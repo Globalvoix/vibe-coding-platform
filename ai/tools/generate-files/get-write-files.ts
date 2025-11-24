@@ -47,7 +47,7 @@ export function getWriteFiles({ sandbox, toolCallId, writer }: Params) {
         },
       })
 
-      return richError.message
+      return
     }
 
     writer.write({
