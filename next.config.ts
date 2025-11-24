@@ -30,6 +30,9 @@ const nextConfig: NextConfig = {
     contentDispositionType: 'attachment',
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
+  experimental: {
+    allowedDevOrigins: ['*.projects.builder.codes'],
+  },
 }
 
 export default withBotId(nextConfig)
