@@ -71,7 +71,31 @@ async function* getCommandLogs(sandboxId: string, cmdId: string) {
     { headers: { 'Content-Type': 'application/json' } }
   )
 
-  const reader = response.body!.getReader()
+  if (!response.ok) {
+    console.error('Failed to stream command logs', {
+      sandboxId,
+      cmdId,
+      status: response.status,
+    })
+    return
+  }
+
+  const stream = response.body
+
+  if (!stream) {
+    console.error('Command log streaming is not supported in this environment')
+    return
+  }
+
+  if (stream.locked) {
+    console.error('Command log stream is already locked for reading', {
+      sandboxId,
+      cmdId,
+    })
+    return
+  }
+
+  const reader = stream.getReader()
   const decoder = new TextDecoder()
   let line = ''
   while (true) {
