@@ -6,7 +6,7 @@ import { useModelId, useReasoningEffort } from './use-settings'
 export function ReasoningEffort() {
   const [modelId] = useModelId()
   const [effort, setEffort] = useReasoningEffort()
-  if (modelId !== Models.OpenAIGPT5) {
+  if (modelId !== Models.OpenAIGPT4o) {
     return null
   }
 
@@ -20,7 +20,7 @@ export function ReasoningEffort() {
           Higher Effort Level
         </Label>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          With GPT-5, you can request higher reasoning effort level.
+          With GPT-4o, you can request higher reasoning effort level.
         </p>
       </div>
       <Checkbox
