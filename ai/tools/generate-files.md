@@ -4,6 +4,13 @@ The generated files should be considered correct on first iteration and suitable
 
 All file paths must be relative to the sandbox root (e.g., `src/index.ts`, `package.json`, `components/Button.tsx`).
 
+## Input Parameters
+
+- `sandboxId`: The identifier of the existing Vercel Sandbox where files will be created or updated.
+- `paths`: An array of **string file paths** (e.g., `"app/page.tsx"`, `"components/Button.tsx"`, `"package.json"`). Each entry must be a relative path from the sandbox root.
+
+> Important: Do **not** include file contents or nested objects inside `paths`. The tool internally generates file objects of the form `{ path: string, content: string }` based on the conversation and the provided path strings.
+
 ## When to Use This Tool
 
 Use Generate Files when:
