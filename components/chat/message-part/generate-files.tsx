@@ -52,6 +52,11 @@ export function GenerateFiles(props: {
             <span>{generating}</span>
           </div>
         )}
+        {props.message.status === 'error' && props.message.error?.message && (
+          <div className="mt-2 rounded-md bg-destructive/10 px-2 py-1 text-xs text-destructive whitespace-pre-wrap">
+            {props.message.error.message}
+          </div>
+        )}
       </div>
     </ToolMessage>
   )
