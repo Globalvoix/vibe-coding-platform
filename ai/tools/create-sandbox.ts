@@ -54,10 +54,26 @@ export const createSandbox = ({ writer }: Params) =>
           `\nYou can now upload files, run commands, and access services on the exposed ports.`
         )
       } catch (error) {
-        const richError = getRichError({
-          action: 'Creating Sandbox',
-          error,
-        })
+        const isOIDCError = error instanceof Error &&
+          error.message.includes('x-vercel-oidc-token')
+
+        let userMessage = ''
+        if (isOIDCError) {
+          const env = process.env.NODE_ENV
+          const isProduction = env === 'production'
+          userMessage = isProduction
+            ? 'Sandbox creation failed due to OIDC authentication. Please ensure OIDC is enabled in your Vercel project settings.'
+            : 'Sandbox creation requires running in a Vercel environment with OIDC enabled. ' +
+              'For local development, please deploy to Vercel or use `npx vercel dev` with your Vercel credentials configured. ' +
+              'Alternatively, ensure your Vercel project has "Secure Backend Access with OIDC Federation" enabled in project settings.'
+        }
+
+        const richError = userMessage
+          ? { message: userMessage, error: { message: userMessage } }
+          : getRichError({
+              action: 'Creating Sandbox',
+              error,
+            })
 
         writer.write({
           id: toolCallId,
@@ -68,7 +84,7 @@ export const createSandbox = ({ writer }: Params) =>
           },
         })
 
-        console.log('Error creating Sandbox:', richError.error)
+        console.log('Error creating Sandbox:', error)
         return richError.message
       }
     },
