@@ -44,7 +44,7 @@ export const generateFiles = ({ writer, modelId }: Params) =>
           data: { error: richError.error, paths: [], status: 'error' },
         })
 
-        return richError.message
+        return
       }
 
       const writeFiles = getWriteFiles({ sandbox, toolCallId, writer })
@@ -54,12 +54,8 @@ export const generateFiles = ({ writer, modelId }: Params) =>
       try {
         for await (const chunk of iterator) {
           if (chunk.files.length > 0) {
-            const error = await writeFiles(chunk)
-            if (error) {
-              return error
-            } else {
-              uploaded.push(...chunk.files)
-            }
+            await writeFiles(chunk)
+            uploaded.push(...chunk.files)
           } else {
             writer.write({
               id: toolCallId,
@@ -88,7 +84,7 @@ export const generateFiles = ({ writer, modelId }: Params) =>
           },
         })
 
-        return richError.message
+        return
       }
 
       writer.write({
