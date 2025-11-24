@@ -71,7 +71,7 @@ export const runCommand = ({ writer }: Params) =>
           },
         })
 
-        return richError.message
+        return
       }
 
       let cmd: Command | null = null
@@ -102,7 +102,7 @@ export const runCommand = ({ writer }: Params) =>
           },
         })
 
-        return richError.message
+        return
       }
 
       writer.write({
@@ -198,7 +198,7 @@ export const runCommand = ({ writer }: Params) =>
           },
         })
 
-        return richError.message
+        return
       }
     },
   })
