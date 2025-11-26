@@ -48,14 +48,7 @@ export default async function Page() {
           <Horizontal
             defaultLayout={horizontalSizes ?? [50, 50]}
             left={<Chat className="flex-1 overflow-hidden" />}
-            right={
-              <Vertical
-                defaultLayout={verticalSizes ?? [33.33, 33.33, 33.33]}
-                top={<Preview className="flex-1 overflow-hidden" />}
-                middle={<FileExplorer className="flex-1 overflow-hidden" />}
-                bottom={<Logs className="flex-1 overflow-hidden" />}
-              />
-            }
+            right={<Sandbox className="flex-1 overflow-hidden" />}
           />
         </div>
       </div>
