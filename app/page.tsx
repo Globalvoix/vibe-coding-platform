@@ -16,7 +16,6 @@ export default async function Page() {
   const horizontalSizes = getHorizontal(store)
   return (
     <>
-      <Welcome defaultOpen={banner} onDismissAction={hideBanner} />
       <div className="flex flex-col h-screen max-h-screen overflow-hidden p-2 space-x-2">
         <Header className="flex items-center w-full" />
         <ul className="flex space-x-5 font-mono text-sm tracking-tight px-1 py-2 md:hidden">
