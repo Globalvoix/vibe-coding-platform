@@ -85,6 +85,19 @@ When errors are reported:
 6. If you've already tried to fix something and it didn't work, try a DIFFERENT approach
 7. Keep track of what you've already tried to avoid loops
 
+8. If you see the Tailwind/PostCSS error "It looks like you're trying to use `tailwindcss` directly as a PostCSS plugin":
+   - Run `pnpm add -D @tailwindcss/postcss`.
+   - Update `postcss.config.js` (or `.cjs`) so `plugins` uses `'@tailwindcss/postcss'` instead of `tailwindcss`, for example:
+
+```js
+module.exports = {
+  plugins: {
+    '@tailwindcss/postcss': {},
+  },
+}
+```
+   - Remove any `tailwindcss: {}` entries from the PostCSS plugins.
+
 IMPORTANT - PERSISTENCE RULE:
 
 - When you fix one error and another error appears, CONTINUE FIXING until the application works
