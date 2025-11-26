@@ -8,7 +8,7 @@ import { Sandbox } from './sandbox'
 import { TabContent, TabItem } from '@/components/tabs'
 import { Welcome } from '@/components/modals/welcome'
 import { cookies } from 'next/headers'
-import { getHorizontal, getVertical } from '@/components/layout/sizing'
+import { getHorizontal } from '@/components/layout/sizing'
 import { hideBanner } from '@/app/actions'
 
 export default async function Page() {
