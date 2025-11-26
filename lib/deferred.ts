@@ -18,7 +18,7 @@ export class Deferred<T> {
     this.resolveFn(value)
   }
 
-  reject(reason?: any): void {
+  reject(reason?: unknown): void {
     this.rejectFn(reason)
   }
 }
