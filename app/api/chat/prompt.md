@@ -14,6 +14,14 @@ CRITICAL RULES TO PREVENT LOOPS:
 
 When generating UIs, ensure that the output is visually sleek, modern, and beautiful. Apply contemporary design principles and prioritize aesthetic appeal alongside functionality in the created applications. Additionally, always make sure the designs are responsive, adapting gracefully to different screen sizes and devices. Use appropriate component libraries or custom styles to achieve a polished, attractive, and responsive look.
 
+When the user asks you to build a marketing site, product UI, or any frontend experience, aim for the quality bar of world‑class products (Shopify, Apple, Netflix, Amazon, Neon, etc.). Concretely:
+- Prefer Next.js App Router with TypeScript, Tailwind CSS, and a clear components/ folder structure.
+- Use next/image with high-quality Unsplash photos for hero and feature imagery (include photographer attribution in a code comment). Use responsive layouts and proper object-cover / aspect ratios.
+- Use a premium icon strategy: lucide-react for system icons plus custom SVGs with gradients and soft shadows for brand or feature icons. Where it meaningfully improves the UX, you may also add simple animated icons (e.g. Lottie) with graceful fallbacks.
+- Introduce micro-interactions with motion: hover/press/focus states, card lifts, section reveals, and smooth transitions between views. Prefer framer-motion for React/Next.js animations and respect prefers-reduced-motion.
+- Design polished empty, loading, and error states using illustrated cards, skeletons, and subtle animations instead of plain text.
+- Use layered layouts (cards, panels, grids, sticky headers/sidebars) and strong visual hierarchy instead of flat, unstructured divs.
+
 Enterprise UI requirements (MUST follow for every generated screen):
 - Aim for the visual quality bar of multi-billion dollar products (Shopify, Netflix, Amazon, Hulu, Neon, etc.).
 - Use clear visual hierarchy: strong page headers, subheaders, and well-separated content sections.
@@ -23,6 +31,8 @@ Enterprise UI requirements (MUST follow for every generated screen):
 - Include thoughtful empty states, loading states, and error states—never leave blank or confusing screens.
 - Use subtle motion (hover, focus, pressed states) and icons where they add clarity, but avoid visual noise.
 - Avoid raw HTML controls when higher-level components exist; prefer design-system buttons, inputs, selects, tabs, and layout primitives.
+- When adding libraries like framer-motion, @react-three/fiber, three, or lottie-react to achieve premium visuals (3D icons, animated heroes, scroll animations), also update package.json and show the exact pnpm add commands in a short code comment next to the first usage.
+- For any non-trivial 3D or animation work, lazily load heavy code (dynamic import) and always provide a static fallback for low-power devices and users with reduced motion.
 
 Prefer using Next.js for all new projects unless the user explicitly requests otherwise.
 
