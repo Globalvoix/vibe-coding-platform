@@ -42,32 +42,43 @@ export const Message = memo(function Message({ message }: Props) {
       value={{ expandedReasoningIndex, setExpandedReasoningIndex }}
     >
       <div
-        className={cn({
-          'mr-20': message.role === 'assistant',
-          'ml-20': message.role === 'user',
-        })}
+        className={cn(
+          'flex gap-3',
+          message.role === 'assistant' ? 'justify-start' : 'justify-end'
+        )}
       >
-        {/* Message Header */}
-        <div className="flex items-center gap-2 text-sm font-medium font-mono text-primary mb-1.5">
-          {message.role === 'user' ? (
-            <>
-              <UserIcon className="ml-auto w-4" />
-              <span>You</span>
-            </>
-          ) : (
-            <>
-              <BotIcon className="w-4" />
-              <span>Assistant ({message.metadata?.model})</span>
-            </>
-          )}
+        {message.role === 'assistant' && (
+          <div className="mt-1 flex h-8 w-8 items-center justify-center rounded-full bg-secondary text-secondary-foreground shadow-xs">
+            <BotIcon className="w-4 h-4" />
+          </div>
+        )}
+
+        <div className="max-w-[min(680px,100%)] space-y-1.5">
+          {/* Message Header */}
+          <div className="flex items-center gap-2 text-[11px] font-mono tracking-tight text-muted-foreground">
+            <span className="uppercase">
+              {message.role === 'user' ? 'You' : 'Assistant'}
+            </span>
+            {message.role === 'assistant' && message.metadata?.model && (
+              <span className="rounded-full border border-border/60 bg-background/80 px-2 py-0.5 text-[10px]">
+                {message.metadata.model}
+              </span>
+            )}
+          </div>
+
+          {/* Message Content */}
+          <div className="space-y-1.5">
+            {message.parts.map((part, index) => (
+              <MessagePart key={index} part={part} partIndex={index} />
+            ))}
+          </div>
         </div>
 
-        {/* Message Content */}
-        <div className="space-y-1.5">
-          {message.parts.map((part, index) => (
-            <MessagePart key={index} part={part} partIndex={index} />
-          ))}
-        </div>
+        {message.role === 'user' && (
+          <div className="mt-1 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-xs">
+            <UserIcon className="w-4 h-4" />
+          </div>
+        )}
       </div>
     </ReasoningContext.Provider>
   )

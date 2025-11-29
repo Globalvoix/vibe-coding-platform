@@ -58,35 +58,48 @@ export function Chat({ className }: Props) {
   return (
     <Panel className={className}>
       <PanelHeader>
-        <div className="flex items-center font-mono font-semibold uppercase">
+        <div className="flex items-center font-mono font-semibold uppercase tracking-tight">
           <MessageCircleIcon className="mr-2 w-4" />
           Chat
         </div>
-        <div className="ml-auto font-mono text-xs opacity-50">[{status}]</div>
+        <div className="ml-auto flex items-center gap-2 font-mono text-[11px] text-muted-foreground">
+          {modelId && (
+            <span className="hidden md:inline truncate max-w-[140px]">Model: {modelId}</span>
+          )}
+          <span className="inline-flex items-center gap-1 rounded-full border border-border/60 bg-background/80 px-2 py-0.5 uppercase tracking-wide">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            <span>{status}</span>
+          </span>
+        </div>
       </PanelHeader>
 
       {/* Messages Area */}
       {messages.length === 0 ? (
         <div className="flex-1 min-h-0">
-          <div className="flex flex-col justify-center items-center h-full font-mono text-sm text-muted-foreground">
-            <p className="flex items-center font-semibold">
-              Click and try one of these prompts:
-            </p>
-            <ul className="p-4 space-y-1 text-center">
-              {TEST_PROMPTS.map((prompt, idx) => (
-                <li
-                  key={idx}
-                  className="px-4 py-2 rounded-sm border border-dashed shadow-sm cursor-pointer border-border hover:bg-secondary/50 hover:text-primary"
-                  onClick={() => validateAndSubmitMessage(prompt)}
-                >
-                  {prompt}
-                </li>
-              ))}
-            </ul>
+          <div className="flex h-full items-center justify-center px-4">
+            <div className="max-w-md w-full rounded-xl border border-dashed border-border/70 bg-background/80 px-4 py-5 shadow-xs font-mono text-sm text-muted-foreground">
+              <p className="mb-2 text-[11px] uppercase tracking-tight text-muted-foreground/80">
+                Quick start
+              </p>
+              <p className="mb-3 text-sm font-semibold text-foreground">
+                Click one of these prompts to see a full app generated:
+              </p>
+              <ul className="space-y-2 text-left">
+                {TEST_PROMPTS.map((prompt, idx) => (
+                  <li
+                    key={idx}
+                    className="cursor-pointer rounded-lg border border-dashed border-border/70 bg-secondary/40 px-3 py-2 text-xs text-foreground transition-colors hover:bg-secondary/70 hover:text-primary"
+                    onClick={() => validateAndSubmitMessage(prompt)}
+                  >
+                    {prompt}
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
       ) : (
-        <Conversation className="relative w-full">
+        <Conversation className="relative w-full flex-1 min-h-0 bg-muted/40">
           <ConversationContent className="space-y-4">
             {messages.map((message) => (
               <Message key={message.id} message={message} />
