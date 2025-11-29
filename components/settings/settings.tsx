@@ -12,7 +12,11 @@ export function Settings() {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button className="cursor-pointer" variant="outline" size="sm">
+        <Button
+          className="cursor-pointer h-8 w-8 rounded-full bg-background/80 border border-border/60 shadow-xs"
+          variant="ghost"
+          size="icon"
+        >
           <SlidersVerticalIcon className="w-4 h-4" />
         </Button>
       </PopoverTrigger>

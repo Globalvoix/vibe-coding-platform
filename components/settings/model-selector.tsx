@@ -29,7 +29,12 @@ export function ModelSelector({ className }: { className?: string }) {
       onValueChange={setModelId}
       disabled={isLoading || !!error || !models?.length}
     >
-      <SelectTrigger className={cn('bg-background', className)}>
+      <SelectTrigger
+        className={cn(
+          'h-8 rounded-full border-none bg-transparent px-2 text-xs font-mono shadow-none focus-visible:ring-0 focus-visible:ring-offset-0',
+          className
+        )}
+      >
         {isLoading ? (
           <div className="flex items-center gap-2">
             <Loader2Icon className="h-4 w-4 animate-spin" />

@@ -116,7 +116,7 @@ export function Chat({ className }: Props) {
             className="font-mono text-sm"
           />
           <div className="flex items-center justify-between pt-2">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 rounded-full bg-secondary/60 px-2 py-1 border border-border/60 shadow-xs">
               <Settings />
               <ModelSelector />
             </div>
