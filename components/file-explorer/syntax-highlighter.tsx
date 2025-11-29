@@ -1,12 +1,13 @@
 import Prism from 'react-syntax-highlighter'
-import grayscale from 'react-syntax-highlighter/dist/esm/styles/hljs/grayscale'
+import { Prism as ReactSyntaxHighlighter } from 'react-syntax-highlighter'
+import oneLight from 'react-syntax-highlighter/dist/esm/styles/prism/one-light'
 
 export function SyntaxHighlighter(props: { path: string; code: string }) {
   const lang = detectLanguageFromFilename(props.path)
   return (
-    <Prism
+    <ReactSyntaxHighlighter
       language={lang ?? 'javascript'}
-      style={grayscale}
+      style={oneLight}
       showLineNumbers
       showInlineLineNumbers
       customStyle={{
@@ -20,9 +21,9 @@ export function SyntaxHighlighter(props: { path: string; code: string }) {
           overflowX: 'auto',
         },
       }}
-    >
+>
       {props.code}
-    </Prism>
+    </ReactSyntaxHighlighter>
   )
 }
 

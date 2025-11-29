@@ -90,12 +90,22 @@ export const FileExplorer = memo(function FileExplorer({
           <div>{renderFileTree(fs)}</div>
         </ScrollArea>
         {selected && sandboxId && !disabled && (
-          <ScrollArea className="w-3/4 flex-shrink-0">
-            <FileContent
-              sandboxId={sandboxId}
-              path={selected.path.substring(1)}
-            />
-            <ScrollBar orientation="horizontal" />
+          <ScrollArea className="w-3/4 flex-shrink-0 bg-muted/40">
+            <div className="flex h-full flex-col border-l border-primary/10 bg-background/95">
+              <div className="flex items-center justify-between border-b border-primary/10 px-3 py-1.5 text-[11px] font-mono text-muted-foreground bg-background/95">
+                <span className="truncate">{selected.path.substring(1)}</span>
+                <span className="ml-2 rounded-full border border-border/60 bg-secondary/60 px-2 py-0.5 text-[10px] uppercase tracking-wide">
+                  {selected.name.split('.').pop()}
+                </span>
+              </div>
+              <div className="flex-1 overflow-auto px-3 py-2 text-sm bg-muted/40">
+                <FileContent
+                  sandboxId={sandboxId}
+                  path={selected.path.substring(1)}
+                />
+                <ScrollBar orientation="horizontal" />
+              </div>
+            </div>
           </ScrollArea>
         )}
       </div>
