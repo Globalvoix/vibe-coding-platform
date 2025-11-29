@@ -2,14 +2,19 @@
 
 import type { ChatUIMessage } from '@/components/chat/types'
 import { TEST_PROMPTS } from '@/ai/constants'
-import { MessageCircleIcon, SendIcon } from 'lucide-react'
+import { ArrowUp, MessageCircleIcon, Square } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Conversation,
   ConversationContent,
   ConversationScrollButton,
 } from '@/components/ai-elements/conversation'
-import { Input } from '@/components/ui/input'
+import {
+  PromptInput,
+  PromptInputAction,
+  PromptInputActions,
+  PromptInputTextarea,
+} from '@/components/ui/prompt-input'
 import { Message } from '@/components/chat/message'
 import { ModelSelector } from '@/components/settings/model-selector'
 import { Panel, PanelHeader } from '@/components/panels/panels'
