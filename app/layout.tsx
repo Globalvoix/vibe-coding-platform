@@ -37,7 +37,7 @@ export default function RootLayout({
 }: Readonly<{ children: ReactNode }>) {
   return (
     <html lang="en">
-      <body className="antialiased">
+      <body className="antialiased bg-gradient-to-br from-background via-background to-secondary/40">
         <Suspense fallback={null}>
           <NuqsAdapter>
             <ChatProvider>

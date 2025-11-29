@@ -14,9 +14,12 @@ export function TabItem({ children, tabId }: Props) {
   return (
     <li
       onClick={() => setTabId(tabId)}
-      className={cn('cursor-pointer', {
-        'border-b border-b-black': activeTabId === tabId,
-      })}
+      className={cn(
+        'cursor-pointer rounded-full px-3 py-1 text-xs font-mono uppercase tracking-tight transition-colors',
+        activeTabId === tabId
+          ? 'bg-foreground text-background shadow-sm'
+          : 'text-foreground/70 hover:bg-secondary/60 hover:text-foreground'
+      )}
     >
       {children}
     </li>

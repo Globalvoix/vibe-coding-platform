@@ -68,21 +68,33 @@ export function Chat({ className }: Props) {
       {/* Messages Area */}
       {messages.length === 0 ? (
         <div className="flex-1 min-h-0">
-          <div className="flex flex-col justify-center items-center h-full font-mono text-sm text-muted-foreground">
-            <p className="flex items-center font-semibold">
-              Click and try one of these prompts:
-            </p>
-            <ul className="p-4 space-y-1 text-center">
-              {TEST_PROMPTS.map((prompt, idx) => (
-                <li
-                  key={idx}
-                  className="px-4 py-2 rounded-sm border border-dashed shadow-sm cursor-pointer border-border hover:bg-secondary/50 hover:text-primary"
-                  onClick={() => validateAndSubmitMessage(prompt)}
-                >
-                  {prompt}
-                </li>
-              ))}
-            </ul>
+          <div className="flex flex-col justify-center items-center h-full gap-6 font-mono text-sm text-muted-foreground">
+            <div className="flex flex-col items-center gap-4">
+              <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/15 to-secondary/40 shadow-lg">
+                <MessageCircleIcon className="w-8 h-8 text-primary" />
+              </div>
+              <img
+                src="https://images.unsplash.com/photo-1523475472560-d2df97ec485c?auto=format&fit=crop&w=800&q=80"
+                alt="AI-powered coding workspace preview"
+                className="hidden md:block h-32 w-56 rounded-2xl object-cover shadow-xl"
+              />
+            </div>
+            <div className="text-center">
+              <p className="flex items-center justify-center font-semibold mb-2">
+                Click and try one of these prompts:
+              </p>
+              <ul className="p-4 space-y-2 text-center">
+                {TEST_PROMPTS.map((prompt, idx) => (
+                  <li
+                    key={idx}
+                    className="px-4 py-2 rounded-full border border-dashed shadow-sm cursor-pointer border-border/70 bg-background/60 hover:bg-secondary/60 hover:text-primary transition-colors"
+                    onClick={() => validateAndSubmitMessage(prompt)}
+                  >
+                    {prompt}
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
       ) : (
