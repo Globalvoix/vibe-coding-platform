@@ -42,7 +42,7 @@ export default async function Page() {
         {/* Desktop layout with horizontal and vertical panels */}
         <div className="hidden flex-1 w-full min-h-0 overflow-hidden pt-2 md:flex">
           <Horizontal
-            defaultLayout={horizontalSizes ?? [50, 50]}
+            defaultLayout={horizontalSizes ?? [35, 65]}
             left={<Chat className="flex-1 overflow-hidden" />}
             right={<Sandbox className="flex-1 overflow-hidden" />}
           />
