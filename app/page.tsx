@@ -8,11 +8,9 @@ import { Sandbox } from './sandbox'
 import { TabContent, TabItem } from '@/components/tabs'
 import { cookies } from 'next/headers'
 import { getHorizontal } from '@/components/layout/sizing'
-import { hideBanner } from '@/app/actions'
 
 export default async function Page() {
   const store = await cookies()
-  const banner = store.get('banner-hidden')?.value !== 'true'
   const horizontalSizes = getHorizontal(store)
   return (
     <>
