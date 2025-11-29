@@ -52,6 +52,9 @@ export function Chat({ className }: Props) {
     setChatStatus(status)
   }, [status, setChatStatus])
 
+  const isLoading = status === 'streaming' || status === 'submitted'
+  const isInputDisabled = status !== 'ready'
+
   return (
     <Panel className={className}>
       <PanelHeader>
@@ -94,24 +97,50 @@ export function Chat({ className }: Props) {
       )}
 
       <form
-        className="flex items-center p-2 space-x-1 border-t border-primary/18 bg-background"
+        className="border-t border-primary/18 bg-background p-2"
         onSubmit={async (event) => {
           event.preventDefault()
           validateAndSubmitMessage(input)
         }}
       >
-        <Settings />
-        <ModelSelector />
-        <Input
-          className="w-full font-mono text-sm rounded-sm border-0 bg-background"
-          disabled={status === 'streaming' || status === 'submitted'}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Type your message..."
+        <PromptInput
           value={input}
-        />
-        <Button type="submit" disabled={status !== 'ready' || !input.trim()}>
-        <SendIcon className="w-4 h-4" />
-        </Button>
+          onValueChange={setInput}
+          isLoading={isLoading}
+          onSubmit={() => validateAndSubmitMessage(input)}
+          disabled={isInputDisabled}
+          className="w-full"
+        >
+          <PromptInputTextarea
+            placeholder="Type your message..."
+            className="font-mono text-sm"
+          />
+          <div className="flex items-center justify-between pt-2">
+            <div className="flex items-center gap-2">
+              <Settings />
+              <ModelSelector />
+            </div>
+            <PromptInputActions>
+              <PromptInputAction
+                tooltip={isLoading ? 'Stop generation' : 'Send message'}
+              >
+                <Button
+                  type="submit"
+                  variant="default"
+                  size="icon"
+                  className="h-8 w-8 rounded-full"
+                  disabled={isInputDisabled || !input.trim()}
+                >
+                  {isLoading ? (
+                    <Square className="size-5 fill-current" />
+                  ) : (
+                    <ArrowUp className="size-5" />
+                  )}
+                </Button>
+              </PromptInputAction>
+            </PromptInputActions>
+          </div>
+        </PromptInput>
       </form>
     </Panel>
   )
