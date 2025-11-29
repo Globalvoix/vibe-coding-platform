@@ -20,6 +20,7 @@ Use Generate Files when:
 - File contents must reflect the user’s intent and the overall session context
 - File paths must be well-structured and use consistent naming conventions
 - Generated files should assume compatibility with other existing files in the sandbox
+- When generating frontend code (React/Next.js/Tailwind), aim for a premium product experience: rich layouts (cards, grids, panels), micro-interactions (hover/press/focus states), high-quality imagery (e.g. Unsplash via next/image), and polished empty/loading/error states.
 
 ## Best Practices
 
