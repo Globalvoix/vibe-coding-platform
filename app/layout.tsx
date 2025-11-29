@@ -7,10 +7,16 @@ import { Toaster } from '@/components/ui/sonner'
 import type { ReactNode } from 'react'
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
+import { Inter } from 'next/font/google'
 import './globals.css'
 
 const title = 'Thinksoft'
 const description = `This is a demo of an end-to-end coding platform where the user can enter text prompts, and the agent will create a full stack application. It uses Vercel's AI Cloud services like Sandbox for secure code execution, AI Gateway for GPT-5 and other models support, Fluid Compute for efficient rendering and streaming, and it's built with Next.js and the AI SDK.`
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-sans',
+})
 
 export const metadata: Metadata = {
   title,
@@ -37,7 +43,7 @@ export default function RootLayout({
 }: Readonly<{ children: ReactNode }>) {
   return (
     <html lang="en">
-      <body className="antialiased">
+      <body className={`${inter.variable} antialiased`}>
         <Suspense fallback={null}>
           <NuqsAdapter>
             <ChatProvider>
