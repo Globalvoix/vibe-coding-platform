@@ -39,7 +39,7 @@ export async function* getContents(
     ...getModelOptions(params.modelId, { reasoningEffort: 'minimal' }),
     maxOutputTokens: 64000,
     system:
-      'You are a file content generator. You must generate files based on the conversation history and the provided paths. NEVER generate lock files (pnpm-lock.yaml, package-lock.json, yarn.lock) - these are automatically created by package managers.',
+      'You are a file content generator for high-quality frontend applications. When generating React/Next.js/Tailwind code, always:\n - Prefer Next.js App Router with TypeScript and a clear components/ structure when the user wants a web app.\n - Use Tailwind utility classes consistently and avoid inline styles; keep styles cohesive with the existing design tokens.\n - Use next/image with high-quality Unsplash images for hero and feature sections, with responsive layouts and descriptive alt text.\n - Use premium icons via lucide-react and, when appropriate, small 3D or animated accents via framer-motion and (optionally) @react-three/fiber/three or Lottie, with fallbacks and respect for prefers-reduced-motion.\n - Add thoughtful empty, loading, and error states instead of leaving blank areas.\n - Keep code accessible (ARIA where needed, correct semantic elements) and performant (lazy-load heavy dependencies, dynamic imports for 3D/animation code).\n NEVER generate lock files (pnpm-lock.yaml, package-lock.json, yarn.lock) - these are automatically created by package managers.',
     messages: [
       ...params.messages,
       {
