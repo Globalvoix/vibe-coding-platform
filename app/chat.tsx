@@ -1,6 +1,6 @@
 import type { ChatUIMessage } from '@/components/chat/types'
 import { TEST_PROMPTS } from '@/ai/constants'
-import { ArrowUp, MessageCircleIcon, Square, Plus, Menu, Clock, Settings as SettingsIcon } from 'lucide-react'
+import { ArrowUp, MessageCircleIcon, Square, Plus, Menu, Clock, PanelLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useUIStore } from '@/lib/ui-store'
 import {
@@ -98,10 +98,10 @@ export function Chat({ className, initialPrompt }: Props) {
           </button>
           <button
             className="p-1 hover:bg-blue-500/20 rounded-md transition-colors"
-            title="Options"
-            aria-label="Options"
+            title="Sidebar"
+            aria-label="Sidebar"
           >
-            <SettingsIcon className="w-3.5 h-3.5 text-muted-foreground" />
+            <PanelLeft className="w-3.5 h-3.5 text-muted-foreground" />
           </button>
         </div>
       </PanelHeader>
