@@ -213,7 +213,7 @@ export function AppSidebar() {
       {/* Backdrop */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/30 z-20 md:hidden"
+          className="fixed inset-0 bg-black/30 z-20"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -233,7 +233,8 @@ export function AppSidebar() {
             </h2>
             <button
               onClick={() => setSidebarOpen(false)}
-              className="p-1.5 hover:bg-secondary rounded-lg transition-colors md:hidden"
+              className="p-1.5 hover:bg-secondary rounded-lg transition-colors"
+              aria-label="Close app menu"
             >
               <X className="w-4 h-4 text-muted-foreground" />
             </button>
