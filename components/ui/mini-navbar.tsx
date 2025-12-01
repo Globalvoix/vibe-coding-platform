@@ -3,8 +3,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 
 const AnimatedNavLink = ({ href, children }: { href: string; children: React.ReactNode }) => {
-  const defaultTextColor = 'text-gray-300';
-  const hoverTextColor = 'text-white';
+  const defaultTextColor = 'text-gray-600';
+  const hoverTextColor = 'text-gray-900';
   const textSizeClass = 'text-sm';
 
   return (
