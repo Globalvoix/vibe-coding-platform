@@ -182,6 +182,7 @@ export function AppSidebar() {
   const [selectedAppForMenu, setSelectedAppForMenu] = useState<string | null>(null)
   const [selectedAppForRename, setSelectedAppForRename] = useState<string | null>(null)
 
+  const { setSidebarCollapsed } = useUIStore()
   const {
     apps,
     currentAppId,
