@@ -34,7 +34,7 @@
   --sidebar-accent-foreground: rgb(23, 23, 23);
   --sidebar-border: rgb(229, 229, 229);
   --sidebar-ring: rgb(161, 161, 161);
-  --font-sans: Geist, sans-serif;
+  --font-sans: Inter, system-ui, sans-serif;
   --font-serif: Geist Mono, monospace;
   --font-mono: Geist Mono, monospace;
   --radius: 0.75rem;
@@ -91,7 +91,7 @@
   --sidebar-accent-foreground: rgb(250, 250, 250);
   --sidebar-border: rgb(255, 255, 255);
   --sidebar-ring: rgb(82, 82, 82);
-  --font-sans: Geist, sans-serif;
+  --font-sans: Inter, system-ui, sans-serif;
   --font-serif: Geist Mono, monospace;
   --font-mono: Geist Mono, monospace;
   --radius: 0.75rem;
