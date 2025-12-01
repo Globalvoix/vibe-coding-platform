@@ -90,18 +90,18 @@ export function Chat({ className, initialPrompt }: Props) {
         </button>
         <div className="flex items-center gap-1">
           <button
-            className="p-1 rounded-md transition-colors hover:bg-blue-600 hover:text-white"
+            className="p-1 rounded transition-colors hover:bg-blue-600 group"
             title="History"
             aria-label="History"
           >
-            <Clock className="w-3.5 h-3.5 text-muted-foreground" />
+            <Clock className="w-3.5 h-3.5 text-muted-foreground group-hover:text-white" />
           </button>
           <button
-            className="p-1 rounded-md transition-colors hover:bg-blue-600 hover:text-white"
+            className="p-1 rounded transition-colors hover:bg-blue-600 group"
             title="Sidebar"
             aria-label="Sidebar"
           >
-            <PanelLeft className="w-3.5 h-3.5 text-muted-foreground" />
+            <PanelLeft className="w-3.5 h-3.5 text-muted-foreground group-hover:text-white" />
           </button>
         </div>
       </PanelHeader>
