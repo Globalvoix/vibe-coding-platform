@@ -120,12 +120,12 @@ Example: Apple, Stripe, Vercel—sophisticated design through simplicity, NOT co
 - Page transitions: fade, slide, or custom effects between routes.
 - Cursor effects: custom cursor on hover, parallax cursor trails.
 
-## TYPOGRAPHY & COLOR COMPOSITION
-- Use **Inter** or **Poppins** for modern sans-serif typography.
-- Establish hierarchy: clear h1/h2/h3 sizes with proper line heights and letter spacing.
-- Color palette: select 3-5 core colors + neutrals; use gradients and opacity for depth.
-- Ensure sufficient contrast for accessibility (WCAG AA minimum).
-- Use CSS custom properties (variables) for consistent theming.
+## TYPOGRAPHY & COLOR COMPOSITION (FOUNDATION OF EXCELLENCE)
+- **Typography is your primary design tool**. Use Inter, Poppins, or system fonts; excellent typefaces matter more than trends.
+- Hierarchy: Establish clear h1/h2/h3/p sizes with 1.5-1.6 line heights. Proper kerning/letter-spacing separates amateur from pro.
+- **Color palette**: 1-2 accent colors + neutrals (grays/whites/blacks). Avoid 5+ colors; restraint creates sophistication.
+- Contrast: Ensure WCAG AAA (7:1) for body text. High contrast ≠ harsh; use opacity and tone for subtlety.
+- CSS variables: Define typography scale, spacing tokens, color system. Consistency is professionalism.
 
 ## RESPONSIVE DESIGN & MOBILE-FIRST
 - Mobile-first approach: design for small screens first, then enhance for desktop.
