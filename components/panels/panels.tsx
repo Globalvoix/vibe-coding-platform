@@ -10,7 +10,7 @@ export function Panel({ className, children }: Props) {
   return (
     <div
       className={cn(
-        'flex flex-col relative border border-primary/18 w-full h-full shadow-sm rounded-sm',
+        'flex flex-col relative border border-primary/18 w-full h-full shadow-sm rounded-sm bg-background',
         className
       )}
     >

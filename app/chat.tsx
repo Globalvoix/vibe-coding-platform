@@ -118,7 +118,7 @@ export function Chat({ className, initialPrompt }: Props) {
           </div>
         </div>
       ) : (
-        <Conversation className="relative w-full flex-1 min-h-0 bg-muted/40">
+        <Conversation className="relative w-full flex-1 min-h-0 bg-background">
           <ConversationContent className="space-y-4">
             {messages.map((message) => (
               <Message key={message.id} message={message} />
