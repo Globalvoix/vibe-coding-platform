@@ -2,7 +2,7 @@
 
 import type { ChatUIMessage } from '@/components/chat/types'
 import { TEST_PROMPTS } from '@/ai/constants'
-import { ArrowUp, MessageCircleIcon, Square } from 'lucide-react'
+import { ArrowUp, MessageCircleIcon, Square, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Conversation,

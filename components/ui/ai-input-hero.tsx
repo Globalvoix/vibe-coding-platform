@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Navbar } from "@/components/ui/mini-navbar";
 import AnimatedGradientBackground from "@/components/ui/animated-gradient-background";
 import { Spinner } from "@/components/ui/spinner";
+import { Plus } from "lucide-react";
 
 export type HeroWaveProps = {
   className?: string;
