@@ -5,9 +5,21 @@ import { useSandboxStore } from './state'
 
 interface Props {
   className?: string
+  hideControls?: boolean
+  onUrlChange?: (url: string) => void
+  onInputChange?: (value: string) => void
+  onLoadingChange?: (loading: boolean) => void
+  onRefreshRef?: React.MutableRefObject<(() => void) | null>
 }
 
-export function Preview({ className }: Props) {
+export function Preview({
+  className,
+  hideControls,
+  onUrlChange,
+  onInputChange,
+  onLoadingChange,
+  onRefreshRef,
+}: Props) {
   const { status, url, urlUUID } = useSandboxStore()
   return (
     <PreviewComponent
@@ -15,6 +27,11 @@ export function Preview({ className }: Props) {
       className={className}
       disabled={status === 'stopped'}
       url={url}
+      hideControls={hideControls}
+      onUrlChange={onUrlChange}
+      onInputChange={onInputChange}
+      onLoadingChange={onLoadingChange}
+      onRefreshRef={onRefreshRef}
     />
   )
 }
