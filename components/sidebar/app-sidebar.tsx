@@ -174,7 +174,6 @@ function RenameDialog({ isOpen, currentName, onClose, onRename }: RenameDialogPr
 
 export function AppSidebar() {
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
-  const [renameDialogOpen, setRenameDialogOpen] = useState(false)
   const [selectedAppForMenu, setSelectedAppForMenu] = useState<string | null>(null)
   const [selectedAppForRename, setSelectedAppForRename] = useState<string | null>(null)
 
