@@ -1,6 +1,7 @@
 "use client";
 
 import { HeroWave } from "@/components/ui/ai-input-hero";
+import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import { useRouter } from "next/navigation";
 
 export default function HomePage() {
@@ -13,5 +14,10 @@ export default function HomePage() {
     }
   };
 
-  return <HeroWave onPromptSubmit={handlePromptSubmit} />;
+  return (
+    <>
+      <AppSidebar />
+      <HeroWave onPromptSubmit={handlePromptSubmit} />
+    </>
+  );
 }
