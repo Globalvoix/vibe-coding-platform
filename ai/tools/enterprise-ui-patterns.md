@@ -65,7 +65,7 @@ export function HeroSection() {
 - Subtle motion (not distracting)
 - Accessible (good text contrast)
 
-## 2. Feature Cards with Hover Effects
+## 2. Feature Cards: Minimal & Elegant
 
 ```tsx
 // components/feature-cards.tsx
@@ -97,9 +97,7 @@ export function FeatureCards() {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: {
-        staggerChildren: 0.2,
-      }
+      transition: { staggerChildren: 0.15 }
     }
   }
 
@@ -108,7 +106,7 @@ export function FeatureCards() {
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.6 }
+      transition: { duration: 0.5 }
     }
   }
 
@@ -118,7 +116,7 @@ export function FeatureCards() {
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true }}
-      className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto"
+      className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto px-4"
     >
       {features.map((feature, index) => {
         const Icon = feature.icon
@@ -126,17 +124,22 @@ export function FeatureCards() {
           <motion.div
             key={index}
             variants={itemVariants}
-            whileHover={{ y: -8, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }}
-            className="bg-white p-8 rounded-xl border border-gray-200 cursor-pointer"
+            whileHover={{ y: -4 }}
+            transition={{ duration: 0.2 }}
+            className="group bg-white p-8 rounded-lg border border-gray-100
+              hover:shadow-md hover:border-gray-200 transition-all duration-200"
           >
-            <motion.div
-              whileHover={{ rotate: 12, scale: 1.1 }}
-              className="mb-4"
-            >
-              <Icon className="w-12 h-12 text-blue-600" />
-            </motion.div>
-            <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-            <p className="text-gray-600">{feature.description}</p>
+            <div className="mb-4 text-gray-900">
+              <Icon className="w-8 h-8" strokeWidth={1.5} />
+            </div>
+
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              {feature.title}
+            </h3>
+
+            <p className="text-gray-600 text-sm leading-relaxed">
+              {feature.description}
+            </p>
           </motion.div>
         )
       })}
@@ -144,6 +147,14 @@ export function FeatureCards() {
   )
 }
 ```
+
+**Why this is sophisticated**:
+- Subtle hover lift (y: -4, not -8)
+- Minimal shadow evolution
+- Clean borders, no gradients
+- Generous padding and spacing
+- Typography creates hierarchy, not color
+- Icons are simple, not animated on hover
 
 ## 3. Scroll-Triggered Reveal Section
 
