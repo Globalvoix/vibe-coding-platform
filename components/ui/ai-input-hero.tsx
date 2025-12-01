@@ -186,7 +186,8 @@ export function HeroWave({
                   onChange={(e) => setPrompt(e.target.value)}
                   placeholder={animatedPlaceholder}
                   rows={5}
-                  className="w-full h-32 sm:h-36 resize-none rounded-2xl bg-white border border-gray-200 text-gray-900 placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 px-4 py-4 pr-16"
+                  disabled={isLoading}
+                  className="w-full h-32 sm:h-36 resize-none rounded-2xl bg-white border border-gray-200 text-gray-900 placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 px-4 py-4 pr-16 disabled:opacity-50 disabled:cursor-not-allowed"
                 />
               </div>
               <button
