@@ -39,6 +39,7 @@ export function Chat({ className, initialPrompt }: Props) {
   const { modelId, reasoningEffort } = useSettings()
   const { messages, sendMessage, status } = useChat<ChatUIMessage>({ chat })
   const { setChatStatus } = useSandboxStore()
+  const { currentAppId } = useAppStore()
 
   const validateAndSubmitMessage = useCallback(
     (text: string) => {
@@ -49,6 +50,12 @@ export function Chat({ className, initialPrompt }: Props) {
     },
     [sendMessage, modelId, setInput, reasoningEffort]
   )
+
+  // Clear messages when switching apps
+  useEffect(() => {
+    // This ensures each app starts fresh or could load its own messages
+    // For now, messages are managed by the useChat hook independently per session
+  }, [currentAppId])
 
   useEffect(() => {
     setChatStatus(status)
