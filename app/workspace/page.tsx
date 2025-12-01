@@ -12,11 +12,12 @@ import { Sandbox } from '../sandbox'
 import { TabContent, TabItem } from '@/components/tabs'
 import { AppSidebar } from '@/components/sidebar/app-sidebar'
 import { useAppStore } from '@/lib/app-store'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { useSandboxStore, useFileExplorerStore } from '../state'
 
 export default function WorkspacePage() {
+  const router = useRouter()
   const searchParams = useSearchParams()
   const prompt = searchParams.get('prompt')
   const [initialPrompt, setInitialPrompt] = useState<string>('')
@@ -41,6 +42,14 @@ export default function WorkspacePage() {
     useSandboxStore.getState().reset()
     useFileExplorerStore.getState().reset()
   }, [currentAppId])
+
+  // Cleanup when unmounting (leaving the page)
+  useEffect(() => {
+    return () => {
+      useSandboxStore.getState().reset()
+      useFileExplorerStore.getState().reset()
+    }
+  }, [])
 
   return (
     <>
