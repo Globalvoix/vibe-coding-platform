@@ -4,13 +4,10 @@ import { useState } from "react"
 import { useAppStore } from "@/lib/app-store"
 import { useUIStore } from "@/lib/ui-store"
 import {
-  ChevronDown,
-  Plus,
   MoreVertical,
   Trash2,
   Edit2,
-  ChevronLeft,
-  ChevronRight,
+  X,
   FolderPlus,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -91,13 +88,12 @@ function CreateAppDialog({ isOpen, onClose, onCreate }: CreateAppDialogProps) {
 
 interface AppMenuProps {
   isOpen: boolean
-  appId: string
   onClose: () => void
   onDelete: () => void
   onRename: () => void
 }
 
-function AppContextMenu({ isOpen, appId, onClose, onDelete, onRename }: AppMenuProps) {
+function AppContextMenu({ isOpen, onClose, onDelete, onRename }: AppMenuProps) {
   if (!isOpen) return null
 
   return (
@@ -176,13 +172,12 @@ function RenameDialog({ isOpen, currentName, onClose, onRename }: RenameDialogPr
 }
 
 export function AppSidebar() {
-  const [isCollapsed, setIsCollapsed] = useState(false)
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
   const [renameDialogOpen, setRenameDialogOpen] = useState(false)
   const [selectedAppForMenu, setSelectedAppForMenu] = useState<string | null>(null)
   const [selectedAppForRename, setSelectedAppForRename] = useState<string | null>(null)
 
-  const { setSidebarCollapsed } = useUIStore()
+  const { sidebarOpen, setSidebarOpen } = useUIStore()
   const {
     apps,
     currentAppId,
@@ -215,39 +210,37 @@ export function AppSidebar() {
 
   return (
     <>
+      {/* Backdrop */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/30 z-20 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Drawer */}
       <div
         className={cn(
-          "fixed left-0 top-0 h-screen bg-background border-r border-border transition-all duration-300 z-30",
-          isCollapsed ? "w-20" : "w-64"
+          "fixed left-0 top-0 h-screen w-64 bg-background border-r border-border z-30 transform transition-transform duration-300 overflow-y-auto",
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-border">
-            {!isCollapsed && (
-              <h2 className="text-sm font-semibold text-foreground uppercase tracking-tight">
-                Apps
-              </h2>
-            )}
+          <div className="flex items-center justify-between p-4 border-b border-border sticky top-0 bg-background">
+            <h2 className="text-sm font-semibold text-foreground uppercase tracking-tight">
+              Apps
+            </h2>
             <button
-              onClick={() => {
-                const newState = !isCollapsed
-                setIsCollapsed(newState)
-                setSidebarCollapsed(newState)
-              }}
-              className="p-1.5 hover:bg-secondary rounded-lg transition-colors"
-              title={isCollapsed ? "Expand" : "Collapse"}
+              onClick={() => setSidebarOpen(false)}
+              className="p-1.5 hover:bg-secondary rounded-lg transition-colors md:hidden"
             >
-              {isCollapsed ? (
-                <ChevronRight className="w-4 h-4 text-muted-foreground" />
-              ) : (
-                <ChevronLeft className="w-4 h-4 text-muted-foreground" />
-              )}
+              <X className="w-4 h-4 text-muted-foreground" />
             </button>
           </div>
 
           {/* Current App Info */}
-          {currentApp && !isCollapsed && (
+          {currentApp && (
             <div className="p-4 border-b border-border bg-secondary/50">
               <div className="text-xs font-medium text-muted-foreground mb-1">
                 Current App
@@ -265,54 +258,45 @@ export function AppSidebar() {
           <div className="p-3 border-b border-border">
             <button
               onClick={() => setCreateDialogOpen(true)}
-              className={cn(
-                "w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-colors",
-                isCollapsed && "px-0"
-              )}
-              title="Create new app"
+              className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-colors"
             >
               <FolderPlus className="w-4 h-4" />
-              {!isCollapsed && <span>New App</span>}
+              <span>New App</span>
             </button>
           </div>
 
           {/* Apps List */}
           <div className="flex-1 overflow-y-auto">
-            <div className={cn("p-3 space-y-2", isCollapsed && "p-1.5")}>
+            <div className="p-3 space-y-2">
               {sortedApps.length === 0 ? (
-                !isCollapsed && (
-                  <div className="text-xs text-muted-foreground text-center py-8">
-                    No apps yet. Create one to get started.
-                  </div>
-                )
+                <div className="text-xs text-muted-foreground text-center py-8">
+                  No apps yet. Create one to get started.
+                </div>
               ) : (
                 sortedApps.map((app) => (
-                  <div
-                    key={app.id}
-                    className="relative"
-                  >
+                  <div key={app.id} className="relative">
                     <button
-                      onClick={() => setCurrentApp(app.id)}
+                      onClick={() => {
+                        setCurrentApp(app.id)
+                        setSidebarOpen(false)
+                      }}
                       className={cn(
                         "w-full text-left px-3 py-2 rounded-lg transition-colors relative group",
                         currentAppId === app.id
                           ? "bg-blue-600/20 border border-blue-500 text-foreground"
                           : "hover:bg-secondary text-muted-foreground hover:text-foreground"
                       )}
-                      title={isCollapsed ? app.name : undefined}
                     >
                       <div className="flex items-center justify-between gap-2 min-w-0">
                         <div className="flex-1 min-w-0">
                           <div className="text-sm font-medium truncate">
-                            {isCollapsed ? app.name.charAt(0).toUpperCase() : app.name}
+                            {app.name}
                           </div>
-                          {!isCollapsed && (
-                            <div className="text-xs text-muted-foreground truncate mt-0.5">
-                              {new Date(app.updatedAt).toLocaleDateString()}
-                            </div>
-                          )}
+                          <div className="text-xs text-muted-foreground truncate mt-0.5">
+                            {new Date(app.updatedAt).toLocaleDateString()}
+                          </div>
                         </div>
-                        {!isCollapsed && currentAppId === app.id && (
+                        {currentAppId === app.id && (
                           <div className="relative">
                             <button
                               onClick={(e) => {
@@ -327,7 +311,6 @@ export function AppSidebar() {
                             </button>
                             <AppContextMenu
                               isOpen={selectedAppForMenu === app.id}
-                              appId={app.id}
                               onClose={() => setSelectedAppForMenu(null)}
                               onDelete={() => handleDeleteApp(app.id)}
                               onRename={() => {
@@ -346,7 +329,7 @@ export function AppSidebar() {
           </div>
 
           {/* Footer Info */}
-          {!isCollapsed && apps.length > 0 && (
+          {apps.length > 0 && (
             <div className="p-3 border-t border-border text-xs text-muted-foreground text-center">
               {apps.length} app{apps.length !== 1 ? "s" : ""} total
             </div>
