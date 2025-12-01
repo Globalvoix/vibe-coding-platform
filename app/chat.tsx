@@ -79,29 +79,29 @@ export function Chat({ className, initialPrompt }: Props) {
 
   return (
     <Panel className={className}>
-      <PanelHeader>
-        <div className="flex items-center gap-2">
+      <PanelHeader className="flex items-center justify-between">
+        <button
+          onClick={toggleSidebar}
+          className="p-1.5 hover:bg-secondary rounded-lg transition-colors"
+          title="Toggle app menu"
+          aria-label="Toggle app menu"
+        >
+          <Menu className="w-5 h-5 text-foreground" />
+        </button>
+        <div className="flex items-center gap-1.5">
           <button
-            onClick={toggleSidebar}
-            className="p-1.5 hover:bg-secondary rounded-lg transition-colors"
-            title="Toggle app menu"
-            aria-label="Toggle app menu"
-          >
-            <Menu className="w-5 h-5 text-foreground" />
-          </button>
-          <button
-            className="p-1.5 hover:bg-secondary rounded-lg transition-colors"
+            className="p-1 hover:bg-secondary rounded-lg transition-colors"
             title="History"
             aria-label="History"
           >
-            <Clock className="w-5 h-5 text-foreground" />
+            <Clock className="w-4 h-4 text-foreground" />
           </button>
           <button
-            className="p-1.5 hover:bg-secondary rounded-lg transition-colors"
+            className="p-1 hover:bg-secondary rounded-lg transition-colors"
             title="Options"
             aria-label="Options"
           >
-            <SettingsIcon className="w-5 h-5 text-foreground" />
+            <SettingsIcon className="w-4 h-4 text-foreground" />
           </button>
         </div>
       </PanelHeader>
