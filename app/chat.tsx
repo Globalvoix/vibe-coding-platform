@@ -51,11 +51,13 @@ export function Chat({ className, initialPrompt }: Props) {
     [sendMessage, modelId, setInput, reasoningEffort]
   )
 
-  // Clear messages when switching apps
+  // Clear messages and input when switching apps
   useEffect(() => {
-    // This ensures each app starts fresh or could load its own messages
-    // For now, messages are managed by the useChat hook independently per session
-  }, [currentAppId])
+    // Reset chat state when user switches to a different app
+    setInput('')
+    chat.messages = []
+    hasSubmittedInitialPromptRef.current = false
+  }, [currentAppId, setInput, chat])
 
   useEffect(() => {
     setChatStatus(status)
