@@ -7,9 +7,10 @@ export default function Page() {
   const router = useRouter()
 
   const handlePromptSubmit = (prompt: string) => {
-    const url = new URL("/workspace", window.location.origin);
-    url.searchParams.set("prompt", prompt);
-    router.push(url.pathname + url.search);
+    if (prompt.trim()) {
+      const encodedPrompt = encodeURIComponent(prompt);
+      router.push(`/workspace?prompt=${encodedPrompt}`);
+    }
   }
 
   return (
