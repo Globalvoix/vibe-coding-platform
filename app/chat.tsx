@@ -2,8 +2,9 @@
 
 import type { ChatUIMessage } from '@/components/chat/types'
 import { TEST_PROMPTS } from '@/ai/constants'
-import { ArrowUp, MessageCircleIcon, Square, Plus } from 'lucide-react'
+import { ArrowUp, MessageCircleIcon, Square, Plus, Menu } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useUIStore } from '@/lib/ui-store'
 import {
   Conversation,
   ConversationContent,
@@ -38,6 +39,7 @@ export function Chat({ className, initialPrompt }: Props) {
   const { messages, sendMessage, status } = useChat<ChatUIMessage>({ chat })
   const { setChatStatus } = useSandboxStore()
   const { currentAppId } = useAppStore()
+  const { toggleSidebar } = useUIStore()
   const [input, setInput] = useState('')
   const hasSubmittedInitialPromptRef = useRef(false)
 
@@ -80,18 +82,17 @@ export function Chat({ className, initialPrompt }: Props) {
   return (
     <Panel className={className}>
       <PanelHeader>
-        <div className="flex items-center font-mono font-semibold uppercase tracking-tight">
+        <button
+          onClick={toggleSidebar}
+          className="p-1.5 hover:bg-secondary rounded-lg transition-colors"
+          title="Toggle app menu"
+          aria-label="Toggle app menu"
+        >
+          <Menu className="w-5 h-5 text-foreground" />
+        </button>
+        <div className="flex items-center font-mono font-semibold uppercase tracking-tight ml-2">
           <MessageCircleIcon className="mr-2 w-4" />
           Chat
-        </div>
-        <div className="ml-auto flex items-center gap-2 font-mono text-[11px] text-muted-foreground">
-          {modelId && (
-            <span className="hidden md:inline truncate max-w-[140px]">Model: {modelId}</span>
-          )}
-          <span className="inline-flex items-center gap-1 rounded-full border border-border/60 bg-background/80 px-2 py-0.5 uppercase tracking-wide">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-            <span>{status}</span>
-          </span>
         </div>
       </PanelHeader>
 
@@ -132,7 +133,7 @@ export function Chat({ className, initialPrompt }: Props) {
       )}
 
       <form
-        className="border-t border-primary/18 bg-background p-2"
+        className="bg-background p-2"
         onSubmit={async (event) => {
           event.preventDefault()
           validateAndSubmitMessage(input)
