@@ -53,6 +53,13 @@ export function Chat({ className, initialPrompt }: Props) {
     setChatStatus(status)
   }, [status, setChatStatus])
 
+  useEffect(() => {
+    if (initialPrompt && initialPrompt.trim() && status === 'ready') {
+      setInput(initialPrompt)
+      validateAndSubmitMessage(initialPrompt)
+    }
+  }, [initialPrompt, status, setInput, validateAndSubmitMessage])
+
   const isLoading = status === 'streaming' || status === 'submitted'
   const isInputDisabled = status !== 'ready'
 
