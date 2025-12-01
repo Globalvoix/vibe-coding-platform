@@ -20,7 +20,7 @@ export default function WorkspacePage() {
   const prompt = searchParams.get('prompt')
   const [initialPrompt, setInitialPrompt] = useState<string>('')
   const [horizontalSizes, setHorizontalSizes] = useState<[number, number] | null>(null)
-  const { createApp } = useAppStore()
+  const { createApp, currentAppId } = useAppStore()
   const hasCreatedAppFromPromptRef = useRef(false)
 
   useEffect(() => {
