@@ -90,14 +90,14 @@ export function Chat({ className, initialPrompt }: Props) {
         </button>
         <div className="flex items-center gap-1">
           <button
-            className="p-1 hover:bg-blue-500/20 rounded-md transition-colors"
+            className="p-1 rounded-md transition-colors hover:bg-blue-600 hover:text-white"
             title="History"
             aria-label="History"
           >
             <Clock className="w-3.5 h-3.5 text-muted-foreground" />
           </button>
           <button
-            className="p-1 hover:bg-blue-500/20 rounded-md transition-colors"
+            className="p-1 rounded-md transition-colors hover:bg-blue-600 hover:text-white"
             title="Sidebar"
             aria-label="Sidebar"
           >
