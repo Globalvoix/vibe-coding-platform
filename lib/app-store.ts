@@ -7,8 +7,13 @@ export interface App {
   description: string
   createdAt: number
   updatedAt: number
-  chatMessages?: any[]
-  files?: any[]
+  chatMessages?: unknown[]
+  files?: unknown[]
+}
+
+interface AppStateSnapshot {
+  chatMessages?: unknown[]
+  files?: unknown[]
 }
 
 interface AppStore {
@@ -21,7 +26,7 @@ interface AppStore {
   getCurrentApp: () => App | undefined
   renameApp: (id: string, newName: string) => void
   updateAppDescription: (id: string, description: string) => void
-  saveAppState: (id: string, state: { chatMessages?: any[]; files?: any[] }) => void
+  saveAppState: (id: string, state: AppStateSnapshot) => void
 }
 
 export const useAppStore = create<AppStore>()(
@@ -87,7 +92,7 @@ export const useAppStore = create<AppStore>()(
         get().updateApp(id, { description })
       },
 
-      saveAppState: (id: string, state: { chatMessages?: any[]; files?: any[] }) => {
+      saveAppState: (id: string, state: AppStateSnapshot) => {
         get().updateApp(id, state)
       },
     }),
