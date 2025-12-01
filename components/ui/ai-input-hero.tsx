@@ -121,7 +121,8 @@ export function HeroWave({
   }, [prompt]);
 
   useEffect(() => {
-    if (!containerRef.current || !waveRef.current) return;
+    // Animation removed for white background version
+    return () => {};
 
     const FilmGrainShader = {
       uniforms: {
