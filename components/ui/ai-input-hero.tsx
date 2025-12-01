@@ -190,6 +190,13 @@ export function HeroWave({
                   disabled={isLoading}
                   className="w-full h-32 sm:h-36 resize-none rounded-2xl bg-white border border-gray-200 text-gray-900 placeholder:text-gray-400 outline-none focus:outline-none px-4 py-4 pr-16 disabled:opacity-50 disabled:cursor-not-allowed"
                 />
+                <button
+                  type="button"
+                  aria-label="More options"
+                  className="absolute left-3 bottom-3 inline-flex items-center justify-center w-9 h-9 rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
               </div>
               <button
                 type="submit"

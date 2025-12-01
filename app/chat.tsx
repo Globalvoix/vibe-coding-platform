@@ -151,9 +151,18 @@ export function Chat({ className, initialPrompt }: Props) {
             className="font-mono text-sm"
           />
           <div className="flex items-center justify-between pt-2">
-            <div className="flex items-center gap-2 rounded-full bg-secondary/60 px-2 py-1 border border-border/60 shadow-xs">
-              <Settings />
-              <ModelSelector />
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border/60 bg-background text-foreground shadow-xs hover:bg-secondary/60 transition-colors"
+                aria-label="More options"
+             >
+                <Plus className="w-4 h-4" />
+              </button>
+              <div className="flex items-center gap-2 rounded-full bg-secondary/60 px-2 py-1 border border-border/60 shadow-xs">
+                <Settings />
+                <ModelSelector />
+              </div>
             </div>
             <PromptInputActions>
               <PromptInputAction
