@@ -298,17 +298,28 @@ export function AppSidebar() {
                         </div>
                         {currentAppId === app.id && (
                           <div className="relative">
-                            <button
+                            <div
+                              role="button"
+                              tabIndex={0}
                               onClick={(e) => {
                                 e.stopPropagation()
                                 setSelectedAppForMenu(
                                   selectedAppForMenu === app.id ? null : app.id
                                 )
                               }}
-                              className="p-1 hover:bg-secondary rounded transition-colors opacity-0 group-hover:opacity-100"
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault()
+                                  e.stopPropagation()
+                                  setSelectedAppForMenu(
+                                    selectedAppForMenu === app.id ? null : app.id
+                                  )
+                                }
+                              }}
+                              className="p-1 hover:bg-secondary rounded transition-colors opacity-0 group-hover:opacity-100 cursor-pointer"
                             >
                               <MoreVertical className="w-4 h-4" />
-                            </button>
+                            </div>
                             <AppContextMenu
                               isOpen={selectedAppForMenu === app.id}
                               onClose={() => setSelectedAppForMenu(null)}
