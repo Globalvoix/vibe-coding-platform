@@ -9,17 +9,14 @@ import { Preview } from '../preview'
 import { Sandbox } from '../sandbox'
 import { TabContent, TabItem } from '@/components/tabs'
 import { AppSidebar } from '@/components/sidebar/app-sidebar'
-import { useUIStore } from '@/lib/ui-store'
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { cn } from '@/lib/utils'
 
 export default function WorkspacePage() {
   const searchParams = useSearchParams()
   const prompt = searchParams.get('prompt')
   const [initialPrompt, setInitialPrompt] = useState<string>('')
   const [horizontalSizes, setHorizontalSizes] = useState<[number, number] | null>(null)
-  const { sidebarCollapsed } = useUIStore()
 
   useEffect(() => {
     if (prompt) {
@@ -30,10 +27,7 @@ export default function WorkspacePage() {
   return (
     <>
       <AppSidebar />
-      <div className={cn(
-        "flex flex-col h-screen max-h-screen overflow-hidden p-2 space-x-2 transition-all duration-300",
-        sidebarCollapsed ? "ml-20" : "ml-64"
-      )}>
+      <div className="flex flex-col h-screen max-h-screen overflow-hidden p-2 space-x-2">
         <Header className="flex items-center w-full" />
         <ul className="flex space-x-5 font-mono text-sm tracking-tight px-1 py-2 md:hidden">
           <TabItem tabId="chat">Chat</TabItem>
