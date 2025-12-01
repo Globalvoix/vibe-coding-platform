@@ -275,7 +275,10 @@ export function AppSidebar() {
           {/* Create New App Button */}
           <div className="p-3 border-b border-border">
             <button
-              onClick={() => setCreateDialogOpen(true)}
+              onClick={() => {
+                setSidebarOpen(false)
+                router.push('/home')
+              }}
               className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-colors"
             >
               <FolderPlus className="w-4 h-4" />
@@ -291,7 +294,7 @@ export function AppSidebar() {
                   No apps yet. Create one to get started.
                 </div>
               ) : (
-                sortedApps.map((app) => (
+                sortedApps.slice(0, 5).map((app) => (
                   <div key={app.id} className="relative">
                     <button
                       onClick={() => {
