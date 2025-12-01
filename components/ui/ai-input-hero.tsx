@@ -149,7 +149,7 @@ export function HeroWave({
         style={{
           position: "absolute",
           inset: 0,
-          zIndex: 3,
+          zIndex: 10,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
