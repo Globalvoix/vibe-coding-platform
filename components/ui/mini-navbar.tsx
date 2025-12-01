@@ -60,7 +60,7 @@ export function Navbar() {
 
   const navLinksData = [
     { label: 'Product', href: '#1' },
-    { label: 'Pricing', href: '#2' },
+    { label: 'Pricing', href: '/pricing' },
     { label: 'Discover', href: '#3' },
   ];
 
