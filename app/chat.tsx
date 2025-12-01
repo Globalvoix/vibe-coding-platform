@@ -1,8 +1,6 @@
-'use client'
-
 import type { ChatUIMessage } from '@/components/chat/types'
 import { TEST_PROMPTS } from '@/ai/constants'
-import { ArrowUp, MessageCircleIcon, Square, Plus, Menu } from 'lucide-react'
+import { ArrowUp, MessageCircleIcon, Square, Plus, Menu, Clock, Settings as SettingsIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useUIStore } from '@/lib/ui-store'
 import {
@@ -82,14 +80,30 @@ export function Chat({ className, initialPrompt }: Props) {
   return (
     <Panel className={className}>
       <PanelHeader>
-        <button
-          onClick={toggleSidebar}
-          className="p-1.5 hover:bg-secondary rounded-lg transition-colors"
-          title="Toggle app menu"
-          aria-label="Toggle app menu"
-        >
-          <Menu className="w-5 h-5 text-foreground" />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={toggleSidebar}
+            className="p-1.5 hover:bg-secondary rounded-lg transition-colors"
+            title="Toggle app menu"
+            aria-label="Toggle app menu"
+          >
+            <Menu className="w-5 h-5 text-foreground" />
+          </button>
+          <button
+            className="p-1.5 hover:bg-secondary rounded-lg transition-colors"
+            title="History"
+            aria-label="History"
+          >
+            <Clock className="w-5 h-5 text-foreground" />
+          </button>
+          <button
+            className="p-1.5 hover:bg-secondary rounded-lg transition-colors"
+            title="Options"
+            aria-label="Options"
+          >
+            <SettingsIcon className="w-5 h-5 text-foreground" />
+          </button>
+        </div>
       </PanelHeader>
 
       {/* Messages Area */}
@@ -153,7 +167,7 @@ export function Chat({ className, initialPrompt }: Props) {
                 type="button"
                 className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border/60 bg-background text-foreground shadow-xs hover:bg-secondary/60 transition-colors"
                 aria-label="More options"
-             >
+              >
                 <Plus className="w-4 h-4" />
               </button>
               <div className="flex items-center gap-2 rounded-full bg-secondary/60 px-2 py-1 border border-border/60 shadow-xs">
