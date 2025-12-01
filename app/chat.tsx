@@ -88,20 +88,20 @@ export function Chat({ className, initialPrompt }: Props) {
         >
           <Menu className="w-5 h-5 text-foreground" />
         </button>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1">
           <button
-            className="p-1 hover:bg-secondary rounded-lg transition-colors"
+            className="p-1 hover:bg-blue-500/20 rounded-md transition-colors"
             title="History"
             aria-label="History"
           >
-            <Clock className="w-4 h-4 text-foreground" />
+            <Clock className="w-3.5 h-3.5 text-muted-foreground" />
           </button>
           <button
-            className="p-1 hover:bg-secondary rounded-lg transition-colors"
+            className="p-1 hover:bg-blue-500/20 rounded-md transition-colors"
             title="Options"
             aria-label="Options"
           >
-            <SettingsIcon className="w-4 h-4 text-foreground" />
+            <SettingsIcon className="w-3.5 h-3.5 text-muted-foreground" />
           </button>
         </div>
       </PanelHeader>
