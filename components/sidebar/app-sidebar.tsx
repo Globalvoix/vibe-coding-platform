@@ -257,6 +257,22 @@ export function AppSidebar() {
             </div>
           )}
 
+          {/* My Apps link */}
+          <div className="p-3 border-b border-border">
+            <button
+              onClick={() => {
+                setSidebarOpen(false)
+                router.push('/apps')
+              }}
+              className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-secondary/70 hover:bg-secondary text-foreground text-sm font-medium transition-colors"
+            >
+              <span>My apps</span>
+              <span className="text-xs text-muted-foreground">
+                View all
+              </span>
+            </button>
+          </div>
+
           {/* Create New App Button */}
           <div className="p-3 border-b border-border">
             <button
