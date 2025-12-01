@@ -1,8 +1,7 @@
 'use client'
 
 import { BarLoader } from 'react-spinners'
-import { CompassIcon, RefreshCwIcon } from 'lucide-react'
-import { Panel, PanelHeader } from '@/components/panels/panels'
+import { Panel } from '@/components/panels/panels'
 import { ScrollArea } from '@radix-ui/react-scroll-area'
 import { useEffect, useRef, useState } from 'react'
 import { cn } from '@/lib/utils'
@@ -11,9 +10,23 @@ interface Props {
   className?: string
   disabled?: boolean
   url?: string
+  hideControls?: boolean
+  onUrlChange?: (url: string) => void
+  onInputChange?: (value: string) => void
+  onLoadingChange?: (loading: boolean) => void
+  onRefreshRef?: React.MutableRefObject<(() => void) | null>
 }
 
-export function Preview({ className, disabled, url }: Props) {
+export function Preview({
+  className,
+  disabled,
+  url,
+  hideControls,
+  onUrlChange,
+  onInputChange,
+  onLoadingChange,
+  onRefreshRef,
+}: Props) {
   const [currentUrl, setCurrentUrl] = useState(url)
   const [error, setError] = useState<string | null>(null)
   const [inputValue, setInputValue] = useState(url || '')
@@ -24,7 +37,13 @@ export function Preview({ className, disabled, url }: Props) {
   useEffect(() => {
     setCurrentUrl(url)
     setInputValue(url || '')
-  }, [url])
+    onUrlChange?.(url || '')
+    onInputChange?.(url || '')
+  }, [url, onUrlChange, onInputChange])
+
+  useEffect(() => {
+    onLoadingChange?.(isLoading)
+  }, [isLoading, onLoadingChange])
 
   const refreshIframe = () => {
     if (iframeRef.current && currentUrl) {
@@ -63,47 +82,19 @@ export function Preview({ className, disabled, url }: Props) {
     setError('Failed to load the page')
   }
 
+  // Expose refresh method to parent via ref
+  useEffect(() => {
+    if (onRefreshRef) {
+      onRefreshRef.current = refreshIframe
+    }
+  }, [onRefreshRef, currentUrl])
+
   return (
-    <Panel className={className}>
-      <PanelHeader>
-        <div className="absolute flex items-center space-x-1">
-          <a href={currentUrl} target="_blank" className="cursor-pointer px-1">
-            <CompassIcon className="w-4" />
-          </a>
-          <button
-            onClick={refreshIframe}
-            type="button"
-            className={cn('cursor-pointer px-1', {
-              'animate-spin': isLoading,
-            })}
-          >
-            <RefreshCwIcon className="w-4" />
-          </button>
-        </div>
-
-        <div className="m-auto h-6">
-          {url && (
-            <input
-              type="text"
-              className="font-mono text-xs h-6 border border-gray-200 px-4 bg-white rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[300px]"
-              onChange={(event) => setInputValue(event.target.value)}
-              onClick={(event) => event.currentTarget.select()}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter') {
-                  event.currentTarget.blur()
-                  loadNewUrl()
-                }
-              }}
-              value={inputValue}
-            />
-          )}
-        </div>
-      </PanelHeader>
-
-      <div className="flex h-[calc(100%-2rem-1px)] relative">
+    <Panel className={cn('border-t-0', className)}>
+      <div className="flex h-full flex-col relative">
         {currentUrl && !disabled && (
           <>
-            <ScrollArea className="w-full">
+            <ScrollArea className="w-full flex-1">
               <iframe
                 ref={iframeRef}
                 src={currentUrl}
