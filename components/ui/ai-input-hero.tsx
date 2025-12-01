@@ -25,6 +25,7 @@ export function HeroWave({
   onPromptSubmit,
 }: HeroWaveProps) {
   const [prompt, setPrompt] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const basePlaceholder = "Make me a";
