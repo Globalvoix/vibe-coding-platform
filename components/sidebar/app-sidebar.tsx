@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useAppStore } from "@/lib/app-store"
 import { useUIStore } from "@/lib/ui-store"
+import { useRouter } from "next/navigation"
 import {
   MoreVertical,
   Trash2,
