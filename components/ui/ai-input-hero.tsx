@@ -855,9 +855,10 @@ export function HeroWave({
         position: "relative",
         width: "100%",
         height: "100vh",
+        backgroundColor: "#ffffff",
         ...style,
       }}
-      aria-label="Animated hero"
+      aria-label="Hero section"
     >
       <Navbar />
       <div
@@ -876,10 +877,10 @@ export function HeroWave({
           className="max-w-3xl w-full text-center"
           style={{ pointerEvents: "auto" }}
         >
-          <h1 className="text-white text-3xl sm:text-5xl font-semibold tracking-tight drop-shadow-[0_1px_8px_rgba(31,61,188,0.25)]">
+          <h1 className="text-gray-900 text-3xl sm:text-5xl font-semibold tracking-tight">
             {title}
           </h1>
-          <p className="text-gray-300/90 mt-3 sm:mt-4 text-sm sm:text-base">
+          <p className="text-gray-600 mt-3 sm:mt-4 text-sm sm:text-base">
             {subtitle}
           </p>
           <form
@@ -890,19 +891,19 @@ export function HeroWave({
             }}
           >
             <div className="relative w-full sm:w-[720px]">
-              <div className="relative rounded-2xl p-[2px] shadow-[0_1px_2px_0_rgba(0,0,0,0.06)] bg-gradient-to-br from-white/10 via-white/5 to-black/20">
+              <div className="relative rounded-2xl p-[2px] shadow-[0_2px_8px_rgba(0,0,0,0.1)] bg-gradient-to-br from-gray-50 to-gray-100">
                 <textarea
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
                   placeholder={animatedPlaceholder}
                   rows={5}
-                  className="w-full h-32 sm:h-36 resize-none rounded-2xl bg-[rgba(15,15,20,0.55)] border border-white/10 text-white placeholder:text-white/40 outline-none focus:ring-2 focus:ring-[#1f3dbc]/40 focus:border-[#1f3dbc]/40 backdrop-blur-md px-4 py-4 pr-16"
+                  className="w-full h-32 sm:h-36 resize-none rounded-2xl bg-white border border-gray-200 text-gray-900 placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 px-4 py-4 pr-16"
                 />
               </div>
               <button
                 type="submit"
                 aria-label={buttonText}
-                className="absolute right-3 bottom-3 inline-flex items-center justify-center w-10 h-10 rounded-xl bg-[#f0f2ff] text-black hover:bg-white transition-colors"
+                className="absolute right-3 bottom-3 inline-flex items-center justify-center w-10 h-10 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition-colors"
               >
                 <svg
                   viewBox="0 0 24 24"
@@ -921,16 +922,6 @@ export function HeroWave({
           </form>
         </div>
       </div>
-      <div
-        ref={waveRef}
-        id="waveCanvas"
-        style={{
-          position: "absolute",
-          inset: 0,
-          zIndex: 1,
-          opacity: 0.8,
-        }}
-      />
     </section>
   );
 }
