@@ -59,7 +59,7 @@ export function Navbar() {
   );
 
   const navLinksData = [
-    { label: 'Manifesto', href: '#1' },
+    { label: 'Product', href: '#1' },
     { label: 'Careers', href: '#2' },
     { label: 'Discover', href: '#3' },
   ];
