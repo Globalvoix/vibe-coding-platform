@@ -178,6 +178,7 @@ export function AppSidebar() {
   const [selectedAppForMenu, setSelectedAppForMenu] = useState<string | null>(null)
   const [selectedAppForRename, setSelectedAppForRename] = useState<string | null>(null)
 
+  const router = useRouter()
   const { sidebarOpen, setSidebarOpen } = useUIStore()
   const {
     apps,
