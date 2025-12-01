@@ -23,6 +23,7 @@ export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [headerShapeClass, setHeaderShapeClass] = useState('rounded-full');
   const shapeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const { toggleSidebar } = useUIStore();
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
