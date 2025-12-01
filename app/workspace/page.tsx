@@ -1,5 +1,7 @@
 "use client";
 
+"use client";
+
 import { Chat } from '../chat'
 import { FileExplorer } from '../file-explorer'
 import { Header } from '../header'
