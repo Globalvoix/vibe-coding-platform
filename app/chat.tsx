@@ -21,7 +21,7 @@ import { Panel, PanelHeader } from '@/components/panels/panels'
 import { Settings } from '@/components/settings/settings'
 import { useChat } from '@ai-sdk/react'
 import { useLocalStorageValue } from '@/lib/use-local-storage-value'
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { useSharedChatContext } from '@/lib/chat-context'
 import { useSettings } from '@/components/settings/use-settings'
 import { useSandboxStore } from './state'
@@ -53,8 +53,16 @@ export function Chat({ className, initialPrompt }: Props) {
     setChatStatus(status)
   }, [status, setChatStatus])
 
+  const hasSubmittedInitialPromptRef = useRef(false)
+
   useEffect(() => {
-    if (initialPrompt && initialPrompt.trim() && status === 'ready') {
+    if (
+      !hasSubmittedInitialPromptRef.current &&
+      initialPrompt &&
+      initialPrompt.trim() &&
+      status === 'ready'
+    ) {
+      hasSubmittedInitialPromptRef.current = true
       setInput(initialPrompt)
       validateAndSubmitMessage(initialPrompt)
     }
