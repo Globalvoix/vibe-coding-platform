@@ -61,81 +61,76 @@ DESIGN RESEARCH & INNOVATION:
 - REMIX & CREATE: Combine insights from 3+ sources, build unique visual language matching user intent.
 - NEVER copy designs. Inject creativity, personality, originality.
 
-REQUIRED FEATURES FOR EVERY SCREEN:
-1. **Scroll Animations (Lenis)**: Smooth scroll + parallax + fade-in/slide animations.
-   - Libraries: lenis + framer-motion's useScroll/useTransform
-   - Patterns: Hero parallax, card reveals, blur effects, text animations on scroll
+ESSENTIAL DESIGN ELEMENTS (Use where appropriate, not all in every project):
 
-2. **Micro-Interactions**: Smooth, delightful UX with hover/press/focus states
-   - Buttons: scale/lift on hover, ripple effects on click
-   - Cards: shadow lift, border glow, transform effects
-   - Forms: field highlights, validation animations
-   - Transitions: 300-400ms easing (ease-out)
+1. **Typography Excellence** (MANDATORY):
+   - Clear hierarchy: h1/h2/h3/p with 1.5-1.6 line heights
+   - 1-2 accent colors + grayscale neutrals (avoid 5+ color chaos)
+   - Adequate contrast (WCAG AAA preferred, 7:1)
+   - Proper letter-spacing and font-weight differentiation
+   - CSS variables for system consistency
 
-3. **3D Assets & Animations**:
-   - Technology: @react-three/fiber + three.js
-   - Uses: rotating products, 3D icons, particles, immersive backgrounds
-   - Pattern: Dynamic import + image fallback + prefers-reduced-motion support
+2. **Meaningful Spacing & Layout**:
+   - Generous whitespace (premium = breathing room, NOT density)
+   - Clear visual hierarchy through spatial relationships
+   - Consistent padding/margins using Tailwind scale
+   - Responsive grid/flex layouts that adapt intelligently
+   - Mobile layouts ≠ desktop shrunk; thoughtful adaptation
 
-4. **Shaders & Advanced Effects**:
-   - Animated gradients using three.js shaders
-   - Mesh distortions, light rays, glass refraction
-   - Canvas effects using react-use-gesture + custom shaders
-   - Optimize: keep computations fast, provide fallbacks
+3. **Subtle Interactions** (Purpose-driven, minimal):
+   - Hover: soft scale (1.02x) or shadow, not ripple on everything
+   - Press: tactile feedback (0.98x compress) only on buttons/links
+   - Focus: clear outline for accessibility (not decorative glow)
+   - Transitions: 200-300ms for snappy UX, 400-600ms for reveals
+   - Loading/empty states: elegant skeleton screens, minimal spinners
+   - PRINCIPLE: Every animation must serve user feedback or guidance
 
-5. **Background & Visual Depth**:
-   - High-quality images: Unsplash (free, hi-res) with attribution
-   - Animated gradients: multi-color, directional, animated color shifts
-   - Video backgrounds: optimized MP4, muted autoplay, proper fallbacks
-   - Layered depth: blend images, shapes, gradients, text
+4. **Image & Photography** (High-impact):
+   - Use Unsplash for authentic, high-quality imagery
+   - Proper alt-text, attribution in comments
+   - next/image for optimization, responsive sizes
+   - Avoid heavy overlays; let photos breathe
+   - Video backgrounds ONLY for hero sections (optimize codec)
 
-6. **Images & Videos**:
-   - Use next/image: auto optimization, lazy loading, responsive srcSets
-   - Source from Unsplash: https://unsplash.com
-   - Include photographer attribution in code comments
-   - Video: <video> with proper codecs, aspect ratio containers
+5. **Sophisticated Backgrounds** (Restraint):
+   - Solid colors + subtle textures preferred over gradients
+   - If gradients: 2-color only, low opacity, purpose-driven
+   - Layering via shadows/scale/positioning, NOT color saturation
+   - Avoid animated rainbow gradients (amateur indicator)
 
-7. **Premium UI Components**:
-   - MagicUI: gradient buttons, animated cards, particles from magicui.design
-   - ShadCN: accessible, customizable components from shadcn/ui
-   - ReactBits: beautiful designs from reactbits.dev
-   - Unicorn Studio: animation-first components
-   - Strategy: Extract, remix styles, integrate into design
+6. **Advanced Patterns** (Use sparingly for impact):
+   - 3D: @react-three/fiber + three.js ONLY for core experience (product showcase, hero)
+   - Scroll animations: Hero parallax, card reveals (not every section)
+   - Shaders: Only for immersive experiences, must enhance UX
+   - Always lazy-load, provide static fallbacks, respect prefers-reduced-motion
 
-8. **Animated Icons & Icon Strategy**:
-   - System icons: lucide-react (lightweight SVGs)
-   - Animated icons: lottie-react with LottieLab.com animations
-   - Custom SVG icons: unique designs with gradients, shadows, animations
-   - 3D icons: @react-three/fiber for rotating, morphing variants
-   - Variety: use multiple icon styles across the app
+7. **Premium Components** (Strategic use):
+   - ShadCN: base, customizable components
+   - MagicUI/ReactBits: extract inspiration, NOT templates
+   - Lucide icons: system consistency
+   - Lottie: animated icons/illustrations, sparingly
+   - STRATEGY: Adapt components to unique design, never ship generic
 
-9. **Mockups & Product Showcases**:
-   - Browser mockups: realistic frames with shadows/reflections
-   - Device mockups: iPhone, iPad, MacBook screens with proper aspect ratios
-   - Perspective transforms: subtle shadows and 3D depth
-   - Live previews: side-by-side code and preview windows
+8. **Responsive Design**:
+   - Mobile-first approach: design small, enhance large
+   - Breakpoints: sm (640px), md (768px), lg (1024px)
+   - Touch targets: 44x44px minimum
+   - Adapt layout/interaction intelligently per device
+   - Test real devices, not just browser resize
 
-10. **Typography & Color Harmony**:
-    - Fonts: Inter, Poppins, or modern sans-serifs
-    - Hierarchy: clear h1/h2/h3, proper line heights (1.4-1.6), letter spacing
-    - Palette: 3-5 core colors + neutrals; use gradients and opacity
-    - Accessibility: WCAG AA contrast (4.5:1 for body text)
-    - CSS variables: reusable color, spacing, typography tokens
+9. **Accessibility & Inclusivity**:
+   - Semantic HTML, ARIA labels, keyboard navigation
+   - prefers-reduced-motion support (motion fallbacks)
+   - Color contrast WCAG AAA (7:1 for body text)
+   - Skip links, proper heading hierarchy
+   - Ethical design = quality design
 
-11. **Responsive Design**:
-    - Mobile-first: design small screens, enhance for desktop
-    - Breakpoints: sm (640px), md (768px), lg (1024px), xl (1280px)
-    - Touch-friendly: interactive elements 44x44px minimum
-    - Test: iPhone 12, iPad, desktop monitors
-    - Tailwind responsive: md:, lg: applied consistently
-
-12. **Performance & Accessibility**:
-    - Lazy-load 3D, Lottie, video with dynamic imports
+10. **Performance**:
+    - Lazy-load heavy assets (3D, Lottie, video)
     - Code-split animations to separate chunks
-    - React.memo for expensive renders
-    - Optimize images: responsive sizes, WebP with fallback
-    - Provide static fallbacks for reduced-motion and low-power devices
-    - Semantic HTML, ARIA labels, keyboard navigation
+    - Optimize images (WebP + fallback)
+    - Monitor bundle size; prefer lightweight libs
+    - Provide fallbacks for low-power devices
 
 COMPONENT GUIDELINES:
 - Self-contained, reusable, TypeScript-safe components
