@@ -35,8 +35,8 @@
   --sidebar-border: rgb(229, 229, 229);
   --sidebar-ring: rgb(161, 161, 161);
   --font-sans: Inter, system-ui, sans-serif;
-  --font-serif: Geist Mono, monospace;
-  --font-mono: Geist Mono, monospace;
+  --font-serif: Inter, system-ui, sans-serif;
+  --font-mono: Inter, system-ui, sans-serif;
   --radius: 0.75rem;
   --shadow-2xs: 0px 1px 0px 0px hsl(0 0% 0% / 0);
   --shadow-xs: 0px 1px 0px 0px hsl(0 0% 0% / 0);
@@ -92,8 +92,8 @@
   --sidebar-border: rgb(255, 255, 255);
   --sidebar-ring: rgb(82, 82, 82);
   --font-sans: Inter, system-ui, sans-serif;
-  --font-serif: Geist Mono, monospace;
-  --font-mono: Geist Mono, monospace;
+  --font-serif: Inter, system-ui, sans-serif;
+  --font-mono: Inter, system-ui, sans-serif;
   --radius: 0.75rem;
   --shadow-2xs: 0px 1px 0px 0px hsl(0 0% 0% / 0);
   --shadow-xs: 0px 1px 0px 0px hsl(0 0% 0% / 0);
@@ -107,6 +107,10 @@
   --shadow-xl: 0px 1px 0px 0px hsl(0 0% 0% / 0),
     0px 8px 10px -1px hsl(0 0% 0% / 0);
   --shadow-2xl: 0px 1px 0px 0px hsl(0 0% 0% / 0);
+}
+
+body {
+  font-family: var(--font-sans);
 }
 
 @theme inline {
