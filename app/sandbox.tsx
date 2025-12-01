@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react'
 import { useState, useRef } from 'react'
-import { Globe, Code2, BarChart3, Cloud, Plus } from 'lucide-react'
+import { Globe, Code2, BarChart3 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Preview } from './preview'
 import { FileExplorer } from './file-explorer'
@@ -82,6 +82,11 @@ export function Sandbox({ className }: Props) {
     }
   }
 
+  const handlePublish = () => {
+    // TODO: Implement publish functionality
+    console.log('Publish clicked')
+  }
+
   return (
     <div className={cn('flex h-full min-h-0 flex-col', className)}>
       <div className="flex items-center justify-between gap-3 border-b border-primary/18 bg-background px-3 py-2">
@@ -131,6 +136,14 @@ export function Sandbox({ className }: Props) {
             </button>
           </div>
         )}
+
+        <button
+          onClick={handlePublish}
+          type="button"
+          className="ml-auto px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-md transition-colors"
+        >
+          Publish
+        </button>
       </div>
 
       <div className="flex-1 min-h-0 flex flex-col">
