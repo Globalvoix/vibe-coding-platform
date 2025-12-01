@@ -374,7 +374,7 @@ export function AppSidebar() {
       />
 
       <RenameDialog
-        isOpen={renameDialogOpen}
+        isOpen={selectedAppForRename !== null}
         currentName={selectedAppForRename ? apps.find((a) => a.id === selectedAppForRename)?.name || "" : ""}
         onClose={() => setSelectedAppForRename(null)}
         onRename={handleRenameApp}
