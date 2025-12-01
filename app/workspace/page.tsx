@@ -14,7 +14,7 @@ import { AppSidebar } from '@/components/sidebar/app-sidebar'
 import { useAppStore } from '@/lib/app-store'
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
-import { useSandboxStore, useFileExplorerStore } from './state'
+import { useSandboxStore, useFileExplorerStore } from '../state'
 
 export default function WorkspacePage() {
   const searchParams = useSearchParams()
