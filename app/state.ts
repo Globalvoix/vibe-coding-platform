@@ -14,6 +14,7 @@ interface SandboxStore {
   commands: Command[]
   generatedFiles: Set<string>
   paths: string[]
+  reset: () => void
   sandboxId?: string
   setChatStatus: (status: ChatStatus) => void
   setSandboxId: (id: string) => void
@@ -70,6 +71,17 @@ export const useSandboxStore = create<SandboxStore>()((set) => ({
   commands: [],
   generatedFiles: new Set<string>(),
   paths: [],
+  reset: () =>
+    set(() => ({
+      sandboxId: undefined,
+      commands: [],
+      paths: [],
+      url: undefined,
+      urlUUID: undefined,
+      generatedFiles: new Set<string>(),
+      status: undefined,
+      chatStatus: 'ready',
+    })),
   setChatStatus: (status) =>
     set((state) =>
       state.chatStatus === status ? state : { chatStatus: status }
@@ -100,6 +112,7 @@ export const useSandboxStore = create<SandboxStore>()((set) => ({
 interface FileExplorerStore {
   paths: string[]
   addPath: (path: string) => void
+  reset: () => void
 }
 
 export const useFileExplorerStore = create<FileExplorerStore>()((set) => ({
@@ -112,6 +125,7 @@ export const useFileExplorerStore = create<FileExplorerStore>()((set) => ({
       return state
     })
   },
+  reset: () => set(() => ({ paths: [] })),
 }))
 
 export function useDataStateMapper() {
