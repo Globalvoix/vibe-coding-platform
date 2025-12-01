@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { useAppStore } from "@/lib/app-store"
 import { useUIStore } from "@/lib/ui-store"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import {
   MoreVertical,
   Trash2,
@@ -178,6 +178,8 @@ export function AppSidebar() {
   const [selectedAppForRename, setSelectedAppForRename] = useState<string | null>(null)
 
   const router = useRouter()
+  const pathname = usePathname()
+  const isWorkspacePage = pathname === '/workspace'
   const { sidebarOpen, setSidebarOpen } = useUIStore()
   const {
     apps,
@@ -188,7 +190,7 @@ export function AppSidebar() {
     renameApp,
   } = useAppStore()
 
-  const currentApp = apps.find((app) => app.id === currentAppId)
+  const currentApp = isWorkspacePage ? apps.find((app) => app.id === currentAppId) : null
   const sortedApps = [...apps].sort((a, b) => b.createdAt - a.createdAt)
 
   const handleCreateApp = (name: string, description: string) => {
