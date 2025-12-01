@@ -90,10 +90,6 @@ export function Chat({ className, initialPrompt }: Props) {
         >
           <Menu className="w-5 h-5 text-foreground" />
         </button>
-        <div className="flex items-center font-mono font-semibold uppercase tracking-tight ml-2">
-          <MessageCircleIcon className="mr-2 w-4" />
-          Chat
-        </div>
       </PanelHeader>
 
       {/* Messages Area */}
