@@ -2,73 +2,68 @@
 
 This document provides ready-to-implement patterns for world-class UI generation.
 
-## 1. Hero Section with Scroll Parallax
+## 1. Hero Section: Clean & Sophisticated
 
 ```tsx
 // components/hero.tsx
 'use client'
 
 import Image from 'next/image'
-import { useScroll, useTransform, motion } from 'framer-motion'
-import { useRef } from 'react'
+import { motion } from 'framer-motion'
 
-export function HeroWithParallax() {
-  const containerRef = useRef(null)
-  const { scrollYProgress } = useScroll({ target: containerRef })
-  const imageY = useTransform(scrollYProgress, [0, 1], [0, 100])
-  const overlayOpacity = useTransform(scrollYProgress, [0, 0.5], [0.3, 0.7])
-
+export function HeroSection() {
   return (
-    <section ref={containerRef} className="relative h-screen overflow-hidden">
-      <motion.div style={{ y: imageY }} className="absolute inset-0">
-        <Image
-          src="https://images.unsplash.com/photo-..."
-          alt="Hero background - Photo by Photographer Name"
-          fill
-          className="object-cover"
-          priority
-        />
-      </motion.div>
-
-      <motion.div
-        style={{ opacity: overlayOpacity }}
-        className="absolute inset-0 bg-black"
+    <section className="relative h-screen bg-white overflow-hidden">
+      {/* Background image (fills, no harsh overlays) */}
+      <Image
+        src="https://images.unsplash.com/photo-..."
+        alt="Hero background - Photo by Jane Doe"
+        fill
+        className="object-cover"
+        priority
+        quality={90}
       />
 
-      <div className="relative z-10 h-full flex flex-col items-center justify-center text-center text-white px-4">
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="text-5xl md:text-6xl font-bold mb-6"
-        >
-          Stunning Visual Experience
-        </motion.h1>
-        
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="text-xl md:text-2xl mb-8 max-w-2xl"
-        >
-          Build beautiful, responsive applications with enterprise-grade quality
-        </motion.p>
+      {/* Subtle overlay (30% opacity max) */}
+      <div className="absolute inset-0 bg-black/20" />
 
-        <motion.button
+      {/* Content with generous spacing */}
+      <div className="relative z-10 h-full flex flex-col items-center justify-center px-4 text-center">
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="bg-white text-black px-8 py-3 rounded-lg font-semibold hover:shadow-xl transition-shadow"
+          transition={{ duration: 0.6 }}
+          className="max-w-2xl"
         >
-          Get Started
-        </motion.button>
+          <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight">
+            Premium Experience, Crafted Carefully
+          </h1>
+
+          <p className="text-lg md:text-xl text-white/90 mb-8 leading-relaxed">
+            Simple, elegant design that speaks for itself. No unnecessary effects.
+          </p>
+
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="bg-white text-gray-900 px-8 py-3 rounded-lg font-semibold
+              hover:bg-gray-50 transition-colors duration-200"
+          >
+            Explore
+          </motion.button>
+        </motion.div>
       </div>
     </section>
   )
 }
 ```
+
+**Why this is sophisticated**:
+- Clean photography without heavy overlays
+- Clear typography hierarchy
+- Purposeful spacing
+- Subtle motion (not distracting)
+- Accessible (good text contrast)
 
 ## 2. Feature Cards with Hover Effects
 
