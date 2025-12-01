@@ -230,7 +230,11 @@ export function AppSidebar() {
               </h2>
             )}
             <button
-              onClick={() => setIsCollapsed(!isCollapsed)}
+              onClick={() => {
+                const newState = !isCollapsed
+                setIsCollapsed(newState)
+                setSidebarCollapsed(newState)
+              }}
               className="p-1.5 hover:bg-secondary rounded-lg transition-colors"
               title={isCollapsed ? "Expand" : "Collapse"}
             >
