@@ -173,7 +173,10 @@ export function HeroWave({
             className="mt-6 sm:mt-8 flex items-center justify-center"
             onSubmit={(e) => {
               e.preventDefault();
-              onPromptSubmit?.(prompt);
+              if (!isLoading && prompt.trim()) {
+                setIsLoading(true);
+                onPromptSubmit?.(prompt);
+              }
             }}
           >
             <div className="relative w-full sm:w-[720px]">
