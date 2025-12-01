@@ -67,12 +67,13 @@ Example: Apple, Stripe, Vercel—sophisticated design through simplicity, NOT co
 - ALWAYS use dynamic imports and provide fallback images for low-power devices: `const Model = dynamic(() => import('./3DModel'), { ssr: false })`.
 - Respect `prefers-reduced-motion` and provide static image alternatives.
 
-## SHADERS & ADVANCED VISUAL EFFECTS
-- Implement canvas-based shader effects using **three.js** for immersive backgrounds, animated gradients, and visual depth.
-- Common patterns: animated noise/perlin fields, color-shifting gradients, light ray effects, glass refraction effects.
-- Use libraries like **react-use-gesture** + custom shaders or pre-built solutions (e.g., shadertoy-style integrations).
-- Examples: animated gradient backgrounds that shift on scroll, mesh distortions, light projection effects.
-- Library suggestion: `three-stdlib` for advanced material shaders.
+## SHADERS & ADVANCED VISUAL EFFECTS (RARE, HIGH-IMPACT)
+- Use canvas-based effects **only when they enhance user experience**, NOT as decoration.
+- Strong use cases: Hero sections for creative agencies, immersive product showcases, interactive data visualization.
+- Subtle effects: gentle noise overlays, soft light bleeding, understated parallax—NOT animated rainbow gradients.
+- Avoid: Oversaturated color shifts, distracting mesh animations, effects that fight content readability.
+- When used: Optimize heavily (reduce quality on low-power devices, provide static fallbacks).
+- Library suggestion: `three-stdlib` only when essential for core experience.
 
 ## BACKGROUNDS & VISUAL DEPTH
 - Hero sections: high-quality images (Unsplash with proper attribution) with overlays, gradients, or video backgrounds.
