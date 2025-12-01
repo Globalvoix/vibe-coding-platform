@@ -20,8 +20,7 @@ import { ModelSelector } from '@/components/settings/model-selector'
 import { Panel, PanelHeader } from '@/components/panels/panels'
 import { Settings } from '@/components/settings/settings'
 import { useChat } from '@ai-sdk/react'
-import { useLocalStorageValue } from '@/lib/use-local-storage-value'
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSharedChatContext } from '@/lib/chat-context'
 import { useSettings } from '@/components/settings/use-settings'
 import { useSandboxStore } from './state'
@@ -39,7 +38,8 @@ export function Chat({ className, initialPrompt }: Props) {
   const { messages, sendMessage, status } = useChat<ChatUIMessage>({ chat })
   const { setChatStatus } = useSandboxStore()
   const { currentAppId } = useAppStore()
-  const [input, setInput] = useLocalStorageValue(currentAppId ? `prompt-input-${currentAppId}` : 'prompt-input')
+  const [input, setInput] = useState('')
+  const hasSubmittedInitialPromptRef = useRef(false)
 
   const validateAndSubmitMessage = useCallback(
     (text: string) => {
@@ -53,17 +53,14 @@ export function Chat({ className, initialPrompt }: Props) {
 
   // Clear messages and input when switching apps
   useEffect(() => {
-    // Reset chat state when user switches to a different app
     setInput('')
     chat.messages = []
     hasSubmittedInitialPromptRef.current = false
-  }, [currentAppId, setInput, chat])
+  }, [currentAppId, chat])
 
   useEffect(() => {
     setChatStatus(status)
   }, [status, setChatStatus])
-
-  const hasSubmittedInitialPromptRef = useRef(false)
 
   useEffect(() => {
     if (
