@@ -1,3 +1,5 @@
+"use client";
+
 import { Chat } from '../chat'
 import { FileExplorer } from '../file-explorer'
 import { Header } from '../header'
@@ -6,12 +8,21 @@ import { Logs } from '../logs'
 import { Preview } from '../preview'
 import { Sandbox } from '../sandbox'
 import { TabContent, TabItem } from '@/components/tabs'
-import { cookies } from 'next/headers'
-import { getHorizontal } from '@/components/layout/sizing'
+import { useSearchParams } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
-export default async function WorkspacePage() {
-  const store = await cookies()
-  const horizontalSizes = getHorizontal(store)
+export default function WorkspacePage() {
+  const searchParams = useSearchParams()
+  const prompt = searchParams.get('prompt')
+  const [initialPrompt, setInitialPrompt] = useState<string>('')
+  const [horizontalSizes, setHorizontalSizes] = useState<[number, number] | null>(null)
+
+  useEffect(() => {
+    if (prompt) {
+      setInitialPrompt(decodeURIComponent(prompt))
+    }
+  }, [prompt])
+
   return (
     <>
       <div className="flex flex-col h-screen max-h-screen overflow-hidden p-2 space-x-2">
@@ -26,7 +37,7 @@ export default async function WorkspacePage() {
         {/* Mobile layout tabs taking the whole space*/}
         <div className="flex flex-1 w-full overflow-hidden pt-2 md:hidden">
           <TabContent tabId="chat" className="flex-1">
-            <Chat className="flex-1 overflow-hidden" />
+            <Chat className="flex-1 overflow-hidden" initialPrompt={initialPrompt} />
           </TabContent>
           <TabContent tabId="preview" className="flex-1">
             <Preview className="flex-1 overflow-hidden" />
@@ -43,7 +54,7 @@ export default async function WorkspacePage() {
         <div className="hidden flex-1 w-full min-h-0 overflow-hidden pt-2 md:flex">
           <Horizontal
             defaultLayout={horizontalSizes ?? [35, 65]}
-            left={<Chat className="flex-1 overflow-hidden" />}
+            left={<Chat className="flex-1 overflow-hidden" initialPrompt={initialPrompt} />}
             right={<Sandbox className="flex-1 overflow-hidden" />}
           />
         </div>
