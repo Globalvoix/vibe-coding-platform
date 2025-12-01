@@ -29,9 +29,10 @@ import { useSandboxStore } from './state'
 interface Props {
   className: string
   modelId?: string
+  initialPrompt?: string
 }
 
-export function Chat({ className }: Props) {
+export function Chat({ className, initialPrompt }: Props) {
   const [input, setInput] = useLocalStorageValue('prompt-input')
   const { chat } = useSharedChatContext()
   const { modelId, reasoningEffort } = useSettings()
