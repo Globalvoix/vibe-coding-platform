@@ -1,15 +1,8 @@
 import { useEffect, useRef } from 'react'
 import { useAppStore } from '@/lib/app-store'
-import { useLocalStorageValue } from '@/lib/use-local-storage-value'
-
-interface AppChatState {
-  messages?: any[]
-  files?: any[]
-}
 
 export function useAppStateManager() {
   const { currentAppId, saveAppState, apps } = useAppStore()
-  const [storedPromptInput] = useLocalStorageValue('prompt-input')
   const previousAppIdRef = useRef<string | null>(null)
 
   useEffect(() => {
