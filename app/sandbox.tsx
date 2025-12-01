@@ -52,7 +52,7 @@ export function Sandbox({ className }: Props) {
         className={cn(
           'inline-flex items-center justify-center rounded-full border text-xs font-medium transition-colors duration-150',
           isActive
-            ? 'px-3 py-1.5 bg-primary/10 border-primary/40 text-foreground'
+            ? 'h-8 px-4 bg-blue-100 border-blue-300 text-blue-800'
             : 'h-8 w-8 bg-background border-border text-muted-foreground hover:bg-muted/40',
           !isActive && 'sm:h-8 sm:w-8'
         )}
