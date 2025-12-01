@@ -125,6 +125,25 @@ export function HeroWave({
       }}
       aria-label="Hero section"
     >
+      <AnimatedGradientBackground
+        startingGap={125}
+        Breathing={true}
+        gradientColors={[
+          "#ffffff",
+          "#2979FF",
+          "#FF80AB",
+          "#FF6D00",
+          "#FFD600",
+          "#00E676",
+          "#3D5AFE",
+        ]}
+        gradientStops={[35, 50, 60, 70, 80, 90, 100]}
+        animationSpeed={0.02}
+        breathingRange={5}
+        topOffset={0}
+        containerClassName="opacity-30"
+        containerStyle={{ filter: "blur(80px)" }}
+      />
       <Navbar />
       <div
         style={{
