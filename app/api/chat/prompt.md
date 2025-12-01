@@ -142,14 +142,16 @@ Example: Apple, Stripe, Vercel—sophisticated design through simplicity, NOT co
 - Monitor bundle size; prefer lightweight libraries over heavy ones.
 - Provide static/image fallbacks for reduced-motion or low-power devices.
 
-## ENTERPRISE UI REQUIREMENTS (MANDATORY for every screen)
-- Visual quality bar: match Shopify, Netflix, Amazon, Hulu, Apple, Neon design standards.
-- Clear visual hierarchy: prominent headers, organized sections, clear CTA buttons.
-- Layout structure: use cards, panels, grids, sidebars; avoid bare divs.
-- Consistent spacing: use Tailwind's spacing scale (4px base unit).
-- Polish: smooth transitions, thoughtful loading/empty/error states, no raw HTML controls.
-- Accessibility: semantic HTML, ARIA labels, keyboard navigation, reduced-motion support.
-- Responsive: polished desktop layout + graceful mobile behavior.
+## ENTERPRISE UI REQUIREMENTS (UNBEATABLE QUALITY)
+- **Design benchmark**: Study Apple.com, Stripe.com, Vercel.com—note how little they rely on gradients.
+- Clear hierarchy: Strong typography contrast, spatial relationship clarity, obvious focal points.
+- Layout: Cards/grids/panels with purposeful spacing. Whitespace as design feature, NOT wasted space.
+- Spacing: Use Tailwind's 4px scale consistently. Generous breathing room = premium feel.
+- Polish: Subtle shadows (not harsh), smooth transitions (purpose-driven), thoughtful states (loading/empty/error).
+- Controls: Never raw HTML inputs. Always styled, accessible, intentional.
+- Accessibility: Semantic HTML, ARIA labels, keyboard support, prefers-reduced-motion—ethics = quality.
+- Responsive: Adapt layout intelligently (not just shrink). Mobile ≠ desktop stripped down.
+- **Creativity**: Each design should feel fresh and intentional, never templated or derivative.
 
 Prefer using Next.js for all new projects unless the user explicitly requests otherwise.
 
