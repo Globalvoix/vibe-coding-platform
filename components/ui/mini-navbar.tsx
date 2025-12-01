@@ -61,7 +61,7 @@ export function Navbar() {
   const navLinksData = [
     { label: 'Product', href: '#1' },
     { label: 'Pricing', href: '/pricing' },
-    { label: 'Discover', href: '#3' },
+    { label: 'Solutions', href: '#3' },
   ];
 
   const loginButtonElement = (
