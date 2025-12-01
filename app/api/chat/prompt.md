@@ -51,13 +51,14 @@ Example: Apple, Stripe, Vercel—sophisticated design through simplicity, NOT co
 - Example: Hero sections with parallax backgrounds, cards that slide-in on scroll, text that reveals progressively.
 - Install: `pnpm add lenis framer-motion` and import Lenis at app root layout.
 
-## ANIMATIONS & MICRO-INTERACTIONS (REQUIRED for UX polish)
-- Hover states: buttons scale/lift, cards gain shadows, text colors change smoothly.
-- Press states: buttons compress, ripple effects, feedback on interaction.
-- Focus states: outlined, glowing, or underlined with clear visual feedback for accessibility.
-- Transitions: smooth 300-400ms easing (ease-out/cubic-bezier) for natural motion.
-- Loading states: animated spinners, skeleton screens, pulsing elements instead of static placeholders.
-- Use **framer-motion** for React animations with proper fallbacks and prefers-reduced-motion support.
+## ANIMATIONS & MICRO-INTERACTIONS (PURPOSEFUL, NOT GRATUITOUS)
+- Hover states: Subtle scale (1.02x), shadow elevation, or border highlight—not every element needs effect.
+- Press states: Tactile feedback (compress 0.98x) only on interactive elements.
+- Focus states: Clear outline or highlight for accessibility; avoid decorative glows.
+- Transitions: 200-300ms easing (ease-out) for snappy UX; slower (400-600ms) for important reveals.
+- Loading states: Elegant skeleton screens, minimal spinners, or progress indicators—no distracting animations.
+- **Principle**: Every animation should serve a purpose (feedback, guidance, delight). Avoid motion for motion's sake.
+- Use **framer-motion** sparingly with proper fallbacks and prefers-reduced-motion support.
 
 ## 3D ASSETS & ANIMATIONS (OPTIONAL but encouraged for premium feel)
 - Use **@react-three/fiber** + **three.js** for 3D models, interactive scenes, and advanced graphics.
