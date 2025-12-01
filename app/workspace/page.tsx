@@ -8,6 +8,7 @@ import { Logs } from '../logs'
 import { Preview } from '../preview'
 import { Sandbox } from '../sandbox'
 import { TabContent, TabItem } from '@/components/tabs'
+import { AppSidebar } from '@/components/sidebar/app-sidebar'
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
@@ -25,7 +26,8 @@ export default function WorkspacePage() {
 
   return (
     <>
-      <div className="flex flex-col h-screen max-h-screen overflow-hidden p-2 space-x-2">
+      <AppSidebar />
+      <div className="flex flex-col h-screen max-h-screen overflow-hidden p-2 space-x-2 ml-64">
         <Header className="flex items-center w-full" />
         <ul className="flex space-x-5 font-mono text-sm tracking-tight px-1 py-2 md:hidden">
           <TabItem tabId="chat">Chat</TabItem>
