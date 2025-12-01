@@ -11,10 +11,12 @@ interface Props {
   className?: string
 }
 
-export function Sandbox({ className }: Props) {
-  const [activeTab, setActiveTab] = useState<'preview' | 'code'>('preview')
+type SandboxTabId = 'preview' | 'code' | 'console'
 
-  const renderTabButton = (id: 'preview' | 'code', label: ReactNode) => (
+export function Sandbox({ className }: Props) {
+  const [activeTab, setActiveTab] = useState<SandboxTabId>('preview')
+
+  const renderTabButton = (id: SandboxTabId, label: ReactNode) => (
     <button
       type="button"
       onClick={() => setActiveTab(id)}
@@ -33,16 +35,20 @@ export function Sandbox({ className }: Props) {
       <div className="flex items-center gap-2 border-b border-primary/18 bg-background px-2 py-1">
         {renderTabButton('preview', 'Preview')}
         {renderTabButton('code', 'Code')}
+        {renderTabButton('console', 'Console')}
       </div>
 
       <div className="flex-1 min-h-0 flex flex-col">
-        {activeTab === 'preview' ? (
+        {activeTab === 'preview' && (
           <Preview className="flex-1 overflow-hidden" />
-        ) : (
-          <div className="flex-1 min-h-0 flex flex-col gap-2">
-            <FileExplorer className="flex-[2] min-h-0 overflow-hidden" />
-            <Logs className="flex-[1] min-h-0 overflow-hidden" />
-          </div>
+        )}
+
+        {activeTab === 'code' && (
+          <FileExplorer className="flex-1 min-h-0 overflow-hidden" />
+        )}
+
+        {activeTab === 'console' && (
+          <Logs className="flex-1 min-h-0 overflow-hidden" />
         )}
       </div>
     </div>
