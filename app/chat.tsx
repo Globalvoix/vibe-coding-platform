@@ -34,12 +34,12 @@ interface Props {
 }
 
 export function Chat({ className, initialPrompt }: Props) {
-  const [input, setInput] = useLocalStorageValue('prompt-input')
   const { chat } = useSharedChatContext()
   const { modelId, reasoningEffort } = useSettings()
   const { messages, sendMessage, status } = useChat<ChatUIMessage>({ chat })
   const { setChatStatus } = useSandboxStore()
   const { currentAppId } = useAppStore()
+  const [input, setInput] = useLocalStorageValue(currentAppId ? `prompt-input-${currentAppId}` : 'prompt-input')
 
   const validateAndSubmitMessage = useCallback(
     (text: string) => {
