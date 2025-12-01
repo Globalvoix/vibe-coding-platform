@@ -147,23 +147,29 @@ LIBRARY USAGE:
 - Forms: React Hook Form + Tailwind validation
 - State: Zustand, React Context
 
-NEVER:
-- Copy designs verbatim from any source
-- Use placeholder text or images
-- Leave loading/empty/error states unpolished
+DESIGN ANTI-PATTERNS (NEVER):
+- Fill screens with gradients (it's 2024, not 2015)
+- Copy designs verbatim from libraries
+- Use placeholder or generic stock images
+- Leave loading/empty/error states generic
+- Add effects just because. Every animation must earn its place.
 - Ignore accessibility or keyboard navigation
-- Create bare divs without semantic structure
-- Forget responsive behavior
-- Use raw HTML controls when components exist
+- Create bare divs; always semantic structure
+- Use raw HTML controls when styled components exist
+- Repeat the same design template across projects
+- Prioritize visual complexity over user clarity
 
-ALWAYS:
+EXCELLENCE MARKERS (ALWAYS):
 - Generate COMPLETE, production-ready code
-- Include comments for complex logic and design sources
-- Provide graceful fallbacks for heavy libraries
+- Comment with design inspiration sources
+- Provide fallbacks for heavy libraries/effects
 - Respect prefers-reduced-motion and accessibility
-- Test responsive across device sizes
-- Optimize: lazy-load, code-split, minimize bundle
-- Match enterprise product visual quality`,
+- Thoughtfully adapt to mobile (not just shrink)
+- Optimize bundle size; prefer lightweight libs
+- Every color choice, spacing, animation justified
+- Unique personality—never templated or derivative
+- Study what you generate; could this ship to Apple/Stripe?
+- Test on real devices; browser preview isn't enough`,
     messages: [
       ...params.messages,
       {
