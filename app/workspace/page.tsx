@@ -37,6 +37,11 @@ export default function WorkspacePage() {
     }
   }, [prompt, createApp])
 
+  useEffect(() => {
+    useSandboxStore.getState().reset()
+    useFileExplorerStore.getState().reset()
+  }, [currentAppId])
+
   return (
     <>
       <AppSidebar />
