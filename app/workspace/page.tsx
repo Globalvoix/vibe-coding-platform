@@ -9,20 +9,30 @@ import { Preview } from '../preview'
 import { Sandbox } from '../sandbox'
 import { TabContent, TabItem } from '@/components/tabs'
 import { AppSidebar } from '@/components/sidebar/app-sidebar'
+import { useAppStore } from '@/lib/app-store'
 import { useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 export default function WorkspacePage() {
   const searchParams = useSearchParams()
   const prompt = searchParams.get('prompt')
   const [initialPrompt, setInitialPrompt] = useState<string>('')
   const [horizontalSizes, setHorizontalSizes] = useState<[number, number] | null>(null)
+  const { createApp } = useAppStore()
+  const hasCreatedAppFromPromptRef = useRef(false)
 
   useEffect(() => {
     if (prompt) {
-      setInitialPrompt(decodeURIComponent(prompt))
+      const decoded = decodeURIComponent(prompt)
+      setInitialPrompt(decoded)
+
+      if (!hasCreatedAppFromPromptRef.current && decoded.trim()) {
+        const name = decoded.length > 60 ? decoded.slice(0, 57) + '...' : decoded
+        createApp(name, decoded)
+        hasCreatedAppFromPromptRef.current = true
+      }
     }
-  }, [prompt])
+  }, [prompt, createApp])
 
   return (
     <>
