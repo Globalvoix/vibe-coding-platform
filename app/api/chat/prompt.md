@@ -75,12 +75,13 @@ Example: Apple, Stripe, Vercel—sophisticated design through simplicity, NOT co
 - When used: Optimize heavily (reduce quality on low-power devices, provide static fallbacks).
 - Library suggestion: `three-stdlib` only when essential for core experience.
 
-## BACKGROUNDS & VISUAL DEPTH
-- Hero sections: high-quality images (Unsplash with proper attribution) with overlays, gradients, or video backgrounds.
-- Gradient backgrounds: use multi-color, directional, or animated gradients for visual interest.
-- Video backgrounds: optimize with MP4 format, muted autoplay, proper fallbacks; use `<video>` or next/image.
-- Animated SVG backgrounds: low-file-size vector animations for smooth performance.
-- Layered depth: blend images, shapes, gradients, and animations to create perceived depth.
+## BACKGROUNDS & VISUAL DEPTH (RESTRAINED, PURPOSEFUL)
+- Hero sections: High-quality photography (Unsplash) as primary, subtle overlays if needed (avoid heavy filters).
+- Gradients: Use 2-color subtle gradients sparingly (not on every section). Example: soft to dark at 5% opacity over image.
+- Video backgrounds: Only for hero/key sections; optimize MP4 codec, muted autoplay, performance on mobile.
+- Depth techniques: Layering via shadows, scale, positioning, and z-index—more sophisticated than color alone.
+- Whitespace: Leverage negative space as background design. Premium = breathing room, NOT visual saturation.
+- Color restraint: 2-3 accent colors max + grayscale neutrals. Avoid multi-color gradient chaos.
 
 ## IMAGE & VIDEO INTEGRATION
 - Use **next/image** for all static images with automatic optimization, responsive srcSets, and lazy loading.
