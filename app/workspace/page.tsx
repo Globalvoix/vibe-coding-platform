@@ -51,7 +51,11 @@ export default function WorkspacePage() {
         {/* Mobile layout tabs taking the whole space*/}
         <div className="flex flex-1 w-full overflow-hidden pt-2 md:hidden">
           <TabContent tabId="chat" className="flex-1">
-            <Chat className="flex-1 overflow-hidden" initialPrompt={initialPrompt} />
+            <Chat
+              key={currentAppId ?? 'default'}
+              className="flex-1 overflow-hidden"
+              initialPrompt={initialPrompt}
+            />
           </TabContent>
           <TabContent tabId="preview" className="flex-1">
             <Preview className="flex-1 overflow-hidden" />
@@ -68,8 +72,19 @@ export default function WorkspacePage() {
         <div className="hidden flex-1 w-full min-h-0 overflow-hidden pt-2 md:flex">
           <Horizontal
             defaultLayout={horizontalSizes ?? [35, 65]}
-            left={<Chat className="flex-1 overflow-hidden" initialPrompt={initialPrompt} />}
-            right={<Sandbox className="flex-1 overflow-hidden" />}
+            left={
+              <Chat
+                key={currentAppId ?? 'default'}
+                className="flex-1 overflow-hidden"
+                initialPrompt={initialPrompt}
+              />
+            }
+            right={
+              <Sandbox
+                key={currentAppId ?? 'default'}
+                className="flex-1 overflow-hidden"
+              />
+            }
           />
         </div>
       </div>
