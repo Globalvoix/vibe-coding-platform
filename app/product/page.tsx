@@ -126,7 +126,7 @@ export default function ProductPage() {
                 </p>
               </div>
 
-              <div className="relative h-64 w-full overflow-hidden rounded-xl sm:h-72">
+              <div className="relative h-80 w-full overflow-hidden rounded-xl sm:h-96 md:h-full md:min-h-96">
                 <Image
                   src={currentSlide.imageSrc}
                   alt={currentSlide.imageAlt}
