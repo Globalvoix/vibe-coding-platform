@@ -21,7 +21,7 @@ export default function WorkspacePage() {
   const prompt = searchParams.get('prompt')
   const [initialPrompt, setInitialPrompt] = useState<string>('')
   const [horizontalSizes, setHorizontalSizes] = useState<[number, number] | null>(null)
-  const { createApp, currentAppId, getCurrentApp, saveAppState } = useAppStore()
+  const { createAppInCloud, currentAppId, getCurrentApp, saveAppState } = useAppStore()
   const hasCreatedAppFromPromptRef = useRef(false)
   const { userId } = useAuth()
   const { sandboxId, paths: sandboxPaths, url, urlUUID } = useSandboxStore()
@@ -33,29 +33,12 @@ export default function WorkspacePage() {
 
       if (!hasCreatedAppFromPromptRef.current && decoded.trim()) {
         const name = decoded.length > 60 ? decoded.slice(0, 57) + '...' : decoded
-        const createdAt = Date.now()
-        const updatedAt = createdAt
-        const id = createdAt.toString()
 
-        createApp(name, decoded, userId ?? null)
         hasCreatedAppFromPromptRef.current = true
-
-        void fetch('/api/apps', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            id,
-            name,
-            description: decoded,
-            createdAt,
-            updatedAt,
-          }),
-        })
+        void createAppInCloud(name, decoded, userId ?? null)
       }
     }
-  }, [prompt, createApp, userId])
+  }, [prompt, createAppInCloud, userId])
 
   // Restore sandbox state when switching apps so each app keeps its own code and preview
   useEffect(() => {
