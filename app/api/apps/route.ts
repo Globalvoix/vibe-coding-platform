@@ -73,7 +73,7 @@ export async function DELETE(request: NextRequest) {
     const { rows } = await db.query(
       'delete from public.apps where id = $1 and user_id = $2 returning id',
       [id, userId]
-    )
+    ) as { rows: Array<{ id: string }> }
 
     if (rows.length === 0) {
       return NextResponse.json({ error: 'App not found or unauthorized' }, { status: 404 })
