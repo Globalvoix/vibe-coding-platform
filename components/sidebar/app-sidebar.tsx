@@ -345,27 +345,20 @@ export function AppSidebar() {
                               tabIndex={0}
                               onClick={(e) => {
                                 e.stopPropagation()
-                                if (operationInProgress !== app.id) {
-                                  setSelectedAppForMenu(
-                                    selectedAppForMenu === app.id ? null : app.id
-                                  )
-                                }
+                                setSelectedAppForMenu(
+                                  selectedAppForMenu === app.id ? null : app.id
+                                )
                               }}
                               onKeyDown={(e) => {
                                 if (e.key === 'Enter' || e.key === ' ') {
                                   e.preventDefault()
                                   e.stopPropagation()
-                                  if (operationInProgress !== app.id) {
-                                    setSelectedAppForMenu(
-                                      selectedAppForMenu === app.id ? null : app.id
-                                    )
-                                  }
+                                  setSelectedAppForMenu(
+                                    selectedAppForMenu === app.id ? null : app.id
+                                  )
                                 }
                               }}
-                              className={cn(
-                                "p-1 hover:bg-secondary rounded transition-colors opacity-0 group-hover:opacity-100",
-                                operationInProgress === app.id ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
-                              )}
+                              className="p-1 hover:bg-secondary rounded transition-colors opacity-0 group-hover:opacity-100 cursor-pointer"
                             >
                               <MoreVertical className="w-4 h-4" />
                             </div>
