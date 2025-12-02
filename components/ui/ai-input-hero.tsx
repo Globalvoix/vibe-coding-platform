@@ -29,6 +29,8 @@ export function HeroWave({
   const [prompt, setPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const { isSignedIn } = useAuth();
+  const { openSignIn } = useClerk();
 
   const basePlaceholder = "Make me a";
   const suggestionsRef = useRef<string[]>([
