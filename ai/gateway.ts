@@ -1,5 +1,6 @@
 import { Models, SUPPORTED_MODELS } from './constants'
 import { openai } from '@ai-sdk/openai'
+import { anthropic } from '@ai-sdk/anthropic'
 import type { JSONValue } from 'ai'
 import type { OpenAIResponsesProviderOptions } from '@ai-sdk/openai'
 import type { LanguageModelV2 } from '@ai-sdk/provider'
@@ -11,11 +12,11 @@ interface AvailableModel {
 
 const MODEL_DISPLAY_NAMES: Record<string, string> = {
   [Models.AmazonNovaPro]: 'Premium code generation (tier A)',
-  [Models.AnthropicClaude4Sonnet]: 'Premium code generation (tier B)',
-  [Models.AnthropicClaude45Sonnet]: 'Default balanced model',
+  [Models.AnthropicClaude4Sonnet]: 'Anthropic Claude Sonnet (v1)',
+  [Models.AnthropicClaude45Sonnet]: 'Anthropic Claude Sonnet (latest)',
   [Models.GoogleGeminiFlash]: 'Fast drafting model',
   [Models.MoonshotKimiK2]: 'Deep reasoning model',
-  [Models.OpenAIGPT5]: 'Advanced reasoning model',
+  [Models.OpenAIGPT5]: 'OpenAI advanced reasoning',
   [Models.XaiGrok3Fast]: 'Fast experimentation model',
 }
 
@@ -44,6 +45,18 @@ export function getModelOptions(
           reasoningEffort: options?.reasoningEffort ?? 'low',
         } satisfies OpenAIResponsesProviderOptions,
       },
+    }
+  }
+
+  if (modelId === Models.AnthropicClaude4Sonnet) {
+    return {
+      model: anthropic('claude-3-5-sonnet-latest'),
+    }
+  }
+
+  if (modelId === Models.AnthropicClaude45Sonnet) {
+    return {
+      model: anthropic('claude-3-7-sonnet-latest'),
     }
   }
 

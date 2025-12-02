@@ -10,6 +10,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^2.0.53",
     "@ai-sdk/gateway": "1.0.32",
     "@ai-sdk/openai": "2.0.42",
     "@ai-sdk/provider": "^2.0.0",
