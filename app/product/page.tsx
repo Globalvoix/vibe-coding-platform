@@ -26,7 +26,7 @@ export default function ProductPage() {
           For founders &amp; builders
         </p>
         <h1 className="text-3xl sm:text-5xl md:text-6xl font-semibold tracking-tight text-gray-900">
-          Build it with Lovable
+          Build it with Thinksoft
         </h1>
         <p className="mt-4 max-w-xl text-sm sm:text-base text-gray-700">
           Your AI cofounder and development team. Ship your idea in days, not months
