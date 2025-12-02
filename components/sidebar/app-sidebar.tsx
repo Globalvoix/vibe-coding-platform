@@ -1,19 +1,16 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useAppStore } from "@/lib/app-store"
 import { useUIStore } from "@/lib/ui-store"
 import { useRouter, usePathname } from "next/navigation"
 import { useAuth, useClerk } from "@clerk/nextjs"
-import { toast } from "sonner"
-import { useAppSync } from "@/hooks/useAppSync"
 import {
   MoreVertical,
   Trash2,
   Edit2,
   X,
   FolderPlus,
-  Loader2,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
