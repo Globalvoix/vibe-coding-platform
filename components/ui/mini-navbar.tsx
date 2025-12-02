@@ -135,8 +135,7 @@ export function Navbar() {
           ))}
         </nav>
         <div className="flex flex-col items-center space-y-4 mt-4 w-full">
-          {loginButtonElement}
-          {signupButtonElement}
+          {authElement}
         </div>
       </div>
     </header>
