@@ -276,15 +276,33 @@ export function AppSidebar() {
 
   const handleDeleteApp = (id: string) => {
     if (confirm("Are you sure you want to delete this app?")) {
-      deleteApp(id)
+      setOperationInProgress(id)
       setSelectedAppForMenu(null)
+
+      void syncDeleteApp(id).then((success) => {
+        setOperationInProgress(null)
+        if (success) {
+          toast.success("App deleted successfully")
+        } else {
+          toast.error("Failed to delete app")
+        }
+      })
     }
   }
 
   const handleRenameApp = (newName: string) => {
     if (selectedAppForRename) {
-      renameApp(selectedAppForRename, newName)
-      setSelectedAppForRename(null)
+      setOperationInProgress(selectedAppForRename)
+
+      void syncRenameApp(selectedAppForRename, newName).then((success) => {
+        setOperationInProgress(null)
+        if (success) {
+          toast.success("App renamed successfully")
+          setSelectedAppForRename(null)
+        } else {
+          toast.error("Failed to rename app")
+        }
+      })
     }
   }
 
