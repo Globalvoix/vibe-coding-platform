@@ -30,7 +30,7 @@ export default function ProductPage() {
         </h1>
         <p className="mt-4 max-w-xl text-sm sm:text-base text-gray-700">
           Your AI cofounder and development team. Ship your idea in days, not months,
-          and start building the business you&apos;ve been dreaming about.
+ and start building the business you&apos;ve been dreaming about.
         </p>
         <button
           type="button"
