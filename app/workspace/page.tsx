@@ -33,8 +33,26 @@ export default function WorkspacePage() {
 
       if (!hasCreatedAppFromPromptRef.current && decoded.trim()) {
         const name = decoded.length > 60 ? decoded.slice(0, 57) + '...' : decoded
+        const createdAt = Date.now()
+        const updatedAt = createdAt
+        const id = createdAt.toString()
+
         createApp(name, decoded, userId ?? null)
         hasCreatedAppFromPromptRef.current = true
+
+        void fetch('/api/apps', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            id,
+            name,
+            description: decoded,
+            createdAt,
+            updatedAt,
+          }),
+        })
       }
     }
   }, [prompt, createApp, userId])
