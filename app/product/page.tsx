@@ -101,32 +101,32 @@ export default function ProductPage() {
         </button>
       </section>
 
-      <section className="relative z-10 bg-[#f6efe6] px-4 py-20">
-        <div className="mx-auto flex max-w-6xl flex-col gap-10">
-          <div className="text-left">
+      <section className="relative z-10 bg-[#f6efe6] px-4 py-16 sm:py-24">
+        <div className="mx-auto max-w-6xl">
+          <div className="mb-10 text-left">
             <h2 className="text-2xl font-semibold tracking-tight text-gray-900 sm:text-3xl">
               Your AI cofounder and dev team
             </h2>
-            <p className="mt-3 max-w-2xl text-sm text-gray-700 sm:text-base">
+            <p className="mt-2 max-w-2xl text-sm text-gray-600 sm:text-base">
               Your idea doesn&apos;t need a technical cofounder. Thinksoft is your technical partner – build, iterate, and ship in hours instead of months.
             </p>
           </div>
 
-          <div className="rounded-3xl bg-[#fdf7ee] p-6 shadow-sm sm:p-8 md:p-10">
-            <div className="grid items-center gap-8 md:grid-cols-2">
+          <div className="rounded-2xl bg-white p-6 sm:p-10">
+            <div className="grid items-start gap-6 md:grid-cols-2 md:gap-12">
               <div className="text-left">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-600">
+                <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">
                   {currentSlide.eyebrow}
                 </p>
-                <h3 className="mt-3 text-xl font-semibold text-gray-900 sm:text-2xl">
+                <h3 className="mt-2 text-lg font-semibold text-gray-900 sm:text-xl">
                   {currentSlide.title}
                 </h3>
-                <p className="mt-3 text-sm text-gray-700 sm:text-base">
+                <p className="mt-3 text-sm text-gray-700 sm:text-base leading-relaxed">
                   {currentSlide.description}
                 </p>
               </div>
 
-              <div className="relative h-56 w-full overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500/20 via-purple-500/20 to-pink-500/20 sm:h-72 md:h-80">
+              <div className="relative h-64 w-full overflow-hidden rounded-xl sm:h-72">
                 <Image
                   src={currentSlide.imageSrc}
                   alt={currentSlide.imageAlt}
@@ -137,23 +137,27 @@ export default function ProductPage() {
               </div>
             </div>
 
-            <div className="mt-8 flex items-center justify-between">
-              <div className="flex items-center gap-3">
+            <div className="mt-6 flex items-center justify-between sm:mt-8">
+              <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={goToPrevious}
                   aria-label="Previous slide"
-                  className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-100"
+                  className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors"
                 >
-                  
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
                 </button>
                 <button
                   type="button"
                   onClick={goToNext}
                   aria-label="Next slide"
-                  className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-100"
+                  className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors"
                 >
-                  
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
                 </button>
               </div>
 
@@ -164,8 +168,8 @@ export default function ProductPage() {
                     type="button"
                     onClick={() => setActiveIndex(index)}
                     aria-label={`Go to slide ${index + 1}`}
-                    className={`h-2.5 rounded-full transition-colors ${
-                      index === activeIndex ? "w-6 bg-gray-900" : "w-2.5 bg-gray-400/40"
+                    className={`h-2 rounded-full transition-all ${
+                      index === activeIndex ? "w-6 bg-gray-800" : "w-2 bg-gray-300"
                     }`}
                   />
                 ))}
