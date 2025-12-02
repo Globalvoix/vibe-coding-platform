@@ -14,14 +14,17 @@ import { useAppStore } from '@/lib/app-store'
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { useSandboxStore, useFileExplorerStore } from '../state'
+import { useAuth } from '@clerk/nextjs'
 
 export default function WorkspacePage() {
   const searchParams = useSearchParams()
   const prompt = searchParams.get('prompt')
   const [initialPrompt, setInitialPrompt] = useState<string>('')
   const [horizontalSizes, setHorizontalSizes] = useState<[number, number] | null>(null)
-  const { createApp, currentAppId } = useAppStore()
+  const { createApp, currentAppId, getCurrentApp, saveAppState } = useAppStore()
   const hasCreatedAppFromPromptRef = useRef(false)
+  const { userId } = useAuth()
+  const { sandboxId, paths: sandboxPaths, url, urlUUID } = useSandboxStore()
 
   useEffect(() => {
     if (prompt) {
@@ -30,16 +33,56 @@ export default function WorkspacePage() {
 
       if (!hasCreatedAppFromPromptRef.current && decoded.trim()) {
         const name = decoded.length > 60 ? decoded.slice(0, 57) + '...' : decoded
-        createApp(name, decoded)
+        createApp(name, decoded, userId ?? null)
         hasCreatedAppFromPromptRef.current = true
       }
     }
-  }, [prompt, createApp])
+  }, [prompt, createApp, userId])
 
+  // Restore sandbox state when switching apps so each app keeps its own code and preview
   useEffect(() => {
-    useSandboxStore.getState().reset()
-    useFileExplorerStore.getState().reset()
-  }, [currentAppId])
+    const sandboxState = useSandboxStore.getState()
+    const fileExplorerState = useFileExplorerStore.getState()
+
+    sandboxState.reset()
+    fileExplorerState.reset()
+
+    const app = getCurrentApp()
+    const filesSnapshot = app?.files as
+      | { sandboxId?: string; paths?: string[]; url?: string; urlUUID?: string }
+      | undefined
+
+    if (filesSnapshot) {
+      if (filesSnapshot.sandboxId) {
+        sandboxState.setSandboxId(filesSnapshot.sandboxId)
+      }
+
+      if (Array.isArray(filesSnapshot.paths) && filesSnapshot.paths.length > 0) {
+        sandboxState.addPaths(filesSnapshot.paths)
+      }
+
+      if (filesSnapshot.url) {
+        sandboxState.setUrl(
+          filesSnapshot.url,
+          filesSnapshot.urlUUID || sandboxState.urlUUID || crypto.randomUUID()
+        )
+      }
+    }
+  }, [currentAppId, getCurrentApp])
+
+  // Persist sandbox state for the current app whenever it changes
+  useEffect(() => {
+    if (!currentAppId) return
+
+    saveAppState(currentAppId, {
+      files: {
+        sandboxId,
+        paths: sandboxPaths,
+        url,
+        urlUUID,
+      },
+    })
+  }, [currentAppId, sandboxId, sandboxPaths, url, urlUUID, saveAppState])
 
   // Cleanup when unmounting (leaving the page)
   useEffect(() => {

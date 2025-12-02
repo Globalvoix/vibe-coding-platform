@@ -7,19 +7,20 @@ export interface App {
   description: string
   createdAt: number
   updatedAt: number
+  ownerId?: string | null
   chatMessages?: unknown[]
-  files?: unknown[]
+  files?: unknown
 }
 
 interface AppStateSnapshot {
   chatMessages?: unknown[]
-  files?: unknown[]
+  files?: unknown
 }
 
 interface AppStore {
   apps: App[]
   currentAppId: string | null
-  createApp: (name: string, description: string) => void
+  createApp: (name: string, description: string, ownerId?: string | null) => void
   deleteApp: (id: string) => void
   updateApp: (id: string, updates: Partial<App>) => void
   setCurrentApp: (id: string) => void
@@ -35,15 +36,16 @@ export const useAppStore = create<AppStore>()(
       apps: [],
       currentAppId: null,
 
-      createApp: (name: string, description: string) => {
+      createApp: (name: string, description: string, ownerId?: string | null) => {
         const newApp: App = {
           id: Date.now().toString(),
           name,
           description,
           createdAt: Date.now(),
           updatedAt: Date.now(),
+          ownerId: ownerId ?? null,
           chatMessages: [],
-          files: [],
+          files: null,
         }
         set((state) => ({
           apps: [...state.apps, newApp],
