@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useAppStore } from "@/lib/app-store"
 import { useUIStore } from "@/lib/ui-store"
 import { useRouter, usePathname } from "next/navigation"
+import { useAuth, useClerk } from "@clerk/nextjs"
 import {
   MoreVertical,
   Trash2,
@@ -181,6 +182,8 @@ export function AppSidebar() {
   const pathname = usePathname()
   const isWorkspacePage = pathname === '/workspace'
   const { sidebarOpen, setSidebarOpen } = useUIStore()
+  const { isSignedIn, userId } = useAuth()
+  const { openSignIn } = useClerk()
   const {
     apps,
     currentAppId,
@@ -190,11 +193,24 @@ export function AppSidebar() {
     renameApp,
   } = useAppStore()
 
-  const currentApp = isWorkspacePage ? apps.find((app) => app.id === currentAppId) : null
-  const sortedApps = [...apps].sort((a, b) => b.createdAt - a.createdAt)
+  const visibleApps = userId
+    ? apps.filter((app) => !app.ownerId || app.ownerId === userId)
+    : []
+
+  const currentApp =
+    isWorkspacePage && currentAppId
+      ? visibleApps.find((app) => app.id === currentAppId) || null
+      : null
+
+  const sortedApps = [...visibleApps].sort((a, b) => b.createdAt - a.createdAt)
 
   const handleCreateApp = (name: string, description: string) => {
-    createApp(name, description)
+    if (!isSignedIn) {
+      openSignIn()
+      return
+    }
+
+    createApp(name, description, userId ?? null)
   }
 
   const handleDeleteApp = (id: string) => {
@@ -262,6 +278,10 @@ export function AppSidebar() {
           <div className="p-3 border-b border-border">
             <button
               onClick={() => {
+                if (!isSignedIn) {
+                  openSignIn()
+                  return
+                }
                 setSidebarOpen(false)
                 router.push('/apps')
               }}
@@ -363,9 +383,9 @@ export function AppSidebar() {
           </div>
 
           {/* Footer Info */}
-          {apps.length > 0 && (
+          {visibleApps.length > 0 && (
             <div className="p-3 border-t border-border text-xs text-muted-foreground text-center">
-              {apps.length} app{apps.length !== 1 ? "s" : ""} total
+              {visibleApps.length} app{visibleApps.length !== 1 ? "s" : ""} total
             </div>
           )}
         </div>
