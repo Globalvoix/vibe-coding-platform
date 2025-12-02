@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 
 export interface App {
   id: string
@@ -19,8 +20,6 @@ interface AppStateSnapshot {
 interface AppStore {
   apps: App[]
   currentAppId: string | null
-  syncStatus: 'idle' | 'loading' | 'error'
-  syncError: string | null
   setApps: (apps: App[]) => void
   createApp: (name: string, description: string, ownerId?: string | null) => void
   deleteApp: (id: string) => void
@@ -30,11 +29,6 @@ interface AppStore {
   renameApp: (id: string, newName: string) => void
   updateAppDescription: (id: string, description: string) => void
   saveAppState: (id: string, state: AppStateSnapshot) => void
-  setSyncStatus: (status: 'idle' | 'loading' | 'error') => void
-  setSyncError: (error: string | null) => void
-  syncDeleteApp: (id: string) => Promise<boolean>
-  syncRenameApp: (id: string, newName: string) => Promise<boolean>
-  syncUpdateApp: (id: string, updates: Partial<App>) => Promise<boolean>
 }
 
 export const useAppStore = create<AppStore>((set, get) => ({
