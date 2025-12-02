@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils"
 interface CreateAppDialogProps {
   isOpen: boolean
   onClose: () => void
-  onCreate: (name: string, description: string) => void | Promise<void>
+  onCreate: (name: string, description: string) => void
 }
 
 function CreateAppDialog({ isOpen, onClose, onCreate }: CreateAppDialogProps) {
