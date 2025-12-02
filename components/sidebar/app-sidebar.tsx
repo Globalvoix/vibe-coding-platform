@@ -209,57 +209,20 @@ export function AppSidebar() {
       return
     }
 
-    const createdAt = Date.now()
-    const updatedAt = createdAt
-
-    const newId = createdAt.toString()
-
     createApp(name, description)
-
-    void fetch('/api/apps', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        id: newId,
-        name,
-        description,
-        createdAt,
-        updatedAt,
-      }),
-    })
   }
 
   const handleDeleteApp = (id: string) => {
     if (confirm("Are you sure you want to delete this app?")) {
-      setOperationInProgress(id)
+      deleteApp(id)
       setSelectedAppForMenu(null)
-
-      void syncDeleteApp(id).then((success) => {
-        setOperationInProgress(null)
-        if (success) {
-          toast.success("App deleted successfully")
-        } else {
-          toast.error("Failed to delete app")
-        }
-      })
     }
   }
 
   const handleRenameApp = (newName: string) => {
     if (selectedAppForRename) {
-      setOperationInProgress(selectedAppForRename)
-
-      void syncRenameApp(selectedAppForRename, newName).then((success) => {
-        setOperationInProgress(null)
-        if (success) {
-          toast.success("App renamed successfully")
-          setSelectedAppForRename(null)
-        } else {
-          toast.error("Failed to rename app")
-        }
-      })
+      renameApp(selectedAppForRename, newName)
+      setSelectedAppForRename(null)
     }
   }
 
