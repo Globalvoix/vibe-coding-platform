@@ -182,7 +182,7 @@ export function AppSidebar() {
   const pathname = usePathname()
   const isWorkspacePage = pathname === '/workspace'
   const { sidebarOpen, setSidebarOpen } = useUIStore()
-  const { isSignedIn, userId } = useAuth()
+  const { isSignedIn } = useAuth()
   const { openSignIn } = useClerk()
   const {
     apps,
@@ -193,13 +193,11 @@ export function AppSidebar() {
     renameApp,
   } = useAppStore()
 
-  const visibleApps = userId
-    ? apps.filter((app) => !app.ownerId || app.ownerId === userId)
-    : []
+  const visibleApps = isSignedIn ? apps : []
 
   const currentApp =
     isWorkspacePage && currentAppId
-      ? visibleApps.find((app) => app.id === currentAppId) || null
+      ? apps.find((app) => app.id === currentAppId) || null
       : null
 
   const sortedApps = [...visibleApps].sort((a, b) => b.createdAt - a.createdAt)
