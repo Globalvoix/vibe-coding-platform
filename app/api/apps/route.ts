@@ -131,7 +131,15 @@ export async function PATCH(request: NextRequest) {
     query += ' ' + updates.join(', ') + ` where id = $${params.length + 1} and user_id = $${params.length + 2} returning id, name, description, created_at, updated_at`
     params.push(id, userId)
 
-    const { rows } = await db.query(query, params)
+    const { rows } = await db.query(query, params) as {
+      rows: Array<{
+        id: string
+        name: string
+        description: string
+        created_at: number
+        updated_at: number
+      }>
+    }
 
     if (rows.length === 0) {
       return NextResponse.json({ error: 'App not found or unauthorized' }, { status: 404 })
