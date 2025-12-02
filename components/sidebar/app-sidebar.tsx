@@ -377,8 +377,13 @@ export function AppSidebar() {
                     >
                       <div className="flex items-center justify-between gap-2 min-w-0">
                         <div className="flex-1 min-w-0">
-                          <div className="text-sm font-medium truncate">
-                            {app.name}
+                          <div className="flex items-center gap-2 min-w-0">
+                            {operationInProgress === app.id && (
+                              <Loader2 className="w-3 h-3 animate-spin flex-shrink-0" />
+                            )}
+                            <div className="text-sm font-medium truncate">
+                              {app.name}
+                            </div>
                           </div>
                           <div className="text-xs text-muted-foreground truncate mt-0.5">
                             {new Date(app.updatedAt).toLocaleDateString()}
