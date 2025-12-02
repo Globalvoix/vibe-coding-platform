@@ -10,12 +10,26 @@ export async function GET() {
   }
 
   const db = getDb()
-  const { rows } = await db.query(
-    'select id, name, description, created_at, updated_at from public.apps where user_id = $1 order by updated_at desc',
-    [userId]
-  )
 
-  return NextResponse.json({ apps: rows })
+  try {
+    const { rows } = await db.query(
+      'select id, name, description, created_at, updated_at from public.apps where user_id = $1 order by updated_at desc',
+      [userId]
+    ) as {
+      rows: Array<{
+        id: string
+        name: string
+        description: string
+        created_at: number
+        updated_at: number
+      }>
+    }
+
+    return NextResponse.json({ apps: rows })
+  } catch (error) {
+    console.error('Failed to fetch apps:', error)
+    return NextResponse.json({ error: 'Failed to fetch apps' }, { status: 500 })
+  }
 }
 
 export async function POST(request: NextRequest) {
