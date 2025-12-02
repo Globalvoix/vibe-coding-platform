@@ -13,7 +13,6 @@ import {
   FolderPlus,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { useAppSync } from "@/hooks/useAppSync"
 
 interface CreateAppDialogProps {
   isOpen: boolean
