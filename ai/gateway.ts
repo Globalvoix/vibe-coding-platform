@@ -41,10 +41,7 @@ export function getModelOptions(
       model: openai('gpt-4.1'),
       providerOptions: {
         openai: {
-          include: ['reasoning.encrypted_content'],
           reasoningEffort: options?.reasoningEffort ?? 'low',
-          reasoningSummary: 'auto',
-          serviceTier: 'priority',
         } satisfies OpenAIResponsesProviderOptions,
       },
     }

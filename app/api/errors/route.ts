@@ -22,10 +22,7 @@ export async function POST(req: Request) {
     model: openai('gpt-4.1'),
     providerOptions: {
       openai: {
-        include: ['reasoning.encrypted_content'],
         reasoningEffort: 'minimal',
-        reasoningSummary: 'auto',
-        serviceTier: 'priority',
       },
     },
     messages: [{ role: 'user', content: JSON.stringify(parsedBody.data) }],
