@@ -51,13 +51,6 @@ export function Chat({ className, initialPrompt }: Props) {
     [sendMessage, modelId, setInput, reasoningEffort]
   )
 
-  // Clear messages and input when switching apps
-  useEffect(() => {
-    setInput('')
-    chat.messages = []
-    hasSubmittedInitialPromptRef.current = false
-  }, [currentAppId, chat])
-
   useEffect(() => {
     setChatStatus(status)
   }, [status, setChatStatus])
