@@ -9,6 +9,7 @@ import { createContext, useContext, useMemo, useRef } from 'react'
 import { useDataStateMapper } from '@/app/state'
 import { mutate } from 'swr'
 import { toast } from 'sonner'
+import { useAppStore } from '@/lib/app-store'
 
 interface ChatContextValue {
   chat: Chat<ChatUIMessage>
@@ -20,19 +21,30 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const mapDataToState = useDataStateMapper()
   const mapDataToStateRef = useRef(mapDataToState)
   mapDataToStateRef.current = mapDataToState
+  const { currentAppId } = useAppStore()
 
-  const chat = useMemo(
-    () =>
-      new Chat<ChatUIMessage>({
-        onToolCall: () => mutate('/api/auth/info'),
-        onData: (data: DataUIPart<DataPart>) => mapDataToStateRef.current(data),
-        onError: (error) => {
-          toast.error(`Communication error with the AI: ${error.message}`)
-          console.error('Error sending message:', error)
-        },
-      }),
-    []
-  )
+  const chatsRef = useRef<Map<string, Chat<ChatUIMessage>>>(new Map())
+
+  const activeChatKey = currentAppId ?? 'default'
+
+  const chat = useMemo(() => {
+    const existing = chatsRef.current.get(activeChatKey)
+    if (existing) {
+      return existing
+    }
+
+    const newChat = new Chat<ChatUIMessage>({
+      onToolCall: () => mutate('/api/auth/info'),
+      onData: (data: DataUIPart<DataPart>) => mapDataToStateRef.current(data),
+      onError: (error) => {
+        toast.error(`Communication error with the AI: ${error.message}`)
+        console.error('Error sending message:', error)
+      },
+    })
+
+    chatsRef.current.set(activeChatKey, newChat)
+    return newChat
+  }, [activeChatKey])
 
   return (
     <ChatContext.Provider value={{ chat }}>{children}</ChatContext.Provider>
