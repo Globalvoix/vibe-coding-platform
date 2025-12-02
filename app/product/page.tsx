@@ -94,12 +94,12 @@ export default function ProductPage() {
         <p className="mt-4 max-w-xl text-sm sm:text-base text-gray-700">
           Your AI cofounder and development team. Ship your idea in days, not months, and start building the business you&apos;ve been dreaming about.
         </p>
-        <button
-          type="button"
+        <Link
+          href="/"
           className="mt-8 inline-flex items-center justify-center rounded-full bg-gray-900 px-6 py-2 text-sm font-medium text-white shadow-sm hover:bg-black transition-colors"
         >
           Get Started
-        </button>
+        </Link>
       </section>
 
       <section className="relative z-10 bg-[#f6efe6] px-4 py-16 sm:py-24">
