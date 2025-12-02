@@ -91,8 +91,8 @@ function CreateAppDialog({ isOpen, onClose, onCreate }: CreateAppDialogProps) {
 interface AppMenuProps {
   isOpen: boolean
   onClose: () => void
-  onDelete: () => void | Promise<void>
-  onRename: () => void | Promise<void>
+  onDelete: () => void
+  onRename: () => void
 }
 
 function AppContextMenu({ isOpen, onClose, onDelete, onRename }: AppMenuProps) {
@@ -122,7 +122,7 @@ interface RenameDialogProps {
   isOpen: boolean
   currentName: string
   onClose: () => void
-  onRename: (newName: string) => void | Promise<void>
+  onRename: (newName: string) => void
 }
 
 function RenameDialog({ isOpen, currentName, onClose, onRename }: RenameDialogProps) {
