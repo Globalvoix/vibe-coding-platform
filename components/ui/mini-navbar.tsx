@@ -26,6 +26,7 @@ export function Navbar() {
   const [headerShapeClass, setHeaderShapeClass] = useState('rounded-full');
   const shapeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { toggleSidebar } = useUIStore();
+  const { isSignedIn } = useAuth();
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
