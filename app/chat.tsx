@@ -36,7 +36,7 @@ export function Chat({ className, initialPrompt }: Props) {
   const { modelId, reasoningEffort } = useSettings()
   const { messages, sendMessage, status } = useChat<ChatUIMessage>({ chat })
   const { setChatStatus } = useSandboxStore()
-  const { currentAppId } = useAppStore()
+  const { currentAppId, getCurrentApp, saveAppState } = useAppStore()
   const { toggleSidebar } = useUIStore()
   const [input, setInput] = useState('')
   const hasSubmittedInitialPromptRef = useRef(false)
@@ -51,12 +51,33 @@ export function Chat({ className, initialPrompt }: Props) {
     [sendMessage, modelId, setInput, reasoningEffort]
   )
 
-  // Clear messages and input when switching apps to isolate chat per app
+  // Restore messages when switching apps so each app keeps its own chat history
   useEffect(() => {
+    if (!currentAppId) {
+      chat.messages = []
+      setInput('')
+      hasSubmittedInitialPromptRef.current = false
+      return
+    }
+
+    const app = getCurrentApp()
+
+    if (app && Array.isArray(app.chatMessages)) {
+      chat.messages = app.chatMessages as ChatUIMessage[]
+    } else {
+      chat.messages = []
+    }
+
     setInput('')
-    chat.messages = []
     hasSubmittedInitialPromptRef.current = false
-  }, [currentAppId, chat])
+  }, [currentAppId, chat, getCurrentApp])
+
+  // Persist messages for the current app whenever they change
+  useEffect(() => {
+    if (!currentAppId) return
+
+    saveAppState(currentAppId, { chatMessages: chat.messages })
+  }, [messages, currentAppId, saveAppState, chat])
 
   useEffect(() => {
     setChatStatus(status)
