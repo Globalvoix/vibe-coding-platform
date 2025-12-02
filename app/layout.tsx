@@ -1,3 +1,4 @@
+import { ClerkProvider } from '@clerk/nextjs'
 import { NuqsAdapter } from 'nuqs/adapters/next/app'
 import { ChatProvider } from '@/lib/chat-context'
 import { CommandLogsStream } from '@/components/commands-logs/commands-logs-stream'
@@ -42,19 +43,21 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: ReactNode }>) {
   return (
-    <html lang="en">
-      <body className={`${inter.variable} antialiased`}>
-        <Suspense fallback={null}>
-          <NuqsAdapter>
-            <ChatProvider>
-              <ErrorMonitor>{children}</ErrorMonitor>
-            </ChatProvider>
-          </NuqsAdapter>
-        </Suspense>
-        <Toaster />
-        <CommandLogsStream />
-        <SandboxState />
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        <body className={`${inter.variable} antialiased`}>
+          <Suspense fallback={null}>
+            <NuqsAdapter>
+              <ChatProvider>
+                <ErrorMonitor>{children}</ErrorMonitor>
+              </ChatProvider>
+            </NuqsAdapter>
+          </Suspense>
+          <Toaster />
+          <CommandLogsStream />
+          <SandboxState />
+        </body>
+      </html>
+    </ClerkProvider>
   )
 }
