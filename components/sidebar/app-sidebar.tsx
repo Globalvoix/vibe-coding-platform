@@ -202,30 +202,26 @@ export function AppSidebar() {
 
   const sortedApps = [...visibleApps].sort((a, b) => b.createdAt - a.createdAt)
 
-  const handleCreateApp = async (name: string, description: string) => {
+  const handleCreateApp = (name: string, description: string) => {
     if (!isSignedIn) {
       openSignIn()
       return
     }
 
-    await createAppInCloud(name, description)
+    createApp(name, description)
   }
 
-  const handleDeleteApp = async (id: string) => {
+  const handleDeleteApp = (id: string) => {
     if (confirm("Are you sure you want to delete this app?")) {
-      const success = await deleteAppInCloud(id)
-      if (success) {
-        setSelectedAppForMenu(null)
-      }
+      deleteApp(id)
+      setSelectedAppForMenu(null)
     }
   }
 
-  const handleRenameApp = async (newName: string) => {
+  const handleRenameApp = (newName: string) => {
     if (selectedAppForRename) {
-      const success = await renameAppInCloud(selectedAppForRename, newName)
-      if (success) {
-        setSelectedAppForRename(null)
-      }
+      renameApp(selectedAppForRename, newName)
+      setSelectedAppForRename(null)
     }
   }
 
