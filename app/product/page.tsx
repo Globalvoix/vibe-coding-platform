@@ -278,6 +278,20 @@ export default function ProductPage() {
           </div>
         </div>
       </section>
+
+      <section className="relative z-10 bg-white px-4 py-20 sm:py-28">
+        <div className="mx-auto max-w-3xl text-center">
+          <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+            Ready to see what&apos;s possible?
+          </h2>
+          <Link
+            href="/"
+            className="mt-6 inline-flex items-center justify-center rounded-lg bg-gray-900 px-6 py-3 text-sm font-medium text-white shadow-sm hover:bg-black transition-colors"
+          >
+            Start building
+          </Link>
+        </div>
+      </section>
     </main>
   );
 }
