@@ -208,7 +208,7 @@ export function AppSidebar() {
       return
     }
 
-    createApp(name, description, userId ?? null)
+    createApp(name, description)
   }
 
   const handleDeleteApp = (id: string) => {
