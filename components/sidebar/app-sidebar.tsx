@@ -244,7 +244,26 @@ export function AppSidebar() {
       return
     }
 
+    const createdAt = Date.now()
+    const updatedAt = createdAt
+
+    const newId = createdAt.toString()
+
     createApp(name, description)
+
+    void fetch('/api/apps', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        id: newId,
+        name,
+        description,
+        createdAt,
+        updatedAt,
+      }),
+    })
   }
 
   const handleDeleteApp = (id: string) => {
