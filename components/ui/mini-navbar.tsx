@@ -62,7 +62,7 @@ export function Navbar() {
   );
 
   const navLinksData = [
-    { label: 'Product', href: '#1' },
+    { label: 'Product', href: '/product' },
     { label: 'Pricing', href: '/pricing' },
     { label: 'Solution', href: '#3' },
   ];
