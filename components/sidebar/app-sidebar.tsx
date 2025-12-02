@@ -180,6 +180,7 @@ export function AppSidebar() {
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
   const [selectedAppForMenu, setSelectedAppForMenu] = useState<string | null>(null)
   const [selectedAppForRename, setSelectedAppForRename] = useState<string | null>(null)
+  const [operationInProgress, setOperationInProgress] = useState<string | null>(null)
 
   const router = useRouter()
   const pathname = usePathname()
@@ -195,7 +196,11 @@ export function AppSidebar() {
     deleteApp,
     setCurrentApp,
     renameApp,
+    syncDeleteApp,
+    syncRenameApp,
   } = useAppStore()
+
+  useAppSync()
 
   useEffect(() => {
     if (!isSignedIn) return
