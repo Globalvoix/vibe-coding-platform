@@ -1,13 +1,29 @@
-import { createGatewayProvider } from '@ai-sdk/gateway'
-import { Models } from './constants'
+import { Models, SUPPORTED_MODELS } from './constants'
+import { openai } from '@ai-sdk/openai'
 import type { JSONValue } from 'ai'
 import type { OpenAIResponsesProviderOptions } from '@ai-sdk/openai'
 import type { LanguageModelV2 } from '@ai-sdk/provider'
 
-export async function getAvailableModels() {
-  const gateway = gatewayInstance()
-  const response = await gateway.getAvailableModels()
-  return response.models.map((model) => ({ id: model.id, name: model.name }))
+interface AvailableModel {
+  id: string
+  name: string
+}
+
+const MODEL_DISPLAY_NAMES: Record<string, string> = {
+  [Models.AmazonNovaPro]: 'Premium code generation (tier A)',
+  [Models.AnthropicClaude4Sonnet]: 'Premium code generation (tier B)',
+  [Models.AnthropicClaude45Sonnet]: 'Default balanced model',
+  [Models.GoogleGeminiFlash]: 'Fast drafting model',
+  [Models.MoonshotKimiK2]: 'Deep reasoning model',
+  [Models.OpenAIGPT5]: 'Advanced reasoning model',
+  [Models.XaiGrok3Fast]: 'Fast experimentation model',
+}
+
+export async function getAvailableModels(): Promise<AvailableModel[]> {
+  return SUPPORTED_MODELS.map((id) => ({
+    id,
+    name: MODEL_DISPLAY_NAMES[id] ?? id,
+  }))
 }
 
 export interface ModelOptions {
@@ -20,10 +36,9 @@ export function getModelOptions(
   modelId: string,
   options?: { reasoningEffort?: 'minimal' | 'low' | 'medium' }
 ): ModelOptions {
-  const gateway = gatewayInstance()
   if (modelId === Models.OpenAIGPT5) {
     return {
-      model: gateway(modelId),
+      model: openai('gpt-4.1'),
       providerOptions: {
         openai: {
           include: ['reasoning.encrypted_content'],
@@ -35,28 +50,7 @@ export function getModelOptions(
     }
   }
 
-  if (
-    modelId === Models.AnthropicClaude4Sonnet ||
-    modelId === Models.AnthropicClaude45Sonnet
-  ) {
-    return {
-      model: gateway(modelId),
-      headers: { 'anthropic-beta': 'fine-grained-tool-streaming-2025-05-14' },
-      providerOptions: {
-        anthropic: {
-          cacheControl: { type: 'ephemeral' },
-        },
-      },
-    }
-  }
-
   return {
-    model: gateway(modelId),
+    model: openai('gpt-4.1-mini'),
   }
-}
-
-function gatewayInstance() {
-  return createGatewayProvider({
-    baseURL: process.env.AI_GATEWAY_BASE_URL,
-  })
 }

@@ -1,5 +1,3 @@
-import { type GatewayModelId } from '@ai-sdk/gateway'
-
 export enum Models {
   AmazonNovaPro = 'amazon/nova-pro',
   AnthropicClaude4Sonnet = 'anthropic/claude-4-sonnet',
@@ -12,7 +10,7 @@ export enum Models {
 
 export const DEFAULT_MODEL = Models.AnthropicClaude45Sonnet
 
-export const SUPPORTED_MODELS: GatewayModelId[] = [
+export const SUPPORTED_MODELS: string[] = [
   Models.AmazonNovaPro,
   Models.AnthropicClaude4Sonnet,
   Models.AnthropicClaude45Sonnet,
