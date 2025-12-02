@@ -5,6 +5,7 @@ import { Navbar } from "@/components/ui/mini-navbar";
 import AnimatedGradientBackground from "@/components/ui/animated-gradient-background";
 import { Spinner } from "@/components/ui/spinner";
 import { Plus } from "lucide-react";
+import { useAuth, useClerk } from "@clerk/nextjs";
 
 export type HeroWaveProps = {
   className?: string;
