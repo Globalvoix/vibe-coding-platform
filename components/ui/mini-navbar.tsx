@@ -3,6 +3,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useUIStore } from '@/lib/ui-store';
 import { Menu } from 'lucide-react';
+import { useAuth } from '@clerk/nextjs';
+import { SignInButton, SignUpButton, UserButton } from '@clerk/nextjs';
 
 const AnimatedNavLink = ({ href, children }: { href: string; children: React.ReactNode }) => {
   const defaultTextColor = 'text-gray-600';
