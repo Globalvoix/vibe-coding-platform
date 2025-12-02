@@ -271,7 +271,7 @@ export default function ProductPage() {
               </div>
               <h3 className="text-lg font-semibold text-gray-900">Client projects</h3>
               <p className="mt-2 text-sm text-gray-600">
-                Ship for clients faster with full code export. Agencies and freelancers use Lovable to deliver production-ready products.
+                Ship for clients faster with full code export. Agencies and freelancers use Thinksoft to deliver production-ready products.
               </p>
             </div>
           </div>
