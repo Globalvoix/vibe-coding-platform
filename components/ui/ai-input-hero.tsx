@@ -177,6 +177,12 @@ export function HeroWave({
             className="mt-6 sm:mt-8 flex items-center justify-center"
             onSubmit={(e) => {
               e.preventDefault();
+
+              if (!isSignedIn) {
+                openSignIn();
+                return;
+              }
+
               if (!isLoading && prompt.trim()) {
                 setIsLoading(true);
                 onPromptSubmit?.(prompt);
