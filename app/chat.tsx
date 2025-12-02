@@ -36,6 +36,7 @@ export function Chat({ className, initialPrompt }: Props) {
   const { modelId, reasoningEffort } = useSettings()
   const { messages, sendMessage, status } = useChat<ChatUIMessage>({ chat })
   const { setChatStatus } = useSandboxStore()
+  const { currentAppId } = useAppStore()
   const { toggleSidebar } = useUIStore()
   const [input, setInput] = useState('')
   const hasSubmittedInitialPromptRef = useRef(false)
