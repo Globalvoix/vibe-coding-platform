@@ -3,6 +3,7 @@
 import AnimatedGradientBackground from "@/components/ui/animated-gradient-background";
 import { Navbar } from "@/components/ui/mini-navbar";
 import Image from "next/image";
+import Link from "next/link";
 import React, { useState } from "react";
 
 const productSlides = [
