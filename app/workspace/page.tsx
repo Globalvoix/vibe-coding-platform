@@ -21,7 +21,7 @@ export default function WorkspacePage() {
   const prompt = searchParams.get('prompt')
   const [initialPrompt, setInitialPrompt] = useState<string>('')
   const [horizontalSizes, setHorizontalSizes] = useState<[number, number] | null>(null)
-  const { createAppInCloud, currentAppId, getCurrentApp, saveAppState } = useAppStore()
+  const { createApp, currentAppId, getCurrentApp, saveAppState } = useAppStore()
   const hasCreatedAppFromPromptRef = useRef(false)
   const { userId } = useAuth()
   const { sandboxId, paths: sandboxPaths, url, urlUUID } = useSandboxStore()
