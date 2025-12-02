@@ -178,6 +178,105 @@ export default function ProductPage() {
           </div>
         </div>
       </section>
+
+      <section className="relative z-10 bg-white px-4 py-16 sm:py-24">
+        <div className="mx-auto max-w-6xl">
+          <div className="mb-12 text-center">
+            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+              Dream it. Build it. Ship it.
+            </h2>
+            <p className="mt-4 max-w-2xl mx-auto text-base text-gray-600">
+              Start from your Notion docs. Connect to Stripe for payments, cron for automations. Ship with the tools you already use.
+            </p>
+          </div>
+
+          <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-3">
+            <div className="rounded-lg border border-gray-200 bg-white p-6 text-center hover:shadow-lg transition-shadow">
+              <div className="flex justify-center mb-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-purple-100">
+                  <svg className="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m0 0h6m0-6v6m0 0v6M6 12h6m0 0h6" />
+                  </svg>
+                </div>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900">B2B SaaS</h3>
+              <p className="mt-2 text-sm text-gray-600">
+                Build subscription platforms, workflow tools, and project management apps. Fikter auth, databases, and billing included.
+              </p>
+            </div>
+
+            <div className="rounded-lg border border-gray-200 bg-white p-6 text-center hover:shadow-lg transition-shadow">
+              <div className="flex justify-center mb-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-yellow-100">
+                  <svg className="h-6 w-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m0 0l8 4m-8-4v10l8 4m0-10l8 4m-8-4v10" />
+                  </svg>
+                </div>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900">Consumer apps</h3>
+              <p className="mt-2 text-sm text-gray-600">
+                Launch social platforms, community sites, and fitness apps with user profiles, feeds, and real-time interactions.
+              </p>
+            </div>
+
+            <div className="rounded-lg border border-gray-200 bg-white p-6 text-center hover:shadow-lg transition-shadow">
+              <div className="flex justify-center mb-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100">
+                  <svg className="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14a2 2 0 012 2v7a2 2 0 01-2 2H5a2 2 0 01-2-2v-7a2 2 0 012-2z" />
+                  </svg>
+                </div>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900">Marketplaces & e-commerce</h3>
+              <p className="mt-2 text-sm text-gray-600">
+                Create booking platforms, storefronts, and rental marketplaces. Payments, search, and user accounts all work out of the box.
+              </p>
+            </div>
+
+            <div className="rounded-lg border border-gray-200 bg-white p-6 text-center hover:shadow-lg transition-shadow">
+              <div className="flex justify-center mb-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-pink-100">
+                  <svg className="h-6 w-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </div>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900">Landing pages & websites</h3>
+              <p className="mt-2 text-sm text-gray-600">
+                Create company sites, portfolios, and waitlist pages with professional design. Custom domains and SEO built in.
+              </p>
+            </div>
+
+            <div className="rounded-lg border border-gray-200 bg-white p-6 text-center hover:shadow-lg transition-shadow">
+              <div className="flex justify-center mb-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-green-100">
+                  <svg className="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                </div>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900">Internal tools & dashboards</h3>
+              <p className="mt-2 text-sm text-gray-600">
+                CRMs, admin panels, and analytics dashboards. Build and visualize what your team needs without waiting on developers.
+              </p>
+            </div>
+
+            <div className="rounded-lg border border-gray-200 bg-white p-6 text-center hover:shadow-lg transition-shadow">
+              <div className="flex justify-center mb-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-orange-100">
+                  <svg className="h-6 w-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 13h8m-8-6h8m0 6h-8m8-6v6m0 6H5a2 2 0 01-2-2V7a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900">Client projects</h3>
+              <p className="mt-2 text-sm text-gray-600">
+                Ship for clients faster with full code export. Agencies and freelancers use Lovable to deliver production-ready products.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }
