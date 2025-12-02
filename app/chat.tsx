@@ -23,6 +23,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSharedChatContext } from '@/lib/chat-context'
 import { useSettings } from '@/components/settings/use-settings'
 import { useSandboxStore } from './state'
+import { useAppStore } from '@/lib/app-store'
 
 interface Props {
   className: string
