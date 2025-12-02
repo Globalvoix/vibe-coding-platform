@@ -20,6 +20,7 @@ interface AppStateSnapshot {
 interface AppStore {
   apps: App[]
   currentAppId: string | null
+  setApps: (apps: App[]) => void
   createApp: (name: string, description: string, ownerId?: string | null) => void
   deleteApp: (id: string) => void
   updateApp: (id: string, updates: Partial<App>) => void
@@ -35,6 +36,13 @@ export const useAppStore = create<AppStore>()(
     (set, get) => ({
       apps: [],
       currentAppId: null,
+
+      setApps: (apps: App[]) => {
+        set({
+          apps,
+          currentAppId: apps.length > 0 ? apps[0].id : null,
+        })
+      },
 
       createApp: (name: string, description: string, ownerId?: string | null) => {
         const newApp: App = {
