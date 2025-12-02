@@ -188,12 +188,10 @@ export function AppSidebar() {
     apps,
     currentAppId,
     setCurrentApp,
-    createAppInCloud,
-    deleteAppInCloud,
-    renameAppInCloud,
+    createApp,
+    deleteApp,
+    renameApp,
   } = useAppStore()
-
-  useAppSync()
 
   const visibleApps = isSignedIn ? apps : []
 
