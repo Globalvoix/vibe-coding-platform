@@ -145,7 +145,7 @@ export default function ProductPage() {
                   aria-label="Previous slide"
                   className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-100"
                 >
-                  2
+                  
                 </button>
                 <button
                   type="button"
@@ -153,7 +153,7 @@ export default function ProductPage() {
                   aria-label="Next slide"
                   className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-100"
                 >
-                  e
+                  
                 </button>
               </div>
 
