@@ -201,7 +201,7 @@ export default function ProductPage() {
               </div>
               <h3 className="text-lg font-semibold text-gray-900">B2B SaaS</h3>
               <p className="mt-2 text-sm text-gray-600">
-                Build subscription platforms, workflow tools, and project management apps. Fikter auth, databases, and billing included.
+                Build subscription platforms, workflow tools, and project management apps. Filter auth, databases, and billing included.
               </p>
             </div>
 
