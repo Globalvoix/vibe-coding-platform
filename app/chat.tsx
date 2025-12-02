@@ -143,7 +143,8 @@ export function Chat({ className, initialPrompt }: Props) {
       )}
 
       <form
-        className="bg-background p-2"
+        className="p-2"
+        style={{ backgroundColor: '#F7F4ED' }}
         onSubmit={async (event) => {
           event.preventDefault()
           validateAndSubmitMessage(input)
