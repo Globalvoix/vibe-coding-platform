@@ -13,11 +13,12 @@ import {
   FolderPlus,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useAppSync } from "@/hooks/useAppSync"
 
 interface CreateAppDialogProps {
   isOpen: boolean
   onClose: () => void
-  onCreate: (name: string, description: string) => void
+  onCreate: (name: string, description: string) => void | Promise<void>
 }
 
 function CreateAppDialog({ isOpen, onClose, onCreate }: CreateAppDialogProps) {
@@ -91,8 +92,8 @@ function CreateAppDialog({ isOpen, onClose, onCreate }: CreateAppDialogProps) {
 interface AppMenuProps {
   isOpen: boolean
   onClose: () => void
-  onDelete: () => void
-  onRename: () => void
+  onDelete: () => void | Promise<void>
+  onRename: () => void | Promise<void>
 }
 
 function AppContextMenu({ isOpen, onClose, onDelete, onRename }: AppMenuProps) {
@@ -122,7 +123,7 @@ interface RenameDialogProps {
   isOpen: boolean
   currentName: string
   onClose: () => void
-  onRename: (newName: string) => void
+  onRename: (newName: string) => void | Promise<void>
 }
 
 function RenameDialog({ isOpen, currentName, onClose, onRename }: RenameDialogProps) {
@@ -187,12 +188,13 @@ export function AppSidebar() {
   const {
     apps,
     currentAppId,
-    createApp,
-    deleteApp,
     setCurrentApp,
-    renameApp,
+    createAppInCloud,
+    deleteAppInCloud,
+    renameAppInCloud,
   } = useAppStore()
 
+  useAppSync()
 
   const visibleApps = isSignedIn ? apps : []
 
@@ -203,26 +205,30 @@ export function AppSidebar() {
 
   const sortedApps = [...visibleApps].sort((a, b) => b.createdAt - a.createdAt)
 
-  const handleCreateApp = (name: string, description: string) => {
+  const handleCreateApp = async (name: string, description: string) => {
     if (!isSignedIn) {
       openSignIn()
       return
     }
 
-    createApp(name, description)
+    await createAppInCloud(name, description)
   }
 
-  const handleDeleteApp = (id: string) => {
+  const handleDeleteApp = async (id: string) => {
     if (confirm("Are you sure you want to delete this app?")) {
-      deleteApp(id)
-      setSelectedAppForMenu(null)
+      const success = await deleteAppInCloud(id)
+      if (success) {
+        setSelectedAppForMenu(null)
+      }
     }
   }
 
-  const handleRenameApp = (newName: string) => {
+  const handleRenameApp = async (newName: string) => {
     if (selectedAppForRename) {
-      renameApp(selectedAppForRename, newName)
-      setSelectedAppForRename(null)
+      const success = await renameAppInCloud(selectedAppForRename, newName)
+      if (success) {
+        setSelectedAppForRename(null)
+      }
     }
   }
 
