@@ -84,9 +84,10 @@ function PromptInput({
       >
         <div
           className={cn(
-            'border-input bg-background rounded-3xl border px-4 py-3 shadow-xs',
+            'border-input rounded-3xl border px-4 py-3 shadow-xs',
             className
           )}
+          style={{ backgroundColor: '#F7F4ED' }}
         >
           {children}
         </div>
