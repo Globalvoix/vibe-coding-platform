@@ -187,11 +187,47 @@ export function AppSidebar() {
   const {
     apps,
     currentAppId,
+    setApps,
     createApp,
     deleteApp,
     setCurrentApp,
     renameApp,
   } = useAppStore()
+
+  useEffect(() => {
+    if (!isSignedIn) return
+
+    let cancelled = false
+
+    const loadApps = async () => {
+      try {
+        const response = await fetch('/api/apps')
+        if (!response.ok) return
+        const data = (await response.json()) as { apps: { id: string; name: string; description: string; created_at: number; updated_at: number }[] }
+        if (cancelled) return
+
+        const mapped = data.apps.map((row) => ({
+          id: row.id,
+          name: row.name,
+          description: row.description ?? '',
+          createdAt: row.created_at,
+          updatedAt: row.updated_at,
+          ownerId: null,
+          chatMessages: [],
+          files: null,
+        }))
+        setApps(mapped)
+      } catch {
+        // ignore load errors for now
+      }
+    }
+
+    void loadApps()
+
+    return () => {
+      cancelled = true
+    }
+  }, [isSignedIn, setApps])
 
   const visibleApps = isSignedIn ? apps : []
 
