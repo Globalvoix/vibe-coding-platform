@@ -34,11 +34,11 @@ export default function WorkspacePage() {
       if (!hasCreatedAppFromPromptRef.current && decoded.trim()) {
         const name = decoded.length > 60 ? decoded.slice(0, 57) + '...' : decoded
 
+        createApp(name, decoded, userId ?? null)
         hasCreatedAppFromPromptRef.current = true
-        void createAppInCloud(name, decoded, userId ?? null)
       }
     }
-  }, [prompt, createAppInCloud, userId])
+  }, [prompt, createApp, userId])
 
   // Restore sandbox state when switching apps so each app keeps its own code and preview
   useEffect(() => {
