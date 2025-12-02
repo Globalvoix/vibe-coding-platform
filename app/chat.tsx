@@ -24,6 +24,7 @@ import { useSharedChatContext } from '@/lib/chat-context'
 import { useSettings } from '@/components/settings/use-settings'
 import { useSandboxStore } from './state'
 import { useAppStore } from '@/lib/app-store'
+import { useAuth, useClerk } from '@clerk/nextjs'
 
 interface Props {
   className: string
@@ -40,15 +41,22 @@ export function Chat({ className, initialPrompt }: Props) {
   const { toggleSidebar } = useUIStore()
   const [input, setInput] = useState('')
   const hasSubmittedInitialPromptRef = useRef(false)
+  const { isSignedIn } = useAuth()
+  const { openSignIn } = useClerk()
 
   const validateAndSubmitMessage = useCallback(
     (text: string) => {
+      if (!isSignedIn) {
+        openSignIn()
+        return
+      }
+
       if (text.trim()) {
         sendMessage({ text }, { body: { modelId, reasoningEffort } })
         setInput('')
       }
     },
-    [sendMessage, modelId, setInput, reasoningEffort]
+    [isSignedIn, openSignIn, sendMessage, modelId, setInput, reasoningEffort]
   )
 
   // Restore messages when switching apps so each app keeps its own chat history
