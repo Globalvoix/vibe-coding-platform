@@ -2,9 +2,71 @@
 
 import AnimatedGradientBackground from "@/components/ui/animated-gradient-background";
 import { Navbar } from "@/components/ui/mini-navbar";
-import React from "react";
+import Image from "next/image";
+import React, { useState } from "react";
+
+const productSlides = [
+  {
+    eyebrow: "Build by describing",
+    title: "Build by describing what you want",
+    description:
+      "Chatting with Thinksoft is like talking with a developer. Describe your vision, drop in screenshots, or paste your Notion doc. Thinksoft takes it from there.",
+    imageSrc:
+      "https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2Ff4bdd9d6c4264a4aab3b5997737053f8?format=webp&width=800",
+    imageAlt: "Ask Thinksoft to create interface screenshot",
+  },
+  {
+    eyebrow: "Production infrastructure",
+    title: "Production infrastructure included",
+    description:
+      "Real backend with Thinksoft Cloud and Supabase gives you Postgres database, authentication, file storage, and real-time features. All auto-provisioned so you can focus on your product.",
+    imageSrc:
+      "https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2Ffa248e6fcafd410abd753bbd5c776402?format=webp&width=800",
+    imageAlt: "App dashboard showing database tables and navigation",
+  },
+  {
+    eyebrow: "Visual controls",
+    title: "Polish it to perfection",
+    description:
+      "Tweak layouts, colors, and text with direct visual control. See changes instantly and bring your vision to life exactly as you imagined it.",
+    imageSrc:
+      "https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F82901f4f7b1442b8a55c41827e5f376e?format=webp&width=800",
+    imageAlt: "Interface panel showing spacing, typography, and color controls",
+  },
+  {
+    eyebrow: "Modern tech stack",
+    title: "Modern, standard tech stack",
+    description:
+      "Build on industry-standard frameworks like React, Supabase, and Tailwind, then sync everything to GitHub from day one. Your code, your repository, your rules.",
+    imageSrc:
+      "https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F2f40a6aab8cd44928646fe23155da865?format=webp&width=800",
+    imageAlt: "Icons representing modern frontend and backend tools",
+  },
+  {
+    eyebrow: "Launch fast",
+    title: "One-click publish",
+    description:
+      "Custom domain, SEO optimization, and security checks are all handled for you. Go from idea to live project in the same day with a single click.",
+    imageSrc:
+      "https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F99768599cc464a688e1375ef6375cb04?format=webp&width=800",
+    imageAlt: "Publish button highlighted in an app interface",
+  },
+] as const;
 
 export default function ProductPage() {
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const currentSlide = productSlides[activeIndex];
+  const lastIndex = productSlides.length - 1;
+
+  const goToPrevious = () => {
+    setActiveIndex((index) => (index === 0 ? lastIndex : index - 1));
+  };
+
+  const goToNext = () => {
+    setActiveIndex((index) => (index === lastIndex ? 0 : index + 1));
+  };
+
   return (
     <main className="relative min-h-screen overflow-hidden bg-white">
       <AnimatedGradientBackground
@@ -37,6 +99,80 @@ export default function ProductPage() {
         >
           Get Started
         </button>
+      </section>
+
+      <section className="relative z-10 bg-[#f6efe6] px-4 py-20">
+        <div className="mx-auto flex max-w-6xl flex-col gap-10">
+          <div className="text-left">
+            <h2 className="text-2xl font-semibold tracking-tight text-gray-900 sm:text-3xl">
+              Your AI cofounder and dev team
+            </h2>
+            <p className="mt-3 max-w-2xl text-sm text-gray-700 sm:text-base">
+              Your idea doesn&apos;t need a technical cofounder. Thinksoft is your technical partner – build, iterate, and ship in hours instead of months.
+            </p>
+          </div>
+
+          <div className="rounded-3xl bg-[#fdf7ee] p-6 shadow-sm sm:p-8 md:p-10">
+            <div className="grid items-center gap-8 md:grid-cols-2">
+              <div className="text-left">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-600">
+                  {currentSlide.eyebrow}
+                </p>
+                <h3 className="mt-3 text-xl font-semibold text-gray-900 sm:text-2xl">
+                  {currentSlide.title}
+                </h3>
+                <p className="mt-3 text-sm text-gray-700 sm:text-base">
+                  {currentSlide.description}
+                </p>
+              </div>
+
+              <div className="relative h-56 w-full overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500/20 via-purple-500/20 to-pink-500/20 sm:h-72 md:h-80">
+                <Image
+                  src={currentSlide.imageSrc}
+                  alt={currentSlide.imageAlt}
+                  fill
+                  sizes="(min-width: 1024px) 480px, (min-width: 768px) 50vw, 100vw"
+                  className="object-cover"
+                />
+              </div>
+            </div>
+
+            <div className="mt-8 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={goToPrevious}
+                  aria-label="Previous slide"
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-100"
+                >
+                  2
+                </button>
+                <button
+                  type="button"
+                  onClick={goToNext}
+                  aria-label="Next slide"
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-100"
+                >
+                  e
+                </button>
+              </div>
+
+              <div className="flex items-center gap-2">
+                {productSlides.map((slide, index) => (
+                  <button
+                    key={slide.title}
+                    type="button"
+                    onClick={() => setActiveIndex(index)}
+                    aria-label={`Go to slide ${index + 1}`}
+                    className={`h-2.5 rounded-full transition-colors ${
+                      index === activeIndex ? "w-6 bg-gray-900" : "w-2.5 bg-gray-400/40"
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
     </main>
   );
