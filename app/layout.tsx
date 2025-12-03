@@ -1,4 +1,4 @@
-import { ClerkProvider } from '@clerk/nextjs'
+import { ClerkProvider as ClerkRootProvider } from '@clerk/nextjs'
 import { NuqsAdapter } from 'nuqs/adapters/next/app'
 import { ChatProvider } from '@/lib/chat-context'
 import { CommandLogsStream } from '@/components/commands-logs/commands-logs-stream'
@@ -9,7 +9,6 @@ import type { ReactNode } from 'react'
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import { Inter } from 'next/font/google'
-import { ClerkProvider } from '@clerk/nextjs'
 import './globals.css'
 
 const title = 'Thinksoft'
@@ -44,7 +43,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: ReactNode }>) {
   return (
-    <ClerkProvider>
+    <ClerkRootProvider>
       <html lang="en">
         <body className={`${inter.variable} antialiased`}>
           <Suspense fallback={null}>
@@ -59,6 +58,6 @@ export default function RootLayout({
           <SandboxState />
         </body>
       </html>
-    </ClerkProvider>
+    </ClerkRootProvider>
   )
 }
