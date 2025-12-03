@@ -30,6 +30,7 @@ export default function WorkspacePage() {
   const promptFromUrl = searchParams.get('prompt')
   const projectId = searchParams.get('projectId')
   const [initialPrompt, setInitialPrompt] = useState<string>('')
+  const { userId } = useAuth()
   const [horizontalSizes, setHorizontalSizes] = useState<[number, number] | null>(
     null
   )
