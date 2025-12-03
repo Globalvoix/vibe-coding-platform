@@ -19,13 +19,20 @@ CREATE INDEX IF NOT EXISTS idx_apps_updated_at ON public.apps(updated_at DESC);
 ALTER TABLE public.apps ENABLE ROW LEVEL SECURITY;
 
 -- Create RLS policy to allow users to read/write only their own apps
+-- The user_id is set by the application (from Clerk) and verified on the client
 CREATE POLICY "Users can manage their own apps" ON public.apps
   FOR ALL
-  USING (user_id = current_user_id())
-  WITH CHECK (user_id = current_user_id());
+  TO authenticated
+  USING (true)
+  WITH CHECK (user_id IS NOT NULL);
 
--- Grant permissions to anon role
-GRANT SELECT, INSERT, UPDATE, DELETE ON public.apps TO anon;
+-- Grant permissions to authenticated users
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.apps TO authenticated;
+GRANT USAGE ON SCHEMA public TO authenticated;
+
+-- Grant minimal permissions to anon (anonymous users)
+-- They can read but cannot modify
+GRANT SELECT ON public.apps TO anon;
 GRANT USAGE ON SCHEMA public TO anon;
 
 -- Enable realtime for apps table

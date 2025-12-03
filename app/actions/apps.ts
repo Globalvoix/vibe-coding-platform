@@ -1,7 +1,7 @@
 'use server'
 
 import { auth } from '@clerk/nextjs/server'
-import { supabaseServer } from '@/lib/supabase-server'
+import { supabase } from '@/lib/supabase'
 import type { Database } from '@/lib/supabase'
 
 type App = Database['public']['Tables']['apps']['Row']
@@ -15,7 +15,7 @@ export async function createAppAction(
     throw new Error('Unauthorized')
   }
 
-  const { data, error } = await supabaseServer
+  const { data, error } = await supabase
     .from('apps')
     .insert({
       user_id: userId,
@@ -40,7 +40,7 @@ export async function getAppsAction(): Promise<App[]> {
     throw new Error('Unauthorized')
   }
 
-  const { data, error } = await supabaseServer
+  const { data, error } = await supabase
     .from('apps')
     .select('*')
     .eq('user_id', userId)
@@ -60,7 +60,7 @@ export async function getRecentAppsAction(limit: number = 5): Promise<App[]> {
     throw new Error('Unauthorized')
   }
 
-  const { data, error } = await supabaseServer
+  const { data, error } = await supabase
     .from('apps')
     .select('*')
     .eq('user_id', userId)
@@ -93,7 +93,7 @@ export async function updateAppAction(
     throw new Error('Unauthorized')
   }
 
-  const { data, error } = await supabaseServer
+  const { data, error } = await supabase
     .from('apps')
     .update({
       ...updates,
@@ -118,7 +118,7 @@ export async function deleteAppAction(id: string): Promise<void> {
     throw new Error('Unauthorized')
   }
 
-  const { error } = await supabaseServer
+  const { error } = await supabase
     .from('apps')
     .delete()
     .eq('id', id)
