@@ -5,15 +5,15 @@ import {
   renameProject,
   updateProjectSandboxState,
 } from '@/lib/projects-db'
+import { auth } from '@clerk/nextjs/server'
 
 export async function GET(
-  req: Request,
+  _req: Request,
   { params }: { params: { id: string } }
 ) {
-  const { searchParams } = new URL(req.url)
-  const userId = searchParams.get('userId')
+  const { userId } = await auth()
   if (!userId) {
-    return NextResponse.json({ error: 'Missing userId' }, { status: 400 })
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
   const project = await getProject(userId, params.id)
@@ -25,10 +25,9 @@ export async function GET(
 }
 
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
-  const { searchParams } = new URL(req.url)
-  const userId = searchParams.get('userId')
+  const { userId } = await auth()
   if (!userId) {
-    return NextResponse.json({ error: 'Missing userId' }, { status: 400 })
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
   const body = await req.json().catch(() => ({})) as {
@@ -58,13 +57,12 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 }
 
 export async function DELETE(
-  req: Request,
+  _req: Request,
   { params }: { params: { id: string } }
 ) {
-  const { searchParams } = new URL(req.url)
-  const userId = searchParams.get('userId')
+  const { userId } = await auth()
   if (!userId) {
-    return NextResponse.json({ error: 'Missing userId' }, { status: 400 })
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
   await deleteProject(userId, params.id)

@@ -11,7 +11,6 @@ import { AppSidebar } from '@/components/sidebar/app-sidebar'
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useSandboxStore, useFileExplorerStore } from '../state'
-import { useAuth } from '@clerk/nextjs'
 
 interface ProjectResponse {
   id: string
@@ -30,7 +29,6 @@ export default function WorkspacePage() {
   const promptFromUrl = searchParams.get('prompt')
   const projectId = searchParams.get('projectId')
   const [initialPrompt, setInitialPrompt] = useState<string>('')
-  const { userId } = useAuth()
   const [horizontalSizes, setHorizontalSizes] = useState<[number, number] | null>(
     null
   )
@@ -53,10 +51,9 @@ export default function WorkspacePage() {
     let cancelled = false
 
     async function loadProject() {
-      if (!userId) return
       if (projectId) {
         try {
-          const response = await fetch(`/api/projects/${projectId}?userId=${encodeURIComponent(userId)}`)
+          const response = await fetch(`/api/projects/${projectId}`)
           if (!response.ok) {
             console.error('Failed to load project')
             return
@@ -80,7 +77,10 @@ export default function WorkspacePage() {
               sandboxState.addPaths(paths)
             }
             if (url) {
-              sandboxState.setUrl(url, urlUUID || sandboxState.urlUUID || crypto.randomUUID())
+              sandboxState.setUrl(
+                url,
+                urlUUID || sandboxState.urlUUID || crypto.randomUUID()
+              )
             }
           }
         } catch (error) {
@@ -100,11 +100,11 @@ export default function WorkspacePage() {
   }, [projectId, promptFromUrl])
 
   useEffect(() => {
-    if (!projectId || !userId) return
+    if (!projectId) return
 
     const timeoutId = window.setTimeout(async () => {
       try {
-        await fetch(`/api/projects/${projectId}?userId=${encodeURIComponent(userId)}` , {
+        await fetch(`/api/projects/${projectId}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

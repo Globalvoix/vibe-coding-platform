@@ -1,12 +1,11 @@
 import { NextResponse } from 'next/server'
+import { auth } from '@clerk/nextjs/server'
 import { createProject, listProjects } from '@/lib/projects-db'
 
-export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url)
-  const userId = searchParams.get('userId')
-
+export async function GET() {
+  const { userId } = await auth()
   if (!userId) {
-    return NextResponse.json({ error: 'Missing userId' }, { status: 400 })
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
   const projects = await listProjects(userId)
@@ -14,17 +13,13 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  const body = await req.json().catch(() => ({})) as {
-    prompt?: string
-    userId?: string
-  }
-
-  const prompt = typeof body.prompt === 'string' ? body.prompt : ''
-  const userId = typeof body.userId === 'string' ? body.userId : ''
-
+  const { userId } = await auth()
   if (!userId) {
-    return NextResponse.json({ error: 'Missing userId' }, { status: 400 })
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
+
+  const body = await req.json().catch(() => ({})) as { prompt?: string }
+  const prompt = typeof body.prompt === 'string' ? body.prompt : ''
 
   if (!prompt.trim()) {
     return NextResponse.json({ error: 'Prompt is required' }, { status: 400 })

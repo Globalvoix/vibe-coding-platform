@@ -4,23 +4,20 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { AppSidebar } from '@/components/sidebar/app-sidebar'
 import type { ProjectRecord } from '@/lib/projects-db'
-import { useAuth } from '@clerk/nextjs'
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<ProjectRecord[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
-  const { userId } = useAuth()
 
   useEffect(() => {
-    if (!userId) return
     let cancelled = false
 
     async function load() {
       try {
         setIsLoading(true)
-        const response = await fetch(`/api/projects?userId=${encodeURIComponent(userId)}`)
+        const response = await fetch('/api/projects')
         if (!response.ok) {
           throw new Error('Failed to load projects')
         }
@@ -56,7 +53,7 @@ export default function ProjectsPage() {
     if (!name || !name.trim()) return
 
     try {
-      const response = await fetch(`/api/projects/${id}?userId=${encodeURIComponent(userId ?? '')}`, {
+      const response = await fetch(`/api/projects/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: name.trim() }),
@@ -73,7 +70,7 @@ export default function ProjectsPage() {
   const handleDelete = async (id: string) => {
     if (!window.confirm('Delete this project?')) return
     try {
-      const response = await fetch(`/api/projects/${id}?userId=${encodeURIComponent(userId ?? '')}`, { method: 'DELETE' })
+      const response = await fetch(`/api/projects/${id}`, { method: 'DELETE' })
       if (!response.ok) throw new Error('Failed to delete project')
       setProjects((prev) => prev.filter((p) => p.id !== id))
     } catch (err) {
