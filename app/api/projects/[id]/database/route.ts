@@ -7,6 +7,10 @@ interface ProjectParams {
   id: string
 }
 
+interface ColumnRow {
+  column_name: string
+}
+
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<ProjectParams> }
@@ -45,7 +49,7 @@ export async function GET(
       {
         tableName,
         rowCount: parseInt(countResult.rows[0]?.count || '0', 10),
-        columns: columnsResult.rows.map((row: any) => row.column_name),
+        columns: columnsResult.rows.map((row: ColumnRow) => row.column_name),
       },
     ]
 
