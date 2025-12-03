@@ -1,5 +1,6 @@
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import { Navbar } from "@/components/ui/mini-navbar";
+import { Button } from "@/components/ui/button";
 
 export default function PricingPage() {
   const plans = [
@@ -17,7 +18,7 @@ export default function PricingPage() {
     },
     {
       name: "Pro",
-      price: "$29/mo",
+      price: "$15/mo",
       description: "For individual builders shipping advanced frontends every week.",
       features: [
         "200 credits per month",
@@ -29,7 +30,7 @@ export default function PricingPage() {
     },
     {
       name: "Business",
-      price: "$99/mo",
+      price: "$50/mo",
       description: "For teams running multiple products and environments.",
       features: [
         "1000 credits per month",
@@ -41,7 +42,7 @@ export default function PricingPage() {
     },
     {
       name: "Enterprise",
-      price: "Contact sales",
+      price: "$499/mo",
       description: "For organizations that need custom limits and enterprise guarantees.",
       features: [
         "10000 credits per month",
@@ -93,6 +94,12 @@ export default function PricingPage() {
                     </li>
                   ))}
                 </ul>
+                <Button
+                  className="mt-6 w-full text-xs"
+                  variant={plan.highlight ? "default" : "outline"}
+                >
+                  Get started
+                </Button>
               </div>
             ))}
           </div>
