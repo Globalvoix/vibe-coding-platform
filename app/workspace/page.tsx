@@ -1,6 +1,4 @@
-"use client";
-
-"use client";
+'use client'
 
 import { Chat } from '../chat'
 import { FileExplorer } from '../file-explorer'
@@ -15,16 +13,21 @@ import { useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { useSandboxStore, useFileExplorerStore } from '../state'
 import { useAuth } from '@clerk/nextjs'
+import { createAppAction, saveAppStateAction } from '@/app/actions/apps'
+import { useAppsSync } from '@/hooks/useAppsSync'
 
 export default function WorkspacePage() {
   const searchParams = useSearchParams()
   const prompt = searchParams.get('prompt')
   const [initialPrompt, setInitialPrompt] = useState<string>('')
   const [horizontalSizes, setHorizontalSizes] = useState<[number, number] | null>(null)
-  const { createApp, currentAppId, getCurrentApp, saveAppState } = useAppStore()
+  const { currentAppId, setCurrentApp } = useAppStore()
   const hasCreatedAppFromPromptRef = useRef(false)
   const { userId } = useAuth()
   const { sandboxId, paths: sandboxPaths, url, urlUUID } = useSandboxStore()
+  const { apps } = useAppsSync()
+
+  const currentApp = apps.find((a) => a.id === currentAppId)
 
   useEffect(() => {
     if (prompt) {
@@ -34,13 +37,17 @@ export default function WorkspacePage() {
       if (!hasCreatedAppFromPromptRef.current && decoded.trim()) {
         const name = decoded.length > 60 ? decoded.slice(0, 57) + '...' : decoded
 
-        createApp(name, decoded, userId ?? null)
+        createAppAction(name, decoded).then((newApp) => {
+          if (newApp) {
+            setCurrentApp(newApp.id)
+          }
+        })
+
         hasCreatedAppFromPromptRef.current = true
       }
     }
-  }, [prompt, createApp, userId])
+  }, [prompt, setCurrentApp])
 
-  // Restore sandbox state when switching apps so each app keeps its own code and preview
   useEffect(() => {
     const sandboxState = useSandboxStore.getState()
     const fileExplorerState = useFileExplorerStore.getState()
@@ -48,44 +55,51 @@ export default function WorkspacePage() {
     sandboxState.reset()
     fileExplorerState.reset()
 
-    const app = getCurrentApp()
-    const filesSnapshot = app?.files as
-      | { sandboxId?: string; paths?: string[]; url?: string; urlUUID?: string }
-      | undefined
+    if (currentApp?.files) {
+      const filesSnapshot = currentApp.files as
+        | { sandboxId?: string; paths?: string[]; url?: string; urlUUID?: string }
+        | undefined
 
-    if (filesSnapshot) {
-      if (filesSnapshot.sandboxId) {
-        sandboxState.setSandboxId(filesSnapshot.sandboxId)
-      }
+      if (filesSnapshot) {
+        if (filesSnapshot.sandboxId) {
+          sandboxState.setSandboxId(filesSnapshot.sandboxId)
+        }
 
-      if (Array.isArray(filesSnapshot.paths) && filesSnapshot.paths.length > 0) {
-        sandboxState.addPaths(filesSnapshot.paths)
-      }
+        if (Array.isArray(filesSnapshot.paths) && filesSnapshot.paths.length > 0) {
+          sandboxState.addPaths(filesSnapshot.paths)
+        }
 
-      if (filesSnapshot.url) {
-        sandboxState.setUrl(
-          filesSnapshot.url,
-          filesSnapshot.urlUUID || sandboxState.urlUUID || crypto.randomUUID()
-        )
+        if (filesSnapshot.url) {
+          sandboxState.setUrl(
+            filesSnapshot.url,
+            filesSnapshot.urlUUID || sandboxState.urlUUID || crypto.randomUUID()
+          )
+        }
       }
     }
-  }, [currentAppId, getCurrentApp])
+  }, [currentAppId, currentApp])
 
-  // Persist sandbox state for the current app whenever it changes
   useEffect(() => {
     if (!currentAppId) return
 
-    saveAppState(currentAppId, {
-      files: {
-        sandboxId,
-        paths: sandboxPaths,
-        url,
-        urlUUID,
-      },
-    })
-  }, [currentAppId, sandboxId, sandboxPaths, url, urlUUID, saveAppState])
+    const saveState = async () => {
+      try {
+        await saveAppStateAction(currentAppId, {
+          sandboxId,
+          paths: sandboxPaths,
+          url,
+          urlUUID,
+        })
+      } catch (error) {
+        console.error('Failed to save app state:', error)
+      }
+    }
 
-  // Cleanup when unmounting (leaving the page)
+    const timeoutId = setTimeout(saveState, 1000)
+
+    return () => clearTimeout(timeoutId)
+  }, [currentAppId, sandboxId, sandboxPaths, url, urlUUID])
+
   useEffect(() => {
     return () => {
       useSandboxStore.getState().reset()
@@ -104,7 +118,6 @@ export default function WorkspacePage() {
           <TabItem tabId="logs">Logs</TabItem>
         </ul>
 
-        {/* Mobile layout tabs taking the whole space*/}
         <div className="flex flex-1 w-full overflow-hidden md:hidden">
           <TabContent tabId="chat" className="flex-1">
             <Chat
@@ -124,7 +137,6 @@ export default function WorkspacePage() {
           </TabContent>
         </div>
 
-        {/* Desktop layout with horizontal and vertical panels */}
         <div className="hidden flex-1 w-full min-h-0 overflow-hidden md:flex">
           <Horizontal
             defaultLayout={horizontalSizes ?? [35, 65]}
