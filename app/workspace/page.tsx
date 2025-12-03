@@ -53,6 +53,7 @@ export default function WorkspacePage() {
     let cancelled = false
 
     async function loadProject() {
+      if (!userId) return
       if (projectId) {
         try {
           const response = await fetch(`/api/projects/${projectId}`)
