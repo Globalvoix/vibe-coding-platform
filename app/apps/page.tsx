@@ -89,11 +89,18 @@ export default function AppsPage() {
           <main className="flex-1">
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {sortedApps.map((app) => (
-                <button
+                <div
                   key={app.id}
                   onClick={() => handleOpenApp(app.id)}
-                  className="flex flex-col items-start text-left rounded-xl border border-border bg-card/80 hover:bg-card shadow-sm hover:shadow-md transition-all p-4 space-y-2 group"
-                  disabled={isDeleting === app.id}
+                  className="flex flex-col items-start text-left rounded-xl border border-border bg-card/80 hover:bg-card shadow-sm hover:shadow-md transition-all p-4 space-y-2 group cursor-pointer"
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      handleOpenApp(app.id)
+                    }
+                  }}
                 >
                   <div className="inline-flex items-center px-2 py-1 rounded-full bg-secondary text-xs text-muted-foreground mb-1">
                     App
@@ -117,7 +124,7 @@ export default function AppsPage() {
                             onClick={(e) => handleDeleteApp(app.id, e)}
                             className="p-1 hover:bg-red-500/10 rounded transition-colors"
                             title="Delete app"
-                            disabled={isDeleting === app.id}
+                            type="button"
                           >
                             <Trash2 className="w-3 h-3 text-red-500" />
                           </button>
@@ -126,7 +133,7 @@ export default function AppsPage() {
                       )}
                     </div>
                   </div>
-                </button>
+                </div>
               ))}
             </div>
           </main>
