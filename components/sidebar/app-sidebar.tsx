@@ -62,6 +62,10 @@ export function AppSidebar() {
               <span>Home</span>
             </button>
             <button
+              onClick={() => {
+                setSidebarOpen(false)
+                router.push('/projects')
+              }}
               className="inline-flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-secondary transition-colors"
               type="button"
             >
