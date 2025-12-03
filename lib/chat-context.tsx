@@ -1,3 +1,5 @@
+'use client'
+
 import { type ChatUIMessage } from '@/components/chat/types'
 import { type ReactNode, createContext, useContext, useMemo, useRef } from 'react'
 import { Chat } from '@ai-sdk/react'
