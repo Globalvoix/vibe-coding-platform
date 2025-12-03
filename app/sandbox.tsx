@@ -2,17 +2,19 @@
 
 import type { ReactNode } from 'react'
 import { useState, useRef } from 'react'
-import { Globe, Code2, BarChart3 } from 'lucide-react'
+import { Globe, Code2, BarChart3, Cloud } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Preview } from './preview'
 import { FileExplorer } from './file-explorer'
 import { Logs } from './logs'
+import { DatabaseViewer } from '@/components/database-viewer/database-viewer'
+import { useSearchParams } from 'next/navigation'
 
 interface Props {
   className?: string
 }
 
-type SandboxTabId = 'preview' | 'code' | 'console'
+type SandboxTabId = 'preview' | 'code' | 'console' | 'database'
 
 interface TabConfig {
   id: SandboxTabId
@@ -21,6 +23,9 @@ interface TabConfig {
 }
 
 export function Sandbox({ className }: Props) {
+  const searchParams = useSearchParams()
+  const projectId = searchParams.get('projectId')
+
   const [activeTab, setActiveTab] = useState<SandboxTabId>('preview')
   const [currentUrl, setCurrentUrl] = useState<string>('')
   const [inputValue, setInputValue] = useState<string>('')
@@ -42,6 +47,11 @@ export function Sandbox({ className }: Props) {
       id: 'console',
       label: 'Console',
       icon: <BarChart3 className="w-4 h-4" />,
+    },
+    {
+      id: 'database',
+      label: 'Database',
+      icon: <Cloud className="w-4 h-4" />,
     },
   ]
 
@@ -164,6 +174,13 @@ export function Sandbox({ className }: Props) {
 
         {activeTab === 'console' && (
           <Logs className="flex-1 min-h-0 overflow-hidden" />
+        )}
+
+        {activeTab === 'database' && (
+          <DatabaseViewer
+            className="flex-1 min-h-0 overflow-hidden"
+            projectId={projectId ?? undefined}
+          />
         )}
       </div>
     </div>
