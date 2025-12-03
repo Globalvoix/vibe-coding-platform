@@ -52,13 +52,28 @@ export function AppSidebar() {
             </button>
           </div>
 
-          <div className="p-4 border-b border-border">
+          <div className="p-4 border-b border-border space-y-1">
             <button
               onClick={handleNavigateHome}
-              className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-foreground hover:bg-secondary transition-colors"
+              className="inline-flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-foreground hover:bg-secondary transition-colors"
+              type="button"
             >
               <Home className="w-4 h-4" />
               <span>Home</span>
+            </button>
+            <button
+              className="inline-flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-secondary transition-colors"
+              type="button"
+            >
+              <LayoutGrid className="w-4 h-4" />
+              <span>All projects</span>
+            </button>
+            <button
+              className="inline-flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-secondary transition-colors"
+              type="button"
+            >
+              <Users className="w-4 h-4" />
+              <span>Shared with me</span>
             </button>
           </div>
         </div>
