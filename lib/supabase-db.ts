@@ -1,17 +1,12 @@
-import { createClient } from '@supabase/supabase-js'
+import { Pool } from 'pg'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+const connectionString = process.env.DATABASE_URL
 
-if (!supabaseUrl || !supabaseServiceKey) {
-  throw new Error(
-    'Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY'
-  )
+if (!connectionString) {
+  throw new Error('DATABASE_URL is not set')
 }
 
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: { persistSession: false },
-})
+const pool = new Pool({ connectionString })
 
 export interface DatabaseSchema {
   name: string
