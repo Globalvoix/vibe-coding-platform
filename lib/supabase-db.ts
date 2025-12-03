@@ -50,17 +50,22 @@ export async function createProjectDatabase(
   try {
     const tableName = `${projectId}_app_data`.replace(/[^a-z0-9_]/g, '_')
 
-    await supabaseAdmin.sql`
+    await pool.query(`
       CREATE TABLE IF NOT EXISTS "${tableName}" (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         data JSONB DEFAULT '{}',
         created_at TIMESTAMPTZ DEFAULT NOW(),
         updated_at TIMESTAMPTZ DEFAULT NOW()
-      );
-      
-      CREATE INDEX IF NOT EXISTS "${tableName}_created_at_idx" ON "${tableName}"(created_at DESC);
-      CREATE INDEX IF NOT EXISTS "${tableName}_updated_at_idx" ON "${tableName}"(updated_at DESC);
-    `
+      )
+    `)
+
+    await pool.query(
+      `CREATE INDEX IF NOT EXISTS "${tableName}_created_at_idx" ON "${tableName}"(created_at DESC)`
+    )
+
+    await pool.query(
+      `CREATE INDEX IF NOT EXISTS "${tableName}_updated_at_idx" ON "${tableName}"(updated_at DESC)`
+    )
 
     return {
       success: true,
