@@ -9,6 +9,7 @@ import type { ReactNode } from 'react'
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import { Inter } from 'next/font/google'
+import { ClerkProvider } from '@clerk/nextjs'
 import './globals.css'
 
 const title = 'Thinksoft'
