@@ -1,36 +1,50 @@
-"use client"
+'use client'
 
-import { useState } from "react"
-import { useAppStore } from "@/lib/app-store"
-import { useUIStore } from "@/lib/ui-store"
-import { useRouter, usePathname } from "next/navigation"
-import { useAuth, useClerk } from "@clerk/nextjs"
+import { useState } from 'react'
+import { useRouter, usePathname } from 'next/navigation'
+import { useAuth, useClerk } from '@clerk/nextjs'
 import {
   MoreVertical,
   Trash2,
   Edit2,
   X,
   FolderPlus,
-} from "lucide-react"
-import { cn } from "@/lib/utils"
+} from 'lucide-react'
+import { cn } from '@/lib/utils'
+import { useUIStore } from '@/lib/ui-store'
+import { useAppsSync } from '@/hooks/useAppsSync'
+import {
+  createAppAction,
+  deleteAppAction,
+  renameAppAction,
+} from '@/app/actions/apps'
+import { useAppStore } from '@/lib/app-store'
+import type { Database } from '@/lib/supabase'
+
+type App = Database['public']['Tables']['apps']['Row']
 
 interface CreateAppDialogProps {
   isOpen: boolean
   onClose: () => void
   onCreate: (name: string, description: string) => void
+  isLoading?: boolean
 }
 
-function CreateAppDialog({ isOpen, onClose, onCreate }: CreateAppDialogProps) {
-  const [name, setName] = useState("")
-  const [description, setDescription] = useState("")
+function CreateAppDialog({
+  isOpen,
+  onClose,
+  onCreate,
+  isLoading = false,
+}: CreateAppDialogProps) {
+  const [name, setName] = useState('')
+  const [description, setDescription] = useState('')
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (name.trim()) {
       onCreate(name, description)
-      setName("")
-      setDescription("")
-      onClose()
+      setName('')
+      setDescription('')
     }
   }
 
@@ -52,6 +66,7 @@ function CreateAppDialog({ isOpen, onClose, onCreate }: CreateAppDialogProps) {
               placeholder="Enter app name..."
               className="w-full px-3 py-2 bg-secondary border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
               autoFocus
+              disabled={isLoading}
             />
           </div>
           <div>
@@ -64,22 +79,24 @@ function CreateAppDialog({ isOpen, onClose, onCreate }: CreateAppDialogProps) {
               placeholder="Describe your app..."
               rows={3}
               className="w-full px-3 py-2 bg-secondary border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              disabled={isLoading}
             />
           </div>
           <div className="flex gap-3 pt-2">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 text-sm font-medium text-foreground bg-secondary border border-border rounded-lg hover:bg-secondary/80 transition-colors"
+              className="flex-1 px-4 py-2 text-sm font-medium text-foreground bg-secondary border border-border rounded-lg hover:bg-secondary/80 transition-colors disabled:opacity-50"
+              disabled={isLoading}
             >
               Cancel
             </button>
             <button
               type="submit"
-              disabled={!name.trim()}
+              disabled={!name.trim() || isLoading}
               className="flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Create
+              {isLoading ? 'Creating...' : 'Create'}
             </button>
           </div>
         </form>
@@ -88,28 +105,37 @@ function CreateAppDialog({ isOpen, onClose, onCreate }: CreateAppDialogProps) {
   )
 }
 
-interface AppMenuProps {
+interface AppContextMenuProps {
   isOpen: boolean
   onClose: () => void
   onDelete: () => void
   onRename: () => void
+  isLoading?: boolean
 }
 
-function AppContextMenu({ isOpen, onClose, onDelete, onRename }: AppMenuProps) {
+function AppContextMenu({
+  isOpen,
+  onClose,
+  onDelete,
+  onRename,
+  isLoading = false,
+}: AppContextMenuProps) {
   if (!isOpen) return null
 
   return (
     <div className="absolute right-0 top-full mt-1 w-40 rounded-lg bg-background border border-border shadow-lg overflow-hidden z-40">
       <button
         onClick={onRename}
-        className="w-full px-4 py-2 text-sm text-foreground hover:bg-secondary flex items-center gap-2 transition-colors"
+        disabled={isLoading}
+        className="w-full px-4 py-2 text-sm text-foreground hover:bg-secondary flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <Edit2 className="w-4 h-4" />
         Rename
       </button>
       <button
         onClick={onDelete}
-        className="w-full px-4 py-2 text-sm text-red-500 hover:bg-secondary flex items-center gap-2 transition-colors border-t border-border"
+        disabled={isLoading}
+        className="w-full px-4 py-2 text-sm text-red-500 hover:bg-secondary flex items-center gap-2 transition-colors border-t border-border disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <Trash2 className="w-4 h-4" />
         Delete
@@ -123,9 +149,16 @@ interface RenameDialogProps {
   currentName: string
   onClose: () => void
   onRename: (newName: string) => void
+  isLoading?: boolean
 }
 
-function RenameDialog({ isOpen, currentName, onClose, onRename }: RenameDialogProps) {
+function RenameDialog({
+  isOpen,
+  currentName,
+  onClose,
+  onRename,
+  isLoading = false,
+}: RenameDialogProps) {
   const [newName, setNewName] = useState(currentName)
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -150,21 +183,23 @@ function RenameDialog({ isOpen, currentName, onClose, onRename }: RenameDialogPr
             placeholder="Enter new app name..."
             className="w-full px-3 py-2 bg-secondary border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
             autoFocus
+            disabled={isLoading}
           />
           <div className="flex gap-3 pt-2">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 text-sm font-medium text-foreground bg-secondary border border-border rounded-lg hover:bg-secondary/80 transition-colors"
+              className="flex-1 px-4 py-2 text-sm font-medium text-foreground bg-secondary border border-border rounded-lg hover:bg-secondary/80 transition-colors disabled:opacity-50"
+              disabled={isLoading}
             >
               Cancel
             </button>
             <button
               type="submit"
-              disabled={!newName.trim()}
+              disabled={!newName.trim() || isLoading}
               className="flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Rename
+              {isLoading ? 'Renaming...' : 'Rename'}
             </button>
           </div>
         </form>
@@ -177,6 +212,7 @@ export function AppSidebar() {
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
   const [selectedAppForMenu, setSelectedAppForMenu] = useState<string | null>(null)
   const [selectedAppForRename, setSelectedAppForRename] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
 
   const router = useRouter()
   const pathname = usePathname()
@@ -184,50 +220,65 @@ export function AppSidebar() {
   const { sidebarOpen, setSidebarOpen } = useUIStore()
   const { isSignedIn } = useAuth()
   const { openSignIn } = useClerk()
-  const {
-    apps,
-    currentAppId,
-    setCurrentApp,
-    createApp,
-    deleteApp,
-    renameApp,
-  } = useAppStore()
+  const { setCurrentApp, currentAppId } = useAppStore()
 
-  const visibleApps = isSignedIn ? apps : []
+  const { apps, isLoading: appsLoading } = useAppsSync(5)
 
-  const currentApp =
-    isWorkspacePage && currentAppId
-      ? apps.find((app) => app.id === currentAppId) || null
-      : null
+  const currentApp = isWorkspacePage && currentAppId ? apps.find((a) => a.id === currentAppId) || null : null
 
-  const sortedApps = [...visibleApps].sort((a, b) => b.createdAt - a.createdAt)
-
-  const handleCreateApp = (name: string, description: string) => {
+  const handleCreateApp = async (name: string, description: string) => {
     if (!isSignedIn) {
       openSignIn()
       return
     }
 
-    createApp(name, description)
-  }
-
-  const handleDeleteApp = (id: string) => {
-    if (confirm("Are you sure you want to delete this app?")) {
-      deleteApp(id)
-      setSelectedAppForMenu(null)
+    try {
+      setIsLoading(true)
+      const newApp = await createAppAction(name, description)
+      if (newApp) {
+        setCurrentApp(newApp.id)
+        setCreateDialogOpen(false)
+      }
+    } catch (error) {
+      console.error('Failed to create app:', error)
+      alert('Failed to create app')
+    } finally {
+      setIsLoading(false)
     }
   }
 
-  const handleRenameApp = (newName: string) => {
+  const handleDeleteApp = async (id: string) => {
+    if (confirm('Are you sure you want to delete this app?')) {
+      try {
+        setIsLoading(true)
+        await deleteAppAction(id)
+        setSelectedAppForMenu(null)
+      } catch (error) {
+        console.error('Failed to delete app:', error)
+        alert('Failed to delete app')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+  }
+
+  const handleRenameApp = async (newName: string) => {
     if (selectedAppForRename) {
-      renameApp(selectedAppForRename, newName)
-      setSelectedAppForRename(null)
+      try {
+        setIsLoading(true)
+        await renameAppAction(selectedAppForRename, newName)
+        setSelectedAppForRename(null)
+      } catch (error) {
+        console.error('Failed to rename app:', error)
+        alert('Failed to rename app')
+      } finally {
+        setIsLoading(false)
+      }
     }
   }
 
   return (
     <>
-      {/* Backdrop */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black/30 z-20"
@@ -235,15 +286,13 @@ export function AppSidebar() {
         />
       )}
 
-      {/* Drawer */}
       <div
         className={cn(
-          "fixed left-0 top-0 h-screen w-64 bg-background border-r border-border z-30 transform transition-transform duration-300 overflow-y-auto",
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          'fixed left-0 top-0 h-screen w-64 bg-background border-r border-border z-30 transform transition-transform duration-300 overflow-y-auto',
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
         <div className="flex flex-col h-full">
-          {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-border sticky top-0 bg-background">
             <h2 className="text-sm font-semibold text-foreground uppercase tracking-tight">
               Apps
@@ -257,7 +306,6 @@ export function AppSidebar() {
             </button>
           </div>
 
-          {/* Current App Info */}
           {currentApp && (
             <div className="p-4 border-b border-border bg-secondary/50">
               <div className="text-xs font-medium text-muted-foreground mb-1">
@@ -272,7 +320,6 @@ export function AppSidebar() {
             </div>
           )}
 
-          {/* My Apps link */}
           <div className="p-3 border-b border-border">
             <button
               onClick={() => {
@@ -292,7 +339,6 @@ export function AppSidebar() {
             </button>
           </div>
 
-          {/* Create New App Button */}
           <div className="p-3 border-b border-border">
             <button
               onClick={() => {
@@ -306,15 +352,18 @@ export function AppSidebar() {
             </button>
           </div>
 
-          {/* Apps List */}
           <div className="flex-1 overflow-y-auto">
             <div className="p-3 space-y-2">
-              {sortedApps.length === 0 ? (
+              {appsLoading ? (
+                <div className="text-xs text-muted-foreground text-center py-8">
+                  Loading apps...
+                </div>
+              ) : apps.length === 0 ? (
                 <div className="text-xs text-muted-foreground text-center py-8">
                   No apps yet. Create one to get started.
                 </div>
               ) : (
-                sortedApps.slice(0, 5).map((app) => (
+                apps.map((app) => (
                   <div key={app.id} className="relative">
                     <button
                       onClick={() => {
@@ -322,10 +371,10 @@ export function AppSidebar() {
                         setSidebarOpen(false)
                       }}
                       className={cn(
-                        "w-full text-left px-3 py-2 rounded-lg transition-colors relative group",
+                        'w-full text-left px-3 py-2 rounded-lg transition-colors relative group',
                         currentAppId === app.id
-                          ? "bg-blue-600/20 border border-blue-500 text-foreground"
-                          : "hover:bg-secondary text-muted-foreground hover:text-foreground"
+                          ? 'bg-blue-600/20 border border-blue-500 text-foreground'
+                          : 'hover:bg-secondary text-muted-foreground hover:text-foreground'
                       )}
                     >
                       <div className="flex items-center justify-between gap-2 min-w-0">
@@ -334,7 +383,7 @@ export function AppSidebar() {
                             {app.name}
                           </div>
                           <div className="text-xs text-muted-foreground truncate mt-0.5">
-                            {new Date(app.updatedAt).toLocaleDateString()}
+                            {new Date(app.updated_at).toLocaleDateString()}
                           </div>
                         </div>
                         {currentAppId === app.id && (
@@ -369,6 +418,7 @@ export function AppSidebar() {
                                 setSelectedAppForRename(app.id)
                                 setSelectedAppForMenu(null)
                               }}
+                              isLoading={isLoading}
                             />
                           </div>
                         )}
@@ -380,10 +430,9 @@ export function AppSidebar() {
             </div>
           </div>
 
-          {/* Footer Info */}
-          {visibleApps.length > 0 && (
+          {!appsLoading && apps.length > 0 && (
             <div className="p-3 border-t border-border text-xs text-muted-foreground text-center">
-              {visibleApps.length} app{visibleApps.length !== 1 ? "s" : ""} total
+              {apps.length} app{apps.length !== 1 ? 's' : ''} shown (recent)
             </div>
           )}
         </div>
@@ -393,13 +442,19 @@ export function AppSidebar() {
         isOpen={createDialogOpen}
         onClose={() => setCreateDialogOpen(false)}
         onCreate={handleCreateApp}
+        isLoading={isLoading}
       />
 
       <RenameDialog
         isOpen={selectedAppForRename !== null}
-        currentName={selectedAppForRename ? apps.find((a) => a.id === selectedAppForRename)?.name || "" : ""}
+        currentName={
+          selectedAppForRename
+            ? apps.find((a) => a.id === selectedAppForRename)?.name || ''
+            : ''
+        }
         onClose={() => setSelectedAppForRename(null)}
         onRename={handleRenameApp}
+        isLoading={isLoading}
       />
     </>
   )
