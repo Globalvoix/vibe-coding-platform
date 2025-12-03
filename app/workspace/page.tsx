@@ -56,7 +56,7 @@ export default function WorkspacePage() {
       if (!userId) return
       if (projectId) {
         try {
-          const response = await fetch(`/api/projects/${projectId}`)
+          const response = await fetch(`/api/projects/${projectId}?userId=${encodeURIComponent(userId)}`)
           if (!response.ok) {
             console.error('Failed to load project')
             return
