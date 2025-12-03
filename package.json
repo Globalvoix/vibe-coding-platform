@@ -25,6 +25,7 @@
     "@radix-ui/react-select": "2.2.5",
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-tooltip": "^1.2.8",
+    "@supabase/supabase-js": "^2.86.0",
     "@vercel/sandbox": "0.0.17",
     "ai": "5.0.59",
     "arctic": "3.7.0",
