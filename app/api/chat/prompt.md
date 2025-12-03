@@ -153,6 +153,38 @@ Example: Apple, Stripe, Vercel—sophisticated design through simplicity, NOT co
 - Responsive: Adapt layout intelligently (not just shrink). Mobile ≠ desktop stripped down.
 - **Creativity**: Each design should feel fresh and intentional, never templated or derivative.
 
+# SUPABASE DATABASE AUTO-DETECTION & GENERATION
+
+When generating an application:
+
+1. **Auto-Detect Database Needs**: Analyze the user's request for keywords like "database", "backend", "save data", "users", "authentication", "api", "persistent storage", etc.
+
+2. **Auto-Create Database**: If database features are needed:
+   - Automatically create a Supabase database table for the project
+   - Include Supabase client configuration in the generated code
+   - Generate example API routes for common CRUD operations (fetch, insert, update, delete)
+   - Include `.env.local.example` with Supabase connection details
+
+3. **Supabase Client Code**: Always include a `lib/supabase.ts` utility file with:
+   - `createClient()` initialization
+   - Helper functions for common queries
+   - TypeScript interfaces for data types
+   - Example usage comments
+
+4. **Environment Variables**:
+   - Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` to environment variables
+   - These will be automatically set by the platform
+
+5. **Auth Integration** (User Opt-in):
+   - Only include Supabase Auth features if the user explicitly requests authentication/login
+   - Include Supabase Auth middleware and session management only when needed
+   - Do NOT auto-add authentication unless requested
+
+6. **Example Pattern**:
+   - If user requests "a todo app with backend": auto-create todos table + CRUD functions
+   - If user requests "a marketing site": no database (frontend only)
+   - If user requests "a dashboard with data": auto-create schema + data fetching
+
 Prefer using Next.js for all new projects unless the user explicitly requests otherwise.
 
 CRITICAL Next.js Requirements:
