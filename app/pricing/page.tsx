@@ -4,35 +4,50 @@ import { Navbar } from "@/components/ui/mini-navbar";
 export default function PricingPage() {
   const plans = [
     {
-      name: "Starter",
-      price: "$0",
-      description: "Experiment with AI-powered app generation and basic features.",
+      name: "Free",
+      price: "$0/mo",
+      description: "Get started with AI-generated frontends and a single workspace.",
       features: [
-        "Up to 3 workspaces",
-        "Standard models",
-        "Community support",
+        "20 credits per month",
+        "Up to 3 apps/workspaces",
+        "1 database creation per month",
+        "Basic frontend generation",
       ],
       highlight: false,
     },
     {
       name: "Pro",
       price: "$29/mo",
-      description: "For builders who ship production-ready sites every week.",
+      description: "For individual builders shipping advanced frontends every week.",
       features: [
-        "Unlimited workspaces",
-        "Priority models and faster runs",
-        "Shareable previews",
+        "200 credits per month",
+        "Up to 10 apps/workspaces",
+        "Up to 10 database creations per month",
+        "Advanced frontend generation",
       ],
       highlight: true,
     },
     {
-      name: "Team",
-      price: "$79/mo",
-      description: "Collaborate with your team on high-velocity projects.",
+      name: "Business",
+      price: "$99/mo",
+      description: "For teams running multiple products and environments.",
       features: [
-        "Everything in Pro",
-        "Team workspaces and roles",
-        "Usage reporting",
+        "1000 credits per month",
+        "Up to 30 apps/workspaces per month",
+        "Up to 30 database creations per month",
+        "Advanced frontend generation",
+      ],
+      highlight: false,
+    },
+    {
+      name: "Enterprise",
+      price: "Contact sales",
+      description: "For organizations that need custom limits and enterprise guarantees.",
+      features: [
+        "10000 credits per month",
+        "Unlimited apps/workspaces per month",
+        "Unlimited database creations per month",
+        "Enterprise-grade frontend generation",
       ],
       highlight: false,
     },
@@ -51,7 +66,7 @@ export default function PricingPage() {
             Choose the plan that fits how you build with Thinksoft.
           </p>
 
-          <div className="mt-10 grid gap-6 sm:grid-cols-3">
+          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {plans.map((plan) => (
               <div
                 key={plan.name}
