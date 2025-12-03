@@ -1,15 +1,11 @@
-'use client'
-
 import { type ChatUIMessage } from '@/components/chat/types'
-import { type ReactNode } from 'react'
+import { type ReactNode, createContext, useContext, useMemo, useRef } from 'react'
 import { Chat } from '@ai-sdk/react'
 import { DataPart } from '@/ai/messages/data-parts'
 import { DataUIPart } from 'ai'
-import { createContext, useContext, useMemo, useRef } from 'react'
 import { useDataStateMapper } from '@/app/state'
 import { mutate } from 'swr'
 import { toast } from 'sonner'
-import { useAppStore } from '@/lib/app-store'
 
 interface ChatContextValue {
   chat: Chat<ChatUIMessage>
@@ -21,19 +17,9 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const mapDataToState = useDataStateMapper()
   const mapDataToStateRef = useRef(mapDataToState)
   mapDataToStateRef.current = mapDataToState
-  const { currentAppId } = useAppStore()
-
-  const chatsRef = useRef<Map<string, Chat<ChatUIMessage>>>(new Map())
-
-  const activeChatKey = currentAppId ?? 'default'
 
   const chat = useMemo(() => {
-    const existing = chatsRef.current.get(activeChatKey)
-    if (existing) {
-      return existing
-    }
-
-    const newChat = new Chat<ChatUIMessage>({
+    return new Chat<ChatUIMessage>({
       onToolCall: () => mutate('/api/auth/info'),
       onData: (data: DataUIPart<DataPart>) => mapDataToStateRef.current(data),
       onError: (error) => {
@@ -41,10 +27,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         console.error('Error sending message:', error)
       },
     })
-
-    chatsRef.current.set(activeChatKey, newChat)
-    return newChat
-  }, [activeChatKey])
+  }, [])
 
   return (
     <ChatContext.Provider value={{ chat }}>{children}</ChatContext.Provider>
