@@ -2,6 +2,11 @@ import type { NextConfig } from 'next'
 import { withBotId } from 'botid/next/config'
 
 const nextConfig: NextConfig = {
+  experimental: {
+    serverActions: {
+      allowedOrigins: ['*'],
+    },
+  },
   webpack(config) {
     config.module.rules.push({
       test: /\.md/,
