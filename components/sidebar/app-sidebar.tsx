@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useUIStore } from '@/lib/ui-store'
 import { cn } from '@/lib/utils'
-import { X, Home } from 'lucide-react'
+import { X, Home, LayoutGrid, Users } from 'lucide-react'
 
 export function AppSidebar() {
   const [isAnimating, setIsAnimating] = useState(false)
