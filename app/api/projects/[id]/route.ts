@@ -24,7 +24,7 @@ export async function GET(
   return NextResponse.json(project)
 }
 
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: Request, { params }: any) {
   const { userId } = await auth()
   if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -58,7 +58,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 
 export async function DELETE(
   _req: Request,
-  { params }: { params: { id: string } }
+  { params }: any
 ) {
   const { userId } = await auth()
   if (!userId) {
