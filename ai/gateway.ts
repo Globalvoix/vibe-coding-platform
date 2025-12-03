@@ -1,8 +1,6 @@
 import { Models, SUPPORTED_MODELS } from './constants'
-import { openai } from '@ai-sdk/openai'
-import { anthropic } from '@ai-sdk/anthropic'
+import { createGateway } from '@ai-sdk/gateway'
 import type { JSONValue } from 'ai'
-import type { OpenAIResponsesProviderOptions } from '@ai-sdk/openai'
 import type { LanguageModelV2 } from '@ai-sdk/provider'
 
 interface AvailableModel {
@@ -17,6 +15,10 @@ const MODEL_DISPLAY_NAMES: Record<string, string> = {
   [Models.OpenAIGPT5]: 'OpenAI GPT-5',
 }
 
+export const aiGateway = createGateway({
+  apiKey: process.env.VERCEL_AI_GATEWAY_API_KEY ?? process.env.AI_GATEWAY_API_KEY,
+})
+
 export async function getAvailableModels(): Promise<AvailableModel[]> {
   return SUPPORTED_MODELS.map((id) => ({
     id,
@@ -30,34 +32,43 @@ export interface ModelOptions {
   headers?: Record<string, string>
 }
 
+function getGatewayModelId(modelId: string): string {
+  if (modelId === Models.OpenAIGPT5) {
+    return 'openai/gpt-4.1'
+  }
+
+  if (modelId === Models.AnthropicClaude4Sonnet) {
+    return 'anthropic/claude-3-5-sonnet-latest'
+  }
+
+  if (modelId === Models.AnthropicClaude45Sonnet) {
+    return 'anthropic/claude-3-7-sonnet-latest'
+  }
+
+  if (modelId === Models.GoogleGeminiFlash) {
+    return 'google/gemini-2.5-flash'
+  }
+
+  return 'openai/gpt-4.1-mini'
+}
+
 export function getModelOptions(
   modelId: string,
   options?: { reasoningEffort?: 'minimal' | 'low' | 'medium' }
 ): ModelOptions {
-  if (modelId === Models.OpenAIGPT5) {
-    return {
-      model: openai('gpt-4.1'),
-      providerOptions: {
-        openai: {
-          reasoningEffort: options?.reasoningEffort ?? 'low',
-        } satisfies OpenAIResponsesProviderOptions,
-      },
-    }
-  }
+  const gatewayModelId = getGatewayModelId(modelId)
 
-  if (modelId === Models.AnthropicClaude4Sonnet) {
-    return {
-      model: anthropic('claude-3-5-sonnet-latest'),
-    }
-  }
-
-  if (modelId === Models.AnthropicClaude45Sonnet) {
-    return {
-      model: anthropic('claude-3-7-sonnet-latest'),
-    }
-  }
+  const providerOptions: Record<string, Record<string, JSONValue>> | undefined =
+    gatewayModelId.startsWith('openai/')
+      ? {
+          openai: {
+            reasoningEffort: options?.reasoningEffort ?? 'low',
+          },
+        }
+      : undefined
 
   return {
-    model: openai('gpt-4.1-mini'),
+    model: aiGateway(gatewayModelId),
+    ...(providerOptions ? { providerOptions } : {}),
   }
 }

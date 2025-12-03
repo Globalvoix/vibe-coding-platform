@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { checkBotId } from 'botid/server'
 import { generateObject } from 'ai'
-import { openai } from '@ai-sdk/openai'
+import { aiGateway } from '@/ai/gateway'
 import { linesSchema, resultSchema } from '@/components/error-monitor/schemas'
 import prompt from './prompt.md'
 
@@ -19,7 +19,7 @@ export async function POST(req: Request) {
 
   const result = await generateObject({
     system: prompt,
-    model: openai('gpt-4.1'),
+    model: aiGateway('openai/gpt-4.1'),
     providerOptions: {
       openai: {
         reasoningEffort: 'minimal',
