@@ -11,6 +11,8 @@ interface AvailableModel {
 const MODEL_DISPLAY_NAMES: Record<string, string> = {
   [Models.AnthropicClaude4Sonnet]: 'Anthropic Claude 4 Sonnet',
   [Models.AnthropicClaude45Sonnet]: 'Anthropic Claude 4.5 Sonnet',
+  [Models.AnthropicClaude35Haiku]: 'Anthropic Claude 3.5 Haiku',
+  [Models.AnthropicClaude3Haiku]: 'Anthropic Claude 3 Haiku',
   [Models.GoogleGeminiFlash]: 'Google Gemini 2.5 Flash',
   [Models.OpenAIGPT5]: 'OpenAI GPT-5',
 }
@@ -43,6 +45,14 @@ function getGatewayModelId(modelId: string): string {
 
   if (modelId === Models.AnthropicClaude45Sonnet) {
     return 'anthropic/claude-3-7-sonnet-latest'
+  }
+
+  if (modelId === Models.AnthropicClaude35Haiku) {
+    return 'anthropic/claude-3.5-haiku'
+  }
+
+  if (modelId === Models.AnthropicClaude3Haiku) {
+    return 'anthropic/claude-3-haiku'
   }
 
   if (modelId === Models.GoogleGeminiFlash) {
