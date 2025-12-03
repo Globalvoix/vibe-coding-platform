@@ -11,6 +11,7 @@ import { AppSidebar } from '@/components/sidebar/app-sidebar'
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useSandboxStore, useFileExplorerStore } from '../state'
+import { useAuth } from '@clerk/nextjs'
 
 interface ProjectResponse {
   id: string
