@@ -52,11 +52,7 @@ export function AppSidebar() {
             </button>
           </div>
 
-          <div className="p-4 border-b border-border space-y-3">
-            <p className="text-xs text-muted-foreground">
-              App management has been disabled for this demo. You can still use the
-              workspace and AI features normally.
-            </p>
+          <div className="p-4 border-b border-border">
             <button
               onClick={handleNavigateHome}
               className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-foreground hover:bg-secondary transition-colors"
