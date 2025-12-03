@@ -100,11 +100,11 @@ export default function WorkspacePage() {
   }, [projectId, promptFromUrl])
 
   useEffect(() => {
-    if (!projectId) return
+    if (!projectId || !userId) return
 
     const timeoutId = window.setTimeout(async () => {
       try {
-        await fetch(`/api/projects/${projectId}`, {
+        await fetch(`/api/projects/${projectId}?userId=${encodeURIComponent(userId)}` , {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
