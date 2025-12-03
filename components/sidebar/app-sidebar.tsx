@@ -1,16 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter, usePathname } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { useUIStore } from '@/lib/ui-store'
 import { cn } from '@/lib/utils'
-import { X, FolderPlus } from 'lucide-react'
+import { X, Home } from 'lucide-react'
 
 export function AppSidebar() {
   const [isAnimating, setIsAnimating] = useState(false)
   const router = useRouter()
-  const pathname = usePathname()
-  const isWorkspacePage = pathname === '/workspace'
   const { sidebarOpen, setSidebarOpen } = useUIStore()
 
   const handleNavigateHome = () => {
@@ -54,24 +52,19 @@ export function AppSidebar() {
             </button>
           </div>
 
-          <div className="p-4 border-b border-border space-y-2">
+          <div className="p-4 border-b border-border space-y-3">
             <p className="text-xs text-muted-foreground">
               App management has been disabled for this demo. You can still use the
               workspace and AI features normally.
             </p>
+            <button
+              onClick={handleNavigateHome}
+              className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-foreground hover:bg-secondary transition-colors"
+            >
+              <Home className="w-4 h-4" />
+              <span>Home</span>
+            </button>
           </div>
-
-          {!isWorkspacePage && (
-            <div className="p-4 border-b border-border">
-              <button
-                onClick={handleNavigateHome}
-                className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-colors"
-              >
-                <FolderPlus className="w-4 h-4" />
-                <span>Open workspace</span>
-              </button>
-            </div>
-          )}
         </div>
       </div>
     </>
