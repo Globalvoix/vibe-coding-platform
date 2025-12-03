@@ -1,4 +1,5 @@
-import type { ChatUIMessage } from '@/components/chat/types'
+'use client'
+
 import { TEST_PROMPTS } from '@/ai/constants'
 import { ArrowUp, MessageCircleIcon, Square, Plus, Menu, Clock, PanelLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -23,8 +24,8 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSharedChatContext } from '@/lib/chat-context'
 import { useSettings } from '@/components/settings/use-settings'
 import { useSandboxStore } from './state'
-import { useAppStore } from '@/lib/app-store'
 import { useAuth, useClerk } from '@clerk/nextjs'
+import type { ChatUIMessage } from '@/components/chat/types'
 
 interface Props {
   className: string
@@ -37,7 +38,6 @@ export function Chat({ className, initialPrompt }: Props) {
   const { modelId, reasoningEffort } = useSettings()
   const { messages, sendMessage, status } = useChat<ChatUIMessage>({ chat })
   const { setChatStatus } = useSandboxStore()
-  const { currentAppId, getCurrentApp, saveAppState } = useAppStore()
   const { toggleSidebar } = useUIStore()
   const [input, setInput] = useState('')
   const hasSubmittedInitialPromptRef = useRef(false)
@@ -58,34 +58,6 @@ export function Chat({ className, initialPrompt }: Props) {
     },
     [isSignedIn, openSignIn, sendMessage, modelId, setInput, reasoningEffort]
   )
-
-  // Restore messages when switching apps so each app keeps its own chat history
-  useEffect(() => {
-    if (!currentAppId) {
-      chat.messages = []
-      setInput('')
-      hasSubmittedInitialPromptRef.current = false
-      return
-    }
-
-    const app = getCurrentApp()
-
-    if (app && Array.isArray(app.chatMessages)) {
-      chat.messages = app.chatMessages as ChatUIMessage[]
-    } else {
-      chat.messages = []
-    }
-
-    setInput('')
-    hasSubmittedInitialPromptRef.current = false
-  }, [currentAppId, chat, getCurrentApp])
-
-  // Persist messages for the current app whenever they change
-  useEffect(() => {
-    if (!currentAppId) return
-
-    saveAppState(currentAppId, { chatMessages: chat.messages })
-  }, [messages, currentAppId, saveAppState, chat])
 
   useEffect(() => {
     setChatStatus(status)
@@ -135,7 +107,6 @@ export function Chat({ className, initialPrompt }: Props) {
         </div>
       </PanelHeader>
 
-      {/* Messages Area */}
       {messages.length === 0 ? (
         <div className="flex-1 min-h-0">
           <div className="flex h-full items-center justify-center px-4">
@@ -200,7 +171,10 @@ export function Chat({ className, initialPrompt }: Props) {
               >
                 <Plus className="w-4 h-4" />
               </button>
-              <div className="flex items-center gap-2 rounded-full px-2 py-1 border border-border/60 shadow-xs" style={{ backgroundColor: '#F7F4ED' }}>
+              <div
+                className="flex items-center gap-2 rounded-full px-2 py-1 border border-border/60 shadow-xs"
+                style={{ backgroundColor: '#F7F4ED' }}
+              >
                 <Settings />
                 <ModelSelector />
               </div>
