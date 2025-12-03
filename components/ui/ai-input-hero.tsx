@@ -175,7 +175,7 @@ export function HeroWave({
           </p>
           <form
             className="mt-6 sm:mt-8 flex items-center justify-center"
-            onSubmit={(e) => {
+            onSubmit={async (e) => {
               e.preventDefault();
 
               if (!isSignedIn) {
@@ -184,10 +184,15 @@ export function HeroWave({
               }
 
               if (!isLoading && prompt.trim()) {
-                setIsLoading(true);
-                Promise.resolve(onPromptSubmit?.(prompt)).finally(() => {
+                try {
+                  setIsLoading(true);
+                  await onPromptSubmit?.(prompt);
+                  // On success, navigation to workspace unmounts this component,
+                  // so we intentionally do not reset isLoading here.
+                } catch (error) {
+                  console.error('Prompt submission failed', error);
                   setIsLoading(false);
-                });
+                }
               }
             }}
           >

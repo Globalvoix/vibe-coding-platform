@@ -19,7 +19,7 @@ export default function HomePage() {
 
     if (!response.ok) {
       console.error('Failed to create project');
-      return;
+      throw new Error('Failed to create project');
     }
 
     const project = await response.json();

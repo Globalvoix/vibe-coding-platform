@@ -9,7 +9,7 @@ import { auth } from '@clerk/nextjs/server'
 
 export async function GET(
   _req: Request,
-  { params }: { params: { id: string } }
+  { params }: any
 ) {
   const { userId } = await auth()
   if (!userId) {
