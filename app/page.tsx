@@ -9,11 +9,23 @@ import { useRouter } from 'next/navigation'
 export default function Page() {
   const router = useRouter()
 
-  const handlePromptSubmit = (prompt: string) => {
-    if (prompt.trim()) {
-      const encodedPrompt = encodeURIComponent(prompt);
-      router.push(`/workspace?prompt=${encodedPrompt}`);
+  const handlePromptSubmit = async (prompt: string) => {
+    const trimmed = prompt.trim();
+    if (!trimmed) return;
+
+    const response = await fetch('/api/projects', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: trimmed }),
+    });
+
+    if (!response.ok) {
+      console.error('Failed to create project');
+      return;
     }
+
+    const project = await response.json();
+    router.push(`/workspace?projectId=${project.id}`);
   }
 
   return (

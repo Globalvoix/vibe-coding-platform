@@ -185,7 +185,9 @@ export function HeroWave({
 
               if (!isLoading && prompt.trim()) {
                 setIsLoading(true);
-                onPromptSubmit?.(prompt);
+                Promise.resolve(onPromptSubmit?.(prompt)).finally(() => {
+                  setIsLoading(false);
+                });
               }
             }}
           >
