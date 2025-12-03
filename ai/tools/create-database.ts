@@ -52,7 +52,7 @@ export const createDatabase = ({ writer }: Params) =>
             type: 'data-creating-database',
             data: {
               status: 'error',
-              error: result.error || 'Failed to create database',
+              error: { message: result.error || 'Failed to create database' },
               projectId,
             },
           })
@@ -82,7 +82,7 @@ export const createDatabase = ({ writer }: Params) =>
           type: 'data-creating-database',
           data: {
             status: 'error',
-            error: errorMessage,
+            error: { message: errorMessage },
             projectId,
           },
         })
