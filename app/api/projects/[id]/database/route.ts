@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
-import { pool } from '@/lib/db'
+import { pool } from '@/lib/supabase-db'
 
 interface ProjectParams {
   id: string
