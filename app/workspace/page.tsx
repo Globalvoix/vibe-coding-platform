@@ -12,21 +12,27 @@ import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useSandboxStore, useFileExplorerStore } from '../state'
 
+interface ProjectResponse {
+  id: string
+  name: string
+  initial_prompt: string | null
+  sandbox_state: {
+    sandboxId?: string
+    paths?: string[]
+    url?: string
+    urlUUID?: string
+  } | null
+}
+
 export default function WorkspacePage() {
   const searchParams = useSearchParams()
-  const prompt = searchParams.get('prompt')
+  const promptFromUrl = searchParams.get('prompt')
+  const projectId = searchParams.get('projectId')
   const [initialPrompt, setInitialPrompt] = useState<string>('')
   const [horizontalSizes, setHorizontalSizes] = useState<[number, number] | null>(
     null
   )
   const { sandboxId, paths: sandboxPaths, url, urlUUID } = useSandboxStore()
-
-  useEffect(() => {
-    if (prompt) {
-      const decoded = decodeURIComponent(prompt)
-      setInitialPrompt(decoded)
-    }
-  }, [prompt])
 
   useEffect(() => {
     const sandboxState = useSandboxStore.getState()
@@ -42,13 +48,78 @@ export default function WorkspacePage() {
   }, [])
 
   useEffect(() => {
-    // Keep effect to touch these values so ESLint/TypeScript know they are used.
-    // This also ensures sandbox state is tracked reactively.
-    void sandboxId
-    void sandboxPaths
-    void url
-    void urlUUID
-  }, [sandboxId, sandboxPaths, url, urlUUID])
+    let cancelled = false
+
+    async function loadProject() {
+      if (projectId) {
+        try {
+          const response = await fetch(`/api/projects/${projectId}`)
+          if (!response.ok) {
+            console.error('Failed to load project')
+            return
+          }
+          const project = (await response.json()) as ProjectResponse
+          if (cancelled) return
+
+          setInitialPrompt(project.initial_prompt ?? '')
+
+          const sandboxState = useSandboxStore.getState()
+          const fileExplorerState = useFileExplorerStore.getState()
+          sandboxState.reset()
+          fileExplorerState.reset()
+
+          if (project.sandbox_state) {
+            const { sandboxId, paths, url, urlUUID } = project.sandbox_state
+            if (sandboxId) {
+              sandboxState.setSandboxId(sandboxId)
+            }
+            if (Array.isArray(paths) && paths.length > 0) {
+              sandboxState.addPaths(paths)
+            }
+            if (url) {
+              sandboxState.setUrl(url, urlUUID || sandboxState.urlUUID || crypto.randomUUID())
+            }
+          }
+        } catch (error) {
+          console.error('Error loading project', error)
+        }
+      } else if (promptFromUrl) {
+        const decoded = decodeURIComponent(promptFromUrl)
+        setInitialPrompt(decoded)
+      }
+    }
+
+    loadProject()
+
+    return () => {
+      cancelled = true
+    }
+  }, [projectId, promptFromUrl])
+
+  useEffect(() => {
+    if (!projectId) return
+
+    const timeoutId = window.setTimeout(async () => {
+      try {
+        await fetch(`/api/projects/${projectId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sandboxState: {
+              sandboxId,
+              paths: sandboxPaths,
+              url,
+              urlUUID,
+            },
+          }),
+        })
+      } catch (error) {
+        console.error('Failed to save project state', error)
+      }
+    }, 1000)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [projectId, sandboxId, sandboxPaths, url, urlUUID])
 
   return (
     <>
@@ -64,7 +135,7 @@ export default function WorkspacePage() {
         <div className="flex flex-1 w-full overflow-hidden md:hidden">
           <TabContent tabId="chat" className="flex-1">
             <Chat
-              key="default"
+              key={projectId ?? 'default'}
               className="flex-1 overflow-hidden"
               initialPrompt={initialPrompt}
             />
@@ -85,13 +156,16 @@ export default function WorkspacePage() {
             defaultLayout={horizontalSizes ?? [35, 65]}
             left={
               <Chat
-                key="default"
+                key={projectId ?? 'default'}
                 className="flex-1 overflow-hidden"
                 initialPrompt={initialPrompt}
               />
             }
             right={
-              <Sandbox key="default" className="flex-1 overflow-hidden" />
+              <Sandbox
+                key={projectId ?? 'default'}
+                className="flex-1 overflow-hidden"
+              />
             }
           />
         </div>
