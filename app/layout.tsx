@@ -44,7 +44,7 @@ export default function RootLayout({
 }: Readonly<{ children: ReactNode }>) {
   return (
     <ClerkRootProvider>
-      <html lang="en">
+      <html lang="en" suppressHydrationWarning>
         <body className={`${inter.variable} antialiased`}>
           <Suspense fallback={null}>
             <NuqsAdapter>

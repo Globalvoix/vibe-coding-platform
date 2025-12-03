@@ -71,7 +71,12 @@ async function* getCommandLogs(sandboxId: string, cmdId: string) {
     { headers: { 'Content-Type': 'application/json' } }
   )
 
-  const reader = response.body!.getReader()
+  const body = response.body
+  if (!body || body.locked) {
+    return
+  }
+
+  const reader = body.getReader()
   const decoder = new TextDecoder()
   let line = ''
   while (true) {
