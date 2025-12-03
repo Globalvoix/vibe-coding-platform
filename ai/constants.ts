@@ -1,6 +1,8 @@
 export enum Models {
   AnthropicClaude4Sonnet = 'anthropic/claude-4-sonnet',
   AnthropicClaude45Sonnet = 'anthropic/claude-sonnet-4.5',
+  AnthropicClaude35Haiku = 'anthropic/claude-3.5-haiku',
+  AnthropicClaude3Haiku = 'anthropic/claude-3-haiku',
   GoogleGeminiFlash = 'google/gemini-2.5-flash',
   OpenAIGPT5 = 'gpt-5',
 }
@@ -10,6 +12,8 @@ export const DEFAULT_MODEL = Models.AnthropicClaude45Sonnet
 export const SUPPORTED_MODELS: string[] = [
   Models.AnthropicClaude4Sonnet,
   Models.AnthropicClaude45Sonnet,
+  Models.AnthropicClaude35Haiku,
+  Models.AnthropicClaude3Haiku,
   Models.GoogleGeminiFlash,
   Models.OpenAIGPT5,
 ]
