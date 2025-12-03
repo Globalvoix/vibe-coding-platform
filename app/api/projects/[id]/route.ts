@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
 import {
   deleteProject,
   getProject,
@@ -8,12 +7,13 @@ import {
 } from '@/lib/projects-db'
 
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: { id: string } }
 ) {
-  const { userId } = await auth()
+  const { searchParams } = new URL(req.url)
+  const userId = searchParams.get('userId')
   if (!userId) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    return NextResponse.json({ error: 'Missing userId' }, { status: 400 })
   }
 
   const project = await getProject(userId, params.id)
@@ -25,9 +25,10 @@ export async function GET(
 }
 
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
-  const { userId } = await auth()
+  const { searchParams } = new URL(req.url)
+  const userId = searchParams.get('userId')
   if (!userId) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    return NextResponse.json({ error: 'Missing userId' }, { status: 400 })
   }
 
   const body = await req.json().catch(() => ({})) as {
@@ -57,12 +58,13 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 }
 
 export async function DELETE(
-  _req: Request,
+  req: Request,
   { params }: { params: { id: string } }
 ) {
-  const { userId } = await auth()
+  const { searchParams } = new URL(req.url)
+  const userId = searchParams.get('userId')
   if (!userId) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    return NextResponse.json({ error: 'Missing userId' }, { status: 400 })
   }
 
   await deleteProject(userId, params.id)

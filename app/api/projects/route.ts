@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
 import { createProject, listProjects } from '@/lib/projects-db'
 
-export async function GET() {
-  const { userId } = await auth()
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url)
+  const userId = searchParams.get('userId')
+
   if (!userId) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    return NextResponse.json({ error: 'Missing userId' }, { status: 400 })
   }
 
   const projects = await listProjects(userId)
@@ -13,13 +14,17 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const { userId } = await auth()
-  if (!userId) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const body = await req.json().catch(() => ({})) as {
+    prompt?: string
+    userId?: string
   }
 
-  const body = await req.json().catch(() => ({}))
   const prompt = typeof body.prompt === 'string' ? body.prompt : ''
+  const userId = typeof body.userId === 'string' ? body.userId : ''
+
+  if (!userId) {
+    return NextResponse.json({ error: 'Missing userId' }, { status: 400 })
+  }
 
   if (!prompt.trim()) {
     return NextResponse.json({ error: 'Prompt is required' }, { status: 400 })
