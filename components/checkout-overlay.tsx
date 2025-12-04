@@ -248,10 +248,19 @@ export function CheckoutOverlay({
   )
 }
 
+interface LemonSqueezyConfig {
+  eventHandler?: (event: CheckoutEvent) => void
+}
+
+interface CheckoutEvent {
+  event: string
+  [key: string]: unknown
+}
+
 declare global {
   interface Window {
     LemonSqueezy?: {
-      Setup: (config: any) => void
+      Setup: (config: LemonSqueezyConfig) => void
       Url?: {
         Open: (url: string) => void
       }
