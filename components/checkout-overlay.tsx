@@ -89,14 +89,16 @@ export function CheckoutOverlay({
   }
 
   const openCheckoutModal = (url: string) => {
-    if (window.LemonSqueezy?.Url?.Open) {
-      window.LemonSqueezy.Url.Open(url)
+    try {
+      // Open Lemon Squeezy checkout in a new window
+      window.open(url, 'lemon-squeezy-checkout', 'width=800,height=600')
       setIsLoading(false)
       setIsWaitingForPayment(true)
       startPaymentPolling()
-    } else {
-      setError('Checkout modal unavailable. Please try again.')
+    } catch (err) {
+      setError('Failed to open checkout. Please try again.')
       setIsLoading(false)
+      console.error('Error opening checkout:', err)
     }
   }
 
