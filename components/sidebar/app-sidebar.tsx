@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useAuth, useClerk } from '@clerk/nextjs'
 import { useUIStore } from '@/lib/ui-store'
 import { cn } from '@/lib/utils'
 import { X, Home, LayoutGrid, Users } from 'lucide-react'
@@ -10,6 +11,8 @@ export function AppSidebar() {
   const [isAnimating, setIsAnimating] = useState(false)
   const router = useRouter()
   const { sidebarOpen, setSidebarOpen } = useUIStore()
+  const { isSignedIn } = useAuth()
+  const { openSignIn } = useClerk()
 
   const handleNavigateHome = () => {
     setSidebarOpen(false)
@@ -53,6 +56,10 @@ export function AppSidebar() {
             </button>
             <button
               onClick={() => {
+                if (!isSignedIn) {
+                  openSignIn()
+                  return
+                }
                 setSidebarOpen(false)
                 router.push('/projects')
               }}
