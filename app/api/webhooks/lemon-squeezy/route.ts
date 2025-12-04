@@ -66,21 +66,31 @@ async function handleSubscriptionCreated(
   const planId = mapProductIdToPlanId(product_id)
 
   // Try to get user_id from custom checkout data
-  const userId = data.attributes.custom?.user_id
+  let userId = data.attributes.custom?.user_id
 
   console.log('🔍 handleSubscriptionCreated - Custom data check:', {
     hasCustomField: !!data.attributes.custom,
     customField: data.attributes.custom,
-    userId: userId,
+    userIdFromCustom: userId,
     customer_id: customer_id,
   })
 
+  // Fallback: Try to find user from checkout cache
   if (!userId) {
-    console.error('❌ No user_id found in webhook payload. Custom field:', data.attributes.custom)
+    console.log('⚠️ Custom user_id not found, checking checkout cache...')
+    userId = getUserIdByProductAndTime(product_id, 120) || undefined
+
+    if (userId) {
+      console.log('✅ Found userId from cache:', userId)
+    }
+  }
+
+  if (!userId) {
+    console.error('❌ No user_id found in webhook or cache. Cannot process subscription.')
     return
   }
 
-  console.log('✅ Found userId:', userId)
+  console.log('✅ Using userId for subscription:', userId)
 
   // Set status to pending_activation for paid plans (awaiting manual activation)
   // Keep 'active' only for free plans
