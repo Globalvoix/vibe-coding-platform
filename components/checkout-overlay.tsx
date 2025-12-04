@@ -92,21 +92,53 @@ export function CheckoutOverlay({
     if (window.LemonSqueezy?.Url?.Open) {
       window.LemonSqueezy.Url.Open(url)
       setIsLoading(false)
+      setIsWaitingForPayment(true)
+      startPaymentPolling()
     } else {
       setError('Checkout modal unavailable. Please try again.')
       setIsLoading(false)
     }
   }
 
-  const handleCheckoutEvent = (event: any) => {
-    if (event.event === 'Checkout.Success') {
-      // Payment was successful, activate subscription
-      activateSubscription()
-    } else if (event.event === 'Checkout.Close') {
-      // User closed the checkout modal
-      onOpenChange(false)
-      setCheckoutUrl(null)
+  const startPaymentPolling = () => {
+    // Clear any existing interval
+    if (pollIntervalRef.current) {
+      clearInterval(pollIntervalRef.current)
     }
+
+    // Poll subscription status every 3 seconds for up to 10 minutes
+    let pollCount = 0
+    const maxPolls = 200 // 200 * 3 seconds = 600 seconds (10 minutes)
+
+    pollIntervalRef.current = setInterval(async () => {
+      pollCount++
+
+      if (pollCount > maxPolls) {
+        clearInterval(pollIntervalRef.current!)
+        setIsWaitingForPayment(false)
+        setError('Payment detection timeout. Please refresh if payment was successful.')
+        return
+      }
+
+      try {
+        const response = await fetch('/api/subscription')
+        if (response.ok) {
+          const data = await response.json()
+
+          // Check if subscription is now pending activation (payment received)
+          if (
+            data.subscription &&
+            data.subscription.status === 'pending_activation'
+          ) {
+            clearInterval(pollIntervalRef.current!)
+            setIsWaitingForPayment(false)
+            activateSubscription()
+          }
+        }
+      } catch (err) {
+        console.error('Error polling subscription:', err)
+      }
+    }, 3000)
   }
 
   const activateSubscription = async () => {
