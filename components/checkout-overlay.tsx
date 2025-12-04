@@ -78,7 +78,7 @@ export function CheckoutOverlay({
         }
         document.body.appendChild(script)
       } else {
-        window.LemonSqueezy.Setup({ eventHandler: handleCheckoutEvent })
+        window.LemonSqueezy.Setup({})
         openCheckoutModal(data.checkoutUrl)
       }
     } catch (err) {
