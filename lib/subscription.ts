@@ -1,4 +1,4 @@
-import { query } from './db'
+import { pool } from './supabase-db'
 
 export type PlanId = 'free' | 'pro' | 'business' | 'enterprise'
 
@@ -19,7 +19,7 @@ export async function getUserSubscription(
   userId: string
 ): Promise<Subscription | null> {
   try {
-    const result = await query(
+    const result = await pool.query(
       'SELECT * FROM subscriptions WHERE user_id = $1',
       [userId]
     )
@@ -34,7 +34,7 @@ export async function initializeFreeSubscription(
   userId: string
 ): Promise<Subscription | null> {
   try {
-    const result = await query(
+    const result = await pool.query(
       `INSERT INTO subscriptions (user_id, plan_id, status)
        VALUES ($1, $2, $3)
        ON CONFLICT (user_id) DO NOTHING
@@ -58,7 +58,7 @@ export async function updateSubscriptionFromWebhook(
   orderIdOrProductId?: string
 ): Promise<Subscription | null> {
   try {
-    const result = await query(
+    const result = await pool.query(
       `INSERT INTO subscriptions (
         user_id,
         plan_id,
