@@ -1,20 +1,30 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useUser } from '@clerk/nextjs'
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import { Navbar } from "@/components/ui/mini-navbar";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from 'lucide-react'
-import { CheckoutOverlay } from '@/components/checkout-overlay'
+import { Badge } from "@/components/ui/badge";
+
+interface UserSubscription {
+  plan_id: string
+  status: string
+}
 
 export default function PricingPage() {
   const router = useRouter()
   const { user, isSignedIn } = useUser()
-  const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
-  const [checkoutOpen, setCheckoutOpen] = useState(false)
-  const [selectedPlan, setSelectedPlan] = useState<{ id: string; name: string } | null>(null)
+  const [userSubscription, setUserSubscription] = useState<UserSubscription | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Checkout links for Lemon Squeezy
+  const checkoutLinks: Record<string, string> = {
+    pro: 'https://thinksoft.lemonsqueezy.com/buy/5c4b6ae1-8fcf-4a2f-8c64-4f8d2a866262',
+    business: 'https://thinksoft.lemonsqueezy.com/buy/0476f9d8-cc5e-4c77-8916-e918e815a141?discount=0',
+    enterprise: 'https://thinksoft.lemonsqueezy.com/buy/1988f037-ac3e-4434-9a34-85ee271d18b5?discount=0',
+  }
 
   const plans = [
     {
@@ -71,6 +81,30 @@ export default function PricingPage() {
     },
   ];
 
+  // Fetch user's current subscription
+  useEffect(() => {
+    const fetchSubscription = async () => {
+      if (!isSignedIn) {
+        setIsLoading(false)
+        return
+      }
+
+      try {
+        const response = await fetch('/api/user/subscription')
+        if (response.ok) {
+          const data = await response.json()
+          setUserSubscription(data.subscription)
+        }
+      } catch (error) {
+        console.error('Error fetching subscription:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchSubscription()
+  }, [isSignedIn])
+
   const handleGetStarted = (planId: string) => {
     // Free plan doesn't need checkout
     if (planId === 'free') {
@@ -88,24 +122,23 @@ export default function PricingPage() {
       return
     }
 
-    // Open checkout overlay for paid plans
-    const planName = plans.find(p => p.id === planId)?.name || 'Plan'
-    setSelectedPlan({ id: planId, name: planName })
-    setCheckoutOpen(true)
+    // Redirect to Lemon Squeezy checkout with user ID in custom field
+    const checkoutUrl = new URL(checkoutLinks[planId as keyof typeof checkoutLinks])
+    if (user?.id) {
+      checkoutUrl.searchParams.append('checkout[custom][user_id]', user.id)
+    }
+    window.location.href = checkoutUrl.toString()
+  }
+
+  const isUserOnPlan = (planId: string): boolean => {
+    if (!userSubscription) return false
+    return userSubscription.plan_id === planId && userSubscription.status === 'active'
   }
 
   return (
     <>
       <AppSidebar />
       <Navbar />
-      {selectedPlan && (
-        <CheckoutOverlay
-          isOpen={checkoutOpen}
-          onOpenChange={setCheckoutOpen}
-          planId={selectedPlan.id}
-          planName={selectedPlan.name}
-        />
-      )}
       <main className="min-h-screen bg-white flex flex-col items-center pt-32 pb-16 px-4">
         <section className="w-full max-w-5xl text-center">
           <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-gray-900">
@@ -125,29 +158,40 @@ export default function PricingPage() {
                     : "border-gray-200"
                 }`}
               >
-                <h2 className="text-base font-semibold text-gray-900">
-                  {plan.name}
-                </h2>
-                <p className="mt-2 text-2xl font-semibold text-gray-900">
-                  {plan.price}
-                </p>
-                <p className="mt-2 text-xs text-gray-600">
-                  {plan.description}
-                </p>
-                <ul className="mt-4 space-y-1 text-xs text-gray-700">
-                  {plan.features.map((feature) => (
-                    <li key={feature} className="flex items-start gap-2">
-                      <span className="mt-[3px] h-1.5 w-1.5 rounded-full bg-blue-600" />
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
+                <div>
+                  <div className="flex items-center justify-between gap-2">
+                    <h2 className="text-base font-semibold text-gray-900">
+                      {plan.name}
+                    </h2>
+                    {isUserOnPlan(plan.id) && (
+                      <Badge variant="default" className="text-xs">
+                        Current Plan
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="mt-2 text-2xl font-semibold text-gray-900">
+                    {plan.price}
+                  </p>
+                  <p className="mt-2 text-xs text-gray-600">
+                    {plan.description}
+                  </p>
+                  <ul className="mt-4 space-y-1 text-xs text-gray-700">
+                    {plan.features.map((feature) => (
+                      <li key={feature} className="flex items-start gap-2">
+                        <span className="mt-[3px] h-1.5 w-1.5 rounded-full bg-blue-600" />
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
                 <Button
                   onClick={() => handleGetStarted(plan.id)}
                   className="mt-6 w-full text-xs"
                   variant={plan.highlight ? "default" : "outline"}
+                  disabled={isLoading}
                 >
-                  Get started
+                  {isLoading ? 'Loading...' : isUserOnPlan(plan.id) ? 'Current Plan' : 'Get started'}
                 </Button>
               </div>
             ))}
