@@ -71,7 +71,7 @@ export default function PricingPage() {
     },
   ];
 
-  const handleGetStarted = async (planId: string) => {
+  const handleGetStarted = (planId: string) => {
     // Free plan doesn't need checkout
     if (planId === 'free') {
       if (!isSignedIn) {
@@ -88,32 +88,10 @@ export default function PricingPage() {
       return
     }
 
-    setLoadingPlan(planId)
-
-    try {
-      const response = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ planId }),
-      })
-
-      if (!response.ok) {
-        const error = await response.json()
-        console.error('Checkout error:', error)
-        setLoadingPlan(null)
-        return
-      }
-
-      const { checkoutUrl } = await response.json()
-
-      // Redirect to Lemon Squeezy checkout
-      window.location.href = checkoutUrl
-    } catch (error) {
-      console.error('Error initiating checkout:', error)
-      setLoadingPlan(null)
-    }
+    // Open checkout overlay for paid plans
+    const planName = plans.find(p => p.id === planId)?.name || 'Plan'
+    setSelectedPlan({ id: planId, name: planName })
+    setCheckoutOpen(true)
   }
 
   return (
