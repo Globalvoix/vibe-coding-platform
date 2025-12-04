@@ -31,6 +31,19 @@ interface LemonSqueezySubscriptionData {
   }
 }
 
+interface LemonSqueezyWebhookAttributes {
+  product_id: string
+  status: string
+  customer_id: string
+  starts_at: string
+  ends_at: string
+  renews_at: string
+  order_id: string
+  custom?: {
+    user_id?: string
+  }
+}
+
 interface LemonSqueezyWebhookPayload {
   meta: {
     event_name: string
@@ -38,15 +51,7 @@ interface LemonSqueezyWebhookPayload {
   data: {
     type: string
     id: string
-    attributes: {
-      product_id: string
-      status: string
-      customer_id: string
-      starts_at: string
-      ends_at: string
-      renews_at: string
-      order_id: string
-    }
+    attributes: LemonSqueezyWebhookAttributes
   }
 }
 
