@@ -4,6 +4,7 @@ import {
   updateSubscriptionFromWebhook,
   mapProductIdToPlanId,
 } from '@/lib/subscription'
+import { getUserIdByProductAndTime } from '@/lib/checkout-cache'
 
 const WEBHOOK_SECRET = process.env.LEMON_SQUEEZY_WEBHOOK_SECRET || ''
 
