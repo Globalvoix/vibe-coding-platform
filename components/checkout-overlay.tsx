@@ -60,27 +60,7 @@ export function CheckoutOverlay({
 
       const data = await response.json()
       setCheckoutUrl(data.checkoutUrl)
-
-      // Load and open Lemon Squeezy checkout
-      if (!window.LemonSqueezy) {
-        const script = document.createElement('script')
-        script.src = 'https://assets.lemonsqueezy.com/lemon.js'
-        script.async = true
-        script.onload = () => {
-          if (window.LemonSqueezy) {
-            window.LemonSqueezy.Setup({})
-            openCheckoutModal(data.checkoutUrl)
-          }
-        }
-        script.onerror = () => {
-          setError('Failed to load checkout. Please try again.')
-          setIsLoading(false)
-        }
-        document.body.appendChild(script)
-      } else {
-        window.LemonSqueezy.Setup({})
-        openCheckoutModal(data.checkoutUrl)
-      }
+      openCheckoutModal(data.checkoutUrl)
     } catch (err) {
       setError('An error occurred. Please try again.')
       console.error('Checkout error:', err)
