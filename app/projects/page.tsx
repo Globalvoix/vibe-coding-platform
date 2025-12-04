@@ -17,6 +17,14 @@ export default function ProjectsPage() {
   useEffect(() => {
     let cancelled = false
 
+    if (!isSignedIn) {
+      openSignIn()
+      setIsLoading(false)
+      return () => {
+        cancelled = true
+      }
+    }
+
     async function load() {
       try {
         setIsLoading(true)
