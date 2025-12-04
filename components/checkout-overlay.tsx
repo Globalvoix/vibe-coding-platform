@@ -68,7 +68,7 @@ export function CheckoutOverlay({
         script.async = true
         script.onload = () => {
           if (window.LemonSqueezy) {
-            window.LemonSqueezy.Setup({ eventHandler: handleCheckoutEvent })
+            window.LemonSqueezy.Setup({})
             openCheckoutModal(data.checkoutUrl)
           }
         }
