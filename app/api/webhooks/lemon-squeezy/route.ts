@@ -59,18 +59,27 @@ async function handleSubscriptionCreated(
   payload: LemonSqueezyWebhookPayload
 ): Promise<void> {
   const { data } = payload
-  const { product_id, status, customer_id, starts_at, renews_at, order_id } =
+  const { product_id, customer_id, starts_at, renews_at, order_id } =
     data.attributes
 
   const planId = mapProductIdToPlanId(product_id)
 
-  // Get the user_id from custom checkout data (passed during checkout creation)
-  const userId = data.attributes.custom?.user_id || customer_id
+  // Try to get user_id from custom checkout data
+  const userId = data.attributes.custom?.user_id
+
+  console.log('🔍 handleSubscriptionCreated - Custom data check:', {
+    hasCustomField: !!data.attributes.custom,
+    customField: data.attributes.custom,
+    userId: userId,
+    customer_id: customer_id,
+  })
 
   if (!userId) {
-    console.error('No user_id found in webhook payload')
+    console.error('❌ No user_id found in webhook payload. Custom field:', data.attributes.custom)
     return
   }
+
+  console.log('✅ Found userId:', userId)
 
   // Set status to pending_activation for paid plans (awaiting manual activation)
   // Keep 'active' only for free plans
