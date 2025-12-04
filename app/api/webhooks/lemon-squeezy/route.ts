@@ -95,14 +95,13 @@ async function handleSubscriptionUpdated(
   payload: LemonSqueezyWebhookPayload
 ): Promise<void> {
   const { data } = payload
-  const { product_id, status, customer_id, starts_at, renews_at, order_id } =
+  const { product_id, customer_id, starts_at, renews_at, order_id } =
     data.attributes
 
   const planId = mapProductIdToPlanId(product_id)
 
   // Get the user_id from custom checkout data
-  const customData = (data.attributes as any).custom
-  const userId = customData?.user_id || customer_id
+  const userId = data.attributes.custom?.user_id || customer_id
 
   if (!userId) {
     console.error('No user_id found in webhook payload')
