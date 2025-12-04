@@ -38,6 +38,11 @@ export async function POST(request: NextRequest) {
     // Generate Lemon Squeezy checkout URL with userId for webhook mapping
     const checkoutUrl = getLemonSqueezyCheckoutUrl(planId, userId)
 
+    // Store in cache as fallback if custom field not in webhook
+    storeCheckoutSession(checkoutUrl, userId)
+
+    console.log('📝 Checkout session stored:', { userId, planId, checkoutUrl: checkoutUrl.substring(0, 80) })
+
     return NextResponse.json({ checkoutUrl })
   } catch (error) {
     console.error('Checkout error:', error)
