@@ -4,7 +4,6 @@ import {
   updateSubscriptionFromWebhook,
   mapProductIdToPlanId,
 } from '@/lib/subscription'
-import { pool } from '@/lib/supabase-db'
 
 const WEBHOOK_SECRET = process.env.LEMON_SQUEEZY_WEBHOOK_SECRET || ''
 
@@ -173,7 +172,7 @@ async function handlePaymentSuccess(
   payload: LemonSqueezyWebhookPayload
 ): Promise<void> {
   const { data } = payload
-  const { product_id, customer_id, starts_at, renews_at, order_id } =
+  const { product_id, customer_id, starts_at, renews_at, ends_at, order_id } =
     data.attributes
 
   const planId = mapProductIdToPlanId(product_id)
@@ -193,25 +192,32 @@ async function handlePaymentSuccess(
   }
 
   try {
-    // Update subscription status to 'active' to grant access
-    const result = await pool.query(
-      `UPDATE subscriptions 
-       SET status = $1, updated_at = NOW()
-       WHERE user_id = $2 AND (status = $3 OR status = $4)
-       RETURNING id, plan_id, status, user_id`,
-      ['active', userId, 'pending_activation', 'active']
+    const periodStart = starts_at || new Date().toISOString()
+    let periodEnd: string
+
+    if (renews_at) {
+      periodEnd = renews_at
+    } else if (ends_at) {
+      periodEnd = ends_at
+    } else {
+      const fallbackEnd = new Date()
+      fallbackEnd.setDate(fallbackEnd.getDate() + 30)
+      periodEnd = fallbackEnd.toISOString()
+    }
+
+    await updateSubscriptionFromWebhook(
+      data.id,
+      userId,
+      planId,
+      'active',
+      periodStart,
+      periodEnd,
+      order_id
     )
 
-    if (result.rows.length > 0) {
-      const subscription = result.rows[0]
-      console.log(
-        `✅ Subscription ACTIVATED: userId=${userId}, plan=${subscription.plan_id}, status=active`
-      )
-    } else {
-      console.warn(
-        `⚠️ Could not find subscription to activate for user=${userId}`
-      )
-    }
+    console.log(
+      `✅ Subscription ACTIVATED: userId=${userId}, plan=${planId}, status=active`
+    )
   } catch (error) {
     console.error('❌ Error activating subscription:', error)
   }
