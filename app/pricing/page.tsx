@@ -98,6 +98,14 @@ export default function PricingPage() {
     <>
       <AppSidebar />
       <Navbar />
+      {selectedPlan && (
+        <CheckoutOverlay
+          isOpen={checkoutOpen}
+          onOpenChange={setCheckoutOpen}
+          planId={selectedPlan.id}
+          planName={selectedPlan.name}
+        />
+      )}
       <main className="min-h-screen bg-white flex flex-col items-center pt-32 pb-16 px-4">
         <section className="w-full max-w-5xl text-center">
           <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-gray-900">
