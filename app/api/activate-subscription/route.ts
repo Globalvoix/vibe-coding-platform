@@ -50,8 +50,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     // Check if user has a pending_activation subscription
     const result = await pool.query(
-      `SELECT id, plan_id, status, current_period_end 
-       FROM subscriptions 
+      `SELECT id, plan_id, status, current_period_end, created_at
+       FROM subscriptions
        WHERE user_id = $1 AND status = $2`,
       [userId, 'pending_activation']
     )
