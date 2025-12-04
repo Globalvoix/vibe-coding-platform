@@ -65,9 +65,7 @@ async function handleSubscriptionCreated(
   const planId = mapProductIdToPlanId(product_id)
 
   // Get the user_id from custom checkout data (passed during checkout creation)
-  // The custom field is available in the webhook payload
-  const customData = (data.attributes as any).custom
-  const userId = customData?.user_id || customer_id
+  const userId = data.attributes.custom?.user_id || customer_id
 
   if (!userId) {
     console.error('No user_id found in webhook payload')
