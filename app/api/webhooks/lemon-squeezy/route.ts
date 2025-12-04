@@ -96,7 +96,15 @@ async function handleSubscriptionUpdated(
     data.attributes
 
   const planId = mapProductIdToPlanId(product_id)
-  const userId = customer_id
+
+  // Get the user_id from custom checkout data
+  const customData = (data.attributes as any).custom
+  const userId = customData?.user_id || customer_id
+
+  if (!userId) {
+    console.error('No user_id found in webhook payload')
+    return
+  }
 
   // Set status to pending_activation for paid plans, active for free plans
   const activationStatus = planId === 'free' ? 'active' : 'pending_activation'
