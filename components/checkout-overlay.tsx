@@ -88,9 +88,9 @@ export function CheckoutOverlay({
       clearInterval(pollIntervalRef.current)
     }
 
-    // Poll subscription status every 3 seconds for up to 10 minutes
+    // Poll subscription status every 2 seconds for up to 5 minutes
     let pollCount = 0
-    const maxPolls = 200 // 200 * 3 seconds = 600 seconds (10 minutes)
+    const maxPolls = 150 // 150 * 2 seconds = 300 seconds (5 minutes)
 
     pollIntervalRef.current = setInterval(async () => {
       pollCount++
@@ -98,7 +98,7 @@ export function CheckoutOverlay({
       if (pollCount > maxPolls) {
         clearInterval(pollIntervalRef.current!)
         setIsWaitingForPayment(false)
-        setError('Payment detection timeout. Please refresh if payment was successful.')
+        setError('Payment detection timeout. Please close and try again, or check your email for payment confirmation.')
         return
       }
 
@@ -106,21 +106,34 @@ export function CheckoutOverlay({
         const response = await fetch('/api/subscription')
         if (response.ok) {
           const data = await response.json()
+          console.log('Subscription status:', data.subscription?.status, 'Poll count:', pollCount)
 
           // Check if subscription is now pending activation (payment received)
           if (
             data.subscription &&
-            data.subscription.status === 'pending_activation'
+            (data.subscription.status === 'pending_activation' ||
+             data.subscription.status === 'active')
           ) {
             clearInterval(pollIntervalRef.current!)
             setIsWaitingForPayment(false)
-            activateSubscription()
+
+            // If already active, just close and redirect
+            if (data.subscription.status === 'active') {
+              onOpenChange(false)
+              setCheckoutUrl(null)
+              router.push('/home')
+            } else {
+              // Otherwise activate it
+              activateSubscription()
+            }
           }
+        } else {
+          console.error('Subscription fetch error:', response.status)
         }
       } catch (err) {
         console.error('Error polling subscription:', err)
       }
-    }, 3000)
+    }, 2000)
   }
 
   const activateSubscription = async () => {
