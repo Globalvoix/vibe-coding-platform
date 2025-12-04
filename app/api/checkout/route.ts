@@ -34,14 +34,9 @@ export async function POST(request: NextRequest) {
       subscription = await initializeFreeSubscription(userId)
     }
 
-    // Get the return URL (where user comes back after payment)
-    const returnUrl = request.headers.get('origin') || 'https://thinksoft.dev'
-
-    // Generate Lemon Squeezy checkout URL that redirects to activation page
-    const checkoutUrl = getLemonSqueezyCheckoutUrl(
-      planId,
-      `${returnUrl}/home/activate`
-    )
+    // Generate Lemon Squeezy checkout URL without redirect
+    // The overlay will poll for payment success instead
+    const checkoutUrl = getLemonSqueezyCheckoutUrl(planId)
 
     return NextResponse.json({ checkoutUrl })
   } catch (error) {
