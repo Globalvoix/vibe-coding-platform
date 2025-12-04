@@ -63,14 +63,26 @@ export function Navbar() {
 
     let cancelled = false;
 
+    const hasCheckoutSuccess =
+      typeof window !== 'undefined' &&
+      new URLSearchParams(window.location.search).get('checkout') === 'success';
+
+    const maxAttempts = hasCheckoutSuccess ? 8 : 1;
+    let attempts = 0;
+
     async function loadSubscription() {
       try {
         const response = await fetch('/api/subscription');
         if (!response.ok) return;
         const data = await response.json();
-        if (!cancelled) {
-          setPlanId(data.planId ?? null);
-          setSubscriptionStatus(data.status ?? null);
+        if (cancelled) return;
+        setPlanId(data.planId ?? null);
+        setSubscriptionStatus(data.status ?? null);
+
+        const isPro = data.planId === 'pro' && data.status === 'active';
+        attempts += 1;
+        if (!isPro && attempts < maxAttempts) {
+          setTimeout(loadSubscription, 2000);
         }
       } catch (error) {
         console.error('Failed to load subscription', error);

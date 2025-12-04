@@ -37,10 +37,10 @@ export async function POST(request: NextRequest) {
     // Get the return URL (where user comes back after payment)
     const returnUrl = request.headers.get('origin') || 'https://thinksoft.dev'
 
-    // Generate Lemon Squeezy checkout URL
+    // Generate Lemon Squeezy checkout URL with success indicator
     const checkoutUrl = getLemonSqueezyCheckoutUrl(
       planId,
-      `${returnUrl}/home`
+      `${returnUrl}/home?checkout=success`
     )
 
     return NextResponse.json({ checkoutUrl })
