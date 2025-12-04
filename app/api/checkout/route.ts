@@ -34,9 +34,8 @@ export async function POST(request: NextRequest) {
       subscription = await initializeFreeSubscription(userId)
     }
 
-    // Generate Lemon Squeezy checkout URL without redirect
-    // The overlay will poll for payment success instead
-    const checkoutUrl = getLemonSqueezyCheckoutUrl(planId)
+    // Generate Lemon Squeezy checkout URL with userId for webhook mapping
+    const checkoutUrl = getLemonSqueezyCheckoutUrl(planId, userId)
 
     return NextResponse.json({ checkoutUrl })
   } catch (error) {
