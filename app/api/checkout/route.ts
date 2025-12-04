@@ -37,10 +37,10 @@ export async function POST(request: NextRequest) {
     // Get the return URL (where user comes back after payment)
     const returnUrl = request.headers.get('origin') || 'https://thinksoft.dev'
 
-    // Generate Lemon Squeezy checkout URL with success indicator
+    // Generate Lemon Squeezy checkout URL that redirects to activation page
     const checkoutUrl = getLemonSqueezyCheckoutUrl(
       planId,
-      `${returnUrl}/home?checkout=success`
+      `${returnUrl}/home/activate`
     )
 
     return NextResponse.json({ checkoutUrl })
