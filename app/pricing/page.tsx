@@ -13,6 +13,8 @@ export default function PricingPage() {
   const router = useRouter()
   const { user, isSignedIn } = useUser()
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
+  const [checkoutOpen, setCheckoutOpen] = useState(false)
+  const [selectedPlan, setSelectedPlan] = useState<{ id: string; name: string } | null>(null)
 
   const plans = [
     {
