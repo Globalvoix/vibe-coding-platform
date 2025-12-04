@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useAuth, useClerk } from '@clerk/nextjs'
 import { AppSidebar } from '@/components/sidebar/app-sidebar'
 import type { ProjectRecord } from '@/lib/projects-db'
 
@@ -10,6 +11,8 @@ export default function ProjectsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
+  const { isSignedIn } = useAuth()
+  const { openSignIn } = useClerk()
 
   useEffect(() => {
     let cancelled = false
