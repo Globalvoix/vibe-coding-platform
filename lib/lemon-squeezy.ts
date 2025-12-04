@@ -1,38 +1,33 @@
 export type PlanId = 'free' | 'pro' | 'business' | 'enterprise'
 
-const PRODUCT_IDS: Record<Exclude<PlanId, 'free'>, string> = {
-  pro: process.env.LEMON_SQUEEZY_PRO_PRODUCT_ID || '716722',
-  business: process.env.LEMON_SQUEEZY_BUSINESS_PRODUCT_ID || '717067',
-  enterprise: process.env.LEMON_SQUEEZY_ENTERPRISE_PRODUCT_ID || '717080',
+const CHECKOUT_URLS: Record<Exclude<PlanId, 'free'>, string> = {
+  pro: 'https://thinksoft.lemonsqueezy.com/buy/5c4b6ae1-8fcf-4a2f-8c64-4f8d2a866262?discount=0',
+  business: 'https://thinksoft.lemonsqueezy.com/buy/0476f9d8-cc5e-4c77-8916-e918e815a141?discount=0',
+  enterprise: 'https://thinksoft.lemonsqueezy.com/buy/1988f037-ac3e-4434-9a34-85ee271d18b5?discount=0',
 }
 
 /**
- * Generate Lemon Squeezy checkout URL for a specific plan
+ * Get Lemon Squeezy checkout URL for a specific plan
  * @param planId The plan to generate checkout for
- * @param email Optional email to pre-fill checkout
  * @param returnUrl URL to redirect to after successful payment
  * @returns The Lemon Squeezy checkout URL
  */
 export function getLemonSqueezyCheckoutUrl(
   planId: Exclude<PlanId, 'free'>,
-  email?: string,
   returnUrl?: string
 ): string {
-  const productId = PRODUCT_IDS[planId]
-  if (!productId) {
+  const baseUrl = CHECKOUT_URLS[planId]
+  if (!baseUrl) {
     throw new Error(`Invalid plan ID: ${planId}`)
   }
 
-  const params = new URLSearchParams()
-  params.append('checkout[product_id]', productId)
-  if (email) {
-    params.append('checkout[email]', email)
-  }
   if (returnUrl) {
-    params.append('checkout[return_url]', returnUrl)
+    const url = new URL(baseUrl)
+    url.searchParams.append('checkout[success_url]', returnUrl)
+    return url.toString()
   }
 
-  return `https://thinksoft.lemonsqueezy.com/checkout/buy/${productId}?${params.toString()}`
+  return baseUrl
 }
 
 /**
