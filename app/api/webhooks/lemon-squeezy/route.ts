@@ -146,16 +146,27 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // Parse the payload
     const payload = JSON.parse(body) as LemonSqueezyWebhookPayload
 
+    console.log('🔔 Webhook received:', {
+      event: payload.meta.event_name,
+      subscriptionId: payload.data.id,
+      customerId: payload.data.attributes.customer_id,
+      productId: payload.data.attributes.product_id,
+      status: payload.data.attributes.status,
+      payloadSnapshot: JSON.stringify(payload, null, 2).substring(0, 500),
+    })
+
     // Handle different webhook events
     switch (payload.meta.event_name) {
       case 'subscription.created':
+        console.log('✅ Processing subscription.created')
         await handleSubscriptionCreated(payload)
         break
       case 'subscription.updated':
+        console.log('✅ Processing subscription.updated')
         await handleSubscriptionUpdated(payload)
         break
       default:
-        console.log(`Unhandled webhook event: ${payload.meta.event_name}`)
+        console.log(`⚠️ Unhandled webhook event: ${payload.meta.event_name}`)
     }
 
     return NextResponse.json({ success: true })
