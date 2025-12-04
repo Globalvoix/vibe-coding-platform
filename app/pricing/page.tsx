@@ -7,6 +7,7 @@ import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import { Navbar } from "@/components/ui/mini-navbar";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from 'lucide-react'
+import { CheckoutOverlay } from '@/components/checkout-overlay'
 
 export default function PricingPage() {
   const router = useRouter()
