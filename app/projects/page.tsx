@@ -52,7 +52,7 @@ export default function ProjectsPage() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [isSignedIn, openSignIn])
 
   const handleOpen = (id: string) => {
     router.push(`/workspace?projectId=${id}`)
