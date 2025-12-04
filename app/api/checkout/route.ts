@@ -40,7 +40,6 @@ export async function POST(request: NextRequest) {
     // Generate Lemon Squeezy checkout URL
     const checkoutUrl = getLemonSqueezyCheckoutUrl(
       planId,
-      undefined, // Email will be fetched by Lemon Squeezy from the store session if needed
       `${returnUrl}/home`
     )
 
