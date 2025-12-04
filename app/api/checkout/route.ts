@@ -5,6 +5,7 @@ import {
   initializeFreeSubscription,
 } from '@/lib/subscription'
 import { getLemonSqueezyCheckoutUrl } from '@/lib/lemon-squeezy'
+import { storeCheckoutSession } from '@/lib/checkout-cache'
 
 export async function POST(request: NextRequest) {
   try {
