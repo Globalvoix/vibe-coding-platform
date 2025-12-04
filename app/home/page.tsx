@@ -1,11 +1,18 @@
 'use client';
 
+import { useEffect } from "react";
 import { HeroWave } from "@/components/ui/ai-input-hero";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import { useRouter } from "next/navigation";
+import { ensureUserSubscription } from "@/app/actions/subscription";
 
 export default function HomePage() {
   const router = useRouter();
+
+  useEffect(() => {
+    // Ensure user has a subscription initialized
+    ensureUserSubscription().catch(console.error)
+  }, [])
 
   const handlePromptSubmit = async (prompt: string) => {
     const trimmed = prompt.trim();
