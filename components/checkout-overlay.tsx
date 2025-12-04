@@ -198,6 +198,14 @@ export function CheckoutOverlay({
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
             <p className="text-sm text-gray-600">Loading checkout...</p>
           </div>
+        ) : isWaitingForPayment ? (
+          <div className="flex flex-col items-center justify-center py-8 gap-3">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="text-sm text-gray-600">Processing payment...</p>
+            <p className="text-xs text-gray-500">
+              Please complete payment in the checkout window
+            </p>
+          </div>
         ) : error ? (
           <div className="space-y-4">
             <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
