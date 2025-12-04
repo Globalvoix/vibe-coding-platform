@@ -71,7 +71,7 @@ export default function PricingPage() {
             {plans.map((plan) => (
               <div
                 key={plan.name}
-                className={`flex flex-col rounded-2xl border bg-white shadow-sm px-5 py-6 text-left ${
+                className={`flex flex-col justify-between rounded-2xl border bg-white shadow-sm px-5 py-6 text-left ${
                   plan.highlight
                     ? "border-blue-600 shadow-md"
                     : "border-gray-200"
