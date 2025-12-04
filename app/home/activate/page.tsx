@@ -130,7 +130,7 @@ export default function ActivatePage() {
                 </button>
 
                 <p className="text-xs text-gray-500 text-center">
-                  If you haven't completed payment yet, please do so first and
+                  If you haven&apos;t completed payment yet, please do so first and
                   then return to this page.
                 </p>
               </div>
