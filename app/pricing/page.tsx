@@ -136,18 +136,10 @@ export default function PricingPage() {
                 </ul>
                 <Button
                   onClick={() => handleGetStarted(plan.id)}
-                  disabled={loadingPlan === plan.id}
                   className="mt-6 w-full text-xs"
                   variant={plan.highlight ? "default" : "outline"}
                 >
-                  {loadingPlan === plan.id ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                      Loading...
-                    </>
-                  ) : (
-                    'Get started'
-                  )}
+                  Get started
                 </Button>
               </div>
             ))}
