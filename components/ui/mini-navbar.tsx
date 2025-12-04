@@ -27,6 +27,8 @@ export function Navbar() {
   const shapeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { toggleSidebar } = useUIStore();
   const { isSignedIn } = useAuth();
+  const [planId, setPlanId] = useState<string | null>(null);
+  const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null);
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -52,6 +54,36 @@ export function Navbar() {
     };
   }, [isOpen]);
 
+  useEffect(() => {
+    if (!isSignedIn) {
+      setPlanId(null);
+      setSubscriptionStatus(null);
+      return;
+    }
+
+    let cancelled = false;
+
+    async function loadSubscription() {
+      try {
+        const response = await fetch('/api/subscription');
+        if (!response.ok) return;
+        const data = await response.json();
+        if (!cancelled) {
+          setPlanId(data.planId ?? null);
+          setSubscriptionStatus(data.status ?? null);
+        }
+      } catch (error) {
+        console.error('Failed to load subscription', error);
+      }
+    }
+
+    loadSubscription();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isSignedIn]);
+
   const logoElement = (
     <div className="relative w-5 h-5 flex items-center justify-center">
       <span className="absolute w-1.5 h-1.5 rounded-full bg-blue-600 top-0 left-1/2 transform -translate-x-1/2 opacity-80"></span>
@@ -67,9 +99,17 @@ export function Navbar() {
     { label: 'Solutions', href: '#3' },
   ];
 
+  const isProActive =
+    planId === 'pro' && (subscriptionStatus === 'active' || !subscriptionStatus);
+
   const authElement = isSignedIn ? (
-    <div className="flex items-center">
+    <div className="flex items-center gap-2">
       <UserButton afterSignOutUrl="/" />
+      {isProActive && (
+        <span className="px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide rounded-full bg-blue-600/10 text-blue-700 border border-blue-500/40">
+          Pro
+        </span>
+      )}
     </div>
   ) : (
     <>
