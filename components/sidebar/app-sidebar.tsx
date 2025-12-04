@@ -39,10 +39,7 @@ export function AppSidebar() {
         )}
       >
         <div className="flex flex-col h-full">
-          <div className="flex items-center justify-between p-4 border-b border-border sticky top-0 bg-background">
-            <h2 className="text-sm font-semibold text-foreground uppercase tracking-tight">
-              Thinksoft
-            </h2>
+          <div className="flex items-center justify-end p-4 border-b border-border sticky top-0 bg-background/60 backdrop-blur-md">
             <button
               onClick={handleToggle}
               className="p-1.5 hover:bg-secondary rounded-lg transition-colors"
