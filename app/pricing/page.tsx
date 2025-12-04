@@ -1,10 +1,21 @@
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useUser } from '@clerk/nextjs'
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import { Navbar } from "@/components/ui/mini-navbar";
 import { Button } from "@/components/ui/button";
+import { Loader2 } from 'lucide-react'
 
 export default function PricingPage() {
+  const router = useRouter()
+  const { user, isSignedIn } = useUser()
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
+
   const plans = [
     {
+      id: 'free',
       name: "Free",
       price: "$0/mo",
       description: "Get started with AI-generated frontends and a single workspace.",
@@ -17,6 +28,7 @@ export default function PricingPage() {
       highlight: false,
     },
     {
+      id: 'pro',
       name: "Pro",
       price: "$15/mo",
       description: "For individual builders shipping advanced frontends every week.",
@@ -29,6 +41,7 @@ export default function PricingPage() {
       highlight: true,
     },
     {
+      id: 'business',
       name: "Business",
       price: "$50/mo",
       description: "For teams running multiple products and environments.",
@@ -41,6 +54,7 @@ export default function PricingPage() {
       highlight: false,
     },
     {
+      id: 'enterprise',
       name: "Enterprise",
       price: "$499/mo",
       description: "For organizations that need custom limits and enterprise guarantees.",
@@ -53,6 +67,51 @@ export default function PricingPage() {
       highlight: false,
     },
   ];
+
+  const handleGetStarted = async (planId: string) => {
+    // Free plan doesn't need checkout
+    if (planId === 'free') {
+      if (!isSignedIn) {
+        router.push('/sign-in')
+        return
+      }
+      router.push('/home')
+      return
+    }
+
+    // For paid plans, redirect to sign in if not signed in
+    if (!isSignedIn) {
+      router.push('/sign-in')
+      return
+    }
+
+    setLoadingPlan(planId)
+
+    try {
+      const response = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ planId }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        console.error('Checkout error:', error)
+        setLoadingPlan(null)
+        return
+      }
+
+      const { checkoutUrl } = await response.json()
+
+      // Redirect to Lemon Squeezy checkout
+      window.location.href = checkoutUrl
+    } catch (error) {
+      console.error('Error initiating checkout:', error)
+      setLoadingPlan(null)
+    }
+  }
 
   return (
     <>
@@ -70,7 +129,7 @@ export default function PricingPage() {
           <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {plans.map((plan) => (
               <div
-                key={plan.name}
+                key={plan.id}
                 className={`flex flex-col justify-between rounded-2xl border bg-white shadow-sm px-5 py-6 text-left ${
                   plan.highlight
                     ? "border-blue-600 shadow-md"
@@ -95,10 +154,19 @@ export default function PricingPage() {
                   ))}
                 </ul>
                 <Button
+                  onClick={() => handleGetStarted(plan.id)}
+                  disabled={loadingPlan === plan.id}
                   className="mt-6 w-full text-xs"
                   variant={plan.highlight ? "default" : "outline"}
                 >
-                  Get started
+                  {loadingPlan === plan.id ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      Loading...
+                    </>
+                  ) : (
+                    'Get started'
+                  )}
                 </Button>
               </div>
             ))}
