@@ -115,7 +115,7 @@ async function handleSubscriptionCreated(
   const planId = mapProductIdToPlanId(product_id)
 
   // Get user_id from custom checkout data
-  let userId = data.attributes.custom?.user_id
+  const userId = data.attributes.custom?.user_id
 
   console.log('🔍 subscription_created - User lookup:', {
     hasCustomUserId: !!userId,
@@ -152,7 +152,7 @@ async function handleSubscriptionUpdated(
   const planId = mapProductIdToPlanId(product_id)
 
   // Get user_id from custom checkout data
-  let userId = data.attributes.custom?.user_id
+  const userId = data.attributes.custom?.user_id
 
   console.log('🔍 subscription_updated - User lookup:', {
     hasCustomUserId: !!userId,
@@ -179,7 +179,7 @@ async function handlePaymentSuccess(
   const planId = mapProductIdToPlanId(product_id)
 
   // Get user_id from custom checkout data
-  let userId = data.attributes.custom?.user_id
+  const userId = data.attributes.custom?.user_id
 
   console.log('🔍 subscription_payment_success - User lookup:', {
     hasCustomUserId: !!userId,
