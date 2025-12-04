@@ -1,11 +1,16 @@
 'use client';
 
+'use client'
+
 import { HeroWave } from '@/components/ui/ai-input-hero'
 import { AppSidebar } from '@/components/sidebar/app-sidebar'
 import { useRouter } from 'next/navigation'
+import { useUIStore } from '@/lib/ui-store'
+import { cn } from '@/lib/utils'
 
 export default function Page() {
   const router = useRouter()
+  const { sidebarOpen } = useUIStore()
 
   const handlePromptSubmit = async (prompt: string) => {
     const trimmed = prompt.trim()
@@ -29,7 +34,14 @@ export default function Page() {
   return (
     <>
       <AppSidebar />
-      <HeroWave onPromptSubmit={handlePromptSubmit} />
+      <div
+        className={cn(
+          'transition-transform duration-300 ease-out',
+          sidebarOpen ? 'translate-x-64' : 'translate-x-0'
+        )}
+      >
+        <HeroWave onPromptSubmit={handlePromptSubmit} />
+      </div>
     </>
   )
 }

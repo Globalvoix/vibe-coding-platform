@@ -1,13 +1,18 @@
 'use client';
 
+'use client';
+
 import { useEffect } from "react";
 import { HeroWave } from "@/components/ui/ai-input-hero";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import { useRouter } from "next/navigation";
+import { useUIStore } from "@/lib/ui-store";
+import { cn } from "@/lib/utils";
 import { ensureUserSubscription } from "@/app/actions/subscription";
 
 export default function HomePage() {
   const router = useRouter();
+  const { sidebarOpen } = useUIStore();
 
   useEffect(() => {
     // Ensure user has a subscription initialized
@@ -36,7 +41,14 @@ export default function HomePage() {
   return (
     <>
       <AppSidebar />
-      <HeroWave onPromptSubmit={handlePromptSubmit} />
+      <div
+        className={cn(
+          'transition-transform duration-300 ease-out',
+          sidebarOpen ? 'translate-x-64' : 'translate-x-0'
+        )}
+      >
+        <HeroWave onPromptSubmit={handlePromptSubmit} />
+      </div>
     </>
   );
 }
