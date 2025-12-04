@@ -166,13 +166,25 @@ export function CheckoutOverlay({
   }
 
   const handleClose = () => {
+    if (pollIntervalRef.current) {
+      clearInterval(pollIntervalRef.current)
+    }
     onOpenChange(false)
     setCheckoutUrl(null)
     setError(null)
+    setIsWaitingForPayment(false)
   }
 
+  useEffect(() => {
+    return () => {
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current)
+      }
+    }
+  }, [])
+
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Complete Your Purchase</DialogTitle>
