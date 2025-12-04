@@ -63,17 +63,23 @@ async function handleSubscriptionCreated(
   // For now, we use customer_id directly - you may need to map this properly
   const userId = customer_id
 
+  // Set status to pending_activation for paid plans (awaiting manual activation)
+  // Keep 'active' only for free plans
+  const activationStatus = planId === 'free' ? 'active' : 'pending_activation'
+
   await updateSubscriptionFromWebhook(
     data.id,
     userId,
     planId,
-    status,
+    activationStatus,
     starts_at,
     renews_at,
     order_id
   )
 
-  console.log(`Subscription created for user ${userId} with plan ${planId}`)
+  console.log(
+    `Subscription created for user ${userId} with plan ${planId} (status: ${activationStatus})`
+  )
 }
 
 async function handleSubscriptionUpdated(
@@ -86,18 +92,21 @@ async function handleSubscriptionUpdated(
   const planId = mapProductIdToPlanId(product_id)
   const userId = customer_id
 
+  // Set status to pending_activation for paid plans, active for free plans
+  const activationStatus = planId === 'free' ? 'active' : 'pending_activation'
+
   await updateSubscriptionFromWebhook(
     data.id,
     userId,
     planId,
-    status,
+    activationStatus,
     starts_at,
     renews_at,
     order_id
   )
 
   console.log(
-    `Subscription updated for user ${userId} with plan ${planId} status: ${status}`
+    `Subscription updated for user ${userId} with plan ${planId} (status: ${activationStatus})`
   )
 }
 
