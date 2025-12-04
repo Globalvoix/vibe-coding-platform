@@ -9,11 +9,13 @@ const CHECKOUT_URLS: Record<Exclude<PlanId, 'free'>, string> = {
 /**
  * Get Lemon Squeezy checkout URL for a specific plan
  * @param planId The plan to generate checkout for
+ * @param userId The Clerk user ID to associate with this checkout
  * @param returnUrl URL to redirect to after successful payment
  * @returns The Lemon Squeezy checkout URL
  */
 export function getLemonSqueezyCheckoutUrl(
   planId: Exclude<PlanId, 'free'>,
+  userId?: string,
   returnUrl?: string
 ): string {
   const baseUrl = CHECKOUT_URLS[planId]
@@ -21,13 +23,18 @@ export function getLemonSqueezyCheckoutUrl(
     throw new Error(`Invalid plan ID: ${planId}`)
   }
 
-  if (returnUrl) {
-    const url = new URL(baseUrl)
-    url.searchParams.append('checkout[success_url]', returnUrl)
-    return url.toString()
+  const url = new URL(baseUrl)
+
+  // Pass userId as custom field so webhook can match it to our database
+  if (userId) {
+    url.searchParams.append('checkout[custom][user_id]', userId)
   }
 
-  return baseUrl
+  if (returnUrl) {
+    url.searchParams.append('checkout[success_url]', returnUrl)
+  }
+
+  return url.toString()
 }
 
 /**
