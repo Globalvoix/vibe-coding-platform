@@ -59,9 +59,15 @@ async function handleSubscriptionCreated(
 
   const planId = mapProductIdToPlanId(product_id)
 
-  // Map customer_id from Lemon Squeezy to our user_id (Clerk user ID)
-  // For now, we use customer_id directly - you may need to map this properly
-  const userId = customer_id
+  // Get the user_id from custom checkout data (passed during checkout creation)
+  // The custom field is available in the webhook payload
+  const customData = (data.attributes as any).custom
+  const userId = customData?.user_id || customer_id
+
+  if (!userId) {
+    console.error('No user_id found in webhook payload')
+    return
+  }
 
   // Set status to pending_activation for paid plans (awaiting manual activation)
   // Keep 'active' only for free plans
