@@ -1,17 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
-import {
-  getUserSubscription,
-  initializeFreeSubscription,
-} from '@/lib/subscription'
-import { getLemonSqueezyCheckoutUrl } from '@/lib/lemon-squeezy'
-import { storeCheckoutSession } from '@/lib/checkout-cache'
+
+const checkoutLinks: Record<string, string> = {
+  pro: 'https://thinksoft.lemonsqueezy.com/buy/5c4b6ae1-8fcf-4a2f-8c64-4f8d2a866262',
+  business: 'https://thinksoft.lemonsqueezy.com/buy/0476f9d8-cc5e-4c77-8916-e918e815a141?discount=0',
+  enterprise: 'https://thinksoft.lemonsqueezy.com/buy/1988f037-ac3e-4434-9a34-85ee271d18b5?discount=0',
+}
 
 export async function POST(request: NextRequest) {
   try {
     const { userId } = await auth()
 
-    // If user is not logged in, return error
     if (!userId) {
       return NextResponse.json(
         { error: 'User not authenticated' },
@@ -29,21 +28,20 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check if user has a subscription, if not create free one
-    let subscription = await getUserSubscription(userId)
-    if (!subscription) {
-      subscription = await initializeFreeSubscription(userId)
+    // Get checkout URL
+    const baseUrl = checkoutLinks[planId as keyof typeof checkoutLinks]
+    if (!baseUrl) {
+      return NextResponse.json(
+        { error: 'Checkout URL not found' },
+        { status: 400 }
+      )
     }
 
-    // Generate Lemon Squeezy checkout URL with userId for webhook mapping
-    const checkoutUrl = getLemonSqueezyCheckoutUrl(planId, userId)
+    // Add user ID as custom field
+    const url = new URL(baseUrl)
+    url.searchParams.append('checkout[custom][user_id]', userId)
 
-    // Store in cache as fallback if custom field not in webhook
-    storeCheckoutSession(checkoutUrl, userId)
-
-    console.log('📝 Checkout session stored:', { userId, planId, checkoutUrl: checkoutUrl.substring(0, 80) })
-
-    return NextResponse.json({ checkoutUrl })
+    return NextResponse.json({ checkoutUrl: url.toString() })
   } catch (error) {
     console.error('Checkout error:', error)
     return NextResponse.json(
