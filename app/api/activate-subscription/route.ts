@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
-import { pool } from '@/lib/db'
+import { pool } from '@/lib/supabase-db'
 
 const RATE_LIMIT_WINDOW = 60000 // 1 minute
 const MAX_ATTEMPTS = 5
