@@ -1,4 +1,4 @@
-import { pool } from './supabase-db'
+import { supabasePool } from './supabase-pool'
 
 export type PlanId = 'free' | 'pro' | 'business' | 'enterprise'
 export type SubscriptionStatus = 'active' | 'pending' | 'trialing' | 'past_due' | 'cancelled'
