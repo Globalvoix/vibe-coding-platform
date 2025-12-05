@@ -59,6 +59,14 @@ export async function updateSubscriptionFromWebhook(
   orderIdOrProductId?: string
 ): Promise<Subscription | null> {
   try {
+    console.log('📊 updateSubscriptionFromWebhook - DB Query:', {
+      userId,
+      planId,
+      status,
+      lemonSqueezySubscriptionId,
+      orderIdOrProductId,
+    })
+
     const result = await supabasePool.query(
       `INSERT INTO subscriptions (
         user_id,
@@ -88,9 +96,19 @@ export async function updateSubscriptionFromWebhook(
         currentPeriodEnd,
       ]
     )
+
+    console.log('✅ Query succeeded, rows affected:', result.rowCount)
+    console.log('📋 Returned subscription:', result.rows[0])
+
     return result.rows[0] || null
   } catch (error) {
-    console.error('Error updating subscription:', error)
+    console.error('❌ Error updating subscription:', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      userId,
+      planId,
+      status,
+    })
     return null
   }
 }
