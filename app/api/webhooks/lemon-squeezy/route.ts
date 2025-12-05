@@ -381,7 +381,7 @@ async function handleSubscriptionCancelled(
 
   try {
     // Update subscription status to 'cancelled'
-    await pool.query(
+    await supabasePool.query(
       `UPDATE subscriptions
        SET status = $1, updated_at = NOW()
        WHERE user_id = $2
