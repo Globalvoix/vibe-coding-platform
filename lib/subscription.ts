@@ -1,12 +1,13 @@
 import { pool } from './supabase-db'
 
 export type PlanId = 'free' | 'pro' | 'business' | 'enterprise'
+export type SubscriptionStatus = 'active' | 'pending' | 'trialing' | 'past_due' | 'cancelled'
 
 interface Subscription {
   id: number
   user_id: string
   plan_id: PlanId
-  status: string
+  status: SubscriptionStatus
   lemon_squeezy_order_id: string | null
   lemon_squeezy_subscription_id: string | null
   current_period_start: string | null
