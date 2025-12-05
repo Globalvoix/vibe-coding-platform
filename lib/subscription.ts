@@ -35,7 +35,7 @@ export async function initializeFreeSubscription(
   userId: string
 ): Promise<Subscription | null> {
   try {
-    const result = await pool.query(
+    const result = await supabasePool.query(
       `INSERT INTO subscriptions (user_id, plan_id, status)
        VALUES ($1, $2, $3)
        ON CONFLICT (user_id) DO NOTHING
