@@ -4,7 +4,7 @@ import {
   updateSubscriptionFromWebhook,
   mapProductIdToPlanId,
 } from '@/lib/subscription'
-import { pool } from '@/lib/supabase-db'
+import { supabasePool } from '@/lib/supabase-pool'
 
 const WEBHOOK_SECRET = process.env.LEMON_SQUEEZY_WEBHOOK_SECRET || ''
 
