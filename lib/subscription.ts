@@ -59,7 +59,7 @@ export async function updateSubscriptionFromWebhook(
   orderIdOrProductId?: string
 ): Promise<Subscription | null> {
   try {
-    const result = await pool.query(
+    const result = await supabasePool.query(
       `INSERT INTO subscriptions (
         user_id,
         plan_id,
