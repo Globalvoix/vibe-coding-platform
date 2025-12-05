@@ -20,7 +20,7 @@ export async function getUserSubscription(
   userId: string
 ): Promise<Subscription | null> {
   try {
-    const result = await pool.query(
+    const result = await supabasePool.query(
       'SELECT * FROM subscriptions WHERE user_id = $1',
       [userId]
     )
