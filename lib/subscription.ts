@@ -53,7 +53,7 @@ export async function updateSubscriptionFromWebhook(
   lemonSqueezySubscriptionId: string,
   userId: string,
   planId: PlanId,
-  status: string,
+  status: SubscriptionStatus,
   currentPeriodStart: string,
   currentPeriodEnd: string,
   orderIdOrProductId?: string
