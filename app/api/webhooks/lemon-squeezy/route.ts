@@ -179,8 +179,17 @@ async function handleOrderCreated(
     const now = new Date().toISOString()
     const thirtyDaysFromNow = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
 
+    console.log('📝 Calling updateSubscriptionFromWebhook with:', {
+      lemonSqueezySubscriptionId: data.id,
+      userId,
+      planId,
+      status: 'pending',
+      currentPeriodStart: now,
+      currentPeriodEnd: thirtyDaysFromNow,
+    })
+
     // Create subscription with 'pending' status (waiting for payment confirmation)
-    await updateSubscriptionFromWebhook(
+    const result = await updateSubscriptionFromWebhook(
       data.id,
       userId,
       planId,
@@ -191,10 +200,18 @@ async function handleOrderCreated(
     )
 
     console.log(
-      `✅ Subscription created (pending payment): userId=${userId}, plan=${planId}`
+      `✅ Subscription created (pending payment):`,
+      {
+        userId,
+        plan: planId,
+        result: result ? `Row ID: ${result.id}` : 'No result returned',
+      }
     )
   } catch (error) {
-    console.error('❌ Error creating subscription:', error)
+    console.error('❌ Error creating subscription in order_created:', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    })
   }
 }
 
