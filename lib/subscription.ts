@@ -16,10 +16,49 @@ interface Subscription {
   updated_at: string
 }
 
+let ensureTablePromise: Promise<void> | null = null
+
+async function ensureSubscriptionsTable(): Promise<void> {
+  if (!ensureTablePromise) {
+    ensureTablePromise = (async () => {
+      try {
+        await pool.query(`
+          CREATE TABLE IF NOT EXISTS subscriptions (
+            id SERIAL PRIMARY KEY,
+            user_id VARCHAR(255) NOT NULL UNIQUE,
+            plan_id VARCHAR(50) NOT NULL DEFAULT 'free',
+            status VARCHAR(50) NOT NULL DEFAULT 'active',
+            lemon_squeezy_order_id VARCHAR(255),
+            lemon_squeezy_subscription_id VARCHAR(255) UNIQUE,
+            current_period_start TIMESTAMPTZ,
+            current_period_end TIMESTAMPTZ,
+            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+          );
+        `)
+
+        await pool.query(
+          `CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);`
+        )
+
+        await pool.query(
+          `CREATE INDEX IF NOT EXISTS idx_subscriptions_lemon_squeezy_id ON subscriptions(lemon_squeezy_subscription_id);`
+        )
+      } catch (error) {
+        console.error('Error ensuring subscriptions table exists:', error)
+        throw error
+      }
+    })()
+  }
+
+  return ensureTablePromise
+}
+
 export async function getUserSubscription(
   userId: string
 ): Promise<Subscription | null> {
   try {
+    await ensureSubscriptionsTable()
     const result = await pool.query(
       'SELECT * FROM subscriptions WHERE user_id = $1',
       [userId]
@@ -35,6 +74,7 @@ export async function initializeFreeSubscription(
   userId: string
 ): Promise<Subscription | null> {
   try {
+    await ensureSubscriptionsTable()
     const result = await pool.query(
       `INSERT INTO subscriptions (user_id, plan_id, status)
        VALUES ($1, $2, $3)
@@ -59,6 +99,7 @@ export async function updateSubscriptionFromWebhook(
   orderIdOrProductId?: string
 ): Promise<Subscription | null> {
   try {
+    await ensureSubscriptionsTable()
     console.log('📊 updateSubscriptionFromWebhook - DB Query:', {
       userId,
       planId,
