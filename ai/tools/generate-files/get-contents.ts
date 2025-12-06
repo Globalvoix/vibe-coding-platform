@@ -1,6 +1,8 @@
 import { streamObject, type ModelMessage } from 'ai'
 import { getModelOptions } from '@/ai/gateway'
 import { Deferred } from '@/lib/deferred'
+import { auth } from '@clerk/nextjs/server'
+import { getUserCredits, recordUsageAndDeductCredits } from '@/lib/credits'
 import z from 'zod/v3'
 
 export type File = z.infer<typeof fileSchema>
@@ -33,6 +35,18 @@ interface FileContentChunk {
 export async function* getContents(
   params: Params
 ): AsyncGenerator<FileContentChunk> {
+  const { userId } = await auth()
+
+  if (!userId) {
+    throw new Error('User not authenticated')
+  }
+
+  const credits = await getUserCredits(userId)
+
+  if (credits.balance <= 0) {
+    throw new Error('You have no AI credits remaining. Please upgrade your plan.')
+  }
+
   const generated: z.infer<typeof fileSchema>[] = []
   const deferred = new Deferred<void>()
   const result = streamObject({
@@ -184,6 +198,18 @@ EXCELLENCE MARKERS (ALWAYS):
       deferred.reject(error)
       console.error('Error communicating with AI')
       console.error(JSON.stringify(error, null, 2))
+    },
+    onFinish: async ({ usage }) => {
+      try {
+        await recordUsageAndDeductCredits({
+          userId,
+          modelId: params.modelId,
+          usage,
+          metadata: { source: 'generate-files' },
+        })
+      } catch (error) {
+        console.error('Failed to record credit usage for generate-files', error)
+      }
     },
   })
 

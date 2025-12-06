@@ -29,6 +29,7 @@ export function Navbar() {
   const { isSignedIn } = useAuth();
   const [planId, setPlanId] = useState<string | null>(null);
   const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null);
+  const [creditBalance, setCreditBalance] = useState<number | null>(null);
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -58,6 +59,7 @@ export function Navbar() {
     if (!isSignedIn) {
       setPlanId(null);
       setSubscriptionStatus(null);
+      setCreditBalance(null);
       return;
     }
 
@@ -70,26 +72,35 @@ export function Navbar() {
     const maxAttempts = hasCheckoutSuccess ? 8 : 1;
     let attempts = 0;
 
-    async function loadSubscription() {
+    async function loadSubscriptionAndCredits() {
       try {
-        const response = await fetch('/api/subscription');
-        if (!response.ok) return;
-        const data = await response.json();
-        if (cancelled) return;
-        setPlanId(data.planId ?? null);
-        setSubscriptionStatus(data.status ?? null);
+        const [subscriptionResponse, creditsResponse] = await Promise.all([
+          fetch('/api/user/subscription'),
+          fetch('/api/user/credits'),
+        ]);
 
-        const isPro = data.planId === 'pro' && data.status === 'active';
+        if (!subscriptionResponse.ok || !creditsResponse.ok || cancelled) return;
+
+        const subscriptionData = await subscriptionResponse.json();
+        const creditsData = await creditsResponse.json();
+
+        setPlanId(subscriptionData.subscription?.plan_id ?? null);
+        setSubscriptionStatus(subscriptionData.subscription?.status ?? null);
+        setCreditBalance(typeof creditsData.credits === 'number' ? creditsData.credits : null);
+
+        const isPro =
+          subscriptionData.subscription?.plan_id === 'pro' &&
+          subscriptionData.subscription?.status === 'active';
         attempts += 1;
         if (!isPro && attempts < maxAttempts) {
-          setTimeout(loadSubscription, 2000);
+          setTimeout(loadSubscriptionAndCredits, 2000);
         }
       } catch (error) {
-        console.error('Failed to load subscription', error);
+        console.error('Failed to load subscription or credits', error);
       }
     }
 
-    loadSubscription();
+    loadSubscriptionAndCredits();
 
     return () => {
       cancelled = true;
@@ -114,12 +125,19 @@ export function Navbar() {
   const isProActive =
     planId === 'pro' && (subscriptionStatus === 'active' || !subscriptionStatus);
 
+  const hasCredits = typeof creditBalance === 'number' && creditBalance > 0;
+
   const authElement = isSignedIn ? (
     <div className="flex items-center gap-2">
       <UserButton afterSignOutUrl="/" />
       {isProActive && (
         <span className="px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide rounded-full bg-blue-600/10 text-blue-700 border border-blue-500/40">
           Pro
+        </span>
+      )}
+      {hasCredits && (
+        <span className="px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide rounded-full bg-green-600/10 text-green-700 border border-green-500/40">
+          {creditBalance} credits
         </span>
       )}
     </div>
