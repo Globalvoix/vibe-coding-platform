@@ -11,6 +11,7 @@ export function AppSidebar() {
   const [isAnimating, setIsAnimating] = useState(false)
   const [creditBalance, setCreditBalance] = useState<number | null>(null)
   const [isCreditsLoading, setIsCreditsLoading] = useState(false)
+  const [resetText, setResetText] = useState<string | null>(null)
   const router = useRouter()
   const { sidebarOpen, setSidebarOpen } = useUIStore()
   const { isSignedIn } = useAuth()
@@ -20,20 +21,70 @@ export function AppSidebar() {
     if (!isSignedIn) {
       setCreditBalance(null)
       setIsCreditsLoading(false)
+      setResetText(null)
       return
     }
 
     let cancelled = false
 
-    async function loadCredits() {
+    async function loadSubscriptionAndCredits() {
       try {
         setIsCreditsLoading(true)
-        const response = await fetch('/api/user/credits')
-        if (!response.ok || cancelled) return
-        const data = await response.json()
-        setCreditBalance(typeof data.credits === 'number' ? data.credits : null)
+
+        const [subscriptionResponse, creditsResponse] = await Promise.all([
+          fetch('/api/user/subscription'),
+          fetch('/api/user/credits'),
+        ])
+
+        if (cancelled) return
+
+        if (creditsResponse.ok) {
+          const creditsData = await creditsResponse.json()
+          setCreditBalance(
+            typeof creditsData.credits === 'number' ? creditsData.credits : null
+          )
+        }
+
+        if (subscriptionResponse.ok) {
+          const subscriptionData = await subscriptionResponse.json()
+          const subscription = subscriptionData.subscription
+
+          if (subscription) {
+            const rawEnd: string | null = subscription.current_period_end
+            let resetDate: Date | null = null
+
+            if (rawEnd) {
+              resetDate = new Date(rawEnd)
+            } else {
+              const now = new Date()
+              resetDate = new Date(
+                now.getFullYear(),
+                now.getMonth() + 1,
+                now.getDate(),
+                now.getHours(),
+                now.getMinutes()
+              )
+            }
+
+            if (!Number.isNaN(resetDate.getTime())) {
+              const datePart = resetDate.toLocaleDateString(undefined, {
+                month: 'short',
+                day: 'numeric',
+              })
+              const timePart = resetDate.toLocaleTimeString(undefined, {
+                hour: 'numeric',
+                minute: '2-digit',
+              })
+              setResetText(`Resets on ${datePart} at ${timePart}`)
+            } else {
+              setResetText(null)
+            }
+          } else {
+            setResetText(null)
+          }
+        }
       } catch (error) {
-        console.error('Failed to load user credits', error)
+        console.error('Failed to load subscription or credits', error)
       } finally {
         if (!cancelled) {
           setIsCreditsLoading(false)
@@ -41,7 +92,7 @@ export function AppSidebar() {
       }
     }
 
-    loadCredits()
+    loadSubscriptionAndCredits()
 
     return () => {
       cancelled = true
@@ -113,11 +164,18 @@ export function AppSidebar() {
           </div>
 
           {isSignedIn && (
-            <div className="mt-auto px-4 py-3 border-t border-border/70 text-xs text-muted-foreground flex items-center justify-between">
-              <span className="font-medium text-foreground/80">Credits left</span>
-              <span className="px-2 py-0.5 text-[11px] font-semibold rounded-full bg-green-600/10 text-green-700 border border-green-500/40">
-                {isCreditsLoading ? '...' : `${creditBalance ?? 0}`}
-              </span>
+            <div className="mt-auto px-4 py-3 border-t border-border/70 text-xs text-muted-foreground flex flex-col gap-1">
+              <div className="flex items-center justify-between">
+                <span className="font-medium text-foreground/80">Credits left</span>
+                <span className="px-2 py-0.5 text-[11px] font-semibold rounded-full bg-green-600/10 text-green-700 border border-green-500/40">
+                  {isCreditsLoading ? '...' : `${creditBalance ?? 0}`}
+                </span>
+              </div>
+              {resetText && (
+                <span className="text-[11px] text-muted-foreground/80">
+                  {resetText}
+                </span>
+              )}
             </div>
           )}
         </div>
