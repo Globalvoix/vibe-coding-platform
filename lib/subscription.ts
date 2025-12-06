@@ -159,8 +159,8 @@ export async function getPlanLimits(planId: PlanId) {
     {
       free: { credits: 20, apps: 3, dbs: 1 },
       pro: { credits: 200, apps: 10, dbs: 10 },
-      business: { credits: 1000, apps: 30, dbs: 30 },
-      enterprise: { credits: 10000, apps: Infinity, dbs: Infinity },
+      business: { credits: 600, apps: 30, dbs: 30 },
+      enterprise: { credits: 6000, apps: Infinity, dbs: Infinity },
     }
   return limits[planId] || limits.free
 }
