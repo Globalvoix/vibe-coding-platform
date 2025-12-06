@@ -376,8 +376,8 @@ async function handleSubscriptionUpdated(
 }
 
 /**
- * subscription_cancelled: User cancelled subscription
- * Set status to 'cancelled'
+ * subscription_cancelled: User subscription ended or was cancelled
+ * Downgrade user to the free plan until they purchase a new subscription
  */
 async function handleSubscriptionCancelled(
   payload: LemonSqueezyWebhookPayload
@@ -397,17 +397,19 @@ async function handleSubscriptionCancelled(
   }
 
   try {
-    // Update subscription status to 'cancelled'
+    // Downgrade user to the free plan with an active free status
     await pool.query(
       `UPDATE subscriptions
-       SET status = $1, updated_at = NOW()
-       WHERE user_id = $2
+       SET plan_id = $1,
+           status = $2,
+           updated_at = NOW()
+       WHERE user_id = $3
        RETURNING id, plan_id, status`,
-      ['cancelled', userId]
+      ['free', 'active', userId]
     )
 
     console.log(
-      `❌ Subscription cancelled: userId=${userId}`
+      `❌ Subscription cancelled, downgraded to free plan: userId=${userId}`
     )
   } catch (error) {
     console.error('❌ Error cancelling subscription:', error)
