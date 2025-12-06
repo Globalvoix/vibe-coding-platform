@@ -23,6 +23,16 @@ export default function Page() {
     })
 
     if (!response.ok) {
+      try {
+        const data = await response.json()
+        if (data?.code === 'APP_LIMIT_REACHED') {
+          router.push('/pricing')
+          return
+        }
+      } catch (error) {
+        console.error('Failed to parse project creation error', error)
+      }
+
       console.error('Failed to create project')
       throw new Error('Failed to create project')
     }
