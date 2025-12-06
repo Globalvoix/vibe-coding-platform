@@ -188,19 +188,19 @@ async function handleOrderCreated(
       currentPeriodEnd: thirtyDaysFromNow,
     })
 
-    // Create subscription with 'pending' status (waiting for payment confirmation)
+    // Create/activate subscription immediately when order is successfully created
     const result = await updateSubscriptionFromWebhook(
       data.id,
       userId,
       planId,
-      'pending',
+      'active',
       now,
       thirtyDaysFromNow,
       data.id
     )
 
     console.log(
-      `✅ Subscription created (pending payment):`,
+      `✅ Subscription ACTIVATED from order_created:`,
       {
         userId,
         plan: planId,
