@@ -108,7 +108,7 @@ export function Navbar() {
   const navLinksData = [
     { label: 'Product', href: '/product' },
     { label: 'Pricing', href: '/pricing' },
-    { label: 'Solutions', href: '#3' },
+    { label: 'Solution', href: '#3' },
   ];
 
   const isProActive =
