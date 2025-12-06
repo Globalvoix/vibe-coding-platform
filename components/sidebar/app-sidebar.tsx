@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth, useClerk } from '@clerk/nextjs'
 import { useUIStore } from '@/lib/ui-store'
@@ -9,10 +9,44 @@ import { X, Home, LayoutGrid, Users } from 'lucide-react'
 
 export function AppSidebar() {
   const [isAnimating, setIsAnimating] = useState(false)
+  const [creditBalance, setCreditBalance] = useState<number | null>(null)
+  const [isCreditsLoading, setIsCreditsLoading] = useState(false)
   const router = useRouter()
   const { sidebarOpen, setSidebarOpen } = useUIStore()
   const { isSignedIn } = useAuth()
   const { openSignIn } = useClerk()
+
+  useEffect(() => {
+    if (!isSignedIn) {
+      setCreditBalance(null)
+      setIsCreditsLoading(false)
+      return
+    }
+
+    let cancelled = false
+
+    async function loadCredits() {
+      try {
+        setIsCreditsLoading(true)
+        const response = await fetch('/api/user/credits')
+        if (!response.ok || cancelled) return
+        const data = await response.json()
+        setCreditBalance(typeof data.credits === 'number' ? data.credits : null)
+      } catch (error) {
+        console.error('Failed to load user credits', error)
+      } finally {
+        if (!cancelled) {
+          setIsCreditsLoading(false)
+        }
+      }
+    }
+
+    loadCredits()
+
+    return () => {
+      cancelled = true
+    }
+  }, [isSignedIn])
 
   const handleNavigateHome = () => {
     setSidebarOpen(false)
@@ -77,6 +111,15 @@ export function AppSidebar() {
               <span>Shared with me</span>
             </button>
           </div>
+
+          {isSignedIn && (
+            <div className="mt-auto px-4 py-3 border-t border-border/70 text-xs text-muted-foreground flex items-center justify-between">
+              <span className="font-medium text-foreground/80">Credits left</span>
+              <span className="px-2 py-0.5 text-[11px] font-semibold rounded-full bg-green-600/10 text-green-700 border border-green-500/40">
+                {isCreditsLoading ? '...' : `${creditBalance ?? 0}`}
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </>
