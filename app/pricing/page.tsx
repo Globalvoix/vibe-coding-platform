@@ -147,9 +147,6 @@ export default function PricingPage() {
           <p className="mt-3 text-sm sm:text-base text-gray-600">
             Choose the plan that fits how you build with Thinksoft.
           </p>
-          <p className="mt-1 text-xs sm:text-sm text-gray-500">
-            Each US dollar of AI gateway usage is mapped to 20 Thinksoft credits for transparent, usage-based billing.
-          </p>
 
           <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {plans.map((plan) => (
