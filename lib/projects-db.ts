@@ -63,6 +63,20 @@ export async function listProjects(userId: string): Promise<ProjectRecord[]> {
   return result.rows
 }
 
+export async function countProjectsCreatedSince(
+  userId: string,
+  periodStart: Date
+): Promise<number> {
+  await ensureProjectsTable()
+  const result = await pool.query<{ count: number }>(
+    `SELECT COUNT(*)::int AS count
+     FROM projects
+     WHERE user_id = $1 AND created_at >= $2`,
+    [userId, periodStart.toISOString()]
+  )
+  return result.rows[0]?.count ?? 0
+}
+
 export async function getProject(userId: string, id: string): Promise<ProjectRecord | null> {
   await ensureProjectsTable()
   const result = await pool.query<ProjectRecord>(
