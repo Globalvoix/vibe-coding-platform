@@ -35,7 +35,7 @@ export default function PricingPage() {
       features: [
         "20 credits per month",
         "Up to 3 apps/workspaces",
-        "1 database creation per month",
+        "Unlimited database creations per month",
         "Basic frontend generation",
       ],
       highlight: false,
@@ -48,7 +48,7 @@ export default function PricingPage() {
       features: [
         "200 credits per month",
         "Up to 10 apps/workspaces",
-        "Up to 10 database creations per month",
+        "Unlimited database creations per month",
         "Advanced frontend generation",
       ],
       highlight: true,
@@ -61,7 +61,7 @@ export default function PricingPage() {
       features: [
         "600 credits per month",
         "Up to 30 apps/workspaces per month",
-        "Up to 30 database creations per month",
+        "Unlimited database creations per month",
         "Advanced frontend generation",
       ],
       highlight: false,
