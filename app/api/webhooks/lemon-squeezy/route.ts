@@ -4,7 +4,7 @@ import {
   updateSubscriptionFromWebhook,
   mapProductIdToPlanId,
 } from '@/lib/subscription'
-import { supabasePool } from '@/lib/supabase-pool'
+import { pool } from '@/lib/supabase-db'
 
 const WEBHOOK_SECRET = process.env.LEMON_SQUEEZY_WEBHOOK_SECRET || ''
 
@@ -398,7 +398,7 @@ async function handleSubscriptionCancelled(
 
   try {
     // Update subscription status to 'cancelled'
-    await supabasePool.query(
+    await pool.query(
       `UPDATE subscriptions
        SET status = $1, updated_at = NOW()
        WHERE user_id = $2

@@ -1,4 +1,4 @@
-import { supabasePool } from './supabase-pool'
+import { pool } from './supabase-db'
 
 export type PlanId = 'free' | 'pro' | 'business' | 'enterprise'
 export type SubscriptionStatus = 'active' | 'pending' | 'trialing' | 'past_due' | 'cancelled'
@@ -20,7 +20,7 @@ export async function getUserSubscription(
   userId: string
 ): Promise<Subscription | null> {
   try {
-    const result = await supabasePool.query(
+    const result = await pool.query(
       'SELECT * FROM subscriptions WHERE user_id = $1',
       [userId]
     )
@@ -35,7 +35,7 @@ export async function initializeFreeSubscription(
   userId: string
 ): Promise<Subscription | null> {
   try {
-    const result = await supabasePool.query(
+    const result = await pool.query(
       `INSERT INTO subscriptions (user_id, plan_id, status)
        VALUES ($1, $2, $3)
        ON CONFLICT (user_id) DO NOTHING
@@ -67,7 +67,7 @@ export async function updateSubscriptionFromWebhook(
       orderIdOrProductId,
     })
 
-    const result = await supabasePool.query(
+    const result = await pool.query(
       `INSERT INTO subscriptions (
         user_id,
         plan_id,
@@ -129,6 +129,8 @@ export function mapProductIdToPlanId(productId: string): PlanId {
     [process.env.LEMON_SQUEEZY_PRO_PRODUCT_ID || '716722']: 'pro',
     [process.env.LEMON_SQUEEZY_BUSINESS_PRODUCT_ID || '717067']: 'business',
     [process.env.LEMON_SQUEEZY_ENTERPRISE_PRODUCT_ID || '717080']: 'enterprise',
+    // Explicit fallback for current Business product in Lemon Squeezy dashboard
+    '717099': 'business',
   }
   return productToPlan[productId] || 'free'
 }
