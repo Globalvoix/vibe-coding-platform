@@ -59,7 +59,7 @@ export default function PricingPage() {
       price: "$50/mo",
       description: "For teams running multiple products and environments.",
       features: [
-        "1000 credits per month",
+        "600 credits per month",
         "Up to 30 apps/workspaces per month",
         "Up to 30 database creations per month",
         "Advanced frontend generation",
@@ -72,7 +72,7 @@ export default function PricingPage() {
       price: "$499/mo",
       description: "For organizations that need custom limits and enterprise guarantees.",
       features: [
-        "10000 credits per month",
+        "6000 credits per month",
         "Unlimited apps/workspaces per month",
         "Unlimited database creations per month",
         "Enterprise-grade frontend generation",
