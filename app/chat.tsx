@@ -68,12 +68,13 @@ export function Chat({ className, initialPrompt }: Props) {
       !hasSubmittedInitialPromptRef.current &&
       initialPrompt &&
       initialPrompt.trim() &&
-      status === 'ready'
+      status === 'ready' &&
+      messages.length === 0
     ) {
       hasSubmittedInitialPromptRef.current = true
-      setInput(initialPrompt)
+      validateAndSubmitMessage(initialPrompt)
     }
-  }, [initialPrompt, status, setInput])
+  }, [initialPrompt, status, messages, validateAndSubmitMessage])
 
   const isLoading = status === 'streaming' || status === 'submitted'
   const isInputDisabled = status !== 'ready'
@@ -165,15 +166,13 @@ export function Chat({ className, initialPrompt }: Props) {
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border/60 text-foreground shadow-xs hover:bg-secondary/60 transition-colors"
-                style={{ backgroundColor: '#F7F4ED' }}
+                className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border/60 text-foreground shadow-xs hover:bg-secondary/60 transition-colors chat-toolbar-action-button"
                 aria-label="More options"
               >
                 <Plus className="w-4 h-4" />
               </button>
               <div
-                className="flex items-center gap-2 rounded-full px-2 py-1 border border-border/60 shadow-xs"
-                style={{ backgroundColor: '#F7F4ED' }}
+                className="flex items-center gap-2 rounded-full px-2 py-1 border border-border/60 shadow-xs chat-toolbar-settings-group"
               >
                 <Settings />
                 <ModelSelector />
