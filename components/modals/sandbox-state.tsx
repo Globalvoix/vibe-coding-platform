@@ -14,32 +14,9 @@ import useSWR from 'swr'
 
 export function SandboxState() {
   const { sandboxId, status, setStatus } = useSandboxStore()
+
   if (status === 'stopped') {
-    return (
-      <Dialog open>
-        <DialogHeader className="sr-only">
-          <DialogTitle className="sr-only">
-            Sandbox max. duration reached
-          </DialogTitle>
-          <DialogDescription className="sr-only">
-            The Vercel Sandbox is already stopped. You can start a new session
-            by clicking the button below.
-          </DialogDescription>
-        </DialogHeader>
-        <DialogContent>
-          <p className="mb-2 text-sm text-foreground">
-            The build computer for this preview has been running for a long time and was
-            automatically stopped, but your projects and code are safely saved.
-          </p>
-          <p className="mb-4 text-xs text-muted-foreground">
-            Start a new session to keep building from where you left off.
-          </p>
-          <Button onClick={() => window.location.reload()}>
-            Start a new session
-          </Button>
-        </DialogContent>
-      </Dialog>
-    )
+    return null
   }
 
   return sandboxId ? (
