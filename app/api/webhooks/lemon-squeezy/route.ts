@@ -178,17 +178,35 @@ async function handleOrderCreated(
   }
 
   try {
-    const planId = mapProductIdToPlanId(productId)
-    const now = new Date().toISOString()
-    const thirtyDaysFromNow = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+    const planId: PlanId = mapProductIdToPlanId(productId)
+    const existingSubscription = await getUserSubscription(userId)
+    const now = new Date()
+    const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000
+
+    let periodStart = now.toISOString()
+    let periodEnd = new Date(now.getTime() + THIRTY_DAYS_MS).toISOString()
+    let isAdditionalPurchase = false
+
+    if (existingSubscription && existingSubscription.status === 'active') {
+      const existingEndRaw = existingSubscription.current_period_end
+      if (existingEndRaw) {
+        const existingEnd = new Date(existingEndRaw)
+        if (!Number.isNaN(existingEnd.getTime()) && existingEnd > now) {
+          isAdditionalPurchase = true
+          periodStart = existingSubscription.current_period_start || periodStart
+          const extendedEnd = new Date(existingEnd.getTime() + THIRTY_DAYS_MS)
+          periodEnd = extendedEnd.toISOString()
+        }
+      }
+    }
 
     console.log('📝 Calling updateSubscriptionFromWebhook with:', {
       lemonSqueezySubscriptionId: data.id,
       userId,
       planId,
       status: 'pending',
-      currentPeriodStart: now,
-      currentPeriodEnd: thirtyDaysFromNow,
+      currentPeriodStart: periodStart,
+      currentPeriodEnd: periodEnd,
     })
 
     // Create/activate subscription immediately when order is successfully created
@@ -197,10 +215,19 @@ async function handleOrderCreated(
       userId,
       planId,
       'active',
-      now,
-      thirtyDaysFromNow,
+      periodStart,
+      periodEnd,
       data.id
     )
+
+    if (isAdditionalPurchase) {
+      await addPlanCreditsForPurchase({
+        userId,
+        planId,
+        reference: data.id,
+        metadata: { source: 'lemon_squeezy', type: 'additional_purchase' },
+      })
+    }
 
     console.log(
       `✅ Subscription ACTIVATED from order_created:`,
