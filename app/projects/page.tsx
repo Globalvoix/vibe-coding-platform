@@ -10,6 +10,7 @@ export default function ProjectsPage() {
   const [projects, setProjects] = useState<ProjectRecord[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
   const router = useRouter()
   const { isSignedIn } = useAuth()
   const { openSignIn } = useClerk()
@@ -90,11 +91,23 @@ export default function ProjectsPage() {
     }
   }
 
+  const normalizedSearch = searchQuery.trim().toLowerCase()
+  const filteredProjects = normalizedSearch
+    ? projects.filter((project) => {
+        const nameText = project.name.toLowerCase()
+        const promptText = (project.initial_prompt ?? '').toLowerCase()
+        return (
+          nameText.includes(normalizedSearch) ||
+          promptText.includes(normalizedSearch)
+        )
+      })
+    : projects
+
   return (
     <>
       <AppSidebar />
       <main className="min-h-screen bg-background px-4 py-6 md:px-8 md:py-10">
-        <header className="mb-6 flex items-center justify-between">
+        <header className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight">
               All projects
@@ -103,20 +116,37 @@ export default function ProjectsPage() {
               Open, rename, or delete projects you have created with Thinksoft.
             </p>
           </div>
+          <div className="w-full max-w-xs">
+            <label
+              className="block text-xs font-medium text-muted-foreground mb-1"
+              htmlFor="project-search"
+            >
+              Search projects
+            </label>
+            <input
+              id="project-search"
+              type="text"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder="Filter by name or prompt..."
+              className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
+            />
+          </div>
         </header>
 
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Loading projects...</p>
         ) : error ? (
           <p className="text-sm text-red-500">{error}</p>
-        ) : projects.length === 0 ? (
+        ) : filteredProjects.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            You have not created any projects yet. Use the prompt bar on the home
-            page to create your first project.
+            {projects.length === 0
+              ? 'You have not created any projects yet. Use the prompt bar on the home page to create your first project.'
+              : 'No projects match your search. Try a different keyword.'}
           </p>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {projects.map((project) => (
+            {filteredProjects.map((project) => (
               <div
                 key={project.id}
                 className="flex flex-col rounded-xl border border-border bg-card/80 hover:bg-card shadow-sm hover:shadow-md transition-all p-4 space-y-2"
