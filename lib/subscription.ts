@@ -170,8 +170,7 @@ export function mapProductIdToPlanId(productId: string): PlanId {
     [process.env.LEMON_SQUEEZY_PRO_PRODUCT_ID || '716722']: 'pro',
     [process.env.LEMON_SQUEEZY_BUSINESS_PRODUCT_ID || '717067']: 'business',
     [process.env.LEMON_SQUEEZY_ENTERPRISE_PRODUCT_ID || '717080']: 'enterprise',
-    // Explicit fallback for current Business product in Lemon Squeezy dashboard
-    '717099': 'business',
   }
+
   return productToPlan[productId] || 'free'
 }
