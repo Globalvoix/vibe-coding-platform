@@ -92,7 +92,7 @@ export function Preview({
   return (
     <Panel className={cn('border-t-0', className)}>
       <div className="flex h-full flex-col relative">
-        {currentUrl && !disabled && (
+        {currentUrl && !disabled ? (
           <>
             <ScrollArea className="w-full flex-1">
               <iframe
@@ -133,6 +133,15 @@ export function Preview({
               </div>
             )}
           </>
+        ) : (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="flex flex-col items-center gap-3 text-xs text-muted-foreground">
+              <div className="h-10 w-10 rounded-full border-2 border-dashed border-border animate-spin" />
+              <p className="text-center max-w-[220px]">
+                Preview will appear here once your app is generated or the sandbox is running.
+              </p>
+            </div>
+          </div>
         )}
       </div>
     </Panel>
