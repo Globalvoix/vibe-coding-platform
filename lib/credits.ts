@@ -197,6 +197,74 @@ export async function getUserCredits(userId: string): Promise<UserCreditInfo> {
   }
 }
 
+export async function addPlanCreditsForPurchase(params: {
+  userId: string
+  planId: PlanId
+  reference?: string
+  metadata?: Record<string, unknown>
+}): Promise<{ added: number; balance: number } | null> {
+  const { userId, planId, reference, metadata } = params
+
+  await hydrateUserCreditsRow(userId)
+  await ensureCreditsTables()
+
+  const limits = await getPlanLimits(planId)
+  const amountToAdd = limits.credits
+
+  if (!Number.isFinite(amountToAdd) || amountToAdd <= 0) {
+    return null
+  }
+
+  const client = await pool.connect()
+
+  try {
+    await client.query('BEGIN')
+
+    const currentResult = await client.query<UserCreditsRow>(
+      'SELECT user_id, balance, last_reset_at FROM user_credits WHERE user_id = $1 FOR UPDATE',
+      [userId]
+    )
+
+    if (currentResult.rowCount === 0) {
+      throw new Error('User credits row missing during top-up')
+    }
+
+    const current = currentResult.rows[0]
+    const newBalance = current.balance + amountToAdd
+
+    await client.query(
+      `UPDATE user_credits
+       SET balance = $1,
+           updated_at = NOW()
+       WHERE user_id = $2`,
+      [newBalance, userId]
+    )
+
+    await client.query(
+      `INSERT INTO credit_transactions (user_id, change, reason, reference, metadata, balance_after)
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [
+        userId,
+        amountToAdd,
+        'manual_adjustment',
+        reference ?? null,
+        { ...(metadata || {}), planId, type: 'plan_top_up' },
+        newBalance,
+      ]
+    )
+
+    await client.query('COMMIT')
+
+    return { added: amountToAdd, balance: newBalance }
+  } catch (error) {
+    await client.query('ROLLBACK')
+    console.error('Error adding plan credits for purchase', error)
+    return null
+  } finally {
+    client.release()
+  }
+}
+
 export async function recordUsageAndDeductCredits(params: {
   userId: string
   modelId: string
