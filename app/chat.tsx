@@ -68,13 +68,12 @@ export function Chat({ className, initialPrompt }: Props) {
       !hasSubmittedInitialPromptRef.current &&
       initialPrompt &&
       initialPrompt.trim() &&
-      status === 'ready' &&
-      messages.length === 0
+      status === 'ready'
     ) {
       hasSubmittedInitialPromptRef.current = true
-      validateAndSubmitMessage(initialPrompt)
+      setInput(initialPrompt)
     }
-  }, [initialPrompt, status, messages, validateAndSubmitMessage])
+  }, [initialPrompt, status, setInput])
 
   const isLoading = status === 'streaming' || status === 'submitted'
   const isInputDisabled = status !== 'ready'
