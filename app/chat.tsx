@@ -107,40 +107,14 @@ export function Chat({ className, initialPrompt }: Props) {
         </div>
       </PanelHeader>
 
-      {messages.length === 0 ? (
-        <div className="flex-1 min-h-0">
-          <div className="flex h-full items-center justify-center px-4">
-            <div className="max-w-md w-full rounded-xl border border-dashed border-border/70 bg-background/80 px-4 py-5 shadow-xs font-mono text-sm text-muted-foreground">
-              <p className="mb-2 text-[11px] uppercase tracking-tight text-muted-foreground/80">
-                Quick start
-              </p>
-              <p className="mb-3 text-sm font-semibold text-foreground">
-                Click one of these prompts to see a full app generated:
-              </p>
-              <ul className="space-y-2 text-left">
-                {TEST_PROMPTS.map((prompt, idx) => (
-                  <li
-                    key={idx}
-                    className="cursor-pointer rounded-lg border border-dashed border-border/70 bg-secondary/40 px-3 py-2 text-xs text-foreground transition-colors hover:bg-secondary/70 hover:text-primary"
-                    onClick={() => validateAndSubmitMessage(prompt)}
-                  >
-                    {prompt}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <Conversation className="relative w-full flex-1 min-h-0 bg-background">
-          <ConversationContent className="space-y-4">
-            {messages.map((message) => (
-              <Message key={message.id} message={message} />
-            ))}
-          </ConversationContent>
-          <ConversationScrollButton />
-        </Conversation>
-      )}
+      <Conversation className="relative w-full flex-1 min-h-0 bg-background">
+        <ConversationContent className="space-y-4">
+          {messages.map((message) => (
+            <Message key={message.id} message={message} />
+          ))}
+        </ConversationContent>
+        <ConversationScrollButton />
+      </Conversation>
 
       <form
         className="bg-background p-2"
