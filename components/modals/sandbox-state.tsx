@@ -27,7 +27,13 @@ export function SandboxState() {
           </DialogDescription>
         </DialogHeader>
         <DialogContent>
-          Sandbox max. duration for this demo has been reached
+          <p className="mb-2 text-sm text-foreground">
+            The build computer for this preview has been running for a long time and was
+            automatically stopped, but your projects and code are safely saved.
+          </p>
+          <p className="mb-4 text-xs text-muted-foreground">
+            Start a new session to keep building from where you left off.
+          </p>
           <Button onClick={() => window.location.reload()}>
             Start a new session
           </Button>

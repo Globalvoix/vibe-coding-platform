@@ -38,8 +38,11 @@ export const createSandbox = ({ writer }: Params) =>
       })
 
       try {
+        const SANDBOX_MAX_DURATION_MS =
+          typeof timeout === 'number' && timeout > 0 ? timeout : 60 * 60 * 1000
+
         const sandbox = await Sandbox.create({
-          timeout: timeout ?? 600000,
+          timeout: SANDBOX_MAX_DURATION_MS,
           ports,
         })
 
