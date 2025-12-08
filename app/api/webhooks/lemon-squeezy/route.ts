@@ -3,7 +3,10 @@ import crypto from 'crypto'
 import {
   updateSubscriptionFromWebhook,
   mapProductIdToPlanId,
+  getUserSubscription,
+  type PlanId,
 } from '@/lib/subscription'
+import { addPlanCreditsForPurchase } from '@/lib/credits'
 import { pool } from '@/lib/supabase-db'
 
 const WEBHOOK_SECRET = process.env.LEMON_SQUEEZY_WEBHOOK_SECRET || ''
