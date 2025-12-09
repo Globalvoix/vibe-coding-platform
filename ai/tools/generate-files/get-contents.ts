@@ -221,12 +221,12 @@ EXCELLENCE MARKERS (ALWAYS):
     const written = generated.map((file) => file.path)
     const paths = written.concat(
       items.files
-        .slice(generated.length, items.files.length - 1)
+        .slice(generated.length)
         .flatMap((f) => (f?.path ? [f.path] : []))
     )
 
     const files = items.files
-      .slice(generated.length, items.files.length - 2)
+      .slice(generated.length)
       .map((file) => fileSchema.parse(file))
 
     if (files.length > 0) {
