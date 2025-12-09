@@ -47,7 +47,6 @@ export async function* getContents(
     throw new Error('You have no AI credits remaining. Please upgrade your plan.')
   }
 
-  const generated: z.infer<typeof fileSchema>[] = []
   const deferred = new Deferred<void>()
   const result = streamObject({
     ...getModelOptions(params.modelId, { reasoningEffort: 'minimal' }),
