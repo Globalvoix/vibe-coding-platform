@@ -1,6 +1,5 @@
 import { streamObject, type ModelMessage } from 'ai'
 import { getModelOptions } from '@/ai/gateway'
-import { Deferred } from '@/lib/deferred'
 import { auth } from '@clerk/nextjs/server'
 import { getUserCredits, recordUsageAndDeductCredits } from '@/lib/credits'
 import z from 'zod/v3'
@@ -47,7 +46,6 @@ export async function* getContents(
     throw new Error('You have no AI credits remaining. Please upgrade your plan.')
   }
 
-  const deferred = new Deferred<void>()
   const result = streamObject({
     ...getModelOptions(params.modelId, { reasoningEffort: 'minimal' }),
     maxOutputTokens: 64000,
@@ -194,7 +192,6 @@ EXCELLENCE MARKERS (ALWAYS):
     ],
     schema: z.object({ files: z.array(fileSchema) }),
     onError: (error) => {
-      deferred.reject(error)
       console.error('Error communicating with AI')
       console.error(JSON.stringify(error, null, 2))
     },
@@ -212,19 +209,74 @@ EXCELLENCE MARKERS (ALWAYS):
     },
   })
 
-  const raceResult = await Promise.race([result.object, deferred.promise])
-  if (!raceResult) {
-    throw new Error('Unexpected Error: Deferred was resolved before the result')
+  const generatedPaths: string[] = []
+  const seenPaths = new Set<string>()
+  let receivedStreamChunk = false
+
+  for await (const partial of result.partialObjectStream) {
+    receivedStreamChunk = true
+
+    if (!partial || !Array.isArray((partial as { files?: unknown }).files)) {
+      continue
+    }
+
+    const parsedFiles = (partial as { files: unknown[] }).files.map((file) =>
+      fileSchema.parse(file)
+    )
+
+    const newFiles: z.infer<typeof fileSchema>[] = []
+
+    for (const file of parsedFiles) {
+      if (!seenPaths.has(file.path)) {
+        seenPaths.add(file.path)
+        newFiles.push(file)
+      }
+    }
+
+    if (newFiles.length === 0) {
+      continue
+    }
+
+    const previouslyGenerated = [...generatedPaths]
+    generatedPaths.push(...newFiles.map((file) => file.path))
+    const paths = [...generatedPaths]
+
+    yield {
+      files: newFiles,
+      paths,
+      written: previouslyGenerated,
+    }
   }
 
-  if (!Array.isArray(raceResult.files)) {
-    return
-  }
+  if (!receivedStreamChunk) {
+    const finalResult = await result.object
 
-  const files = raceResult.files.map((file) => fileSchema.parse(file))
-  const paths = files.map((file) => file.path)
+    if (!finalResult || !Array.isArray(finalResult.files)) {
+      return
+    }
 
-  if (files.length > 0) {
-    yield { files, paths, written: [] }
+    const parsedFiles = finalResult.files.map((file) => fileSchema.parse(file))
+    const newFiles: z.infer<typeof fileSchema>[] = []
+
+    for (const file of parsedFiles) {
+      if (!seenPaths.has(file.path)) {
+        seenPaths.add(file.path)
+        newFiles.push(file)
+      }
+    }
+
+    if (newFiles.length === 0) {
+      return
+    }
+
+    const previouslyGenerated = [...generatedPaths]
+    generatedPaths.push(...newFiles.map((file) => file.path))
+    const paths = [...generatedPaths]
+
+    yield {
+      files: newFiles,
+      paths,
+      written: previouslyGenerated,
+    }
   }
 }
