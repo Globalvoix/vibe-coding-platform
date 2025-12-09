@@ -212,40 +212,19 @@ EXCELLENCE MARKERS (ALWAYS):
     },
   })
 
-  for await (const items of result.partialObjectStream) {
-    if (!Array.isArray(items?.files)) {
-      continue
-    }
-
-    const written = generated.map((file) => file.path)
-    const paths = written.concat(
-      items.files
-        .slice(generated.length)
-        .flatMap((f) => (f?.path ? [f.path] : []))
-    )
-
-    const files = items.files
-      .slice(generated.length)
-      .map((file) => fileSchema.parse(file))
-
-    if (files.length > 0) {
-      yield { files, paths, written }
-      generated.push(...files)
-    } else {
-      yield { files: [], written, paths }
-    }
-  }
-
   const raceResult = await Promise.race([result.object, deferred.promise])
   if (!raceResult) {
     throw new Error('Unexpected Error: Deferred was resolved before the result')
   }
 
-  const written = generated.map((file) => file.path)
-  const files = raceResult.files.slice(generated.length)
-  const paths = written.concat(files.map((file) => file.path))
+  if (!Array.isArray(raceResult.files)) {
+    return
+  }
+
+  const files = raceResult.files.map((file) => fileSchema.parse(file))
+  const paths = files.map((file) => file.path)
+
   if (files.length > 0) {
-    yield { files, written, paths }
-    generated.push(...files)
+    yield { files, paths, written: [] }
   }
 }
