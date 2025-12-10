@@ -20,7 +20,7 @@ export type HeroWaveProps = {
 export function HeroWave({
   className,
   style,
-  title = "Build with AI.",
+  title = "Thinksoft",
   subtitle = "The AI Fullstack Engineer. Create beautiful, production-ready websites",
   placeholder = "Describe what you want to create...",
   buttonText = "Generate",

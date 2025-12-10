@@ -107,19 +107,10 @@ export function Navbar() {
     };
   }, [isSignedIn]);
 
-  const logoElement = (
-    <div className="relative w-5 h-5 flex items-center justify-center">
-      <span className="absolute w-1.5 h-1.5 rounded-full bg-blue-600 top-0 left-1/2 transform -translate-x-1/2 opacity-80"></span>
-      <span className="absolute w-1.5 h-1.5 rounded-full bg-blue-600 left-0 top-1/2 transform -translate-y-1/2 opacity-80"></span>
-      <span className="absolute w-1.5 h-1.5 rounded-full bg-blue-600 right-0 top-1/2 transform -translate-y-1/2 opacity-80"></span>
-      <span className="absolute w-1.5 h-1.5 rounded-full bg-blue-600 bottom-0 left-1/2 transform -translate-x-1/2 opacity-80"></span>
-    </div>
-  );
-
   const navLinksData = [
     { label: 'Product', href: '/product' },
     { label: 'Pricing', href: '/pricing' },
-    { label: 'Solution', href: '#3' },
+    { label: 'Home', href: '/' },
   ];
 
   const isProActive =
@@ -172,7 +163,6 @@ export function Navbar() {
           >
             <Menu className="w-5 h-5 text-gray-700" />
           </button>
-          {logoElement}
         </div>
 
         <nav className="hidden sm:flex items-center space-x-4 sm:space-x-6 text-sm">
