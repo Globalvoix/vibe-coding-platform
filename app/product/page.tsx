@@ -6,6 +6,30 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 
+const designSystemStyles = `
+  @keyframes color-cycle-1 {
+    0%, 100% { background-color: #ec4899; }
+    33% { background-color: #ff6b35; }
+    66% { background-color: #c4b5fd; }
+  }
+
+  @keyframes color-cycle-2 {
+    0%, 100% { background-color: #ff6b35; }
+    33% { background-color: #c4b5fd; }
+    66% { background-color: #ec4899; }
+  }
+
+  @keyframes color-cycle-3 {
+    0%, 100% { background-color: #c4b5fd; }
+    33% { background-color: #ec4899; }
+    66% { background-color: #ff6b35; }
+  }
+
+  .color-block-1 { animation: color-cycle-1 6s ease-in-out infinite; }
+  .color-block-2 { animation: color-cycle-2 6s ease-in-out infinite; }
+  .color-block-3 { animation: color-cycle-3 6s ease-in-out infinite; }
+`;
+
 export default function ProductPage() {
   return (
     <main className="relative min-h-screen overflow-hidden bg-white">
