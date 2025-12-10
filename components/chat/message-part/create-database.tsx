@@ -1,4 +1,5 @@
 import type { DataPart } from '@/ai/messages/data-parts'
+import type { DataPart } from '@/ai/messages/data-parts'
 import { DatabaseIcon, CheckIcon, XIcon } from 'lucide-react'
 import { Spinner } from './spinner'
 import { ToolHeader } from '../tool-header'
