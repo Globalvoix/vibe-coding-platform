@@ -131,25 +131,15 @@ export function HeroWave({
       }}
       aria-label="Hero section"
     >
-      <AnimatedGradientBackground
-        startingGap={125}
-        Breathing={true}
-        gradientColors={[
-          "#ffffff",
-          "#2979FF",
-          "#FF80AB",
-          "#FF6D00",
-          "#FFD600",
-          "#00E676",
-          "#3D5AFE",
-        ]}
-        gradientStops={[35, 50, 60, 70, 80, 90, 100]}
-        animationSpeed={0.02}
-        breathingRange={5}
-        topOffset={0}
-        containerClassName="opacity-30"
-        containerStyle={{ filter: "blur(80px)" }}
-      />
+      <div className="absolute inset-0 -z-10 pointer-events-none">
+        <Image
+          src="https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2Fb5a609c4244d4c71b2dcf5fa87e9858c?format=webp&width=1600"
+          alt="Thinksoft blue gradient background"
+          fill
+          priority
+          className="object-cover"
+        />
+      </div>
       <Navbar />
       <div
         style={{
