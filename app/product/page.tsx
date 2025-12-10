@@ -500,6 +500,96 @@ export default function ProductPage() {
           </div>
         </div>
       </section>
+
+      <section className="relative z-10 bg-[#05060a] px-4 py-20 sm:py-24">
+        <div className="mx-auto max-w-6xl">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between mb-6 sm:mb-8">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight text-white">
+              You can build literally anything
+            </h2>
+            <p className="text-sm sm:text-base text-gray-300 max-w-md">
+              From landing pages to full SaaS apps, Thinksoft adapts to whatever you want to ship next.
+            </p>
+          </div>
+
+          <div className="space-y-5">
+            <div className="flex gap-4 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {primaryBuildCards.map((card) => (
+                <article
+                  key={card.label}
+                  className={`relative flex min-w-[220px] max-w-[260px] flex-col rounded-3xl border border-white/10 bg-gradient-to-b ${card.gradientClass} p-3 sm:p-4 text-white shadow-[0_18px_60px_rgba(0,0,0,0.6)]`}
+                >
+                  <div className="mb-3 flex items-center gap-2">
+                    <span className={`flex h-6 w-6 items-center justify-center rounded-xl ${card.badgeColorClass}`}>
+                      <span className="h-1.5 w-1.5 rounded-md bg-white" />
+                    </span>
+                    <span className="text-xs font-medium">{card.label}</span>
+                  </div>
+                  <div className="relative mt-1 overflow-hidden rounded-2xl bg-black/40">
+                    <Image
+                      src={card.imageSrc}
+                      alt={card.imageAlt}
+                      width={320}
+                      height={200}
+                      className="h-40 w-full object-cover"
+                    />
+                  </div>
+                </article>
+              ))}
+            </div>
+
+            <div className="flex gap-4 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {secondaryBuildCards.map((card) => (
+                <article
+                  key={card.label}
+                  className={`relative flex min-w-[220px] max-w-[260px] flex-col rounded-3xl border border-white/10 bg-gradient-to-b ${card.gradientClass} p-3 sm:p-4 text-white shadow-[0_18px_60px_rgba(0,0,0,0.6)]`}
+                >
+                  <div className="mb-3 flex items-center gap-2">
+                    <span className={`flex h-6 w-6 items-center justify-center rounded-xl ${card.badgeColorClass}`}>
+                      <span className="h-1.5 w-1.5 rounded-md bg-white" />
+                    </span>
+                    <span className="text-xs font-medium">{card.label}</span>
+                  </div>
+                  <div className="relative mt-1 overflow-hidden rounded-2xl bg-black/40">
+                    <Image
+                      src={card.imageSrc}
+                      alt={card.imageAlt}
+                      width={320}
+                      height={200}
+                      className="h-40 w-full object-cover"
+                    />
+                  </div>
+                </article>
+              ))}
+            </div>
+
+            <div className="flex gap-4 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {tertiaryBuildCards.map((card) => (
+                <article
+                  key={card.label}
+                  className={`relative flex min-w-[220px] max-w-[260px] flex-col rounded-3xl border border-white/10 bg-gradient-to-b ${card.gradientClass} p-3 sm:p-4 text-white shadow-[0_18px_60px_rgba(0,0,0,0.6)]`}
+                >
+                  <div className="mb-3 flex items-center gap-2">
+                    <span className={`flex h-6 w-6 items-center justify-center rounded-xl ${card.badgeColorClass}`}>
+                      <span className="h-1.5 w-1.5 rounded-md bg-white" />
+                    </span>
+                    <span className="text-xs font-medium">{card.label}</span>
+                  </div>
+                  <div className="relative mt-1 overflow-hidden rounded-2xl bg-black/40">
+                    <Image
+                      src={card.imageSrc}
+                      alt={card.imageAlt}
+                      width={320}
+                      height={200}
+                      className="h-40 w-full object-cover"
+                    />
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }
