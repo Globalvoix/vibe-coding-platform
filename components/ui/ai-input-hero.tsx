@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Navbar } from "@/components/ui/mini-navbar";
 import Image from "next/image";
-import { Spinner } from "@components/ui/spinner";
+import { Spinner } from "@/components/ui/spinner";
 import { Plus } from "lucide-react";
 import { useAuth, useClerk } from "@clerk/nextjs";
 
