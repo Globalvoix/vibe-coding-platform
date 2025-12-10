@@ -18,9 +18,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: `Invalid request` }, { status: 400 })
   }
 
+  const { model } = getModelOptions('openai/gpt-4.1')
+
   const result = await generateObject({
     system: prompt,
-    model: aiGateway('openai/gpt-4.1'),
+    model,
     providerOptions: {
       openai: {
         reasoningEffort: 'minimal',
