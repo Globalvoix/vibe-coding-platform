@@ -1,80 +1,17 @@
 "use client";
 
-'use client';
-
 import AnimatedGradientBackground from "@/components/ui/animated-gradient-background";
 import { Navbar } from "@/components/ui/mini-navbar";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useState } from "react";
-
-const productSlides = [
-  {
-    eyebrow: "Build by describing",
-    title: "Build by describing what you want",
-    description:
-      "Chatting with Thinksoft is like talking with a developer. Describe your vision, drop in screenshots, or paste your Notion doc. Thinksoft takes it from there.",
-    imageSrc:
-      "https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2Ff4bdd9d6c4264a4aab3b5997737053f8?format=webp&width=800",
-    imageAlt: "Ask Thinksoft to create interface screenshot",
-  },
-  {
-    eyebrow: "Production infrastructure",
-    title: "Production infrastructure included",
-    description:
-      "Real backend with Thinksoft Cloud and Supabase gives you Postgres database, authentication, file storage, and real-time features. All auto-provisioned so you can focus on your product.",
-    imageSrc:
-      "https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2Ffa248e6fcafd410abd753bbd5c776402?format=webp&width=800",
-    imageAlt: "App dashboard showing database tables and navigation",
-  },
-  {
-    eyebrow: "Visual controls",
-    title: "Polish it to perfection",
-    description:
-      "Tweak layouts, colors, and text with direct visual control. See changes instantly and bring your vision to life exactly as you imagined it.",
-    imageSrc:
-      "https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F82901f4f7b1442b8a55c41827e5f376e?format=webp&width=800",
-    imageAlt: "Interface panel showing spacing, typography, and color controls",
-  },
-  {
-    eyebrow: "Modern tech stack",
-    title: "Modern, standard tech stack",
-    description:
-      "Build on industry-standard frameworks like React, Supabase, and Tailwind, then sync everything to GitHub from day one. Your code, your repository, your rules.",
-    imageSrc:
-      "https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F2f40a6aab8cd44928646fe23155da865?format=webp&width=800",
-    imageAlt: "Icons representing modern frontend and backend tools",
-  },
-  {
-    eyebrow: "Launch fast",
-    title: "One-click publish",
-    description:
-      "Custom domain, SEO optimization, and security checks are all handled for you. Go from idea to live project in the same day with a single click.",
-    imageSrc:
-      "https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F99768599cc464a688e1375ef6375cb04?format=webp&width=800",
-    imageAlt: "Publish button highlighted in an app interface",
-  },
-] as const;
+import React from "react";
 
 export default function ProductPage() {
-  const [activeIndex, setActiveIndex] = useState(0);
-
-  const currentSlide = productSlides[activeIndex];
-  const lastIndex = productSlides.length - 1;
-
-  const goToPrevious = () => {
-    setActiveIndex((index) => (index === 0 ? lastIndex : index - 1));
-  };
-
-  const goToNext = () => {
-    setActiveIndex((index) => (index === lastIndex ? 0 : index + 1));
-  };
-
   return (
     <main className="relative min-h-screen overflow-hidden bg-white">
       <AnimatedGradientBackground
         startingGap={125}
-        Breathing={true}
+        Breathing
         gradientColors={["#ffffff", "#2979FF", "#FF80AB", "#FF6D00", "#FFD600", "#00E676", "#3D5AFE"]}
         gradientStops={[35, 50, 60, 70, 80, 90, 100]}
         animationSpeed={0.02}
@@ -104,194 +41,26 @@ export default function ProductPage() {
         </Link>
       </section>
 
-      <section className="relative z-10 bg-[#f6efe6] px-4 py-16 sm:py-24">
-        <div className="mx-auto max-w-6xl">
-          <div className="mb-10 text-left">
-            <h2 className="text-2xl font-semibold tracking-tight text-gray-900 sm:text-3xl">
-              Your AI cofounder and dev team
-            </h2>
-            <p className="mt-2 max-w-2xl text-sm text-gray-600 sm:text-base">
-              Your idea doesn&apos;t need a technical cofounder. Thinksoft is your technical partner – build, iterate, and ship in hours instead of months.
-            </p>
+      <section className="relative z-10 bg-[#05060a] px-4 py-20 sm:py-28 text-center">
+        <div className="mx-auto max-w-3xl">
+          <div className="flex justify-center mb-10">
+            <Image
+              src="https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2Ff6b8eacc082f4e3bb3eaa5683364dabb?format=webp&width=800"
+              alt="Thinksoft coding agent beam"
+              width={48}
+              height={192}
+              className="h-40 sm:h-48 w-auto"
+            />
           </div>
-
-          <div className="rounded-2xl bg-white p-6 sm:p-10">
-            <div className="grid items-start gap-6 md:grid-cols-2 md:gap-12">
-              <div className="text-left">
-                <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">
-                  {currentSlide.eyebrow}
-                </p>
-                <h3 className="mt-2 text-lg font-semibold text-gray-900 sm:text-xl">
-                  {currentSlide.title}
-                </h3>
-                <p className="mt-3 text-sm text-gray-700 sm:text-base leading-relaxed">
-                  {currentSlide.description}
-                </p>
-              </div>
-
-              <div className="relative h-80 w-full overflow-hidden rounded-xl sm:h-96 md:h-full md:min-h-96">
-                <Image
-                  src={currentSlide.imageSrc}
-                  alt={currentSlide.imageAlt}
-                  fill
-                  sizes="(min-width: 1024px) 480px, (min-width: 768px) 50vw, 100vw"
-                  className="object-cover"
-                />
-              </div>
-            </div>
-
-            <div className="mt-6 flex items-center justify-between sm:mt-8">
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={goToPrevious}
-                  aria-label="Previous slide"
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors"
-                >
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
-                </button>
-                <button
-                  type="button"
-                  onClick={goToNext}
-                  aria-label="Next slide"
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors"
-                >
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
-              </div>
-
-              <div className="flex items-center gap-2">
-                {productSlides.map((slide, index) => (
-                  <button
-                    key={slide.title}
-                    type="button"
-                    onClick={() => setActiveIndex(index)}
-                    aria-label={`Go to slide ${index + 1}`}
-                    className={`h-2 rounded-full transition-all ${
-                      index === activeIndex ? "w-6 bg-gray-800" : "w-2 bg-gray-300"
-                    }`}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="relative z-10 bg-white px-4 py-16 sm:py-24">
-        <div className="mx-auto max-w-6xl">
-          <div className="mb-12 text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-              Dream it. Build it. Ship it.
-            </h2>
-            <p className="mt-4 max-w-2xl mx-auto text-base text-gray-600">
-              Start from your Notion docs. Connect to Stripe for payments, cron for automations. Ship with the tools you already use.
-            </p>
-          </div>
-
-          <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-3">
-            <div className="rounded-lg border border-gray-200 bg-white p-6 text-center hover:shadow-lg transition-shadow">
-              <div className="flex justify-center mb-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-purple-100">
-                  <svg className="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m0 0h6m0-6v6m0 0v6M6 12h6m0 0h6" />
-                  </svg>
-                </div>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900">B2B SaaS</h3>
-              <p className="mt-2 text-sm text-gray-600">
-                Build subscription platforms, workflow tools, and project management apps. Filter auth, databases, and billing included.
-              </p>
-            </div>
-
-            <div className="rounded-lg border border-gray-200 bg-white p-6 text-center hover:shadow-lg transition-shadow">
-              <div className="flex justify-center mb-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-yellow-100">
-                  <svg className="h-6 w-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m0 0l8 4m-8-4v10l8 4m0-10l8 4m-8-4v10" />
-                  </svg>
-                </div>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900">Consumer apps</h3>
-              <p className="mt-2 text-sm text-gray-600">
-                Launch social platforms, community sites, and fitness apps with user profiles, feeds, and real-time interactions.
-              </p>
-            </div>
-
-            <div className="rounded-lg border border-gray-200 bg-white p-6 text-center hover:shadow-lg transition-shadow">
-              <div className="flex justify-center mb-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100">
-                  <svg className="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14a2 2 0 012 2v7a2 2 0 01-2 2H5a2 2 0 01-2-2v-7a2 2 0 012-2z" />
-                  </svg>
-                </div>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900">Marketplaces & e-commerce</h3>
-              <p className="mt-2 text-sm text-gray-600">
-                Create booking platforms, storefronts, and rental marketplaces. Payments, search, and user accounts all work out of the box.
-              </p>
-            </div>
-
-            <div className="rounded-lg border border-gray-200 bg-white p-6 text-center hover:shadow-lg transition-shadow">
-              <div className="flex justify-center mb-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-pink-100">
-                  <svg className="h-6 w-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                </div>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900">Landing pages & websites</h3>
-              <p className="mt-2 text-sm text-gray-600">
-                Create company sites, portfolios, and waitlist pages with professional design. Custom domains and SEO built in.
-              </p>
-            </div>
-
-            <div className="rounded-lg border border-gray-200 bg-white p-6 text-center hover:shadow-lg transition-shadow">
-              <div className="flex justify-center mb-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-green-100">
-                  <svg className="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
-                </div>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900">Internal tools & dashboards</h3>
-              <p className="mt-2 text-sm text-gray-600">
-                CRMs, admin panels, and analytics dashboards. Build and visualize what your team needs without waiting on developers.
-              </p>
-            </div>
-
-            <div className="rounded-lg border border-gray-200 bg-white p-6 text-center hover:shadow-lg transition-shadow">
-              <div className="flex justify-center mb-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-orange-100">
-                  <svg className="h-6 w-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 13h8m-8-6h8m0 6h-8m8-6v6m0 6H5a2 2 0 01-2-2V7a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2z" />
-                  </svg>
-                </div>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900">Client projects</h3>
-              <p className="mt-2 text-sm text-gray-600">
-                Ship for clients faster with full code export. Agencies and freelancers use Thinksoft to deliver production-ready products.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="relative z-10 bg-white px-4 py-20 sm:py-28">
-        <div className="mx-auto max-w-3xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-            Ready to see what&apos;s possible?
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight text-gray-100">
+            Empowering product builders
+            <span className="block font-bold text-white">
+              with the most powerful coding agents
+            </span>
           </h2>
-          <Link
-            href="/"
-            className="mt-6 inline-flex items-center justify-center rounded-lg bg-gray-900 px-6 py-3 text-sm font-medium text-white shadow-sm hover:bg-black transition-colors"
-          >
-            Start building
-          </Link>
+          <p className="mt-4 text-sm sm:text-base text-gray-300">
+            Bot does the heavy lifting for you, so you can focus on your vision instead of fighting errors.
+          </p>
         </div>
       </section>
     </main>
