@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Cloud, AlertCircle, Loader } from 'lucide-react'
 import { Panel, PanelHeader } from '@/components/panels/panels'
+import { Button } from '@/components/ui/button'
 
 interface DatabaseInfo {
   tableName: string
@@ -19,6 +20,7 @@ export function DatabaseViewer({ className, projectId }: Props) {
   const [databases, setDatabases] = useState<DatabaseInfo[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [enablingCloud, setEnablingCloud] = useState(false)
 
   useEffect(() => {
     if (!projectId) return
@@ -77,8 +79,41 @@ export function DatabaseViewer({ className, projectId }: Props) {
               No database created yet
             </p>
             <p className="text-xs text-muted-foreground/60 mt-1">
-              Generate an app that needs data storage to create a database
+              Enable Thinksoft cloud to allow automatic database creation for this project.
             </p>
+            {projectId && (
+              <Button
+                type="button"
+                size="sm"
+                className="mt-3"
+                disabled={enablingCloud}
+                onClick={async () => {
+                  if (!projectId || enablingCloud) return
+                  setEnablingCloud(true)
+                  setError(null)
+
+                  try {
+                    const response = await fetch(`/api/projects/${projectId}`, {
+                      method: 'PATCH',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ cloudEnabled: true }),
+                    })
+
+                    if (!response.ok) {
+                      throw new Error('Failed to enable Thinksoft cloud')
+                    }
+                  } catch (err) {
+                    setError(
+                      err instanceof Error ? err.message : 'Failed to enable Thinksoft cloud'
+                    )
+                  } finally {
+                    setEnablingCloud(false)
+                  }
+                }}
+              >
+                {enablingCloud ? 'Enabling…' : 'Enable Thinksoft cloud'}
+              </Button>
+            )}
           </div>
         ) : (
           <div className="space-y-3">

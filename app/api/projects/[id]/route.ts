@@ -5,6 +5,7 @@ import {
   getProject,
   renameProject,
   updateProjectSandboxState,
+  updateProjectCloudEnabled,
 } from '@/lib/projects-db'
 import { auth } from '@clerk/nextjs/server'
 
@@ -43,6 +44,7 @@ export async function PATCH(
   const body = await req.json().catch(() => ({})) as {
     name?: string
     sandboxState?: unknown
+    cloudEnabled?: boolean
   }
 
   let project = null
@@ -53,6 +55,10 @@ export async function PATCH(
 
   if (body.sandboxState !== undefined) {
     project = await updateProjectSandboxState(userId, projectParams.id, body.sandboxState)
+  }
+
+  if (typeof body.cloudEnabled === 'boolean') {
+    project = await updateProjectCloudEnabled(userId, projectParams.id, body.cloudEnabled)
   }
 
   if (!project) {

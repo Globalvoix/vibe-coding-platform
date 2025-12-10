@@ -3,7 +3,6 @@ import z from 'zod/v3'
 import type { UIMessage, UIMessageStreamWriter } from 'ai'
 import type { DataPart } from '../messages/data-parts'
 import {
-  detectNeedsDatabase,
   createProjectDatabase,
   generateSupabaseClientCode,
 } from '@/lib/supabase-db'

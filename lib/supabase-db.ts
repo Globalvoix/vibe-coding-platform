@@ -48,6 +48,20 @@ export async function createProjectDatabase(
   }
 }> {
   try {
+    const projectResult = await pool.query<{ cloud_enabled: boolean }>(
+      `SELECT cloud_enabled FROM projects WHERE id = $1`,
+      [projectId]
+    )
+
+    const cloudEnabled = projectResult.rows[0]?.cloud_enabled ?? false
+
+    if (!cloudEnabled) {
+      return {
+        success: false,
+        error: 'Cloud is not enabled for this project',
+      }
+    }
+
     const tableName = `${projectId}_app_data`.replace(/[^a-z0-9_]/g, '_')
 
     await pool.query(`

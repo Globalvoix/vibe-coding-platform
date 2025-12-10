@@ -20,10 +20,13 @@ async function ensureProjectsTable() {
       initial_prompt TEXT,
       sandbox_state JSONB,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      cloud_enabled BOOLEAN NOT NULL DEFAULT FALSE
     );
     CREATE INDEX IF NOT EXISTS projects_user_id_idx ON projects(user_id);
     CREATE INDEX IF NOT EXISTS projects_updated_at_idx ON projects(updated_at DESC);
+    ALTER TABLE projects
+      ADD COLUMN IF NOT EXISTS cloud_enabled BOOLEAN NOT NULL DEFAULT FALSE;
   `)
   initialized = true
 }
@@ -36,6 +39,7 @@ export interface ProjectRecord {
   sandbox_state: unknown | null
   created_at: string
   updated_at: string
+  cloud_enabled: boolean
 }
 
 export async function createProject(userId: string, prompt: string): Promise<ProjectRecord> {
@@ -114,6 +118,22 @@ export async function updateProjectSandboxState(
      WHERE user_id = $1 AND id = $2
      RETURNING *`,
     [userId, id, sandboxState]
+  )
+  return result.rows[0] ?? null
+}
+
+export async function updateProjectCloudEnabled(
+  userId: string,
+  id: string,
+  cloudEnabled: boolean
+): Promise<ProjectRecord | null> {
+  await ensureProjectsTable()
+  const result = await pool.query<ProjectRecord>(
+    `UPDATE projects
+     SET cloud_enabled = $3, updated_at = NOW()
+     WHERE user_id = $1 AND id = $2
+     RETURNING *`,
+    [userId, id, cloudEnabled]
   )
   return result.rows[0] ?? null
 }
