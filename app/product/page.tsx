@@ -261,6 +261,116 @@ export default function ProductPage() {
           </div>
         </div>
       </section>
+
+      <section className="relative z-10 bg-[#05060a] px-4 py-20 sm:py-28">
+        <div className="mx-auto max-w-6xl">
+          <div className="text-center mb-10 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight text-gray-100">
+              Everything you need to scale
+            </h2>
+            <p className="mt-2 text-lg font-semibold text-white">Built in.</p>
+            <p className="mt-3 max-w-2xl mx-auto text-sm sm:text-base text-gray-300">
+              Stop stitching together platforms. Thinksoft Cloud gives you enterprise-grade backend infrastructure
+              including hosting, databases, integrations, and more.
+            </p>
+          </div>
+
+          <div className="grid gap-4 sm:gap-6 md:grid-cols-3 text-left">
+            <div className="rounded-2xl bg-gradient-to-b from-[#10131a] to-[#05060a] border border-white/10 overflow-hidden flex flex-col">
+              <div className="flex-1 flex items-center justify-center bg-gradient-to-b from-[#0f172a] to-transparent pt-6">
+                <Image
+                  src="https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2Fd8085420120e4282b7c0cd1952683d65?format=webp&width=800"
+                  alt="Unlimited databases graphic"
+                  width={420}
+                  height={200}
+                  className="w-full h-40 object-contain"
+                />
+              </div>
+              <div className="px-5 py-5">
+                <h3 className="text-sm sm:text-base font-semibold text-gray-100 mb-1">Unlimited databases</h3>
+                <p className="text-xs sm:text-sm text-gray-300">
+                  Scale from prototype to production with managed Postgres instances tuned for your workloads.
+                </p>
+              </div>
+            </div>
+
+            <div className="rounded-2xl bg-gradient-to-b from-[#10131a] to-[#05060a] border border-white/10 overflow-hidden flex flex-col">
+              <div className="flex-1 flex items-center justify-center bg-gradient-to-b from-[#0f172a] to-transparent pt-6">
+                <Image
+                  src="https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2Fe0b0fcc843ff4d22bd5e88b4aa8f4450?format=webp&width=800"
+                  alt="Enterprise-grade reliability graphic"
+                  width={420}
+                  height={200}
+                  className="w-full h-40 object-contain"
+                />
+              </div>
+              <div className="px-5 py-5">
+                <h3 className="text-sm sm:text-base font-semibold text-gray-100 mb-1">Enterprise-grade</h3>
+                <p className="text-xs sm:text-sm text-gray-300">
+                  Global edge infrastructure, observability, and safeguards so your app stays fast and reliable.
+                </p>
+              </div>
+            </div>
+
+            <div className="rounded-2xl bg-gradient-to-b from-[#10131a] to-[#05060a] border border-white/10 overflow-hidden flex flex-col">
+              <div className="flex-1 flex items-center justify-center bg-gradient-to-b from-[#0f172a] to-transparent pt-6">
+                <Image
+                  src="https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F676cd37fecba4e08832c96b013ad77d6?format=webp&width=800"
+                  alt="User management and authentication graphic"
+                  width={420}
+                  height={200}
+                  className="w-full h-40 object-contain"
+                />
+              </div>
+              <div className="px-5 py-5">
+                <h3 className="text-sm sm:text-base font-semibold text-gray-100 mb-1">User management &amp; authentication</h3>
+                <p className="text-xs sm:text-sm text-gray-300">
+                  Secure sign-in, roles, and permissions ready out of the box so you never roll auth by hand.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 sm:mt-6 grid gap-4 sm:gap-6 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1.8fr)]">
+            <div className="rounded-2xl bg-gradient-to-b from-[#10131a] to-[#05060a] border border-white/10 overflow-hidden flex flex-col">
+              <div className="flex-1 flex items-center justify-center bg-black pt-6">
+                <Image
+                  src="https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2Fd78a9b391b7049fba635a17d9fe2591c?format=webp&width=800"
+                  alt="SEO score graphic"
+                  width={340}
+                  height={200}
+                  className="w-full h-32 object-contain"
+                />
+              </div>
+              <div className="px-5 py-5">
+                <p className="text-xs sm:text-sm font-medium text-gray-100 mb-1">SEO optimization</p>
+                <p className="text-xs sm:text-sm text-gray-300">
+                  Ship with performance and SEO best practices baked in so your project ranks from day one.
+                </p>
+              </div>
+            </div>
+
+            <div className="rounded-2xl bg-gradient-to-b from-[#10131a] to-[#05060a] border border-white/10 overflow-hidden flex flex-col md:flex-row">
+              <div className="flex-1 flex items-center justify-center bg-black pt-6 pb-4 md:pb-6">
+                <Image
+                  src="https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F697a3f380a984338b53ed485e33b1a22?format=webp&width=800"
+                  alt="Publish button graphic"
+                  width={360}
+                  height={200}
+                  className="w-full h-28 object-contain"
+                />
+              </div>
+              <div className="flex-1 px-5 py-5 flex flex-col justify-center">
+                <p className="text-xs sm:text-sm font-medium text-gray-100 mb-1">Hosting with analytics &amp; custom domains</p>
+                <p className="text-xs sm:text-sm text-gray-300">
+                  One-click deploys, built-in analytics, and first-class support for your own domains make going live
+                  effortless.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }
