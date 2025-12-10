@@ -15,6 +15,14 @@ export const dataPartSchema = z.object({
     status: z.enum(['generating', 'uploading', 'uploaded', 'done', 'error']),
     error: errorSchema.optional(),
   }),
+  'creating-database': z.object({
+    status: z.enum(['creating', 'success', 'error']),
+    projectId: z.string(),
+    appName: z.string().optional(),
+    tableName: z.string().optional(),
+    reason: z.string().optional(),
+    error: errorSchema.optional(),
+  }),
   'run-command': z.object({
     sandboxId: z.string(),
     commandId: z.string().optional(),
