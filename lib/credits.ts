@@ -35,8 +35,9 @@ const CREDITS_PER_DOLLAR = 20
 const MODEL_PRICING_PER_1K: Record<string, { inputUsd: number; outputUsd: number }> = {
   [Models.AnthropicClaude45Sonnet]: { inputUsd: 0.003, outputUsd: 0.015 },
   [Models.AnthropicClaude4Sonnet]: { inputUsd: 0.003, outputUsd: 0.015 },
-  [Models.AnthropicClaude35Haiku]: { inputUsd: 0.0008, outputUsd: 0.004 },
-  [Models.AnthropicClaude3Haiku]: { inputUsd: 0.0008, outputUsd: 0.004 },
+  [Models.AmazonNovaPro]: { inputUsd: 0.0025, outputUsd: 0.01 },
+  [Models.MoonshotKimiK2]: { inputUsd: 0.002, outputUsd: 0.008 },
+  [Models.XaiGrok3Fast]: { inputUsd: 0.001, outputUsd: 0.003 },
   [Models.GoogleGeminiFlash]: { inputUsd: 0.00035, outputUsd: 0.00053 },
   [Models.OpenAIGPT5]: { inputUsd: 0.005, outputUsd: 0.015 },
 }
