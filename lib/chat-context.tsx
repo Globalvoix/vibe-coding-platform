@@ -5,7 +5,7 @@ import { type ReactNode, createContext, useContext, useMemo, useRef } from 'reac
 import { Chat } from '@ai-sdk/react'
 import { DataPart } from '@/ai/messages/data-parts'
 import { DataUIPart } from 'ai'
-import { useDataStateMapper } from '@/app/state'
+import { useDataStateMapper, useSandboxStore } from '@/app/state'
 import { mutate } from 'swr'
 import { toast } from 'sonner'
 
@@ -20,6 +20,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const mapDataToStateRef = useRef(mapDataToState)
   mapDataToStateRef.current = mapDataToState
 
+  const { setChatStatus } = useSandboxStore()
+
   const chat = useMemo(() => {
     return new Chat<ChatUIMessage>({
       onToolCall: () => mutate('/api/auth/info'),
@@ -27,9 +29,10 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       onError: (error) => {
         toast.error(`Communication error with the AI: ${error.message}`)
         console.error('Error sending message:', error)
+        setChatStatus('ready')
       },
     })
-  }, [])
+  }, [setChatStatus])
 
   return (
     <ChatContext.Provider value={{ chat }}>{children}</ChatContext.Provider>
