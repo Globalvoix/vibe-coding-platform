@@ -3,6 +3,7 @@
 import { TEST_PROMPTS } from '@/ai/constants'
 import { ArrowUp, MessageCircleIcon, Square, Plus, Menu, Clock, PanelLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { toast } from 'sonner'
 import { useUIStore } from '@/lib/ui-store'
 import {
   Conversation,
@@ -41,6 +42,8 @@ export function Chat({ className, initialPrompt }: Props) {
   const { toggleSidebar } = useUIStore()
   const [input, setInput] = useState('')
   const hasSubmittedInitialPromptRef = useRef(false)
+  const [forceEnableInput, setForceEnableInput] = useState(false)
+  const recoveryTimeoutRef = useRef<number | null>(null)
   const { isSignedIn } = useAuth()
   const { openSignIn } = useClerk()
 
@@ -64,6 +67,37 @@ export function Chat({ className, initialPrompt }: Props) {
   }, [status, setChatStatus])
 
   useEffect(() => {
+    if (status === 'ready') {
+      setForceEnableInput(false)
+      if (recoveryTimeoutRef.current !== null) {
+        clearTimeout(recoveryTimeoutRef.current)
+        recoveryTimeoutRef.current = null
+      }
+      return
+    }
+
+    if (status === 'streaming' || status === 'submitted') {
+      if (recoveryTimeoutRef.current !== null) {
+        clearTimeout(recoveryTimeoutRef.current)
+      }
+
+      recoveryTimeoutRef.current = window.setTimeout(() => {
+        setForceEnableInput(true)
+        toast.error('The AI did not respond. You can try sending your message again.')
+        const abortChat = chat as unknown as { abort?: () => void }
+        abortChat.abort?.()
+      }, 30000)
+    }
+
+    return () => {
+      if (recoveryTimeoutRef.current !== null) {
+        clearTimeout(recoveryTimeoutRef.current)
+        recoveryTimeoutRef.current = null
+      }
+    }
+  }, [chat, status])
+
+  useEffect(() => {
     if (
       !hasSubmittedInitialPromptRef.current &&
       initialPrompt &&
@@ -75,8 +109,9 @@ export function Chat({ className, initialPrompt }: Props) {
     }
   }, [initialPrompt, status, setInput])
 
-  const isLoading = status === 'streaming' || status === 'submitted'
-  const isInputDisabled = status !== 'ready'
+  const isLoading =
+    !forceEnableInput && (status === 'streaming' || status === 'submitted')
+  const isInputDisabled = !forceEnableInput && status !== 'ready'
 
   return (
     <Panel className={className}>
