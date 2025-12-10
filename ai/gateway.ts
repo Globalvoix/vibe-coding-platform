@@ -1,31 +1,13 @@
-import { Models, SUPPORTED_MODELS } from './constants'
-import { createGateway } from '@ai-sdk/gateway'
+import { createGatewayProvider } from '@ai-sdk/gateway'
+import { Models } from './constants'
 import type { JSONValue } from 'ai'
+import type { OpenAIResponsesProviderOptions } from '@ai-sdk/openai'
 import type { LanguageModelV2 } from '@ai-sdk/provider'
 
-interface AvailableModel {
-  id: string
-  name: string
-}
-
-const MODEL_DISPLAY_NAMES: Record<string, string> = {
-  [Models.AnthropicClaude4Sonnet]: 'Anthropic Claude 4 Sonnet',
-  [Models.AnthropicClaude45Sonnet]: 'Anthropic Claude 4.5 Sonnet',
-  [Models.AnthropicClaude35Haiku]: 'Anthropic Claude 3.5 Haiku',
-  [Models.AnthropicClaude3Haiku]: 'Anthropic Claude 3 Haiku',
-  [Models.GoogleGeminiFlash]: 'Google Gemini 2.5 Flash',
-  [Models.OpenAIGPT5]: 'OpenAI GPT-5',
-}
-
-export const aiGateway = createGateway({
-  apiKey: process.env.VERCEL_AI_GATEWAY_API_KEY ?? process.env.AI_GATEWAY_API_KEY,
-})
-
-export async function getAvailableModels(): Promise<AvailableModel[]> {
-  return SUPPORTED_MODELS.map((id) => ({
-    id,
-    name: MODEL_DISPLAY_NAMES[id] ?? id,
-  }))
+export async function getAvailableModels() {
+  const gateway = gatewayInstance()
+  const response = await gateway.getAvailableModels()
+  return response.models.map((model) => ({ id: model.id, name: model.name }))
 }
 
 export interface ModelOptions {
@@ -34,51 +16,47 @@ export interface ModelOptions {
   headers?: Record<string, string>
 }
 
-function getGatewayModelId(modelId: string): string {
-  if (modelId === Models.OpenAIGPT5) {
-    return 'openai/gpt-4.1'
-  }
-
-  if (modelId === Models.AnthropicClaude4Sonnet) {
-    return 'anthropic/claude-3-5-sonnet-latest'
-  }
-
-  if (modelId === Models.AnthropicClaude45Sonnet) {
-    return 'anthropic/claude-3-7-sonnet-latest'
-  }
-
-  if (modelId === Models.AnthropicClaude35Haiku) {
-    return 'anthropic/claude-3.5-haiku'
-  }
-
-  if (modelId === Models.AnthropicClaude3Haiku) {
-    return 'anthropic/claude-3-haiku'
-  }
-
-  if (modelId === Models.GoogleGeminiFlash) {
-    return 'google/gemini-2.5-flash'
-  }
-
-  return 'openai/gpt-4.1-mini'
-}
-
 export function getModelOptions(
   modelId: string,
   options?: { reasoningEffort?: 'minimal' | 'low' | 'medium' }
 ): ModelOptions {
-  const gatewayModelId = getGatewayModelId(modelId)
+  const gateway = gatewayInstance()
+  if (modelId === Models.OpenAIGPT5) {
+    return {
+      model: gateway(modelId),
+      providerOptions: {
+        openai: {
+          include: ['reasoning.encrypted_content'],
+          reasoningEffort: options?.reasoningEffort ?? 'low',
+          reasoningSummary: 'auto',
+          serviceTier: 'priority',
+        } satisfies OpenAIResponsesProviderOptions,
+      },
+    }
+  }
 
-  const providerOptions: Record<string, Record<string, JSONValue>> | undefined =
-    gatewayModelId.startsWith('openai/')
-      ? {
-          openai: {
-            reasoningEffort: options?.reasoningEffort ?? 'low',
-          },
-        }
-      : undefined
+  if (
+    modelId === Models.AnthropicClaude4Sonnet ||
+    modelId === Models.AnthropicClaude45Sonnet
+  ) {
+    return {
+      model: gateway(modelId),
+      headers: { 'anthropic-beta': 'fine-grained-tool-streaming-2025-05-14' },
+      providerOptions: {
+        anthropic: {
+          cacheControl: { type: 'ephemeral' },
+        },
+      },
+    }
+  }
 
   return {
-    model: aiGateway(gatewayModelId),
-    ...(providerOptions ? { providerOptions } : {}),
+    model: gateway(modelId),
   }
+}
+
+function gatewayInstance() {
+  return createGatewayProvider({
+    baseURL: process.env.AI_GATEWAY_BASE_URL,
+  })
 }
