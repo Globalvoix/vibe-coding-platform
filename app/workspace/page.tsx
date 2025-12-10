@@ -8,7 +8,6 @@ import { Preview } from '../preview'
 import { Sandbox } from '../sandbox'
 import { TabContent, TabItem } from '@/components/tabs'
 import { AppSidebar } from '@/components/sidebar/app-sidebar'
-import { DatabaseViewer } from '@/components/database-viewer/database-viewer'
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useSandboxStore, useFileExplorerStore } from '../state'
@@ -134,7 +133,6 @@ export default function WorkspacePage() {
           <TabItem tabId="preview">Preview</TabItem>
           <TabItem tabId="file-explorer">File Explorer</TabItem>
           <TabItem tabId="logs">Logs</TabItem>
-          <TabItem tabId="database">Database</TabItem>
         </ul>
 
         <div className="flex flex-1 w-full overflow-hidden md:hidden">
@@ -153,9 +151,6 @@ export default function WorkspacePage() {
           </TabContent>
           <TabContent tabId="logs" className="flex-1">
             <Logs className="flex-1 overflow-hidden" />
-          </TabContent>
-          <TabContent tabId="database" className="flex-1">
-            <DatabaseViewer className="flex-1 overflow-hidden" projectId={projectId ?? undefined} />
           </TabContent>
         </div>
 
