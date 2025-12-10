@@ -30,6 +30,135 @@ const designSystemStyles = `
   .color-block-3 { animation: color-cycle-3 6s ease-in-out infinite; }
 `;
 
+const primaryBuildCards = [
+  {
+    label: "Landing page",
+    badgeColorClass: "bg-pink-500",
+    gradientClass: "from-[#3b0764] to-[#9f1239]",
+    imageSrc:
+      "https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2Fcb008e2116b74e34af60b9fea71cc2bf?format=webp&width=800",
+    imageAlt: "Landing page example",
+  },
+  {
+    label: "Dashboard",
+    badgeColorClass: "bg-blue-500",
+    gradientClass: "from-[#020617] to-[#0f172a]",
+    imageSrc:
+      "https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F4563e241ce714d179df42c3fb52c6b6c?format=webp&width=800",
+    imageAlt: "Dashboard example",
+  },
+  {
+    label: "Mobile",
+    badgeColorClass: "bg-sky-500",
+    gradientClass: "from-[#111827] to-[#0f766e]",
+    imageSrc:
+      "https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2Fade73e5d69d04351bb8f555f0736a8cc?format=webp&width=800",
+    imageAlt: "Mobile app example",
+  },
+  {
+    label: "Portfolio",
+    badgeColorClass: "bg-cyan-500",
+    gradientClass: "from-[#020617] to-[#0f172a]",
+    imageSrc:
+      "https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F010adfc9a6664b5c80529f7978e0b02c?format=webp&width=800",
+    imageAlt: "Portfolio example",
+  },
+  {
+    label: "E-commerce",
+    badgeColorClass: "bg-indigo-500",
+    gradientClass: "from-[#020617] to-[#0b1120]",
+    imageSrc:
+      "https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F0ef9a6b3e0494d9caf6a32ff85d2cdff?format=webp&width=800",
+    imageAlt: "E-commerce example",
+  },
+  {
+    label: "Product site",
+    badgeColorClass: "bg-orange-500",
+    gradientClass: "from-[#0b1120] to-[#7c2d12]",
+    imageSrc:
+      "https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F3a5003496cb24a58ab1f662453d14eae?format=webp&width=800",
+    imageAlt: "Product page example",
+  },
+];
+
+const secondaryBuildCards = [
+  {
+    label: "Productivity",
+    badgeColorClass: "bg-orange-500",
+    gradientClass: "from-[#0b1120] to-[#7c2d12]",
+    imageSrc:
+      "https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F192f10c48a8247308f480dc456781fe2?format=webp&width=800",
+    imageAlt: "Productivity app example",
+  },
+  {
+    label: "Internal tool",
+    badgeColorClass: "bg-sky-500",
+    gradientClass: "from-[#020617] to-[#0f172a]",
+    imageSrc:
+      "https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F726a2ed284774a729bf969552eef1e0d?format=webp&width=800",
+    imageAlt: "Internal tool example",
+  },
+  {
+    label: "Community & Social",
+    badgeColorClass: "bg-teal-500",
+    gradientClass: "from-[#022c22] to-[#0f172a]",
+    imageSrc:
+      "https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F129cd6be412943c7b52c4628b072eb69?format=webp&width=800",
+    imageAlt: "Community app example",
+  },
+  {
+    label: "Business & Finance",
+    badgeColorClass: "bg-amber-500",
+    gradientClass: "from-[#020617] to-[#1f2937]",
+    imageSrc:
+      "https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F66b20bd0378e4689a75d772407cc0eed?format=webp&width=800",
+    imageAlt: "Business site example",
+  },
+  {
+    label: "CRM",
+    badgeColorClass: "bg-violet-500",
+    gradientClass: "from-[#020617] to-[#4b5563]",
+    imageSrc:
+      "https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2Ffdd642323a854901b074ecf594def65f?format=webp&width=800",
+    imageAlt: "CRM example",
+  },
+];
+
+const tertiaryBuildCards = [
+  {
+    label: "Lifestyle",
+    badgeColorClass: "bg-orange-400",
+    gradientClass: "from-[#3f2a1c] to-[#0b1120]",
+    imageSrc:
+      "https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F5d17ba18be7a4e189307c9e4bbad5f64?format=webp&width=800",
+    imageAlt: "Lifestyle site example",
+  },
+  {
+    label: "Entertainment",
+    badgeColorClass: "bg-pink-500",
+    gradientClass: "from-[#3b0764] to-[#111827]",
+    imageSrc:
+      "https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F4bfe3ce86f3a413c98c317a73d2faa71?format=webp&width=800",
+    imageAlt: "Entertainment site example",
+  },
+  {
+    label: "Health & Wellness",
+    badgeColorClass: "bg-red-500",
+    gradientClass: "from-[#111827] to-[#4b5563]",
+    imageSrc:
+      "https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F37b5191addc64d5fa88f2cf3fe1e7c19?format=webp&width=800",
+    imageAlt: "Health and wellness site example",
+  },
+  {
+    label: "Education",
+    badgeColorClass: "bg-green-500",
+    gradientClass: "from-[#022c22] to-[#312e81]",
+    imageSrc:
+      "https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F34c2770ecca34d32b72bf5357a826ffb?format=webp&width=800",
+    imageAlt: "Education site example",
+  },
+];
+
 export default function ProductPage() {
   return (
     <main className="relative min-h-screen overflow-hidden bg-white">
