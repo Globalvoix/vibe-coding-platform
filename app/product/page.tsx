@@ -63,6 +63,89 @@ export default function ProductPage() {
           </p>
         </div>
       </section>
+
+      <section className="relative z-10 bg-[#05060a] px-4 pb-20 sm:pb-28">
+        <div className="mx-auto max-w-6xl grid gap-6 md:grid-cols-2">
+          <div className="space-y-6">
+            <div className="rounded-2xl border border-white/10 bg-[#111318] p-6 sm:p-7 text-left text-gray-100">
+              <h3 className="text-base sm:text-lg font-semibold">
+                Always the best, without switching tools
+              </h3>
+              <p className="mt-3 text-sm sm:text-base text-gray-300">
+                Thinksoft integrates the frontier coding agents from the AI labs directly inside one familiar visual
+                interface. No more AI anxiety or juggling multiple platforms.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-white/10 bg-[#111318] p-6 sm:p-7 text-left text-gray-100 flex flex-col justify-between min-h-[190px]">
+              <div>
+                <p className="text-[11px] font-semibold tracking-[0.18em] uppercase text-gray-400">
+                  Less errors. More shipping.
+                </p>
+                <div className="mt-4 flex items-baseline gap-2">
+                  <span className="text-5xl sm:text-6xl font-semibold">98%</span>
+                  <span className="text-sm sm:text-base text-gray-300">less errors</span>
+                </div>
+                <p className="mt-4 text-sm sm:text-base text-gray-300 max-w-xs">
+                  Thinksoft automatically tests, refactors, and iterates, reducing errors so you keep building instead of
+                  fixing.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            <div className="rounded-2xl border border-white/10 bg-[#111318] p-6 sm:p-7 text-left text-gray-100 flex flex-col items-start gap-4">
+              <p className="text-[11px] font-semibold tracking-[0.18em] uppercase text-gray-400">
+                Agents you can trust
+              </p>
+              <div className="w-full max-w-xs rounded-2xl bg-[#1a1c22] px-3 py-3 text-sm text-gray-100">
+                <div className="flex items-center justify-between rounded-xl bg-[#2a2d35] px-3 py-2 mb-2">
+                  <span className="flex items-center gap-2 font-medium">
+                    <span className="inline-block h-2.5 w-2.5 rounded-full bg-orange-400" />
+                    Claude Code
+                  </span>
+                </div>
+                <div className="flex items-center justify-between px-3 py-1.5 text-gray-400">
+                  <span className="flex items-center gap-2">
+                    <span className="inline-block h-2 w-2 rounded-full border border-gray-400" />
+                    Codex
+                  </span>
+                  <span className="text-xs">coming soon</span>
+                </div>
+                <div className="flex items-center justify-between px-3 py-1.5 text-gray-400">
+                  <span className="flex items-center gap-2">
+                    <span className="inline-block h-2 w-2 rounded-full bg-blue-400" />
+                    Gemini
+                  </span>
+                  <span className="text-xs">coming soon</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-white/10 bg-[#111318] p-6 sm:p-7 text-left text-gray-100 flex flex-col gap-4">
+              <div>
+                <h3 className="text-base sm:text-lg font-semibold">
+                  Build big without breaking
+                </h3>
+                <p className="mt-3 text-sm sm:text-base text-gray-300 max-w-md">
+                  Thinksoft handles projects far larger than before. Its improved built-in context management can handle
+                  complexity and keep your projects running smoothly.
+                </p>
+              </div>
+              <div className="relative mt-2 flex justify-center">
+                <Image
+                  src="https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F52f8de17ee4d47a78333a8a0af6e6088?format=webp&width=800"
+                  alt="Thinksoft performance windows"
+                  width={640}
+                  height={210}
+                  className="w-full max-w-md rounded-xl object-cover"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }
