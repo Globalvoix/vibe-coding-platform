@@ -109,29 +109,22 @@ export function Chat({ className, initialPrompt, initialImages }: Props) {
       }
 
       const imagesToSend = images || chatImages
-      let messageText = text.trim()
+      const messageText = text.trim()
 
-      // Include image URLs in the message text if images are present
+      // If there are images, include them in the message text for now
+      let finalMessage = messageText
       if (imagesToSend && imagesToSend.length > 0) {
-        const imageUrls = imagesToSend.map(img => img.url)
-        if (messageText) {
-          messageText += '\n\n[Images attached]'
-        }
-        // For now, we'll send images as references in the message
-        // The AI SDK will handle them appropriately
-        sendMessage({
-          text: messageText || '[Images attached]',
-          experimental_attachments: imageUrls.map(url => ({
-            contentType: 'image',
-            url
-          }))
-        } as any, { body: { modelId, reasoningEffort } })
-      } else if (messageText) {
-        sendMessage({ text: messageText }, { body: { modelId, reasoningEffort } })
+        const imageUrls = imagesToSend.map(img => img.url).join('\n')
+        finalMessage = messageText
+          ? `${messageText}\n\n[Images]:\n${imageUrls}`
+          : `[Images]:\n${imageUrls}`
       }
 
-      setInput('')
-      setChatImages([])
+      if (finalMessage.trim()) {
+        sendMessage({ text: finalMessage }, { body: { modelId, reasoningEffort } })
+        setInput('')
+        setChatImages([])
+      }
     },
     [isSignedIn, openSignIn, sendMessage, modelId, setInput, reasoningEffort, chatImages]
   )
