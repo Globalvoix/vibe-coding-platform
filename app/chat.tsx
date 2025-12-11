@@ -220,12 +220,36 @@ export function Chat({ className, initialPrompt, initialImages }: Props) {
           validateAndSubmitMessage(input)
         }}
       >
+        {chatImages.length > 0 && (
+          <div className="mb-2 flex flex-wrap gap-2 px-2">
+            {chatImages.map((image) => (
+              <div
+                key={image.url}
+                className="relative group inline-block rounded-lg overflow-hidden border border-border"
+              >
+                <img
+                  src={image.url}
+                  alt={image.name}
+                  className="h-16 w-16 object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeImage(image.url)}
+                  className="absolute top-0.5 right-0.5 inline-flex items-center justify-center w-5 h-5 rounded-full bg-red-500 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                  aria-label="Remove image"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
         <PromptInput
           value={input}
           onValueChange={setInput}
           isLoading={isLoading}
           onSubmit={() => validateAndSubmitMessage(input)}
-          disabled={isInputDisabled}
+          disabled={isInputDisabled || isUploadingImage}
           className="w-full"
         >
           <PromptInputTextarea
@@ -234,12 +258,26 @@ export function Chat({ className, initialPrompt, initialImages }: Props) {
           />
           <div className="flex items-center justify-between pt-2">
             <div className="flex items-center gap-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handleImageSelect}
+                className="hidden"
+              />
               <button
                 type="button"
-                className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border/60 text-foreground shadow-xs hover:bg-secondary/60 transition-colors chat-toolbar-action-button"
-                aria-label="More options"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploadingImage || isInputDisabled}
+                className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border/60 text-foreground shadow-xs hover:bg-secondary/60 transition-colors chat-toolbar-action-button disabled:opacity-50 disabled:cursor-not-allowed"
+                aria-label="Upload images"
               >
-                <Plus className="w-4 h-4" />
+                {isUploadingImage ? (
+                  <div className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full" />
+                ) : (
+                  <Plus className="w-4 h-4" />
+                )}
               </button>
               <div
                 className="flex items-center gap-2 rounded-full px-2 py-1 border border-border/60 shadow-xs chat-toolbar-settings-group"
