@@ -87,26 +87,15 @@ export function DatabaseViewer({ className, projectId }: Props) {
                 size="sm"
                 className="mt-3"
                 disabled={enablingCloud}
-                onClick={async () => {
+                onClick={() => {
                   if (!projectId || enablingCloud) return
                   setEnablingCloud(true)
                   setError(null)
 
-                  try {
-                    const response = await fetch(`/api/projects/${projectId}`, {
-                      method: 'PATCH',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ cloudEnabled: true }),
-                    })
-
-                    if (!response.ok) {
-                      throw new Error('Failed to enable Supabase')
-                    }
-                  } catch (err) {
-                    setError(err instanceof Error ? err.message : 'Failed to enable Supabase')
-                  } finally {
-                    setEnablingCloud(false)
-                  }
+                  const startUrl = `/api/supabase/oauth/start?projectId=${encodeURIComponent(
+                    projectId
+                  )}`
+                  window.location.href = startUrl
                 }}
               >
                 {enablingCloud ? 'Enabling…' : 'Enable Supabase'}
