@@ -89,26 +89,7 @@ export async function POST(req: Request) {
           const result = streamText({
             ...getModelOptions(modelId, { reasoningEffort }),
             system: prompt,
-            messages: convertToModelMessages(
-              processedMessages.map((message) => {
-                // Handle image URLs in message content
-                if (message.content && typeof message.content === 'object') {
-                  const content = message.content as MessageContent
-                  if (content.imageUrls && content.imageUrls.length > 0) {
-                    // Convert imageUrls to proper format for the model
-                    const contentParts: Array<{ type: 'text' | 'image'; text?: string; url?: string }> = []
-                    if (content.text) {
-                      contentParts.push({ type: 'text', text: content.text })
-                    }
-                    for (const imageUrl of content.imageUrls) {
-                      contentParts.push({ type: 'image', url: imageUrl })
-                    }
-                    message.content = contentParts
-                  }
-                }
-                return message
-              })
-            ),
+            messages: convertToModelMessages(processedMessages),
             stopWhen: stepCountIs(20),
             tools: tools({ modelId, writer }),
             onError: (error) => {
