@@ -16,6 +16,11 @@ export default function Page() {
     const trimmed = prompt.trim()
     if (!trimmed && (!images || images.length === 0)) return
 
+    // Store images in sessionStorage for the workspace
+    if (images && images.length > 0) {
+      sessionStorage.setItem('initialImages', JSON.stringify(images))
+    }
+
     const response = await fetch('/api/projects', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
