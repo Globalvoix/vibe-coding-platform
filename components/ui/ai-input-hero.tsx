@@ -130,7 +130,7 @@ export function HeroWave({
       }}
       aria-label="Hero section"
     >
-      <div className="absolute inset-0 -z-10 pointer-events-none">
+      <div className="absolute inset-0 z-0 pointer-events-none">
         <Image
           src="https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F9a8f5387ede246eeb2c02b9f864f1bcb?format=webp&width=1600"
           alt="Thinksoft blue gradient background"
