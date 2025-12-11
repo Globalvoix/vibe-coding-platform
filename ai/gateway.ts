@@ -8,7 +8,17 @@ import type { LanguageModelV2 } from '@ai-sdk/provider'
 export async function getAvailableModels() {
   const gateway = gatewayInstance()
   const response = await gateway.getAvailableModels()
-  return response.models.map((model) => ({ id: model.id, name: model.name }))
+
+  const models = response.models.map((model) => ({ id: model.id, name: model.name }))
+
+  if (process.env.OPENAI_API_KEY) {
+    const hasGpt5 = models.some((model) => model.id === Models.OpenAIGPT5)
+    if (!hasGpt5) {
+      models.push({ id: Models.OpenAIGPT5, name: 'OpenAI GPT-5' })
+    }
+  }
+
+  return models
 }
 
 export interface ModelOptions {
