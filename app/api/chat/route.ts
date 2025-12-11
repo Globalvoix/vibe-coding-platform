@@ -21,6 +21,11 @@ interface BodyData {
   reasoningEffort?: 'low' | 'medium'
 }
 
+interface MessageContent {
+  text?: string
+  imageUrls?: string[]
+}
+
 export async function POST(req: Request) {
   try {
     const checkResult = await checkBotId()
@@ -61,27 +66,46 @@ export async function POST(req: Request) {
       stream: createUIMessageStream({
         originalMessages: messages,
         execute: ({ writer }) => {
+          const processedMessages = messages.map((message) => {
+            message.parts = message.parts.map((part) => {
+              if (part.type === 'data-report-errors') {
+                return {
+                  type: 'text',
+                  text:
+                    `There are errors in the generated code. This is the summary of the errors we have:\n` +
+                    `\`\`\`${part.data.summary}\`\`\`\n` +
+                    (part.data.paths?.length
+                      ? `The following files may contain errors:\n` +
+                        `\`\`\`${part.data.paths?.join('\n')}\`\`\`\n`
+                      : '') +
+                    `Fix the errors reported.`,
+                }
+              }
+              return part
+            })
+            return message
+          })
+
           const result = streamText({
             ...getModelOptions(modelId, { reasoningEffort }),
             system: prompt,
             messages: convertToModelMessages(
-              messages.map((message) => {
-                message.parts = message.parts.map((part) => {
-                  if (part.type === 'data-report-errors') {
-                    return {
-                      type: 'text',
-                      text:
-                        `There are errors in the generated code. This is the summary of the errors we have:\n` +
-                        `\`\`\`${part.data.summary}\`\`\`\n` +
-                        (part.data.paths?.length
-                          ? `The following files may contain errors:\n` +
-                            `\`\`\`${part.data.paths?.join('\n')}\`\`\`\n`
-                          : '') +
-                        `Fix the errors reported.`,
+              processedMessages.map((message) => {
+                // Handle image URLs in message content
+                if (message.content && typeof message.content === 'object') {
+                  const content = message.content as MessageContent
+                  if (content.imageUrls && content.imageUrls.length > 0) {
+                    // Convert imageUrls to proper format for the model
+                    const contentParts: Array<{ type: 'text' | 'image'; text?: string; url?: string }> = []
+                    if (content.text) {
+                      contentParts.push({ type: 'text', text: content.text })
                     }
+                    for (const imageUrl of content.imageUrls) {
+                      contentParts.push({ type: 'image', url: imageUrl })
+                    }
+                    message.content = contentParts
                   }
-                  return part
-                })
+                }
                 return message
               })
             ),
