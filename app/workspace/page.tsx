@@ -8,6 +8,7 @@ import { Preview } from '../preview'
 import { Sandbox } from '../sandbox'
 import { TabContent, TabItem } from '@/components/tabs'
 import { AppSidebar } from '@/components/sidebar/app-sidebar'
+import { EnvVarsManager } from '@/components/env-vars/env-vars-manager'
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useSandboxStore, useFileExplorerStore } from '../state'
@@ -148,10 +149,11 @@ export default function WorkspacePage() {
     <>
       <AppSidebar />
       <div className="flex flex-col h-screen max-h-screen overflow-hidden">
-        <ul className="flex space-x-5 font-mono text-sm tracking-tight px-1 py-2 md:hidden border-b border-border">
+        <ul className="flex space-x-5 font-mono text-sm tracking-tight px-1 py-2 md:hidden border-b border-border overflow-x-auto">
           <TabItem tabId="chat">Chat</TabItem>
           <TabItem tabId="preview">Preview</TabItem>
-          <TabItem tabId="file-explorer">File Explorer</TabItem>
+          <TabItem tabId="file-explorer">Files</TabItem>
+          <TabItem tabId="env-vars">Env Vars</TabItem>
           <TabItem tabId="logs">Logs</TabItem>
         </ul>
 
@@ -162,6 +164,7 @@ export default function WorkspacePage() {
               className="flex-1 overflow-hidden"
               initialPrompt={initialPrompt}
               initialImages={initialImages}
+              projectId={projectId}
             />
           </TabContent>
           <TabContent tabId="preview" className="flex-1">
@@ -169,6 +172,9 @@ export default function WorkspacePage() {
           </TabContent>
           <TabContent tabId="file-explorer" className="flex-1">
             <FileExplorer className="flex-1 overflow-hidden" />
+          </TabContent>
+          <TabContent tabId="env-vars" className="flex-1">
+            <EnvVarsManager projectId={projectId || undefined} />
           </TabContent>
           <TabContent tabId="logs" className="flex-1">
             <Logs className="flex-1 overflow-hidden" />
@@ -184,6 +190,7 @@ export default function WorkspacePage() {
                 className="flex-1 overflow-hidden"
                 initialPrompt={initialPrompt}
                 initialImages={initialImages}
+                projectId={projectId}
               />
             }
             right={
