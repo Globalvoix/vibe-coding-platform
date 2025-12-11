@@ -1,7 +1,7 @@
 'use client'
 
 import { TEST_PROMPTS } from '@/ai/constants'
-import { ArrowUp, MessageCircleIcon, Square, Plus, Menu, Clock, PanelLeft } from 'lucide-react'
+import { ArrowUp, MessageCircleIcon, Square, Plus, Menu, Clock, PanelLeft, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { useUIStore } from '@/lib/ui-store'
@@ -27,6 +27,7 @@ import { useSettings } from '@/components/settings/use-settings'
 import { useSandboxStore } from './state'
 import { useAuth, useClerk } from '@clerk/nextjs'
 import type { ChatUIMessage } from '@/components/chat/types'
+import { uploadImageToSupabase, deleteImageFromSupabase } from '@/lib/supabase-client'
 
 interface UploadedImage {
   url: string
@@ -47,11 +48,58 @@ export function Chat({ className, initialPrompt, initialImages }: Props) {
   const { setChatStatus } = useSandboxStore()
   const { toggleSidebar } = useUIStore()
   const [input, setInput] = useState('')
+  const [chatImages, setChatImages] = useState<UploadedImage[]>([])
+  const [isUploadingImage, setIsUploadingImage] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const hasSubmittedInitialPromptRef = useRef(false)
   const [forceEnableInput, setForceEnableInput] = useState(false)
   const recoveryTimeoutRef = useRef<number | null>(null)
-  const { isSignedIn } = useAuth()
+  const { isSignedIn, userId } = useAuth()
   const { openSignIn } = useClerk()
+
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.currentTarget.files
+    if (!files || !userId) return
+
+    for (const file of Array.from(files)) {
+      if (!file.type.startsWith('image/')) {
+        toast.error('Please select image files only')
+        continue
+      }
+
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error('Image size must be less than 10MB')
+        continue
+      }
+
+      try {
+        setIsUploadingImage(true)
+        const url = await uploadImageToSupabase(file, userId)
+        setChatImages((prev) => [...prev, { url, name: file.name }])
+        toast.success(`Image "${file.name}" uploaded`)
+      } catch (error) {
+        toast.error(
+          error instanceof Error ? error.message : 'Failed to upload image'
+        )
+      } finally {
+        setIsUploadingImage(false)
+      }
+    }
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
+
+  const removeImage = async (imageUrl: string) => {
+    try {
+      await deleteImageFromSupabase(imageUrl)
+      setChatImages((prev) => prev.filter((img) => img.url !== imageUrl))
+      toast.success('Image removed')
+    } catch (error) {
+      toast.error('Failed to remove image')
+    }
+  }
 
   const validateAndSubmitMessage = useCallback(
     (text: string, images?: UploadedImage[]) => {
@@ -60,13 +108,15 @@ export function Chat({ className, initialPrompt, initialImages }: Props) {
         return
       }
 
-      if (text.trim() || (images && images.length > 0)) {
-        const imageUrls = images?.map(img => img.url) || []
+      const imagesToSend = images || chatImages
+      if (text.trim() || (imagesToSend && imagesToSend.length > 0)) {
+        const imageUrls = imagesToSend.map(img => img.url)
         sendMessage({ text, imageUrls }, { body: { modelId, reasoningEffort } })
         setInput('')
+        setChatImages([])
       }
     },
-    [isSignedIn, openSignIn, sendMessage, modelId, setInput, reasoningEffort]
+    [isSignedIn, openSignIn, sendMessage, modelId, setInput, reasoningEffort, chatImages]
   )
 
   useEffect(() => {
