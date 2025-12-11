@@ -58,7 +58,7 @@ export function DatabaseViewer({ className, projectId }: Props) {
       <PanelHeader className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Cloud className="w-4 h-4" />
-          <span>Database</span>
+          <span>Thinksoft Cloud</span>
         </div>
       </PanelHeader>
 
@@ -76,10 +76,10 @@ export function DatabaseViewer({ className, projectId }: Props) {
           <div className="flex flex-col items-center justify-center h-32 text-center">
             <Cloud className="w-8 h-8 text-muted-foreground/30 mb-2" />
             <p className="text-sm text-muted-foreground">
-              No database created yet
+              No Supabase database created yet
             </p>
             <p className="text-xs text-muted-foreground/60 mt-1">
-              Enable Thinksoft cloud to allow automatic database creation for this project.
+              Enable Supabase for this project to provision a managed Postgres database with Thinksoft Cloud.
             </p>
             {projectId && (
               <Button
@@ -100,18 +100,16 @@ export function DatabaseViewer({ className, projectId }: Props) {
                     })
 
                     if (!response.ok) {
-                      throw new Error('Failed to enable Thinksoft cloud')
+                      throw new Error('Failed to enable Supabase')
                     }
                   } catch (err) {
-                    setError(
-                      err instanceof Error ? err.message : 'Failed to enable Thinksoft cloud'
-                    )
+                    setError(err instanceof Error ? err.message : 'Failed to enable Supabase')
                   } finally {
                     setEnablingCloud(false)
                   }
                 }}
               >
-                {enablingCloud ? 'Enabling…' : 'Enable Thinksoft cloud'}
+                {enablingCloud ? 'Enabling…' : 'Enable Supabase'}
               </Button>
             )}
           </div>
