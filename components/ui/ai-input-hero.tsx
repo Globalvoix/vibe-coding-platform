@@ -4,7 +4,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { Navbar } from "@/components/ui/mini-navbar";
 import Image from "next/image";
 import { Spinner } from "@/components/ui/spinner";
-import AnimatedGradientBackground from "@/components/ui/animated-gradient-background";
 import { useAuth, useClerk } from "@clerk/nextjs";
 
 export type HeroWaveProps = {
@@ -131,23 +130,15 @@ export function HeroWave({
       }}
       aria-label="Hero section"
     >
-      <AnimatedGradientBackground
-        gradientColors={[
-          "#000000",
-          "#1a1a1a",
-          "#333333",
-          "#4d4d4d",
-          "#666666",
-          "#808080",
-        ]}
-        gradientStops={[0, 20, 40, 60, 80, 100]}
-        startingGap={150}
-        Breathing={true}
-        breathingRange={5}
-        animationSpeed={0.01}
-        containerClassName="z-0 opacity-100"
-        containerStyle={{ filter: 'contrast(1.1) brightness(0.8)' }}
-      />
+      <div className="absolute inset-0 -z-10 pointer-events-none">
+        <Image
+          src="https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F9a8f5387ede246eeb2c02b9f864f1bcb?format=webp&width=1600"
+          alt="Thinksoft blue gradient background"
+          fill
+          priority
+          className="object-cover"
+        />
+      </div>
       <Navbar />
       <div
         style={{
