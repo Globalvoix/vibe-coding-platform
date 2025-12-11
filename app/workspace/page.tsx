@@ -143,7 +143,6 @@ export default function WorkspacePage() {
               key={projectId ?? 'default'}
               className="flex-1 overflow-hidden"
               initialPrompt={initialPrompt}
-              initialImages={initialImages}
               projectId={projectId}
             />
           </TabContent>
