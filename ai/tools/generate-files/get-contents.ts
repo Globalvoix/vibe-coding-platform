@@ -1,5 +1,6 @@
 import { streamObject, type ModelMessage } from 'ai'
 import { getModelOptions } from '@/ai/gateway'
+import { Models } from '@/ai/constants'
 import { Deferred } from '@/lib/deferred'
 import z from 'zod/v3'
 
@@ -35,11 +36,13 @@ export async function* getContents(
 ): AsyncGenerator<FileContentChunk> {
   const generated: z.infer<typeof fileSchema>[] = []
   const deferred = new Deferred<void>()
+  const reasoningEffort =
+    params.modelId === Models.OpenAIGPT5 ? 'medium' : 'minimal'
   const result = streamObject({
-    ...getModelOptions(params.modelId, { reasoningEffort: 'minimal' }),
+    ...getModelOptions(params.modelId, { reasoningEffort }),
     maxOutputTokens: 64000,
     system:
-      'You are a file content generator. You must generate files based on the conversation history and the provided paths. NEVER generate lock files (pnpm-lock.yaml, package-lock.json, yarn.lock) - these are automatically created by package managers.',
+      'You are a file content generator. You must generate files based on the conversation history and the provided paths. NEVER generate lock files (pnpm-lock.yaml, package-lock.json, yarn.lock) - these are automatically created by package managers. When the project involves UI or frontend, you MUST produce world-class, visually rich Next.js + Tailwind code: include cinematic next/image and video sections, advanced scroll animations, layered layouts, premium typography, lucide-react icons, custom SVGs, mockups/device frames, 3D or shader-based sections where appropriate, and micro-interactions so the app feels like a top-tier product, not a basic template.',
     messages: [
       ...params.messages,
       {
