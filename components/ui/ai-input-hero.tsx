@@ -4,15 +4,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { Navbar } from "@/components/ui/mini-navbar";
 import Image from "next/image";
 import { Spinner } from "@/components/ui/spinner";
-import { Plus, X } from "lucide-react";
-import { useAuth, useClerk } from "@clerk/nextjs";
-import { uploadImageToSupabase, deleteImageFromSupabase } from "@/lib/supabase-client";
-import { toast } from "sonner";
-
-export type UploadedImage = {
-  url: string;
-  name: string;
-};
 
 export type HeroWaveProps = {
   className?: string;
@@ -21,7 +12,7 @@ export type HeroWaveProps = {
   subtitle?: string;
   placeholder?: string;
   buttonText?: string;
-  onPromptSubmit?: (value: string, images?: UploadedImage[]) => void;
+  onPromptSubmit?: (value: string) => void;
 };
 
 export function HeroWave({
@@ -35,11 +26,8 @@ export function HeroWave({
 }: HeroWaveProps) {
   const [prompt, setPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
-  const [isUploading, setIsUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const { isSignedIn, userId } = useAuth();
+  const { isSignedIn } = useAuth();
   const { openSignIn } = useClerk();
 
   const basePlaceholder = "Make me a";
@@ -128,53 +116,6 @@ export function HeroWave({
     };
   }, [prompt]);
 
-  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.currentTarget.files;
-    if (!files || !userId) return;
-
-    for (const file of Array.from(files)) {
-      if (!file.type.startsWith("image/")) {
-        toast.error("Please select image files only");
-        continue;
-      }
-
-      if (file.size > 10 * 1024 * 1024) {
-        toast.error("Image size must be less than 10MB");
-        continue;
-      }
-
-      try {
-        setIsUploading(true);
-        const url = await uploadImageToSupabase(file, userId);
-        setUploadedImages((prev) => [
-          ...prev,
-          { url, name: file.name },
-        ]);
-        toast.success(`Image "${file.name}" uploaded`);
-      } catch (error) {
-        toast.error(
-          error instanceof Error ? error.message : "Failed to upload image"
-        );
-      } finally {
-        setIsUploading(false);
-      }
-    }
-
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
-
-  const removeImage = async (imageUrl: string) => {
-    try {
-      await deleteImageFromSupabase(imageUrl);
-      setUploadedImages((prev) => prev.filter((img) => img.url !== imageUrl));
-      toast.success("Image removed");
-    } catch (error) {
-      toast.error("Failed to remove image");
-    }
-  };
-
   return (
     <section
       ref={containerRef}
@@ -230,10 +171,10 @@ export function HeroWave({
                 return;
               }
 
-              if (!isLoading && (prompt.trim() || uploadedImages.length > 0)) {
+              if (!isLoading && prompt.trim()) {
                 try {
                   setIsLoading(true);
-                  await onPromptSubmit?.(prompt, uploadedImages.length > 0 ? uploadedImages : undefined);
+                  await onPromptSubmit?.(prompt);
                   // On success, navigation to workspace unmounts this component,
                   // so we intentionally do not reset isLoading here.
                 } catch (error) {
@@ -244,60 +185,15 @@ export function HeroWave({
             }}
           >
             <div className="relative w-full sm:w-[720px]">
-              {uploadedImages.length > 0 && (
-                <div className="mb-3 flex flex-wrap gap-2">
-                  {uploadedImages.map((image) => (
-                    <div
-                      key={image.url}
-                      className="relative group inline-block rounded-lg overflow-hidden border border-gray-200"
-                    >
-                      <img
-                        src={image.url}
-                        alt={image.name}
-                        className="h-20 w-20 object-cover"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeImage(image.url)}
-                        className="absolute top-1 right-1 inline-flex items-center justify-center w-5 h-5 rounded-full bg-red-500 text-white opacity-0 group-hover:opacity-100 transition-opacity"
-                        aria-label="Remove image"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
               <div className="relative rounded-2xl p-[2px] shadow-[0_2px_8px_rgba(0,0,0,0.1)] bg-gradient-to-br from-gray-50 to-gray-100">
                 <textarea
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
                   placeholder={animatedPlaceholder}
                   rows={5}
-                  disabled={isLoading || isUploading}
+                  disabled={isLoading}
                   className="w-full h-32 sm:h-36 resize-none rounded-2xl bg-white border border-gray-200 text-gray-900 placeholder:text-gray-400 outline-none focus:outline-none px-4 py-4 pr-16 disabled:opacity-50 disabled:cursor-not-allowed"
                 />
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  onChange={handleImageSelect}
-                  className="hidden"
-                />
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={isUploading || isLoading}
-                  aria-label="Upload images"
-                  className="absolute left-3 bottom-3 inline-flex items-center justify-center w-9 h-9 rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isUploading ? (
-                    <Spinner size="sm" color="currentColor" />
-                  ) : (
-                    <Plus className="w-4 h-4" />
-                  )}
-                </button>
               </div>
               <button
                 type="submit"
