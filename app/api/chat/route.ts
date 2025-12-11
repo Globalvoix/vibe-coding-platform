@@ -13,12 +13,14 @@ import { getAvailableModels, getModelOptions } from '@/ai/gateway'
 import { checkBotId } from 'botid/server'
 import { tools } from '@/ai/tools'
 import { recordUsageAndDeductCredits, getUserCredits } from '@/lib/credits'
+import { getEnvVarsForChat } from '@/lib/env-vars-db'
 import prompt from './prompt.md'
 
 interface BodyData {
   messages: ChatUIMessage[]
   modelId?: string
   reasoningEffort?: 'low' | 'medium'
+  projectId?: string
 }
 
 export async function POST(req: Request) {
@@ -37,8 +39,12 @@ export async function POST(req: Request) {
       )
     }
 
-    const [models, { messages, modelId = DEFAULT_MODEL, reasoningEffort }] =
-      await Promise.all([getAvailableModels(), req.json() as Promise<BodyData>])
+    const [models, bodyData] = await Promise.all([
+      getAvailableModels(),
+      req.json() as Promise<BodyData>,
+    ])
+
+    const { messages, modelId = DEFAULT_MODEL, reasoningEffort, projectId } = bodyData
 
     const model = models.find((model) => model.id === modelId)
     if (!model) {
@@ -55,6 +61,20 @@ export async function POST(req: Request) {
         { error: 'You have no AI credits remaining. Please upgrade your plan.' },
         { status: 402 }
       )
+    }
+
+    // Get project env vars if projectId is provided
+    let envVarsContext = ''
+    if (projectId) {
+      try {
+        const envVars = await getEnvVarsForChat(projectId)
+        const envVarKeys = Object.keys(envVars)
+        if (envVarKeys.length > 0) {
+          envVarsContext = `\n\n## Available Environment Variables for this project:\n${envVarKeys.map((key) => `- ${key}`).join('\n')}\n\nYou have access to these environment variables. Use them when generating code. If you need additional environment variables, ask the user to add them in the Environment Variables tab.`
+        }
+      } catch (error) {
+        console.warn('Failed to fetch env vars:', error)
+      }
     }
 
     return createUIMessageStreamResponse({
@@ -81,9 +101,11 @@ export async function POST(req: Request) {
             return message
           })
 
+          const systemPrompt = prompt + envVarsContext
+
           const result = streamText({
             ...getModelOptions(modelId, { reasoningEffort }),
-            system: prompt,
+            system: systemPrompt,
             messages: convertToModelMessages(processedMessages),
             stopWhen: stepCountIs(20),
             tools: tools({ modelId, writer }),
