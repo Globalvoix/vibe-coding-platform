@@ -19,11 +19,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const body = await req.json().catch(() => ({})) as { prompt?: string }
+  const body = await req.json().catch(() => ({})) as { prompt?: string; imageUrls?: string[] }
   const prompt = typeof body.prompt === 'string' ? body.prompt : ''
+  const imageUrls = Array.isArray(body.imageUrls) ? body.imageUrls : []
 
-  if (!prompt.trim()) {
-    return NextResponse.json({ error: 'Prompt is required' }, { status: 400 })
+  if (!prompt.trim() && imageUrls.length === 0) {
+    return NextResponse.json({ error: 'Prompt or images are required' }, { status: 400 })
   }
 
   let subscription = await getUserSubscription(userId)
