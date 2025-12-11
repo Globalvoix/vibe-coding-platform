@@ -19,6 +19,18 @@ export async function getAvailableModels() {
     }
   }
 
+  if (process.env.ANTHROPIC_API_KEY) {
+    const hasClaude4 = models.some(
+      (model) => model.id === Models.AnthropicClaude4Sonnet
+    )
+    if (!hasClaude4) {
+      models.push({
+        id: Models.AnthropicClaude4Sonnet,
+        name: 'Anthropic Claude 4 Sonnet',
+      })
+    }
+  }
+
   return models
 }
 
