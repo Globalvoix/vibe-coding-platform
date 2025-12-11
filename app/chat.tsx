@@ -108,20 +108,10 @@ export function Chat({ className, initialPrompt, initialImages }: Props) {
         return
       }
 
-      const imagesToSend = images || chatImages
       const messageText = text.trim()
 
-      // If there are images, include them in the message text for now
-      let finalMessage = messageText
-      if (imagesToSend && imagesToSend.length > 0) {
-        const imageUrls = imagesToSend.map(img => img.url).join('\n')
-        finalMessage = messageText
-          ? `${messageText}\n\n[Images]:\n${imageUrls}`
-          : `[Images]:\n${imageUrls}`
-      }
-
-      if (finalMessage.trim()) {
-        sendMessage({ text: finalMessage }, { body: { modelId, reasoningEffort } })
+      if (messageText) {
+        sendMessage({ text: messageText }, { body: { modelId, reasoningEffort } })
         setInput('')
         setChatImages([])
       }
