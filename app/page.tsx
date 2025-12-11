@@ -12,14 +12,14 @@ export default function Page() {
   const router = useRouter()
   const { sidebarOpen } = useUIStore()
 
-  const handlePromptSubmit = async (prompt: string) => {
+  const handlePromptSubmit = async (prompt: string, images?: Array<{ url: string; name: string }>) => {
     const trimmed = prompt.trim()
-    if (!trimmed) return
+    if (!trimmed && (!images || images.length === 0)) return
 
     const response = await fetch('/api/projects', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: trimmed }),
+      body: JSON.stringify({ prompt: trimmed, imageUrls: images?.map(img => img.url) || [] }),
     })
 
     if (!response.ok) {
