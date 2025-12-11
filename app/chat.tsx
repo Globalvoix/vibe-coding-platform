@@ -49,7 +49,7 @@ export function Chat({ className, initialPrompt, projectId }: Props) {
   const { openSignIn } = useClerk()
 
   const validateAndSubmitMessage = useCallback(
-    (text: string, images?: UploadedImage[]) => {
+    (text: string) => {
       if (!isSignedIn) {
         openSignIn()
         return
