@@ -39,9 +39,10 @@ interface Props {
   modelId?: string
   initialPrompt?: string
   initialImages?: UploadedImage[]
+  projectId?: string | null
 }
 
-export function Chat({ className, initialPrompt, initialImages }: Props) {
+export function Chat({ className, initialPrompt, initialImages, projectId }: Props) {
   const { chat } = useSharedChatContext()
   const { modelId, reasoningEffort } = useSettings()
   const { messages, sendMessage, status } = useChat<ChatUIMessage>({ chat })
@@ -111,7 +112,7 @@ export function Chat({ className, initialPrompt, initialImages }: Props) {
       const messageText = text.trim()
 
       if (messageText) {
-        sendMessage({ text: messageText }, { body: { modelId, reasoningEffort } })
+        sendMessage({ text: messageText }, { body: { modelId, reasoningEffort, projectId } })
         setInput('')
         setChatImages([])
       }
