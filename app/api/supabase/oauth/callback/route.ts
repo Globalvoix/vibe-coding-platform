@@ -19,13 +19,14 @@ export async function GET(req: NextRequest) {
 
   const requestUrl = new URL(req.url)
 
-  const redirectUrlEnv =
+  const oauthRedirectUrlEnv =
     process.env.SUPABASE_OAUTH_REDIRECT_URL ||
     (process.env.NEXT_PUBLIC_APP_URL
       ? `${process.env.NEXT_PUBLIC_APP_URL}/api/supabase/oauth/callback`
       : undefined)
 
-  const redirectUrl = redirectUrlEnv || `${requestUrl.origin}/api/supabase/oauth/callback`
+  const oauthRedirectUrl =
+    oauthRedirectUrlEnv || `${requestUrl.origin}/api/supabase/oauth/callback`
   const code = requestUrl.searchParams.get('code')
   const state = requestUrl.searchParams.get('state')
 
@@ -58,7 +59,7 @@ export async function GET(req: NextRequest) {
       code,
       client_id: OAUTH_CLIENT_ID,
       client_secret: OAUTH_CLIENT_SECRET,
-      redirect_uri: redirectUrl,
+      redirect_uri: oauthRedirectUrl,
       code_verifier: codeVerifier,
     }),
   })
@@ -103,9 +104,9 @@ export async function GET(req: NextRequest) {
   await updateProjectCloudEnabled(userId, projectId, true)
 
   const redirectPath = `/workspace?projectId=${encodeURIComponent(projectId)}`
-  const redirectUrl = `${requestUrl.origin}${redirectPath}`
+  const workspaceRedirectUrl = `${requestUrl.origin}${redirectPath}`
 
-  const response = NextResponse.redirect(redirectUrl)
+  const response = NextResponse.redirect(workspaceRedirectUrl)
   response.cookies.set('sb_oauth_verifier', '', { maxAge: 0, path: '/' })
   response.cookies.set('sb_oauth_state', '', { maxAge: 0, path: '/' })
   response.cookies.set('sb_oauth_project_id', '', { maxAge: 0, path: '/' })
