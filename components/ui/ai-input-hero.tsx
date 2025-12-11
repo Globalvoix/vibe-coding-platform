@@ -133,19 +133,20 @@ export function HeroWave({
     >
       <AnimatedGradientBackground
         gradientColors={[
-          "#5B8DEE",
-          "#4472E8",
-          "#3557E0",
-          "#2541D8",
-          "#1F32B0",
-          "#1B2888",
+          "#1a1a2e",
+          "#2d4a8f",
+          "#5b7fbf",
+          "#8b9fd8",
+          "#d97b7b",
+          "#f5a17b",
         ]}
-        gradientStops={[20, 35, 50, 65, 80, 100]}
-        startingGap={120}
+        gradientStops={[5, 25, 45, 60, 80, 100]}
+        startingGap={140}
         Breathing={true}
-        breathingRange={8}
-        animationSpeed={0.015}
-        containerClassName="z-0"
+        breathingRange={6}
+        animationSpeed={0.012}
+        containerClassName="z-0 opacity-90"
+        containerStyle={{ filter: 'contrast(0.95) saturate(0.85)' }}
       />
       <Navbar />
       <div
