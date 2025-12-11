@@ -6,7 +6,7 @@ import {
   stepCountIs,
   streamText,
 } from 'ai'
-import { DEFAULT_MODEL } from '@/ai/constants'
+import { DEFAULT_MODEL, Models } from '@/ai/constants'
 import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { getAvailableModels, getModelOptions } from '@/ai/gateway'
@@ -45,6 +45,8 @@ export async function POST(req: Request) {
     ])
 
     const { messages, modelId = DEFAULT_MODEL, reasoningEffort, projectId } = bodyData
+    const effectiveReasoningEffort: BodyData['reasoningEffort'] =
+      reasoningEffort ?? (modelId === Models.OpenAIGPT5 ? 'medium' : 'low')
 
     const model = models.find((model) => model.id === modelId)
     if (!model) {
@@ -104,7 +106,7 @@ export async function POST(req: Request) {
           const systemPrompt = prompt + envVarsContext
 
           const result = streamText({
-            ...getModelOptions(modelId, { reasoningEffort }),
+            ...getModelOptions(modelId, { reasoningEffort: effectiveReasoningEffort }),
             system: systemPrompt,
             messages: convertToModelMessages(processedMessages),
             stopWhen: stepCountIs(20),
