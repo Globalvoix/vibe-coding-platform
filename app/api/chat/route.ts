@@ -21,11 +21,6 @@ interface BodyData {
   reasoningEffort?: 'low' | 'medium'
 }
 
-interface MessageContent {
-  text?: string
-  imageUrls?: string[]
-}
-
 export async function POST(req: Request) {
   try {
     const checkResult = await checkBotId()
