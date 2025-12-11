@@ -25,17 +25,11 @@ interface ProjectResponse {
   } | null
 }
 
-interface UploadedImage {
-  url: string
-  name: string
-}
-
 export default function WorkspacePage() {
   const searchParams = useSearchParams()
   const promptFromUrl = searchParams.get('prompt')
   const projectId = searchParams.get('projectId')
   const [initialPrompt, setInitialPrompt] = useState<string>('')
-  const [initialImages, setInitialImages] = useState<UploadedImage[]>([])
   const [horizontalSizes, setHorizontalSizes] = useState<[number, number] | null>(
     null
   )
@@ -58,20 +52,6 @@ export default function WorkspacePage() {
     let cancelled = false
 
     async function loadProject() {
-      // Try to retrieve images from sessionStorage
-      try {
-        const storedImages = sessionStorage.getItem('initialImages')
-        if (storedImages) {
-          const images = JSON.parse(storedImages) as UploadedImage[]
-          if (!cancelled) {
-            setInitialImages(images)
-          }
-          sessionStorage.removeItem('initialImages')
-        }
-      } catch (error) {
-        console.warn('Failed to retrieve initial images', error)
-      }
-
       if (projectId) {
         try {
           const response = await fetch(`/api/projects/${projectId}`)
@@ -189,7 +169,6 @@ export default function WorkspacePage() {
                 key={projectId ?? 'default'}
                 className="flex-1 overflow-hidden"
                 initialPrompt={initialPrompt}
-                initialImages={initialImages}
                 projectId={projectId}
               />
             }
