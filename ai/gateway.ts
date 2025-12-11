@@ -1,4 +1,5 @@
 import { createGatewayProvider } from '@ai-sdk/gateway'
+import { createOpenAI } from '@ai-sdk/openai'
 import { Models } from './constants'
 import type { JSONValue } from 'ai'
 import type { OpenAIResponsesProviderOptions } from '@ai-sdk/openai'
@@ -20,10 +21,10 @@ export function getModelOptions(
   modelId: string,
   options?: { reasoningEffort?: 'minimal' | 'low' | 'medium' }
 ): ModelOptions {
-  const gateway = gatewayInstance()
   if (modelId === Models.OpenAIGPT5) {
+    const openai = openaiInstance()
     return {
-      model: gateway(modelId),
+      model: openai(modelId),
       providerOptions: {
         openai: {
           include: ['reasoning.encrypted_content'],
@@ -34,6 +35,8 @@ export function getModelOptions(
       },
     }
   }
+
+  const gateway = gatewayInstance()
 
   if (
     modelId === Models.AnthropicClaude4Sonnet ||
@@ -53,6 +56,13 @@ export function getModelOptions(
   return {
     model: gateway(modelId),
   }
+}
+
+function openaiInstance() {
+  return createOpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+    organization: process.env.OPENAI_ORG_ID,
+  })
 }
 
 function gatewayInstance() {
