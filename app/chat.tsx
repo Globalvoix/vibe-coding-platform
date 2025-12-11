@@ -28,13 +28,19 @@ import { useSandboxStore } from './state'
 import { useAuth, useClerk } from '@clerk/nextjs'
 import type { ChatUIMessage } from '@/components/chat/types'
 
+interface UploadedImage {
+  url: string
+  name: string
+}
+
 interface Props {
   className: string
   modelId?: string
   initialPrompt?: string
+  initialImages?: UploadedImage[]
 }
 
-export function Chat({ className, initialPrompt }: Props) {
+export function Chat({ className, initialPrompt, initialImages }: Props) {
   const { chat } = useSharedChatContext()
   const { modelId, reasoningEffort } = useSettings()
   const { messages, sendMessage, status } = useChat<ChatUIMessage>({ chat })
@@ -48,14 +54,15 @@ export function Chat({ className, initialPrompt }: Props) {
   const { openSignIn } = useClerk()
 
   const validateAndSubmitMessage = useCallback(
-    (text: string) => {
+    (text: string, images?: UploadedImage[]) => {
       if (!isSignedIn) {
         openSignIn()
         return
       }
 
-      if (text.trim()) {
-        sendMessage({ text }, { body: { modelId, reasoningEffort } })
+      if (text.trim() || (images && images.length > 0)) {
+        const imageUrls = images?.map(img => img.url) || []
+        sendMessage({ text, imageUrls }, { body: { modelId, reasoningEffort } })
         setInput('')
       }
     },
@@ -100,14 +107,19 @@ export function Chat({ className, initialPrompt }: Props) {
   useEffect(() => {
     if (
       !hasSubmittedInitialPromptRef.current &&
-      initialPrompt &&
-      initialPrompt.trim() &&
+      (initialPrompt?.trim() || (initialImages && initialImages.length > 0)) &&
       status === 'ready'
     ) {
       hasSubmittedInitialPromptRef.current = true
-      setInput(initialPrompt)
+      if (initialPrompt?.trim()) {
+        setInput(initialPrompt)
+      }
+      // If there are initial images but no prompt, auto-submit with just the images
+      if ((!initialPrompt || !initialPrompt.trim()) && initialImages && initialImages.length > 0) {
+        validateAndSubmitMessage('', initialImages)
+      }
     }
-  }, [initialPrompt, status, setInput])
+  }, [initialPrompt, initialImages, status, setInput, validateAndSubmitMessage])
 
   const isLoading =
     !forceEnableInput && (status === 'streaming' || status === 'submitted')
