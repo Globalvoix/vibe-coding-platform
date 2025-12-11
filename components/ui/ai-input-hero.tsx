@@ -126,7 +126,7 @@ export function HeroWave({
         position: "relative",
         width: "100%",
         height: "100vh",
-        backgroundColor: "#0052CC",
+        backgroundColor: "#ffffff",
         ...style,
       }}
       aria-label="Hero section"
@@ -164,10 +164,10 @@ export function HeroWave({
           className="max-w-3xl w-full text-center"
           style={{ pointerEvents: "auto" }}
         >
-          <h1 className="text-white text-3xl sm:text-5xl font-semibold tracking-tight">
+          <h1 className="text-gray-900 text-3xl sm:text-5xl font-semibold tracking-tight">
             {title}
           </h1>
-          <p className="text-white/80 mt-3 sm:mt-4 text-sm sm:text-base">
+          <p className="text-gray-600 mt-3 sm:mt-4 text-sm sm:text-base">
             {subtitle}
           </p>
           <form
