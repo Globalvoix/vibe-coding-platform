@@ -1,5 +1,6 @@
 import { createGatewayProvider } from '@ai-sdk/gateway'
 import { createOpenAI } from '@ai-sdk/openai'
+import { createAnthropic } from '@ai-sdk/anthropic'
 import { Models } from './constants'
 import type { JSONValue } from 'ai'
 import type { OpenAIResponsesProviderOptions } from '@ai-sdk/openai'
@@ -44,12 +45,21 @@ export function getModelOptions(
     }
   }
 
+  if (modelId === Models.AnthropicClaude4Sonnet) {
+    const anthropic = anthropicInstance()
+    return {
+      model: anthropic(modelId),
+      providerOptions: {
+        anthropic: {
+          cacheControl: { type: 'ephemeral' },
+        },
+      },
+    }
+  }
+
   const gateway = gatewayInstance()
 
-  if (
-    modelId === Models.AnthropicClaude4Sonnet ||
-    modelId === Models.AnthropicClaude45Sonnet
-  ) {
+  if (modelId === Models.AnthropicClaude45Sonnet) {
     return {
       model: gateway(modelId),
       headers: { 'anthropic-beta': 'fine-grained-tool-streaming-2025-05-14' },
@@ -70,6 +80,12 @@ function openaiInstance() {
   return createOpenAI({
     apiKey: process.env.OPENAI_API_KEY,
     organization: process.env.OPENAI_ORG_ID,
+  })
+}
+
+function anthropicInstance() {
+  return createAnthropic({
+    apiKey: process.env.ANTHROPIC_API_KEY,
   })
 }
 
