@@ -128,6 +128,53 @@ export function HeroWave({
     };
   }, [prompt]);
 
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.currentTarget.files;
+    if (!files || !userId) return;
+
+    for (const file of Array.from(files)) {
+      if (!file.type.startsWith("image/")) {
+        toast.error("Please select image files only");
+        continue;
+      }
+
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error("Image size must be less than 10MB");
+        continue;
+      }
+
+      try {
+        setIsUploading(true);
+        const url = await uploadImageToSupabase(file, userId);
+        setUploadedImages((prev) => [
+          ...prev,
+          { url, name: file.name },
+        ]);
+        toast.success(`Image "${file.name}" uploaded`);
+      } catch (error) {
+        toast.error(
+          error instanceof Error ? error.message : "Failed to upload image"
+        );
+      } finally {
+        setIsUploading(false);
+      }
+    }
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const removeImage = async (imageUrl: string) => {
+    try {
+      await deleteImageFromSupabase(imageUrl);
+      setUploadedImages((prev) => prev.filter((img) => img.url !== imageUrl));
+      toast.success("Image removed");
+    } catch (error) {
+      toast.error("Failed to remove image");
+    }
+  };
+
   return (
     <section
       ref={containerRef}
