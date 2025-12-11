@@ -12,19 +12,14 @@ export default function Page() {
   const router = useRouter()
   const { sidebarOpen } = useUIStore()
 
-  const handlePromptSubmit = async (prompt: string, images?: Array<{ url: string; name: string }>) => {
+  const handlePromptSubmit = async (prompt: string) => {
     const trimmed = prompt.trim()
-    if (!trimmed && (!images || images.length === 0)) return
-
-    // Store images in sessionStorage for the workspace
-    if (images && images.length > 0) {
-      sessionStorage.setItem('initialImages', JSON.stringify(images))
-    }
+    if (!trimmed) return
 
     const response = await fetch('/api/projects', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: trimmed, imageUrls: images?.map(img => img.url) || [] }),
+      body: JSON.stringify({ prompt: trimmed }),
     })
 
     if (!response.ok) {
