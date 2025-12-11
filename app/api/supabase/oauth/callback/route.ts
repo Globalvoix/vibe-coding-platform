@@ -40,11 +40,19 @@ export async function GET(req: NextRequest) {
   const projectId = cookieStore.get('sb_oauth_project_id')?.value
 
   if (!storedState || state !== storedState) {
-    return NextResponse.json({ error: 'Invalid state' }, { status: 400 })
+    const response = NextResponse.json({ error: 'Invalid state' }, { status: 400 })
+    response.cookies.set('sb_oauth_verifier', '', { maxAge: 0, path: '/' })
+    response.cookies.set('sb_oauth_state', '', { maxAge: 0, path: '/' })
+    response.cookies.set('sb_oauth_project_id', '', { maxAge: 0, path: '/' })
+    return response
   }
 
   if (!codeVerifier) {
-    return NextResponse.json({ error: 'Missing PKCE verifier' }, { status: 400 })
+    const response = NextResponse.json({ error: 'Missing PKCE verifier' }, { status: 400 })
+    response.cookies.set('sb_oauth_verifier', '', { maxAge: 0, path: '/' })
+    response.cookies.set('sb_oauth_state', '', { maxAge: 0, path: '/' })
+    response.cookies.set('sb_oauth_project_id', '', { maxAge: 0, path: '/' })
+    return response
   }
 
   const tokenUrl = new URL('/auth/v1/oauth/token', SUPABASE_URL)
@@ -66,10 +74,14 @@ export async function GET(req: NextRequest) {
 
   if (!tokenResponse.ok) {
     const errorText = await tokenResponse.text().catch(() => '')
-    return NextResponse.json(
+    const response = NextResponse.json(
       { error: 'Failed to exchange code for tokens', details: errorText },
       { status: 500 }
     )
+    response.cookies.set('sb_oauth_verifier', '', { maxAge: 0, path: '/' })
+    response.cookies.set('sb_oauth_state', '', { maxAge: 0, path: '/' })
+    response.cookies.set('sb_oauth_project_id', '', { maxAge: 0, path: '/' })
+    return response
   }
 
   const tokenData = (await tokenResponse.json()) as {
