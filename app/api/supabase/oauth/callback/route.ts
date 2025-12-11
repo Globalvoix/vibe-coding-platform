@@ -8,14 +8,9 @@ import { updateProjectCloudEnabled } from '@/lib/projects-db'
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 const OAUTH_CLIENT_ID = process.env.NEXT_PUBLIC_SUPABASE_OAUTH_CLIENT_ID
 const OAUTH_CLIENT_SECRET = process.env.SUPABASE_OAUTH_CLIENT_SECRET
-const OAUTH_REDIRECT_URL =
-  process.env.SUPABASE_OAUTH_REDIRECT_URL ||
-  (process.env.NEXT_PUBLIC_APP_URL
-    ? `${process.env.NEXT_PUBLIC_APP_URL}/api/supabase/oauth/callback`
-    : undefined)
 
 export async function GET(req: NextRequest) {
-  if (!SUPABASE_URL || !OAUTH_CLIENT_ID || !OAUTH_CLIENT_SECRET || !OAUTH_REDIRECT_URL) {
+  if (!SUPABASE_URL || !OAUTH_CLIENT_ID || !OAUTH_CLIENT_SECRET) {
     return NextResponse.json(
       { error: 'Supabase OAuth configuration is missing' },
       { status: 500 }
@@ -23,6 +18,14 @@ export async function GET(req: NextRequest) {
   }
 
   const requestUrl = new URL(req.url)
+
+  const redirectUrlEnv =
+    process.env.SUPABASE_OAUTH_REDIRECT_URL ||
+    (process.env.NEXT_PUBLIC_APP_URL
+      ? `${process.env.NEXT_PUBLIC_APP_URL}/api/supabase/oauth/callback`
+      : undefined)
+
+  const redirectUrl = redirectUrlEnv || `${requestUrl.origin}/api/supabase/oauth/callback`
   const code = requestUrl.searchParams.get('code')
   const state = requestUrl.searchParams.get('state')
 
@@ -55,7 +58,7 @@ export async function GET(req: NextRequest) {
       code,
       client_id: OAUTH_CLIENT_ID,
       client_secret: OAUTH_CLIENT_SECRET,
-      redirect_uri: OAUTH_REDIRECT_URL,
+      redirect_uri: redirectUrl,
       code_verifier: codeVerifier,
     }),
   })

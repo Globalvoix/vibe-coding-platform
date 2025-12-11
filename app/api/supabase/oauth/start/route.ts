@@ -4,11 +4,6 @@ import crypto from 'node:crypto'
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 const OAUTH_CLIENT_ID = process.env.NEXT_PUBLIC_SUPABASE_OAUTH_CLIENT_ID
-const OAUTH_REDIRECT_URL =
-  process.env.SUPABASE_OAUTH_REDIRECT_URL ||
-  (process.env.NEXT_PUBLIC_APP_URL
-    ? `${process.env.NEXT_PUBLIC_APP_URL}/api/supabase/oauth/callback`
-    : undefined)
 
 function base64UrlEncode(buffer: Buffer) {
   return buffer
@@ -19,7 +14,7 @@ function base64UrlEncode(buffer: Buffer) {
 }
 
 export async function GET(req: NextRequest) {
-  if (!SUPABASE_URL || !OAUTH_CLIENT_ID || !OAUTH_REDIRECT_URL) {
+  if (!SUPABASE_URL || !OAUTH_CLIENT_ID) {
     return NextResponse.json(
       { error: 'Supabase OAuth configuration is missing' },
       { status: 500 }
@@ -28,6 +23,14 @@ export async function GET(req: NextRequest) {
 
   const url = new URL(req.url)
   const projectId = url.searchParams.get('projectId')
+
+  const redirectUrlEnv =
+    process.env.SUPABASE_OAUTH_REDIRECT_URL ||
+    (process.env.NEXT_PUBLIC_APP_URL
+      ? `${process.env.NEXT_PUBLIC_APP_URL}/api/supabase/oauth/callback`
+      : undefined)
+
+  const redirectUrl = redirectUrlEnv || `${url.origin}/api/supabase/oauth/callback`
 
   if (!projectId) {
     return NextResponse.json(
@@ -45,7 +48,7 @@ export async function GET(req: NextRequest) {
   const authorizeUrl = new URL('/auth/v1/oauth/authorize', SUPABASE_URL)
   authorizeUrl.searchParams.set('response_type', 'code')
   authorizeUrl.searchParams.set('client_id', OAUTH_CLIENT_ID)
-  authorizeUrl.searchParams.set('redirect_uri', OAUTH_REDIRECT_URL)
+  authorizeUrl.searchParams.set('redirect_uri', redirectUrl)
   authorizeUrl.searchParams.set('code_challenge', codeChallenge)
   authorizeUrl.searchParams.set('code_challenge_method', 'S256')
   authorizeUrl.searchParams.set('state', state)
