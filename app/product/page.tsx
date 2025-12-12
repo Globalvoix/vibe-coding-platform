@@ -162,7 +162,9 @@ const tertiaryBuildCards = [
 
 export default function ProductPage() {
   return (
-    <main className="relative min-h-screen overflow-hidden bg-white">
+    <>
+      <AppSidebar />
+      <main className="relative min-h-screen overflow-hidden bg-white">
       <style>{designSystemStyles}</style>
       <AnimatedGradientBackground
         startingGap={125}
@@ -591,6 +593,7 @@ export default function ProductPage() {
           </div>
         </div>
       </section>
-    </main>
+      </main>
+    </>
   );
 }
