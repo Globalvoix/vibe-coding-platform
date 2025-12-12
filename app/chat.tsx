@@ -21,6 +21,7 @@ import { ModelSelector } from '@/components/settings/model-selector'
 import { Panel, PanelHeader } from '@/components/panels/panels'
 import { Settings } from '@/components/settings/settings'
 import { SupabaseButton } from '@/components/supabase-button/supabase-button'
+import { ComingSoonModal } from '@/components/modals/coming-soon-modal'
 import { useChat } from '@ai-sdk/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSharedChatContext } from '@/lib/chat-context'
@@ -49,6 +50,23 @@ export function Chat({ className, initialPrompt, projectId }: Props) {
   const recoveryTimeoutRef = useRef<number | null>(null)
   const { isSignedIn } = useAuth()
   const { openSignIn } = useClerk()
+  const [comingSoonModal, setComingSoonModal] = useState<{
+    isOpen: boolean
+    title: string
+    description: string
+  }>({
+    isOpen: false,
+    title: '',
+    description: '',
+  })
+
+  const handleComingSoon = (title: string, description: string) => {
+    setComingSoonModal({
+      isOpen: true,
+      title,
+      description,
+    })
+  }
 
   useEffect(() => {
     if (!projectId) return
@@ -71,6 +89,21 @@ export function Chat({ className, initialPrompt, projectId }: Props) {
     const interval = setInterval(checkSupabaseStatus, 5000)
     return () => clearInterval(interval)
   }, [projectId])
+
+  useEffect(() => {
+    if (input.trim()) {
+      localStorage.setItem('prompt-draft', input)
+    }
+  }, [input])
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !input) {
+      const stored = localStorage.getItem('prompt-draft')
+      if (stored) {
+        setInput(stored)
+      }
+    }
+  }, [])
 
   const validateAndSubmitMessage = useCallback(
     (text: string) => {
@@ -151,33 +184,36 @@ export function Chat({ className, initialPrompt, projectId }: Props) {
   const isInputDisabled = !forceEnableInput && status !== 'ready'
 
   return (
-    <Panel className={className}>
-      <PanelHeader className="flex items-center justify-between">
-        <button
-          onClick={toggleSidebar}
-          className="p-1.5 hover:bg-secondary rounded-lg transition-colors"
-          title="Toggle app menu"
-          aria-label="Toggle app menu"
-        >
-          <Menu className="w-5 h-5 text-foreground" />
-        </button>
-        <div className="flex items-center gap-1">
+    <>
+      <Panel className={className}>
+        <PanelHeader className="flex items-center justify-between">
           <button
-            className="p-1 rounded transition-colors hover:bg-blue-600 group"
-            title="History"
-            aria-label="History"
+            onClick={toggleSidebar}
+            className="p-1.5 hover:bg-secondary rounded-lg transition-colors"
+            title="Toggle app menu"
+            aria-label="Toggle app menu"
           >
-            <Clock className="w-3.5 h-3.5 text-muted-foreground group-hover:text-white" />
+            <Menu className="w-5 h-5 text-foreground" />
           </button>
-          <button
-            className="p-1 rounded transition-colors hover:bg-blue-600 group"
-            title="Sidebar"
-            aria-label="Sidebar"
-          >
-            <PanelLeft className="w-3.5 h-3.5 text-muted-foreground group-hover:text-white" />
-          </button>
-        </div>
-      </PanelHeader>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => handleComingSoon('History', 'Chat history is coming soon!')}
+              className="p-1 rounded transition-colors hover:bg-blue-600 group"
+              title="History"
+              aria-label="History"
+            >
+              <Clock className="w-3.5 h-3.5 text-muted-foreground group-hover:text-white" />
+            </button>
+            <button
+              onClick={() => handleComingSoon('Sidebar', 'Additional sidebar features are coming soon!')}
+              className="p-1 rounded transition-colors hover:bg-blue-600 group"
+              title="Sidebar"
+              aria-label="Sidebar"
+            >
+              <PanelLeft className="w-3.5 h-3.5 text-muted-foreground group-hover:text-white" />
+            </button>
+          </div>
+        </PanelHeader>
 
       <Conversation className="relative w-full flex-1 min-h-0 bg-background">
         <ConversationContent className="space-y-4">
@@ -246,6 +282,15 @@ export function Chat({ className, initialPrompt, projectId }: Props) {
           </div>
         </PromptInput>
       </form>
+      <ComingSoonModal
+        isOpen={comingSoonModal.isOpen}
+        onClose={() =>
+          setComingSoonModal((prev) => ({ ...prev, isOpen: false }))
+        }
+        title={comingSoonModal.title}
+        description={comingSoonModal.description}
+      />
     </Panel>
+    </>
   )
 }
