@@ -20,6 +20,9 @@ async function ensureSupabaseConnectionsTable() {
       access_token TEXT NOT NULL,
       refresh_token TEXT,
       expires_at TIMESTAMPTZ,
+      supabase_project_ref TEXT,
+      supabase_org_id TEXT,
+      supabase_project_name TEXT,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       PRIMARY KEY (user_id, project_id)
@@ -37,6 +40,9 @@ export interface SupabaseConnectionRecord {
   access_token: string
   refresh_token: string | null
   expires_at: string | null
+  supabase_project_ref: string | null
+  supabase_org_id: string | null
+  supabase_project_name: string | null
   created_at: string
   updated_at: string
 }
