@@ -29,6 +29,7 @@ import { useSettings } from '@/components/settings/use-settings'
 import { useSandboxStore } from './state'
 import { useAuth, useClerk } from '@clerk/nextjs'
 import type { ChatUIMessage } from '@/components/chat/types'
+import { useChatPersistence } from '@/lib/use-chat-persistence'
 
 interface Props {
   className: string
