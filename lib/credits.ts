@@ -148,11 +148,51 @@ async function hydrateUserCreditsRow(userId: string): Promise<{ row: UserCredits
 
   const existing = result.rows[0]
 
+  const lastResetAt = existing.last_reset_at ? new Date(existing.last_reset_at) : null
+
   if (!periodStart) {
-    return { row: existing, planId }
+    if (!lastResetAt) {
+      return { row: existing, planId }
+    }
+
+    const now = new Date()
+    const nextResetAt = new Date(lastResetAt.getTime() + 30 * 24 * 60 * 60 * 1000)
+
+    if (now < nextResetAt) {
+      return { row: existing, planId }
+    }
+
+    const limits = await getPlanLimits(planId)
+    const newBalance = limits.credits
+
+    const update = await pool.query<UserCreditsRow>(
+      `UPDATE user_credits
+       SET balance = $1,
+           last_reset_at = $2,
+           updated_at = NOW()
+       WHERE user_id = $3
+       RETURNING user_id, balance, last_reset_at`,
+      [newBalance, now.toISOString(), userId]
+    )
+
+    const change = newBalance - existing.balance
+
+    await pool.query(
+      `INSERT INTO credit_transactions (user_id, change, reason, reference, metadata, balance_after)
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [
+        userId,
+        change,
+        'plan_period_reset',
+        null,
+        { planId, previousBalance: existing.balance, periodStart: now.toISOString() },
+        newBalance,
+      ]
+    )
+
+    return { row: update.rows[0] ?? existing, planId }
   }
 
-  const lastResetAt = existing.last_reset_at ? new Date(existing.last_reset_at) : null
   const periodStartDate = new Date(periodStart)
 
   if (lastResetAt && periodStartDate <= lastResetAt) {
