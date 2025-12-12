@@ -21,9 +21,9 @@ export default function PricingPage() {
 
   // Checkout links for Lemon Squeezy
   const checkoutLinks: Record<string, string> = {
-    pro: 'https://thinksoft.lemonsqueezy.com/buy/5c4b6ae1-8fcf-4a2f-8c64-4f8d2a866262',
-    business: 'https://thinksoft.lemonsqueezy.com/buy/0476f9d8-cc5e-4c77-8916-e918e815a141?discount=0',
-    enterprise: 'https://thinksoft.lemonsqueezy.com/buy/1988f037-ac3e-4434-9a34-85ee271d18b5?discount=0',
+    pro: 'https://thinksoft.lemonsqueezy.com/buy/ea0e1501-3012-4c88-8e63-ac594da0018a?discount=0',
+    business: 'https://thinksoft.lemonsqueezy.com/buy/44d1ea32-a735-49b6-bbcf-412a4427f354?discount=0',
+    enterprise: 'https://thinksoft.lemonsqueezy.com/buy/4d1f1fd1-bf49-4e12-9b92-7dc29f18c349?discount=0',
   }
 
   const plans = [
