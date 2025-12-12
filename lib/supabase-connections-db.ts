@@ -53,17 +53,23 @@ export async function upsertSupabaseConnection(params: {
   accessToken: string
   refreshToken: string | null
   expiresAt: Date | null
+  supabaseProjectRef?: string | null
+  supabaseOrgId?: string | null
+  supabaseProjectName?: string | null
 }): Promise<SupabaseConnectionRecord> {
   await ensureSupabaseConnectionsTable()
 
   const result = await pool.query<SupabaseConnectionRecord>(
-    `INSERT INTO supabase_connections (user_id, project_id, access_token, refresh_token, expires_at)
-     VALUES ($1, $2, $3, $4, $5)
+    `INSERT INTO supabase_connections (user_id, project_id, access_token, refresh_token, expires_at, supabase_project_ref, supabase_org_id, supabase_project_name)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
      ON CONFLICT (user_id, project_id)
      DO UPDATE SET
        access_token = EXCLUDED.access_token,
        refresh_token = EXCLUDED.refresh_token,
        expires_at = EXCLUDED.expires_at,
+       supabase_project_ref = COALESCE(EXCLUDED.supabase_project_ref, supabase_connections.supabase_project_ref),
+       supabase_org_id = COALESCE(EXCLUDED.supabase_org_id, supabase_connections.supabase_org_id),
+       supabase_project_name = COALESCE(EXCLUDED.supabase_project_name, supabase_connections.supabase_project_name),
        updated_at = NOW()
      RETURNING *`,
     [
@@ -72,6 +78,9 @@ export async function upsertSupabaseConnection(params: {
       params.accessToken,
       params.refreshToken,
       params.expiresAt ? params.expiresAt.toISOString() : null,
+      params.supabaseProjectRef ?? null,
+      params.supabaseOrgId ?? null,
+      params.supabaseProjectName ?? null,
     ]
   )
 
