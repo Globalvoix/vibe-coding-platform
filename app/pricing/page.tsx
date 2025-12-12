@@ -43,7 +43,7 @@ export default function PricingPage() {
     {
       id: 'pro',
       name: "Pro",
-      price: "$15/mo",
+      price: "$20/mo",
       description: "For individual builders shipping advanced frontends every week.",
       features: [
         "200 credits per month",
@@ -69,7 +69,7 @@ export default function PricingPage() {
     {
       id: 'enterprise',
       name: "Enterprise",
-      price: "$499/mo",
+      price: "$500/mo",
       description: "For organizations that need custom limits and enterprise guarantees.",
       features: [
         "6000 credits per month",
