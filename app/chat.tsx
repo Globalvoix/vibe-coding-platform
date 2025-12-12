@@ -43,11 +43,34 @@ export function Chat({ className, initialPrompt, projectId }: Props) {
   const { setChatStatus } = useSandboxStore()
   const { toggleSidebar } = useUIStore()
   const [input, setInput] = useState('')
+  const [supabaseConnected, setSupabaseConnected] = useState(false)
   const hasSubmittedInitialPromptRef = useRef(false)
   const [forceEnableInput, setForceEnableInput] = useState(false)
   const recoveryTimeoutRef = useRef<number | null>(null)
   const { isSignedIn } = useAuth()
   const { openSignIn } = useClerk()
+
+  useEffect(() => {
+    if (!projectId) return
+
+    const checkSupabaseStatus = async () => {
+      try {
+        const response = await fetch(
+          `/api/supabase-connect/status?projectId=${projectId}`
+        )
+        if (response.ok) {
+          const data = (await response.json()) as { connected: boolean }
+          setSupabaseConnected(data.connected)
+        }
+      } catch (error) {
+        console.error('Failed to check Supabase status:', error)
+      }
+    }
+
+    checkSupabaseStatus()
+    const interval = setInterval(checkSupabaseStatus, 5000)
+    return () => clearInterval(interval)
+  }, [projectId])
 
   const validateAndSubmitMessage = useCallback(
     (text: string) => {
