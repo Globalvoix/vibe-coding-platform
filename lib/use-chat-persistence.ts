@@ -1,16 +1,13 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { ChatUIMessage } from '@/components/chat/types'
-import type { Chat } from '@ai-sdk/react'
 
-export function useChatPersistence(
-  projectId: string | null,
-  messages: ChatUIMessage[],
-  chat: Chat<ChatUIMessage>
-) {
+export function useChatPersistence(projectId: string | null, messages: ChatUIMessage[]) {
+  const [restoredMessages, setRestoredMessages] = useState<ChatUIMessage[]>([])
   const projectIdRef = useRef(projectId)
   const hasRestoredRef = useRef(false)
+  const messageCountRef = useRef(0)
 
   // Save messages to localStorage whenever they change
   useEffect(() => {
@@ -20,16 +17,18 @@ export function useChatPersistence(
 
     try {
       const storageKey = `chat-messages-${projectId}`
-      localStorage.setItem(storageKey, JSON.stringify(messages))
+      const allMessages = [...restoredMessages, ...messages]
+      localStorage.setItem(storageKey, JSON.stringify(allMessages))
     } catch (error) {
       console.error('Failed to save chat messages:', error)
     }
-  }, [projectId, messages])
+  }, [projectId, messages, restoredMessages])
 
   // Restore messages from localStorage when projectId changes
   useEffect(() => {
     if (!projectId) {
       hasRestoredRef.current = false
+      setRestoredMessages([])
       return
     }
 
@@ -40,6 +39,7 @@ export function useChatPersistence(
 
     projectIdRef.current = projectId
     hasRestoredRef.current = true
+    messageCountRef.current = 0
 
     if (typeof window === 'undefined') return
 
@@ -47,15 +47,13 @@ export function useChatPersistence(
       const storageKey = `chat-messages-${projectId}`
       const stored = localStorage.getItem(storageKey)
       if (stored) {
-        const restoredMessages = JSON.parse(stored) as ChatUIMessage[]
-        
-        // Restore messages by directly manipulating the chat's internal state
-        if (chat && typeof (chat as unknown as Record<string, unknown>).setMessages === 'function') {
-          ((chat as unknown) as { setMessages: (msgs: ChatUIMessage[]) => void }).setMessages(restoredMessages)
-        }
+        const restoredMsgs = JSON.parse(stored) as ChatUIMessage[]
+        setRestoredMessages(restoredMsgs)
       }
     } catch (error) {
       console.error('Failed to restore chat messages:', error)
     }
-  }, [projectId, chat])
+  }, [projectId])
+
+  return { restoredMessages, allMessages: [...restoredMessages, ...messages] }
 }
