@@ -1,10 +1,13 @@
 import { createGatewayProvider } from '@ai-sdk/gateway'
 import { createOpenAI } from '@ai-sdk/openai'
 import { createAnthropic } from '@ai-sdk/anthropic'
+import { createGoogleGenerativeAI } from '@ai-sdk/google'
 import { Models } from './constants'
 import type { JSONValue } from 'ai'
 import type { OpenAIResponsesProviderOptions } from '@ai-sdk/openai'
 import type { LanguageModelV2 } from '@ai-sdk/provider'
+
+const GOOGLE_GEMINI_FLASH_MODEL_ID = 'gemini-2.5-flash' as const
 
 export async function getAvailableModels() {
   const gateway = gatewayInstance()
@@ -27,6 +30,16 @@ export async function getAvailableModels() {
       models.push({
         id: Models.AnthropicClaude4Sonnet,
         name: 'Anthropic Claude 4 Sonnet',
+      })
+    }
+  }
+
+  if (process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+    const hasGeminiFlash = models.some((model) => model.id === Models.GoogleGeminiFlash)
+    if (!hasGeminiFlash) {
+      models.push({
+        id: Models.GoogleGeminiFlash,
+        name: 'Google Gemini 2.5 Flash',
       })
     }
   }
@@ -69,6 +82,13 @@ export function getModelOptions(
     }
   }
 
+  if (modelId === Models.GoogleGeminiFlash && process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+    const google = googleInstance()
+    return {
+      model: google(GOOGLE_GEMINI_FLASH_MODEL_ID),
+    }
+  }
+
   const gateway = gatewayInstance()
 
   if (modelId === Models.AnthropicClaude45Sonnet) {
@@ -98,6 +118,12 @@ function openaiInstance() {
 function anthropicInstance() {
   return createAnthropic({
     apiKey: process.env.ANTHROPIC_API_KEY,
+  })
+}
+
+function googleInstance() {
+  return createGoogleGenerativeAI({
+    apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
   })
 }
 
