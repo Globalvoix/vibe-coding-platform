@@ -73,6 +73,10 @@ export function SupabaseConnectionManager({ className, projectId }: Props) {
     }
 
     fetchConnection()
+
+    const pollInterval = setInterval(fetchConnection, 3000)
+
+    return () => clearInterval(pollInterval)
   }, [projectId])
 
   const getSupabaseUrl = (path: string) => {
