@@ -7,6 +7,7 @@ import z from 'zod/v3'
 interface Params {
   writer: UIMessageStreamWriter<UIMessage<never, DataPart>>
   projectId?: string
+  supabaseConnected?: boolean
 }
 
 const tableColumnSchema = z.object({
@@ -32,7 +33,7 @@ const tableColumnSchema = z.object({
   primaryKey: z.boolean().optional().describe('Mark as primary key'),
 })
 
-export const createRealtimeBackend = ({ writer, projectId }: Params) =>
+export const createRealtimeBackend = ({ writer, projectId, supabaseConnected }: Params) =>
   tool({
     description,
     inputSchema: z.object({
@@ -63,6 +64,18 @@ export const createRealtimeBackend = ({ writer, projectId }: Params) =>
           data: {
             status: 'error',
             message: 'Project ID not found',
+          },
+        })
+        return
+      }
+
+      if (!supabaseConnected) {
+        writer.write({
+          id: toolCallId,
+          type: 'data-create-realtime-backend',
+          data: {
+            status: 'error',
+            message: 'Supabase is not connected to this project. Please connect a Supabase project first using the Supabase button in the chat toolbar.',
           },
         })
         return
