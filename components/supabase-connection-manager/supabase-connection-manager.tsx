@@ -1,5 +1,28 @@
 'use client'
 
+/**
+ * Supabase Connection Manager Component
+ *
+ * This component displays the connection status and management interface for Supabase projects.
+ * It replaces the old DatabaseViewer to provide a more integrated experience similar to Lovable.
+ *
+ * Features:
+ * - Display Supabase connection status with project information
+ * - Quick links to Supabase features (Manage Users, SQL Editor, Edge Functions, Manage Secrets)
+ * - Enable/Disable Supabase connection for the current project
+ * - Manage Organizations link
+ *
+ * When Supabase is connected:
+ * - AI can use the createRealtimeBackend tool to create tables, functions, and enable real-time subscriptions
+ * - Frontend code can automatically subscribe to real-time database changes
+ * - Backend functions can be created for complex business logic
+ *
+ * Integration:
+ * - OAuth flow stores Supabase project reference (ref) for generating correct dashboard links
+ * - Real-time schema management is handled through /api/projects/[id]/supabase-schema endpoint
+ * - Connection status is fetched from /api/projects/[id]/supabase-connection endpoint
+ */
+
 import { useEffect, useState } from 'react'
 import { Cloud, AlertCircle, Loader, ExternalLink, LogOut } from 'lucide-react'
 import { Panel, PanelHeader } from '@/components/panels/panels'
