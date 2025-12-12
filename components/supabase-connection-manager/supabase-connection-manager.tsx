@@ -22,6 +22,7 @@ export function SupabaseConnectionManager({ className, projectId }: Props) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [enablingCloud, setEnablingCloud] = useState(false)
+  const [disconnecting, setDisconnecting] = useState(false)
 
   useEffect(() => {
     if (!projectId) return
