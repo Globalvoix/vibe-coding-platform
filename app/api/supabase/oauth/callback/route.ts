@@ -20,12 +20,62 @@ function clearOauthCookies(response: NextResponse) {
 }
 
 export async function GET(req: NextRequest) {
+  const requestUrl = new URL(req.url)
+  const cookieStore = await cookies()
+
+  const projectId = cookieStore.get('sb_oauth_project_id')?.value ?? null
+
+  const redirectToWorkspace = (reason: string) => {
+    const target = buildWorkspaceRedirect(requestUrl.origin, projectId, reason)
+    return clearOauthCookies(NextResponse.redirect(target))
+  }
+
   const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
   const oauthClientId =
     process.env.SUPABASE_OAUTH_CLIENT_ID || process.env.NEXT_PUBLIC_SUPABASE_OAUTH_CLIENT_ID
   const oauthClientSecret = process.env.SUPABASE_OAUTH_CLIENT_SECRET
 
-  const requestUrl = new URL(req.url)
+  if (!supabaseUrl || !oauthClientId || !oauthClientSecret) {
+    console.error('Supabase OAuth configuration missing', {
+      hasUrl: !!supabaseUrl,
+      hasClientId: !!oauthClientId,
+      hasClientSecret: !!oauthClientSecret,
+    })
+    return redirectToWorkspace('missing_config')
+  }
+
+  const code = requestUrl.searchParams.get('code')
+  const state = requestUrl.searchParams.get('state')
+  const error = requestUrl.searchParams.get('error')
+  const errorDescription = requestUrl.searchParams.get('error_description')
+
+  if (error) {
+    console.error('Supabase OAuth error:', error, errorDescription)
+    return redirectToWorkspace('oauth_error')
+  }
+
+  if (!code) {
+    console.error('No authorization code received')
+    return redirectToWorkspace('missing_code')
+  }
+
+  const storedState = cookieStore.get('sb_oauth_state')?.value ?? null
+  const codeVerifier = cookieStore.get('sb_oauth_verifier')?.value ?? null
+
+  if (!storedState || !state || state !== storedState) {
+    console.error('State mismatch or missing', { hasStoredState: !!storedState, hasState: !!state })
+    return redirectToWorkspace('invalid_state')
+  }
+
+  if (!codeVerifier) {
+    console.error('Code verifier missing from cookies')
+    return redirectToWorkspace('missing_verifier')
+  }
+
+  if (!projectId) {
+    console.error('Project ID missing from cookies')
+    return redirectToWorkspace('missing_project')
+  }
 
   const oauthRedirectUrlEnv =
     process.env.SUPABASE_OAUTH_REDIRECT_URL ||
@@ -36,65 +86,57 @@ export async function GET(req: NextRequest) {
   const oauthRedirectUrl =
     oauthRedirectUrlEnv || `${requestUrl.origin}/api/supabase/oauth/callback`
 
-  const cookieStore = await cookies()
-  const storedState = cookieStore.get('sb_oauth_state')?.value ?? null
-  const codeVerifier = cookieStore.get('sb_oauth_verifier')?.value ?? null
-  const projectId = cookieStore.get('sb_oauth_project_id')?.value ?? null
-
-  const redirectToWorkspace = (reason: string) => {
-    const target = buildWorkspaceRedirect(requestUrl.origin, projectId, reason)
-    return clearOauthCookies(NextResponse.redirect(target))
-  }
-
-  if (!supabaseUrl || !oauthClientId || !oauthClientSecret) {
-    return redirectToWorkspace('missing_config')
-  }
-
-  const code = requestUrl.searchParams.get('code')
-  const state = requestUrl.searchParams.get('state')
-
-  if (!code) {
-    return redirectToWorkspace('missing_code')
-  }
-
-  if (!storedState || state !== storedState) {
-    return redirectToWorkspace('invalid_state')
-  }
-
-  if (!codeVerifier) {
-    return redirectToWorkspace('missing_verifier')
-  }
-
   const tokenUrl = new URL('/auth/v1/oauth/token', supabaseUrl)
 
-  const tokenResponse = await fetch(tokenUrl.toString(), {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: new URLSearchParams({
-      grant_type: 'authorization_code',
-      code,
-      client_id: oauthClientId,
-      client_secret: oauthClientSecret,
-      redirect_uri: oauthRedirectUrl,
-      code_verifier: codeVerifier,
-    }),
-  })
+  let tokenResponse: Response
 
-  if (!tokenResponse.ok) {
+  try {
+    tokenResponse = await fetch(tokenUrl.toString(), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        grant_type: 'authorization_code',
+        code,
+        client_id: oauthClientId,
+        client_secret: oauthClientSecret,
+        redirect_uri: oauthRedirectUrl,
+        code_verifier: codeVerifier,
+      }),
+    })
+  } catch (err) {
+    console.error('Token exchange request failed:', err)
     return redirectToWorkspace('token_exchange_failed')
   }
 
-  const tokenData = (await tokenResponse.json()) as {
-    access_token: string
-    refresh_token?: string
-    expires_in?: number
+  if (!tokenResponse.ok) {
+    const errorText = await tokenResponse.text()
+    console.error('Token exchange failed', {
+      status: tokenResponse.status,
+      statusText: tokenResponse.statusText,
+      error: errorText,
+    })
+    return redirectToWorkspace('token_exchange_failed')
+  }
+
+  let tokenData: { access_token: string; refresh_token?: string; expires_in?: number }
+
+  try {
+    tokenData = (await tokenResponse.json()) as {
+      access_token: string
+      refresh_token?: string
+      expires_in?: number
+    }
+  } catch (err) {
+    console.error('Failed to parse token response:', err)
+    return redirectToWorkspace('token_parse_failed')
   }
 
   const { userId } = await auth()
 
-  if (!userId || !projectId) {
+  if (!userId) {
+    console.error('User not authenticated')
     const response = NextResponse.redirect(`${requestUrl.origin}/`)
     return clearOauthCookies(response)
   }
@@ -132,28 +174,39 @@ export async function GET(req: NextRequest) {
           supabaseProjectRef = typeof ref === 'string' ? ref : null
           supabaseProjectName = typeof name === 'string' ? name : null
           supabaseOrgId = typeof organizationId === 'string' ? organizationId : null
+
+          console.log('Supabase project info fetched:', {
+            ref: supabaseProjectRef,
+            name: supabaseProjectName,
+          })
         }
       }
+    } else {
+      console.warn('Failed to fetch Supabase projects:', projectsResponse.status)
     }
   } catch (err) {
     console.error('Failed to fetch Supabase projects:', err)
   }
 
-  await upsertSupabaseConnection({
-    userId,
-    projectId,
-    accessToken: tokenData.access_token,
-    refreshToken: tokenData.refresh_token ?? null,
-    expiresAt,
-    supabaseProjectRef,
-    supabaseOrgId,
-    supabaseProjectName,
-  })
+  try {
+    await upsertSupabaseConnection({
+      userId,
+      projectId,
+      accessToken: tokenData.access_token,
+      refreshToken: tokenData.refresh_token ?? null,
+      expiresAt,
+      supabaseProjectRef,
+      supabaseOrgId,
+      supabaseProjectName,
+    })
 
-  await updateProjectCloudEnabled(userId, projectId, true)
+    await updateProjectCloudEnabled(userId, projectId, true)
 
-  const workspaceRedirectUrl = `${requestUrl.origin}/workspace?projectId=${encodeURIComponent(projectId)}`
-
-  const response = NextResponse.redirect(workspaceRedirectUrl)
-  return clearOauthCookies(response)
+    const workspaceRedirectUrl = `${requestUrl.origin}/workspace?projectId=${encodeURIComponent(projectId)}`
+    const response = NextResponse.redirect(workspaceRedirectUrl)
+    return clearOauthCookies(response)
+  } catch (err) {
+    console.error('Failed to save Supabase connection:', err)
+    return redirectToWorkspace('connection_save_failed')
+  }
 }
