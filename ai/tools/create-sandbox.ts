@@ -2,15 +2,18 @@ import type { UIMessageStreamWriter, UIMessage } from 'ai'
 import type { DataPart } from '../messages/data-parts'
 import { Sandbox } from '@vercel/sandbox'
 import { getRichError } from './get-rich-error'
+import { syncProjectEnvToSandbox } from './project-env'
 import { tool } from 'ai'
 import description from './create-sandbox.md'
 import z from 'zod/v3'
 
 interface Params {
   writer: UIMessageStreamWriter<UIMessage<never, DataPart>>
+  userId?: string
+  projectId?: string
 }
 
-export const createSandbox = ({ writer }: Params) =>
+export const createSandbox = ({ writer, userId, projectId }: Params) =>
   tool({
     description,
     inputSchema: z.object({
@@ -45,6 +48,12 @@ export const createSandbox = ({ writer }: Params) =>
           timeout: SANDBOX_MAX_DURATION_MS,
           ports,
         })
+
+        try {
+          await syncProjectEnvToSandbox({ sandbox, userId, projectId })
+        } catch {
+          // best-effort: sandbox still usable even if env sync fails
+        }
 
         writer.write({
           id: toolCallId,

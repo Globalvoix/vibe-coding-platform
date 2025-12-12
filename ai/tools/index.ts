@@ -9,16 +9,17 @@ import { createRealtimeBackend } from './create-realtime-backend'
 interface Params {
   modelId: string
   writer: UIMessageStreamWriter<UIMessage<never, DataPart>>
+  userId?: string
   projectId?: string
   supabaseConnected?: boolean
 }
 
-export function tools({ modelId, writer, projectId, supabaseConnected }: Params) {
+export function tools({ modelId, writer, userId, projectId, supabaseConnected }: Params) {
   return {
-    createSandbox: createSandbox({ writer }),
-    generateFiles: generateFiles({ writer, modelId }),
+    createSandbox: createSandbox({ writer, userId, projectId }),
+    generateFiles: generateFiles({ writer, modelId, userId, projectId }),
     getSandboxURL: getSandboxURL({ writer }),
-    runCommand: runCommand({ writer }),
+    runCommand: runCommand({ writer, userId, projectId }),
     createRealtimeBackend: createRealtimeBackend({ writer, projectId, supabaseConnected }),
   }
 }

@@ -4,6 +4,7 @@ import { Sandbox } from '@vercel/sandbox'
 import { getContents, type File } from './generate-files/get-contents'
 import { getRichError } from './get-rich-error'
 import { getWriteFiles } from './generate-files/get-write-files'
+import { syncProjectEnvToSandbox } from './project-env'
 import { tool } from 'ai'
 import description from './generate-files.md'
 import z from 'zod/v3'
@@ -11,9 +12,11 @@ import z from 'zod/v3'
 interface Params {
   modelId: string
   writer: UIMessageStreamWriter<UIMessage<never, DataPart>>
+  userId?: string
+  projectId?: string
 }
 
-export const generateFiles = ({ writer, modelId }: Params) =>
+export const generateFiles = ({ writer, modelId, userId, projectId }: Params) =>
   tool({
     description,
     inputSchema: z.object({
@@ -45,6 +48,12 @@ export const generateFiles = ({ writer, modelId }: Params) =>
         })
 
         return richError.message
+      }
+
+      try {
+        await syncProjectEnvToSandbox({ sandbox, userId, projectId })
+      } catch {
+        // best-effort
       }
 
       const writeFiles = getWriteFiles({ sandbox, toolCallId, writer })
