@@ -9,8 +9,9 @@ import { Sandbox } from '../sandbox'
 import { TabContent, TabItem } from '@/components/tabs'
 import { AppSidebar } from '@/components/sidebar/app-sidebar'
 import { EnvVarsManager } from '@/components/env-vars/env-vars-manager'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 import { useSandboxStore, useFileExplorerStore } from '../state'
 
 interface ProjectResponse {
@@ -26,9 +27,11 @@ interface ProjectResponse {
 }
 
 export default function WorkspacePage() {
+  const router = useRouter()
   const searchParams = useSearchParams()
   const promptFromUrl = searchParams.get('prompt')
   const projectId = searchParams.get('projectId')
+  const supabaseOauth = searchParams.get('supabaseOauth')
   const [initialPrompt, setInitialPrompt] = useState<string>('')
   const [horizontalSizes, setHorizontalSizes] = useState<[number, number] | null>(
     null
@@ -36,6 +39,24 @@ export default function WorkspacePage() {
   const { sandboxId, paths: sandboxPaths, url, urlUUID } = useSandboxStore()
 
   useEffect(() => {
+    if (supabaseOauth) {
+      const errorMessages: Record<string, string> = {
+        missing_config: 'Supabase connection is not configured yet. Please contact support or set the Supabase OAuth environment variables for this deployment.',
+        missing_project: 'Could not start Supabase connection (missing project). Please try again from the database panel.',
+        missing_code: 'Supabase sign-in was cancelled or failed to return an authorization code. Please try again.',
+        invalid_state: 'Supabase sign-in validation failed. Please try again.',
+        missing_verifier: 'Supabase sign-in session expired. Please try again.',
+        token_exchange_failed: 'Supabase sign-in failed while exchanging the authorization code. Please try again.',
+      }
+
+      toast.error(errorMessages[supabaseOauth] ?? 'Supabase sign-in failed. Please try again.')
+
+      const params = new URLSearchParams(searchParams.toString())
+      params.delete('supabaseOauth')
+      const nextQuery = params.toString()
+      router.replace(nextQuery ? `/workspace?${nextQuery}` : '/workspace')
+    }
+
     const sandboxState = useSandboxStore.getState()
     const fileExplorerState = useFileExplorerStore.getState()
 
