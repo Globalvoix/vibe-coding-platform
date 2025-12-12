@@ -18,6 +18,7 @@ function getRequestOrigin(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   const url = new URL(req.url)
+  const origin = getRequestOrigin(req)
   const code = url.searchParams.get('code')
   const error = url.searchParams.get('error')
   const errorDescription = url.searchParams.get('error_description')
@@ -45,7 +46,7 @@ export async function GET(req: NextRequest) {
       stateMatch: state === receivedState,
       hasAppProject: !!appProjectId,
     })
-    const response = NextResponse.redirect(`${url.origin}/workspace?projectId=${appProjectId}`)
+    const response = NextResponse.redirect(`${origin}/workspace?projectId=${appProjectId}`)
     response.cookies.set('sb_cv', '', { maxAge: 0, path: '/' })
     response.cookies.set('sb_state', '', { maxAge: 0, path: '/' })
     response.cookies.set('sb_app_project', '', { maxAge: 0, path: '/' })
@@ -59,7 +60,7 @@ export async function GET(req: NextRequest) {
 
   if (!supabaseUrl || !oauthClientId || !oauthClientSecret) {
     console.error('Supabase OAuth not configured')
-    const response = NextResponse.redirect(`${url.origin}/workspace?projectId=${appProjectId}`)
+    const response = NextResponse.redirect(`${origin}/workspace?projectId=${appProjectId}`)
     response.cookies.set('sb_cv', '', { maxAge: 0, path: '/' })
     response.cookies.set('sb_state', '', { maxAge: 0, path: '/' })
     response.cookies.set('sb_app_project', '', { maxAge: 0, path: '/' })
@@ -68,7 +69,7 @@ export async function GET(req: NextRequest) {
 
   const redirectUrl =
     process.env.SUPABASE_OAUTH_REDIRECT_URL ||
-    `${getRequestOrigin(req)}/api/supabase-connect/callback`
+    `${origin}/api/supabase-connect/callback`
 
   try {
     const tokenResponse = await fetch(
@@ -93,7 +94,7 @@ export async function GET(req: NextRequest) {
       const errorText = await tokenResponse.text()
       console.error('Token exchange failed:', errorText)
       const response = NextResponse.redirect(
-        `${url.origin}/workspace?projectId=${appProjectId}`
+        `${origin}/workspace?projectId=${appProjectId}`
       )
       response.cookies.set('sb_cv', '', { maxAge: 0, path: '/' })
       response.cookies.set('sb_state', '', { maxAge: 0, path: '/' })
@@ -111,7 +112,7 @@ export async function GET(req: NextRequest) {
 
     if (!userId) {
       console.error('User not authenticated')
-      const response = NextResponse.redirect(`${url.origin}/`)
+      const response = NextResponse.redirect(`${origin}/`)
       response.cookies.set('sb_cv', '', { maxAge: 0, path: '/' })
       response.cookies.set('sb_state', '', { maxAge: 0, path: '/' })
       response.cookies.set('sb_app_project', '', { maxAge: 0, path: '/' })
@@ -119,7 +120,7 @@ export async function GET(req: NextRequest) {
     }
 
     const response = NextResponse.redirect(
-      `${url.origin}/supabase-select-project?appProjectId=${appProjectId}&token=${encodeURIComponent(
+      `${origin}/supabase-select-project?appProjectId=${appProjectId}&token=${encodeURIComponent(
         tokenData.access_token
       )}&refreshToken=${encodeURIComponent(tokenData.refresh_token || '')}&expiresIn=${
         tokenData.expires_in || ''
@@ -152,7 +153,7 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     console.error('Supabase OAuth error:', error)
     const response = NextResponse.redirect(
-      `${url.origin}/workspace?projectId=${appProjectId}`
+      `${origin}/workspace?projectId=${appProjectId}`
     )
     response.cookies.set('sb_cv', '', { maxAge: 0, path: '/' })
     response.cookies.set('sb_state', '', { maxAge: 0, path: '/' })
