@@ -31,36 +31,11 @@ export default function WorkspacePage() {
   const searchParams = useSearchParams()
   const promptFromUrl = searchParams.get('prompt')
   const projectId = searchParams.get('projectId')
-  const supabaseOauth = searchParams.get('supabaseOauth')
   const [initialPrompt, setInitialPrompt] = useState<string>('')
   const [horizontalSizes, setHorizontalSizes] = useState<[number, number] | null>(
     null
   )
   const { sandboxId, paths: sandboxPaths, url, urlUUID } = useSandboxStore()
-
-  useEffect(() => {
-    if (supabaseOauth) {
-      const errorMessages: Record<string, string> = {
-        missing_config: 'Supabase connection is not configured. Please contact support to set up Supabase OAuth environment variables.',
-        missing_project: 'Could not start Supabase connection (missing project). Please try clicking the Enable Supabase button again.',
-        missing_code: 'Supabase sign-in was cancelled or failed. Please try again.',
-        invalid_state: 'Supabase sign-in validation failed (session mismatch). Please try again.',
-        missing_verifier: 'Supabase sign-in session expired. Please try again.',
-        token_exchange_failed: 'Failed to exchange authorization code with Supabase. Please check your Supabase OAuth client configuration and try again.',
-        token_parse_failed: 'Failed to parse Supabase token response. Please try again.',
-        oauth_error: 'Supabase OAuth error occurred. Please try again.',
-        oauth_setup_failed: 'Failed to set up Supabase authentication. Please try again.',
-        connection_save_failed: 'Connection was established but failed to save. Please try again.',
-      }
-
-      toast.error(errorMessages[supabaseOauth] ?? 'Supabase connection failed. Please try again.')
-
-      const params = new URLSearchParams(searchParams.toString())
-      params.delete('supabaseOauth')
-      const nextQuery = params.toString()
-      router.replace(nextQuery ? `/workspace?${nextQuery}` : '/workspace')
-    }
-  }, [supabaseOauth, router, searchParams])
 
   useEffect(() => {
     const sandboxState = useSandboxStore.getState()
