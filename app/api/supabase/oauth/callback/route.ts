@@ -117,12 +117,22 @@ export async function GET(req: NextRequest) {
     })
 
     if (projectsResponse.ok) {
-      const projectsData = (await projectsResponse.json()) as any
+      const projectsData = (await projectsResponse.json()) as unknown
+
       if (Array.isArray(projectsData) && projectsData.length > 0) {
         const firstProject = projectsData[0]
-        supabaseProjectRef = firstProject.ref
-        supabaseProjectName = firstProject.name
-        supabaseOrgId = firstProject.organization_id
+
+        if (firstProject && typeof firstProject === 'object') {
+          const firstProjectRecord = firstProject as Record<string, unknown>
+
+          const ref = firstProjectRecord.ref
+          const name = firstProjectRecord.name
+          const organizationId = firstProjectRecord.organization_id
+
+          supabaseProjectRef = typeof ref === 'string' ? ref : null
+          supabaseProjectName = typeof name === 'string' ? name : null
+          supabaseOrgId = typeof organizationId === 'string' ? organizationId : null
+        }
       }
     }
   } catch (err) {
