@@ -10,6 +10,7 @@ import { CreateDatabase } from './create-database'
 import { ReportErrors } from './report-errors'
 import { Reasoning } from './reasoning'
 import { Text } from './text'
+import { CreateRealtimeBackend } from './create-realtime-backend'
 import { memo } from 'react'
 
 interface Props {
