@@ -164,22 +164,24 @@ export function SupabaseConnectionManager({ className, projectId }: Props) {
             <div className="text-sm text-red-700 dark:text-red-300">{error}</div>
           </div>
         ) : !connection?.connected ? (
-          <div className="flex flex-col items-center justify-center h-32 text-center">
-            <Cloud className="w-8 h-8 text-muted-foreground/30 mb-2" />
-            <p className="text-sm text-muted-foreground">
-              No Supabase database connected yet
-            </p>
-            <p className="text-xs text-muted-foreground/60 mt-1">
-              Enable Supabase for this project to access managed Postgres database with real-time capabilities.
-            </p>
+          <div className="flex flex-col items-center justify-center h-32 text-center gap-3">
+            <Cloud className="w-8 h-8 text-muted-foreground/30" />
+            <div>
+              <p className="text-sm text-muted-foreground font-medium">
+                No Supabase database connected yet
+              </p>
+              <p className="text-xs text-muted-foreground/60 mt-1">
+                Click below to connect your Supabase project and enable real-time database capabilities.
+              </p>
+            </div>
             {projectId && (
               <Button
                 type="button"
                 size="sm"
-                className="mt-3"
-                disabled={enablingCloud}
+                className="mt-2"
+                disabled={enablingCloud || loading}
                 onClick={() => {
-                  if (!projectId || enablingCloud) return
+                  if (!projectId || enablingCloud || loading) return
                   setEnablingCloud(true)
                   setError(null)
 
@@ -189,7 +191,14 @@ export function SupabaseConnectionManager({ className, projectId }: Props) {
                   window.location.href = startUrl
                 }}
               >
-                {enablingCloud ? 'Enabling…' : 'Enable Supabase'}
+                {enablingCloud ? (
+                  <>
+                    <span className="inline-block w-3 h-3 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Connecting to Supabase…
+                  </>
+                ) : (
+                  'Enable Supabase'
+                )}
               </Button>
             )}
           </div>
