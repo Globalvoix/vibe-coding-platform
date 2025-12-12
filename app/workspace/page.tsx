@@ -41,15 +41,19 @@ export default function WorkspacePage() {
   useEffect(() => {
     if (supabaseOauth) {
       const errorMessages: Record<string, string> = {
-        missing_config: 'Supabase connection is not configured yet. Please contact support or set the Supabase OAuth environment variables for this deployment.',
-        missing_project: 'Could not start Supabase connection (missing project). Please try again from the database panel.',
-        missing_code: 'Supabase sign-in was cancelled or failed to return an authorization code. Please try again.',
-        invalid_state: 'Supabase sign-in validation failed. Please try again.',
+        missing_config: 'Supabase connection is not configured. Please contact support to set up Supabase OAuth environment variables.',
+        missing_project: 'Could not start Supabase connection (missing project). Please try clicking the Enable Supabase button again.',
+        missing_code: 'Supabase sign-in was cancelled or failed. Please try again.',
+        invalid_state: 'Supabase sign-in validation failed (session mismatch). Please try again.',
         missing_verifier: 'Supabase sign-in session expired. Please try again.',
-        token_exchange_failed: 'Supabase sign-in failed while exchanging the authorization code. Please try again.',
+        token_exchange_failed: 'Failed to exchange authorization code with Supabase. Please check your Supabase OAuth client configuration and try again.',
+        token_parse_failed: 'Failed to parse Supabase token response. Please try again.',
+        oauth_error: 'Supabase OAuth error occurred. Please try again.',
+        oauth_setup_failed: 'Failed to set up Supabase authentication. Please try again.',
+        connection_save_failed: 'Connection was established but failed to save. Please try again.',
       }
 
-      toast.error(errorMessages[supabaseOauth] ?? 'Supabase sign-in failed. Please try again.')
+      toast.error(errorMessages[supabaseOauth] ?? 'Supabase connection failed. Please try again.')
 
       const params = new URLSearchParams(searchParams.toString())
       params.delete('supabaseOauth')
