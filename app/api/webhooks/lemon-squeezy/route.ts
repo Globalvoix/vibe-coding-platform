@@ -427,15 +427,21 @@ async function handleSubscriptionCancelled(
   }
 
   try {
-    // Downgrade user to the free plan with an active free status
+    const now = new Date()
+    const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000
+    const periodStart = now.toISOString()
+    const periodEnd = new Date(now.getTime() + THIRTY_DAYS_MS).toISOString()
+
     await pool.query(
       `UPDATE subscriptions
        SET plan_id = $1,
            status = $2,
+           current_period_start = $3,
+           current_period_end = $4,
            updated_at = NOW()
-       WHERE user_id = $3
+       WHERE user_id = $5
        RETURNING id, plan_id, status`,
-      ['free', 'active', userId]
+      ['free', 'active', periodStart, periodEnd, userId]
     )
 
     console.log(
