@@ -7,7 +7,6 @@ import {
   streamText,
 } from 'ai'
 import { DEFAULT_MODEL, Models } from '@/ai/constants'
-import type { ChatUIMessage } from '@/components/chat/types'
 import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { getAvailableModels, getModelOptions } from '@/ai/gateway'
