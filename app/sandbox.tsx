@@ -2,19 +2,18 @@
 
 import type { ReactNode } from 'react'
 import { useState, useRef } from 'react'
-import { Globe, Code2, BarChart3, Cloud } from 'lucide-react'
+import { Globe, Code2, BarChart3 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Preview } from './preview'
 import { FileExplorer } from './file-explorer'
 import { Logs } from './logs'
-import { SupabaseConnectionManager } from '@/components/supabase-connection-manager/supabase-connection-manager'
 import { useSearchParams } from 'next/navigation'
 
 interface Props {
   className?: string
 }
 
-type SandboxTabId = 'preview' | 'code' | 'console' | 'cloud'
+type SandboxTabId = 'preview' | 'code' | 'console'
 
 interface TabConfig {
   id: SandboxTabId
