@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils'
 import { Preview } from './preview'
 import { FileExplorer } from './file-explorer'
 import { Logs } from './logs'
+import { ComingSoonModal } from '@/components/modals/coming-soon-modal'
 import { useSearchParams } from 'next/navigation'
 
 interface Props {
@@ -29,6 +30,7 @@ export function Sandbox({ className }: Props) {
   const [currentUrl, setCurrentUrl] = useState<string>('')
   const [inputValue, setInputValue] = useState<string>('')
   const [isLoading, setIsLoading] = useState(false)
+  const [showComingSoon, setShowComingSoon] = useState(false)
   const previewRefreshRef = useRef<(() => void) | null>(null)
 
   const tabs: TabConfig[] = [
@@ -87,8 +89,7 @@ export function Sandbox({ className }: Props) {
   }
 
   const handlePublish = () => {
-    // TODO: Implement publish functionality
-    console.log('Publish clicked')
+    setShowComingSoon(true)
   }
 
   return (
@@ -170,6 +171,12 @@ export function Sandbox({ className }: Props) {
           <Logs className="flex-1 min-h-0 overflow-hidden" />
         )}
       </div>
+      <ComingSoonModal
+        isOpen={showComingSoon}
+        onClose={() => setShowComingSoon(false)}
+        title="Publish"
+        description="Publishing and deploying your projects is coming soon!"
+      />
     </div>
   )
 }
