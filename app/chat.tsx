@@ -62,7 +62,7 @@ export function Chat({ className, initialPrompt, projectId }: Props) {
   })
 
   // Persist and restore chat messages across page refreshes
-  useChatPersistence(projectId || null, messages, chat)
+  const { allMessages } = useChatPersistence(projectId || null, messages)
 
   const handleComingSoon = (title: string, description: string) => {
     setComingSoonModal({
