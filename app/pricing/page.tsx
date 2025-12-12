@@ -34,8 +34,8 @@ export default function PricingPage() {
       description: "Get started with AI-generated frontends and a single workspace.",
       features: [
         "20 credits per month",
-        "Up to 3 apps/workspaces",
-        "Unlimited database creations per month",
+        "Up to 5 apps/workspaces",
+        "Unlimited database creations",
         "Basic frontend generation",
       ],
       highlight: false,
@@ -47,8 +47,8 @@ export default function PricingPage() {
       description: "For individual builders shipping advanced frontends every week.",
       features: [
         "200 credits per month",
-        "Up to 10 apps/workspaces",
-        "Unlimited database creations per month",
+        "Unlimited apps/workspaces",
+        "Unlimited database creations",
         "Advanced frontend generation",
       ],
       highlight: true,
@@ -60,8 +60,8 @@ export default function PricingPage() {
       description: "For teams running multiple products and environments.",
       features: [
         "600 credits per month",
-        "Up to 30 apps/workspaces per month",
-        "Unlimited database creations per month",
+        "Unlimited apps/workspaces",
+        "Unlimited database creations",
         "Advanced frontend generation",
       ],
       highlight: false,
@@ -73,8 +73,8 @@ export default function PricingPage() {
       description: "For organizations that need custom limits and enterprise guarantees.",
       features: [
         "6000 credits per month",
-        "Unlimited apps/workspaces per month",
-        "Unlimited database creations per month",
+        "Unlimited apps/workspaces",
+        "Unlimited database creations",
         "Enterprise-grade frontend generation",
       ],
       highlight: false,
@@ -176,12 +176,22 @@ export default function PricingPage() {
                     {plan.description}
                   </p>
                   <ul className="mt-4 space-y-1 text-xs text-gray-700">
-                    {plan.features.map((feature) => (
-                      <li key={feature} className="flex items-start gap-2">
-                        <span className="mt-[3px] h-1.5 w-1.5 rounded-full bg-blue-600" />
-                        <span>{feature}</span>
-                      </li>
-                    ))}
+                    {plan.features.map((feature) => {
+                      const isDatabase = feature.includes('database creations')
+                      return (
+                        <li key={feature} className="flex items-start gap-2">
+                          <span className="mt-[3px] h-1.5 w-1.5 rounded-full bg-blue-600" />
+                          <span className="flex items-center gap-2">
+                            {feature}
+                            {isDatabase && (
+                              <span className="ml-auto inline-block px-1.5 py-0.5 text-[10px] font-medium bg-blue-100 text-blue-800 rounded">
+                                Coming Soon
+                              </span>
+                            )}
+                          </span>
+                        </li>
+                      )
+                    })}
                   </ul>
                 </div>
 
