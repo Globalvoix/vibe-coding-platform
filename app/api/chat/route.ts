@@ -46,7 +46,7 @@ export async function POST(req: Request) {
       req.json() as Promise<BodyData>,
     ])
 
-    const { messages, modelId = DEFAULT_MODEL, reasoningEffort, projectId } = bodyData
+    const { messages, modelId = DEFAULT_MODEL, reasoningEffort, projectId, supabaseConnected } = bodyData
     const effectiveReasoningEffort: BodyData['reasoningEffort'] =
       reasoningEffort ?? (modelId === Models.OpenAIGPT5 ? 'medium' : 'low')
 
@@ -69,6 +69,8 @@ export async function POST(req: Request) {
 
     // Get project env vars if projectId is provided
     let envVarsContext = ''
+    let supabaseContext = ''
+
     if (projectId) {
       try {
         const envVars = await getEnvVarsForChat(projectId)
@@ -78,6 +80,18 @@ export async function POST(req: Request) {
         }
       } catch (error) {
         console.warn('Failed to fetch env vars:', error)
+      }
+
+      // Get Supabase project details if connected
+      if (supabaseConnected) {
+        try {
+          const supabaseProject = await getSupabaseProject(userId, projectId)
+          if (supabaseProject) {
+            supabaseContext = `\n\n## Supabase Backend Integration:\nThis project is connected to a Supabase PostgreSQL database. You have full access to create tables, functions, enable real-time subscriptions, and manage the database schema. The Supabase project is: ${supabaseProject.supabase_project_name} (Ref: ${supabaseProject.supabase_project_ref}). When generating code, you can automatically set up the database schema and real-time features.`
+          }
+        } catch (error) {
+          console.warn('Failed to fetch Supabase project:', error)
+        }
       }
     }
 
