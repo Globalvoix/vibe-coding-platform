@@ -89,7 +89,7 @@ export const createRealtimeBackend = ({ writer, projectId, supabaseConnected }: 
 
       try {
         const response = await fetch(
-          `/api/projects/${projectId}/supabase-schema`,
+          `/api/supabase-backend/schema?projectId=${encodeURIComponent(projectId)}`,
           {
             method: 'POST',
             headers: {
