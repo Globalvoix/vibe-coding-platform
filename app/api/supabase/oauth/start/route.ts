@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server'
+import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import crypto from 'node:crypto'
-
 
 function base64UrlEncode(buffer: Buffer) {
   return buffer
@@ -36,13 +36,6 @@ export async function GET(req: NextRequest) {
       : undefined)
 
   const redirectUrl = redirectUrlEnv || `${url.origin}/api/supabase/oauth/callback`
-
-  if (!projectId) {
-    return NextResponse.json(
-      { error: 'projectId is required' },
-      { status: 400 }
-    )
-  }
 
   const codeVerifier = base64UrlEncode(crypto.randomBytes(32))
   const codeChallenge = base64UrlEncode(

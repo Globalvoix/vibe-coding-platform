@@ -5,17 +5,25 @@ import { cookies } from 'next/headers'
 import { upsertSupabaseConnection } from '@/lib/supabase-connections-db'
 import { updateProjectCloudEnabled } from '@/lib/projects-db'
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
-const OAUTH_CLIENT_ID = process.env.NEXT_PUBLIC_SUPABASE_OAUTH_CLIENT_ID
-const OAUTH_CLIENT_SECRET = process.env.SUPABASE_OAUTH_CLIENT_SECRET
+function buildWorkspaceRedirect(origin: string, projectId: string | null, reason: string) {
+  const params = new URLSearchParams()
+  if (projectId) params.set('projectId', projectId)
+  params.set('supabaseOauth', reason)
+  return `${origin}/workspace?${params.toString()}`
+}
+
+function clearOauthCookies(response: NextResponse) {
+  response.cookies.set('sb_oauth_verifier', '', { maxAge: 0, path: '/' })
+  response.cookies.set('sb_oauth_state', '', { maxAge: 0, path: '/' })
+  response.cookies.set('sb_oauth_project_id', '', { maxAge: 0, path: '/' })
+  return response
+}
 
 export async function GET(req: NextRequest) {
-  if (!SUPABASE_URL || !OAUTH_CLIENT_ID || !OAUTH_CLIENT_SECRET) {
-    return NextResponse.json(
-      { error: 'Supabase OAuth configuration is missing' },
-      { status: 500 }
-    )
-  }
+  const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
+  const oauthClientId =
+    process.env.SUPABASE_OAUTH_CLIENT_ID || process.env.NEXT_PUBLIC_SUPABASE_OAUTH_CLIENT_ID
+  const oauthClientSecret = process.env.SUPABASE_OAUTH_CLIENT_SECRET
 
   const requestUrl = new URL(req.url)
 
@@ -27,35 +35,37 @@ export async function GET(req: NextRequest) {
 
   const oauthRedirectUrl =
     oauthRedirectUrlEnv || `${requestUrl.origin}/api/supabase/oauth/callback`
+
+  const cookieStore = await cookies()
+  const storedState = cookieStore.get('sb_oauth_state')?.value ?? null
+  const codeVerifier = cookieStore.get('sb_oauth_verifier')?.value ?? null
+  const projectId = cookieStore.get('sb_oauth_project_id')?.value ?? null
+
+  const redirectToWorkspace = (reason: string) => {
+    const target = buildWorkspaceRedirect(requestUrl.origin, projectId, reason)
+    return clearOauthCookies(NextResponse.redirect(target))
+  }
+
+  if (!supabaseUrl || !oauthClientId || !oauthClientSecret) {
+    return redirectToWorkspace('missing_config')
+  }
+
   const code = requestUrl.searchParams.get('code')
   const state = requestUrl.searchParams.get('state')
 
   if (!code) {
-    return NextResponse.json({ error: 'Missing code' }, { status: 400 })
+    return redirectToWorkspace('missing_code')
   }
 
-  const cookieStore = await cookies()
-  const storedState = cookieStore.get('sb_oauth_state')?.value
-  const codeVerifier = cookieStore.get('sb_oauth_verifier')?.value
-  const projectId = cookieStore.get('sb_oauth_project_id')?.value
-
   if (!storedState || state !== storedState) {
-    const response = NextResponse.json({ error: 'Invalid state' }, { status: 400 })
-    response.cookies.set('sb_oauth_verifier', '', { maxAge: 0, path: '/' })
-    response.cookies.set('sb_oauth_state', '', { maxAge: 0, path: '/' })
-    response.cookies.set('sb_oauth_project_id', '', { maxAge: 0, path: '/' })
-    return response
+    return redirectToWorkspace('invalid_state')
   }
 
   if (!codeVerifier) {
-    const response = NextResponse.json({ error: 'Missing PKCE verifier' }, { status: 400 })
-    response.cookies.set('sb_oauth_verifier', '', { maxAge: 0, path: '/' })
-    response.cookies.set('sb_oauth_state', '', { maxAge: 0, path: '/' })
-    response.cookies.set('sb_oauth_project_id', '', { maxAge: 0, path: '/' })
-    return response
+    return redirectToWorkspace('missing_verifier')
   }
 
-  const tokenUrl = new URL('/auth/v1/oauth/token', SUPABASE_URL)
+  const tokenUrl = new URL('/auth/v1/oauth/token', supabaseUrl)
 
   const tokenResponse = await fetch(tokenUrl.toString(), {
     method: 'POST',
@@ -65,23 +75,15 @@ export async function GET(req: NextRequest) {
     body: new URLSearchParams({
       grant_type: 'authorization_code',
       code,
-      client_id: OAUTH_CLIENT_ID,
-      client_secret: OAUTH_CLIENT_SECRET,
+      client_id: oauthClientId,
+      client_secret: oauthClientSecret,
       redirect_uri: oauthRedirectUrl,
       code_verifier: codeVerifier,
     }),
   })
 
   if (!tokenResponse.ok) {
-    const errorText = await tokenResponse.text().catch(() => '')
-    const response = NextResponse.json(
-      { error: 'Failed to exchange code for tokens', details: errorText },
-      { status: 500 }
-    )
-    response.cookies.set('sb_oauth_verifier', '', { maxAge: 0, path: '/' })
-    response.cookies.set('sb_oauth_state', '', { maxAge: 0, path: '/' })
-    response.cookies.set('sb_oauth_project_id', '', { maxAge: 0, path: '/' })
-    return response
+    return redirectToWorkspace('token_exchange_failed')
   }
 
   const tokenData = (await tokenResponse.json()) as {
@@ -93,12 +95,8 @@ export async function GET(req: NextRequest) {
   const { userId } = await auth()
 
   if (!userId || !projectId) {
-    const redirectBack = `${requestUrl.origin}/`
-    const response = NextResponse.redirect(redirectBack)
-    response.cookies.set('sb_oauth_verifier', '', { maxAge: 0, path: '/' })
-    response.cookies.set('sb_oauth_state', '', { maxAge: 0, path: '/' })
-    response.cookies.set('sb_oauth_project_id', '', { maxAge: 0, path: '/' })
-    return response
+    const response = NextResponse.redirect(`${requestUrl.origin}/`)
+    return clearOauthCookies(response)
   }
 
   const expiresAt = tokenData.expires_in
@@ -115,13 +113,8 @@ export async function GET(req: NextRequest) {
 
   await updateProjectCloudEnabled(userId, projectId, true)
 
-  const redirectPath = `/workspace?projectId=${encodeURIComponent(projectId)}`
-  const workspaceRedirectUrl = `${requestUrl.origin}${redirectPath}`
+  const workspaceRedirectUrl = `${requestUrl.origin}/workspace?projectId=${encodeURIComponent(projectId)}`
 
   const response = NextResponse.redirect(workspaceRedirectUrl)
-  response.cookies.set('sb_oauth_verifier', '', { maxAge: 0, path: '/' })
-  response.cookies.set('sb_oauth_state', '', { maxAge: 0, path: '/' })
-  response.cookies.set('sb_oauth_project_id', '', { maxAge: 0, path: '/' })
-
-  return response
+  return clearOauthCookies(response)
 }
