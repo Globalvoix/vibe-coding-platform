@@ -119,14 +119,14 @@ export async function POST(req: Request) {
             return message
           })
 
-          const systemPrompt = prompt + envVarsContext
+          const systemPrompt = prompt + envVarsContext + supabaseContext
 
           const result = streamText({
             ...getModelOptions(modelId, { reasoningEffort: effectiveReasoningEffort }),
             system: systemPrompt,
             messages: convertToModelMessages(processedMessages),
             stopWhen: stepCountIs(20),
-            tools: tools({ modelId, writer, projectId }),
+            tools: tools({ modelId, writer, projectId, supabaseConnected }),
             onError: (error) => {
               console.error('Error communicating with AI')
               console.error(JSON.stringify(error, null, 2))
