@@ -3,6 +3,19 @@ import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { cookies } from 'next/headers'
 
+function getRequestOrigin(req: NextRequest) {
+  const forwardedProto = req.headers.get('x-forwarded-proto')
+  const forwardedHost = req.headers.get('x-forwarded-host')
+  const host = forwardedHost ?? req.headers.get('host')
+
+  if (host) {
+    const proto = forwardedProto ?? new URL(req.url).protocol.replace(':', '')
+    return `${proto}://${host}`
+  }
+
+  return new URL(req.url).origin
+}
+
 export async function GET(req: NextRequest) {
   const url = new URL(req.url)
   const code = url.searchParams.get('code')
@@ -55,9 +68,7 @@ export async function GET(req: NextRequest) {
 
   const redirectUrl =
     process.env.SUPABASE_OAUTH_REDIRECT_URL ||
-    (process.env.NEXT_PUBLIC_APP_URL
-      ? `${process.env.NEXT_PUBLIC_APP_URL}/api/supabase-connect/callback`
-      : `${url.origin}/api/supabase-connect/callback`)
+    `${getRequestOrigin(req)}/api/supabase-connect/callback`
 
   try {
     const tokenResponse = await fetch(

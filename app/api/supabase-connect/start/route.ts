@@ -2,6 +2,19 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import crypto from 'node:crypto'
 
+function getRequestOrigin(req: NextRequest) {
+  const forwardedProto = req.headers.get('x-forwarded-proto')
+  const forwardedHost = req.headers.get('x-forwarded-host')
+  const host = forwardedHost ?? req.headers.get('host')
+
+  if (host) {
+    const proto = forwardedProto ?? new URL(req.url).protocol.replace(':', '')
+    return `${proto}://${host}`
+  }
+
+  return new URL(req.url).origin
+}
+
 function base64UrlEncode(buffer: Buffer) {
   return buffer
     .toString('base64')
@@ -34,9 +47,7 @@ export async function GET(req: NextRequest) {
 
   const redirectUrl =
     process.env.SUPABASE_OAUTH_REDIRECT_URL ||
-    (process.env.NEXT_PUBLIC_APP_URL
-      ? `${process.env.NEXT_PUBLIC_APP_URL}/api/supabase-connect/callback`
-      : `${url.origin}/api/supabase-connect/callback`)
+    `${getRequestOrigin(req)}/api/supabase-connect/callback`
 
   const codeVerifier = base64UrlEncode(crypto.randomBytes(32))
   const codeChallenge = base64UrlEncode(
