@@ -47,11 +47,6 @@ export function Sandbox({ className }: Props) {
       label: 'Console',
       icon: <BarChart3 className="w-4 h-4" />,
     },
-    {
-      id: 'cloud',
-      label: 'Thinksoft Cloud',
-      icon: <Cloud className="w-4 h-4" />,
-    },
   ]
 
   const renderTabButton = (tab: TabConfig) => {
