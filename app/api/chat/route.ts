@@ -14,6 +14,7 @@ import { checkBotId } from 'botid/server'
 import { tools } from '@/ai/tools'
 import { recordUsageAndDeductCredits, getUserCredits } from '@/lib/credits'
 import { getEnvVarsForChat } from '@/lib/env-vars-db'
+import { getSupabaseProject } from '@/lib/supabase-projects-db'
 import prompt from './prompt.md'
 
 interface BodyData {
@@ -21,6 +22,7 @@ interface BodyData {
   modelId?: string
   reasoningEffort?: 'low' | 'medium'
   projectId?: string
+  supabaseConnected?: boolean
 }
 
 export async function POST(req: Request) {
