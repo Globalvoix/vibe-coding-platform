@@ -215,15 +215,30 @@ export function SupabaseConnectionManager({ className, projectId }: Props) {
             </div>
 
             <div className="flex gap-2 pt-2 border-t border-border/50">
-              <Button variant="ghost" size="sm" className="text-xs">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-xs"
+                onClick={() => {
+                  if (connection?.orgId) {
+                    window.open(`https://app.supabase.com/account/organizations`, '_blank')
+                  }
+                }}
+              >
                 <span className="inline-flex items-center gap-1">
                   <span>ℹ️</span>
                   Manage Organizations
                 </span>
               </Button>
-              <Button variant="ghost" size="sm" className="text-xs text-destructive hover:text-destructive">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-xs text-destructive hover:text-destructive"
+                disabled={disconnecting}
+                onClick={handleDisconnect}
+              >
                 <LogOut className="w-3.5 h-3.5 mr-1" />
-                Disconnect
+                {disconnecting ? 'Disconnecting…' : 'Disconnect'}
               </Button>
             </div>
           </div>
