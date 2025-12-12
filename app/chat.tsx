@@ -199,6 +199,7 @@ export function Chat({ className, initialPrompt, projectId }: Props) {
           />
           <div className="flex items-center justify-between pt-2">
             <div className="flex items-center gap-2">
+              <SupabaseButton projectId={projectId || undefined} isConnected={supabaseConnected} />
               <button
                 type="button"
                 className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border/60 text-foreground shadow-xs hover:bg-secondary/60 transition-colors chat-toolbar-action-button"
