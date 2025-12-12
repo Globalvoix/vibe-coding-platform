@@ -13,13 +13,8 @@ export enum Models {
 export const DEFAULT_MODEL = Models.AnthropicClaude45Sonnet
 
 export const SUPPORTED_MODELS: GatewayModelId[] = [
-  Models.AmazonNovaPro,
-  Models.AnthropicClaude4Sonnet,
   Models.AnthropicClaude45Sonnet,
-  Models.GoogleGeminiFlash,
-  Models.MoonshotKimiK2,
   Models.OpenAIGPT5,
-  Models.XaiGrok3Fast,
 ]
 
 export const TEST_PROMPTS = [
