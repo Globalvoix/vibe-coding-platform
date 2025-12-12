@@ -177,7 +177,7 @@ export function Sandbox({ className }: Props) {
         )}
 
         {activeTab === 'cloud' && (
-          <DatabaseViewer
+          <SupabaseConnectionManager
             className="flex-1 min-h-0 overflow-hidden"
             projectId={projectId ?? undefined}
           />
