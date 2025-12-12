@@ -45,7 +45,7 @@ export const dataPartSchema = z.object({
     action: z.enum(['create_table', 'enable_realtime', 'create_function', 'execute_sql']).optional(),
     message: z.string().optional(),
     details: z.string().optional(),
-    result: z.any().optional(),
+    result: z.unknown().optional(),
   }),
 })
 
