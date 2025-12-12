@@ -103,12 +103,41 @@ export async function GET(req: NextRequest) {
     ? new Date(Date.now() + tokenData.expires_in * 1000)
     : null
 
+  let supabaseProjectRef: string | null = null
+  let supabaseOrgId: string | null = null
+  let supabaseProjectName: string | null = null
+
+  try {
+    const projectsUrl = new URL('/v1/projects', supabaseUrl)
+    const projectsResponse = await fetch(projectsUrl.toString(), {
+      headers: {
+        Authorization: `Bearer ${tokenData.access_token}`,
+        'Content-Type': 'application/json',
+      },
+    })
+
+    if (projectsResponse.ok) {
+      const projectsData = (await projectsResponse.json()) as any
+      if (Array.isArray(projectsData) && projectsData.length > 0) {
+        const firstProject = projectsData[0]
+        supabaseProjectRef = firstProject.ref
+        supabaseProjectName = firstProject.name
+        supabaseOrgId = firstProject.organization_id
+      }
+    }
+  } catch (err) {
+    console.error('Failed to fetch Supabase projects:', err)
+  }
+
   await upsertSupabaseConnection({
     userId,
     projectId,
     accessToken: tokenData.access_token,
     refreshToken: tokenData.refresh_token ?? null,
     expiresAt,
+    supabaseProjectRef,
+    supabaseOrgId,
+    supabaseProjectName,
   })
 
   await updateProjectCloudEnabled(userId, projectId, true)
