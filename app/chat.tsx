@@ -82,11 +82,21 @@ export function Chat({ className, initialPrompt, projectId }: Props) {
       const messageText = text.trim()
 
       if (messageText) {
-        sendMessage({ text: messageText }, { body: { modelId, reasoningEffort, projectId } })
+        sendMessage(
+          { text: messageText },
+          {
+            body: {
+              modelId,
+              reasoningEffort,
+              projectId,
+              supabaseConnected,
+            },
+          }
+        )
         setInput('')
       }
     },
-    [isSignedIn, openSignIn, sendMessage, modelId, setInput, reasoningEffort]
+    [isSignedIn, openSignIn, sendMessage, modelId, setInput, reasoningEffort, projectId, supabaseConnected]
   )
 
   useEffect(() => {
