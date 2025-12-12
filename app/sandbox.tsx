@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils'
 import { Preview } from './preview'
 import { FileExplorer } from './file-explorer'
 import { Logs } from './logs'
-import { DatabaseViewer } from '@/components/database-viewer/database-viewer'
+import { SupabaseConnectionManager } from '@/components/supabase-connection-manager/supabase-connection-manager'
 import { useSearchParams } from 'next/navigation'
 
 interface Props {
