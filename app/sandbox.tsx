@@ -169,13 +169,6 @@ export function Sandbox({ className }: Props) {
         {activeTab === 'console' && (
           <Logs className="flex-1 min-h-0 overflow-hidden" />
         )}
-
-        {activeTab === 'cloud' && (
-          <SupabaseConnectionManager
-            className="flex-1 min-h-0 overflow-hidden"
-            projectId={projectId ?? undefined}
-          />
-        )}
       </div>
     </div>
   )
