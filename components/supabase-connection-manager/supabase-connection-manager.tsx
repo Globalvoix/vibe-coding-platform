@@ -204,19 +204,22 @@ export function SupabaseConnectionManager({ className, projectId }: Props) {
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="border border-border rounded-lg p-4">
-              <div className="flex items-center justify-between mb-1">
-                <h3 className="font-semibold text-foreground">Supabase</h3>
+            <div className="border border-border rounded-lg p-4 bg-blue-50/50 dark:bg-blue-950/10">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-semibold text-foreground">Thinksoft Cloud</h3>
                 <div className="flex items-center gap-1.5 px-2 py-0.5 bg-green-100 dark:bg-green-950/30 rounded-full">
-                  <div className="w-2 h-2 rounded-full bg-green-600 dark:bg-green-400" />
+                  <div className="w-2 h-2 rounded-full bg-green-600 dark:bg-green-400 animate-pulse" />
                   <span className="text-xs font-medium text-green-700 dark:text-green-300">
                     Connected
                   </span>
                 </div>
               </div>
-              <p className="text-xs text-muted-foreground">
-                Manage your Supabase project
-              </p>
+              <div className="text-xs text-muted-foreground space-y-1">
+                <p>Your Supabase database is now connected and ready to use.</p>
+                <p className="text-muted-foreground/70">
+                  AI can create tables, functions, and enable real-time subscriptions automatically.
+                </p>
+              </div>
             </div>
 
             <div className="space-y-2">
