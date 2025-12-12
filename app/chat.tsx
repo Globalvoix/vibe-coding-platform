@@ -127,6 +127,7 @@ export function Chat({ className, initialPrompt, projectId }: Props) {
           }
         )
         setInput('')
+        localStorage.removeItem('prompt-draft')
       }
     },
     [isSignedIn, openSignIn, sendMessage, modelId, setInput, reasoningEffort, projectId, supabaseConnected]
