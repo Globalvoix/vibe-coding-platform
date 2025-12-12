@@ -40,6 +40,13 @@ export const dataPartSchema = z.object({
     summary: z.string(),
     paths: z.array(z.string()).optional(),
   }),
+  'create-realtime-backend': z.object({
+    status: z.enum(['loading', 'success', 'error']),
+    action: z.enum(['create_table', 'enable_realtime', 'create_function', 'execute_sql']).optional(),
+    message: z.string().optional(),
+    details: z.string().optional(),
+    result: z.any().optional(),
+  }),
 })
 
 export type DataPart = z.infer<typeof dataPartSchema>
