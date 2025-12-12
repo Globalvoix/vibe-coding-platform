@@ -10,15 +10,16 @@ interface Params {
   modelId: string
   writer: UIMessageStreamWriter<UIMessage<never, DataPart>>
   projectId?: string
+  supabaseConnected?: boolean
 }
 
-export function tools({ modelId, writer, projectId }: Params) {
+export function tools({ modelId, writer, projectId, supabaseConnected }: Params) {
   return {
     createSandbox: createSandbox({ writer }),
     generateFiles: generateFiles({ writer, modelId }),
     getSandboxURL: getSandboxURL({ writer }),
     runCommand: runCommand({ writer }),
-    createRealtimeBackend: createRealtimeBackend({ writer, projectId }),
+    createRealtimeBackend: createRealtimeBackend({ writer, projectId, supabaseConnected }),
   }
 }
 
