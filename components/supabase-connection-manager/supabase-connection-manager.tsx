@@ -58,6 +58,32 @@ export function SupabaseConnectionManager({ className, projectId }: Props) {
     return `${baseUrl}${path}`
   }
 
+  const handleDisconnect = async () => {
+    if (!projectId || disconnecting) return
+
+    setDisconnecting(true)
+    setError(null)
+
+    try {
+      const response = await fetch(
+        `/api/projects/${projectId}/supabase-disconnect`,
+        {
+          method: 'POST',
+        }
+      )
+
+      if (!response.ok) {
+        throw new Error('Failed to disconnect')
+      }
+
+      setConnection({ connected: false })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to disconnect')
+    } finally {
+      setDisconnecting(false)
+    }
+  }
+
   const links = [
     {
       label: 'Manage Users',
