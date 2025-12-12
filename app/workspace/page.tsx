@@ -60,7 +60,9 @@ export default function WorkspacePage() {
       const nextQuery = params.toString()
       router.replace(nextQuery ? `/workspace?${nextQuery}` : '/workspace')
     }
+  }, [supabaseOauth, router, searchParams])
 
+  useEffect(() => {
     const sandboxState = useSandboxStore.getState()
     const fileExplorerState = useFileExplorerStore.getState()
 
