@@ -223,8 +223,13 @@ export function SupabaseConnectionManager({ className, projectId }: Props) {
               <div className="px-3 py-2 rounded-md bg-secondary/50">
                 <div className="flex items-center gap-2 text-sm font-medium text-foreground">
                   <span>🌱</span>
-                  <span>Thinksoft</span>
+                  <span>{connection?.projectName || 'Supabase Project'}</span>
                 </div>
+                {connection?.projectRef && (
+                  <div className="text-xs text-muted-foreground mt-1 font-mono">
+                    Ref: {connection.projectRef}
+                  </div>
+                )}
               </div>
 
               {links.map((link) => (
