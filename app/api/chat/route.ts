@@ -13,7 +13,8 @@ import { getAvailableModels, getModelOptions } from '@/ai/gateway'
 import { checkBotId } from 'botid/server'
 import { tools } from '@/ai/tools'
 import { recordUsageAndDeductCredits, getUserCredits } from '@/lib/credits'
-import { getEnvVarsForChat } from '@/lib/env-vars-db'
+import { createOrUpdateEnvVar, getEnvVarsForChat } from '@/lib/env-vars-db'
+import { getProject } from '@/lib/projects-db'
 import { getSupabaseProject } from '@/lib/supabase-projects-db'
 import prompt from './prompt.md'
 
@@ -23,6 +24,55 @@ interface BodyData {
   reasoningEffort?: 'low' | 'medium'
   projectId?: string
   supabaseConnected?: boolean
+}
+
+function extractEnvVarsFromText(text: string) {
+  const found: Array<{ key: string; value: string }> = []
+
+  const lines = text.split(/\r?\n/)
+  for (const line of lines) {
+    const trimmed = line.trim()
+    if (!trimmed || trimmed.startsWith('#')) continue
+
+    const match = trimmed.match(/^([A-Z][A-Z0-9_]{1,63})\s*=\s*(.+)$/)
+    if (!match) continue
+
+    const key = match[1] ?? ''
+    let rawValue = (match[2] ?? '').trim()
+
+    if (rawValue.startsWith('"') && rawValue.endsWith('"') && rawValue.length >= 2) {
+      rawValue = rawValue
+        .slice(1, -1)
+        .replace(/\\n/g, '\n')
+        .replace(/\\"/g, '"')
+        .replace(/\\\\/g, '\\')
+    } else if (rawValue.startsWith("'") && rawValue.endsWith("'") && rawValue.length >= 2) {
+      rawValue = rawValue.slice(1, -1)
+    }
+
+    if (!rawValue) continue
+
+    found.push({ key, value: rawValue })
+  }
+
+  if (!found.some((v) => v.key === 'GOOGLE_GENERATIVE_AI_API_KEY')) {
+    const isGeminiMentioned = /\bgemini\b/i.test(text) || /google\s+generative/i.test(text)
+    const tokenMatch = text.match(/AIza[0-9A-Za-z_-]{20,}/)
+    if (isGeminiMentioned && tokenMatch?.[0]) {
+      found.push({ key: 'GOOGLE_GENERATIVE_AI_API_KEY', value: tokenMatch[0] })
+    }
+  }
+
+  return found
+}
+
+function redactSecretsFromText(text: string, secrets: string[]) {
+  let redacted = text
+  for (const secret of secrets) {
+    if (!secret) continue
+    redacted = redacted.split(secret).join('[REDACTED]')
+  }
+  return redacted
 }
 
 export async function POST(req: Request) {
@@ -47,6 +97,35 @@ export async function POST(req: Request) {
     ])
 
     const { messages, modelId = DEFAULT_MODEL, reasoningEffort, projectId, supabaseConnected } = bodyData
+
+    const extractedEnvVars: Array<{ key: string; value: string }> = []
+    const secretsToRedact: string[] = []
+
+    if (projectId) {
+      try {
+        const project = await getProject(userId, projectId)
+        if (project) {
+          for (const message of messages) {
+            if (message.role !== 'user') continue
+            for (const part of message.parts ?? []) {
+              if (part.type !== 'text') continue
+              const text = String(part.text ?? '')
+              const vars = extractEnvVarsFromText(text)
+              for (const v of vars) {
+                extractedEnvVars.push(v)
+                secretsToRedact.push(v.value)
+              }
+            }
+          }
+
+          for (const { key, value } of extractedEnvVars) {
+            await createOrUpdateEnvVar(projectId, userId, key, value, true)
+          }
+        }
+      } catch (error) {
+        console.warn('Failed to capture env vars from chat:', error)
+      }
+    }
     const effectiveReasoningEffort: BodyData['reasoningEffort'] =
       reasoningEffort ?? (modelId === Models.OpenAIGPT5 ? 'medium' : 'low')
 
@@ -101,6 +180,12 @@ export async function POST(req: Request) {
         execute: ({ writer }) => {
           const processedMessages = messages.map((message) => {
             message.parts = message.parts.map((part) => {
+              if (message.role === 'user' && part.type === 'text' && secretsToRedact.length > 0) {
+                return {
+                  ...part,
+                  text: redactSecretsFromText(String(part.text ?? ''), secretsToRedact),
+                }
+              }
               if (part.type === 'data-report-errors') {
                 return {
                   type: 'text',
@@ -126,7 +211,7 @@ export async function POST(req: Request) {
             system: systemPrompt,
             messages: convertToModelMessages(processedMessages),
             stopWhen: stepCountIs(20),
-            tools: tools({ modelId, writer, projectId, supabaseConnected }),
+            tools: tools({ modelId, writer, userId, projectId, supabaseConnected }),
             onError: (error) => {
               console.error('Error communicating with AI')
               console.error(JSON.stringify(error, null, 2))
