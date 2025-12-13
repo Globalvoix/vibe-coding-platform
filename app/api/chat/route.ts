@@ -13,6 +13,7 @@ import { getAvailableModels, getModelOptions } from '@/ai/gateway'
 import { checkBotId } from 'botid/server'
 import { tools } from '@/ai/tools'
 import { recordUsageAndDeductCredits, getUserCredits } from '@/lib/credits'
+import { getUserSubscription, isPaidSubscription } from '@/lib/subscription'
 import { createOrUpdateEnvVar, getEnvVarsForChat } from '@/lib/env-vars-db'
 import { getProject } from '@/lib/projects-db'
 import { getSupabaseProject } from '@/lib/supabase-projects-db'
@@ -91,12 +92,30 @@ export async function POST(req: Request) {
       )
     }
 
-    const [models, bodyData] = await Promise.all([
+    const bodyData = (await req.json()) as BodyData
+    const {
+      messages,
+      modelId = DEFAULT_MODEL,
+      reasoningEffort,
+      projectId,
+      supabaseConnected,
+    } = bodyData
+
+    const [models, subscription] = await Promise.all([
       getAvailableModels(),
-      req.json() as Promise<BodyData>,
+      getUserSubscription(userId),
     ])
 
-    const { messages, modelId = DEFAULT_MODEL, reasoningEffort, projectId, supabaseConnected } = bodyData
+    if (modelId === Models.AnthropicClaude45Sonnet && !isPaidSubscription(subscription)) {
+      return NextResponse.json(
+        {
+          error:
+            'Claude Sonnet 4.5 is available on paid plans. Please upgrade to use it.',
+          code: 'PAID_PLAN_REQUIRED',
+        },
+        { status: 403 }
+      )
+    }
 
     const extractedEnvVars: Array<{ key: string; value: string }> = []
     const secretsToRedact: string[] = []
