@@ -3,6 +3,8 @@ import { useState, useEffect, useCallback } from 'react'
 interface DisplayModel {
   id: string
   label: string
+  enabled: boolean
+  requiresPaid: boolean
 }
 
 const MAX_RETRIES = 3
@@ -28,9 +30,11 @@ export function useAvailableModels() {
         }
         const data = await response.json()
         const newModels = data.models.map(
-          (model: { id: string; name: string }) => ({
+          (model: { id: string; name: string; enabled?: boolean; requiresPaid?: boolean }) => ({
             id: model.id,
             label: model.name,
+            enabled: model.enabled ?? true,
+            requiresPaid: model.requiresPaid ?? false,
           })
         )
         setModels(newModels)
