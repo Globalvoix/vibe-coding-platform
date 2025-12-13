@@ -3,6 +3,12 @@ import { pool } from './supabase-db'
 export type PlanId = 'free' | 'pro' | 'business' | 'enterprise'
 export type SubscriptionStatus = 'active' | 'pending' | 'trialing' | 'past_due' | 'cancelled'
 
+export function isPaidSubscription(subscription: Subscription | null | undefined): boolean {
+  if (!subscription) return false
+  if (subscription.plan_id === 'free') return false
+  return subscription.status === 'active' || subscription.status === 'trialing'
+}
+
 const BILLING_PERIOD_DAYS = 30
 
 function addDays(date: Date, days: number): Date {
@@ -19,7 +25,7 @@ function parseDate(value: string | null): Date | null {
   return Number.isNaN(d.getTime()) ? null : d
 }
 
-interface Subscription {
+export interface Subscription {
   id: number
   user_id: string
   plan_id: PlanId
