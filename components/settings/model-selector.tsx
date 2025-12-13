@@ -11,7 +11,9 @@ import {
   SelectLabel,
 } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
+import { toast } from 'sonner'
+import { DEFAULT_MODEL } from '@/ai/constants'
 import { useAvailableModels } from './use-available-models'
 import { useModelId } from './use-settings'
 
@@ -22,6 +24,21 @@ export function ModelSelector({ className }: { className?: string }) {
     () => available?.sort((a, b) => a.label.localeCompare(b.label)) || [],
     [available]
   )
+
+  useEffect(() => {
+    if (isLoading || !models.length) return
+
+    const selected = models.find((m) => m.id === modelId)
+    if (selected && selected.enabled) return
+
+    const fallback = models.find((m) => m.enabled)?.id ?? DEFAULT_MODEL
+    if (fallback !== modelId) {
+      setModelId(fallback)
+      if (selected?.requiresPaid) {
+        toast.error('Upgrade your plan to use Claude Sonnet 4.5.')
+      }
+    }
+  }, [DEFAULT_MODEL, isLoading, modelId, models, setModelId])
 
   return (
     <Select
@@ -52,8 +69,19 @@ export function ModelSelector({ className }: { className?: string }) {
         <SelectGroup>
           <SelectLabel>Models</SelectLabel>
           {models.map((model) => (
-            <SelectItem key={model.id} value={model.id}>
-              {model.label}
+            <SelectItem
+              key={model.id}
+              value={model.id}
+              disabled={!model.enabled}
+            >
+              <span className="flex w-full items-center justify-between gap-2">
+                <span>{model.label}</span>
+                {model.requiresPaid && !model.enabled ? (
+                  <span className="text-[10px] uppercase text-muted-foreground">
+                    Paid
+                  </span>
+                ) : null}
+              </span>
             </SelectItem>
           ))}
         </SelectGroup>
