@@ -42,7 +42,7 @@ const tableColumnSchema = z.object({
   primaryKey: z.boolean().optional().describe('Mark as primary key'),
 })
 
-export const createRealtimeBackend = ({ writer, projectId, supabaseConnected }: Params) =>
+export const createRealtimeBackend = ({ writer, projectId, supabaseConnected, supabaseConnection }: Params) =>
   tool({
     description,
     inputSchema: z.object({
