@@ -108,7 +108,7 @@ export function Navbar() {
   }, [isSignedIn]);
 
   const navLinksData = [
-    { label: 'Home', href: '/' },
+    { label: 'Homes', href: '/' },
     { label: 'Pricing', href: '/pricing' },
     { label: 'Product', href: '/product' },
   ];
