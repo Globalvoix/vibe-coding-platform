@@ -244,7 +244,14 @@ export async function POST(req: Request) {
             system: systemPrompt,
             messages: convertToModelMessages(processedMessages),
             stopWhen: stepCountIs(20),
-            tools: tools({ modelId, writer, userId, projectId, supabaseConnected }),
+            tools: tools({
+              modelId,
+              writer,
+              userId,
+              projectId,
+              supabaseConnected,
+              supabaseConnection: supabaseConnectionInfo,
+            }),
             onError: (error) => {
               console.error('Error communicating with AI')
               console.error(JSON.stringify(error, null, 2))
