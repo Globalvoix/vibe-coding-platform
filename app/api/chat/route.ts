@@ -168,6 +168,7 @@ export async function POST(req: Request) {
     // Get project env vars if projectId is provided
     let envVarsContext = ''
     let supabaseContext = ''
+    let supabaseConnectionInfo: typeof import('@/ai/tools').SupabaseConnectionInfo | undefined
 
     if (projectId) {
       try {
@@ -186,6 +187,19 @@ export async function POST(req: Request) {
           const supabaseProject = await getSupabaseProject(userId, projectId)
           if (supabaseProject) {
             supabaseContext = `\n\n## Supabase Backend Integration:\nThis project is connected to a Supabase PostgreSQL database. You have full access to create tables, functions, enable real-time subscriptions, and manage the database schema. The Supabase project is: ${supabaseProject.supabase_project_name} (Ref: ${supabaseProject.supabase_project_ref}). When generating code, you can automatically set up the database schema and real-time features.`
+
+            // Prepare Supabase connection info for AI tools
+            const supabaseUrl =
+              process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
+            if (supabaseUrl && supabaseProject.access_token) {
+              supabaseConnectionInfo = {
+                accessToken: supabaseProject.access_token,
+                projectRef: supabaseProject.supabase_project_ref,
+                projectName: supabaseProject.supabase_project_name || undefined,
+                organizationId: supabaseProject.supabase_org_id || undefined,
+                supabaseUrl,
+              }
+            }
           }
         } catch (error) {
           console.warn('Failed to fetch Supabase project:', error)
