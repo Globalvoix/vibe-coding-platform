@@ -4,7 +4,13 @@ import { tool } from 'ai'
 import description from './create-realtime-backend.md'
 import z from 'zod/v3'
 
-import type { SupabaseConnectionInfo } from './index'
+interface SupabaseConnectionInfo {
+  accessToken: string
+  projectRef: string
+  projectName?: string
+  organizationId?: string
+  supabaseUrl?: string
+}
 
 interface Params {
   writer: UIMessageStreamWriter<UIMessage<never, DataPart>>
