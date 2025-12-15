@@ -1,7 +1,8 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
-import { deleteSupabaseProject, getProject } from '@/lib/projects-db'
+import { deleteSupabaseProject } from '@/lib/supabase-projects-db'
+import { getProject } from '@/lib/projects-db'
 
 export async function POST(req: NextRequest) {
   const { userId } = await auth()

@@ -1,7 +1,8 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
-import { saveSupabaseProject, getProject } from '@/lib/projects-db'
+import { saveSupabaseProject } from '@/lib/supabase-projects-db'
+import { getProject } from '@/lib/projects-db'
 
 interface SelectRequest {
   appProjectId: string
