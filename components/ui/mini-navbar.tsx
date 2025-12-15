@@ -108,9 +108,9 @@ export function Navbar() {
   }, [isSignedIn]);
 
   const navLinksData = [
-    { label: 'Product', href: '/product' },
-    { label: 'Pricing', href: '/pricing' },
     { label: 'Home', href: '/' },
+    { label: 'Pricing', href: '/pricing' },
+    { label: 'Product', href: '/product' },
   ];
 
   const isProActive =
