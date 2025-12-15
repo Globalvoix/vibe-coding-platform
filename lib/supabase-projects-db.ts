@@ -115,8 +115,136 @@ export async function deleteSupabaseProject(
   await ensureSupabaseProjectsTable()
 
   await pool.query(
-    `DELETE FROM supabase_projects 
+    `DELETE FROM supabase_projects
      WHERE user_id = $1 AND project_id = $2`,
     [userId, projectId]
   )
+}
+
+export async function listUserSupabaseProjects(
+  userId: string
+): Promise<SupabaseProjectRecord[]> {
+  await ensureSupabaseProjectsTable()
+
+  const result = await pool.query<SupabaseProjectRecord>(
+    `SELECT * FROM supabase_projects
+     WHERE user_id = $1
+     ORDER BY updated_at DESC`,
+    [userId]
+  )
+
+  return result.rows
+}
+
+export function isTokenExpired(expiresAt: string | null): boolean {
+  if (!expiresAt) return false
+  return new Date(expiresAt) <= new Date()
+}
+
+export async function refreshSupabaseToken(
+  connection: SupabaseProjectRecord,
+  supabaseUrl: string,
+  oauthClientId: string,
+  oauthClientSecret: string
+): Promise<SupabaseProjectRecord | null> {
+  if (!connection.refresh_token) {
+    return null // Cannot refresh without refresh token
+  }
+
+  try {
+    const tokenResponse = await fetch(
+      new URL('/auth/v1/oauth/token', supabaseUrl).toString(),
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          grant_type: 'refresh_token',
+          refresh_token: connection.refresh_token,
+          client_id: oauthClientId,
+          client_secret: oauthClientSecret,
+        }),
+      }
+    )
+
+    if (!tokenResponse.ok) {
+      console.error('Token refresh failed', {
+        status: tokenResponse.status,
+        userId: connection.user_id,
+        projectId: connection.project_id,
+      })
+      return null
+    }
+
+    const tokenData = (await tokenResponse.json()) as {
+      access_token: string
+      refresh_token?: string
+      expires_in?: number
+    }
+
+    const expiresIn = tokenData.expires_in || 3600
+    const expiresAt = new Date(Date.now() + expiresIn * 1000)
+
+    // Update token in database
+    const result = await pool.query<SupabaseProjectRecord>(
+      `UPDATE supabase_projects
+       SET access_token = $1, refresh_token = $2, expires_at = $3, updated_at = NOW()
+       WHERE user_id = $4 AND project_id = $5
+       RETURNING *`,
+      [
+        tokenData.access_token,
+        tokenData.refresh_token || connection.refresh_token,
+        expiresAt.toISOString(),
+        connection.user_id,
+        connection.project_id,
+      ]
+    )
+
+    return result.rows[0] ?? null
+  } catch (error) {
+    console.error('Error refreshing Supabase token', {
+      error: error instanceof Error ? error.message : String(error),
+      userId: connection.user_id,
+      projectId: connection.project_id,
+    })
+    return null
+  }
+}
+
+export async function getSupabaseProjectWithRefresh(
+  userId: string,
+  projectId: string,
+  supabaseUrl?: string,
+  oauthClientId?: string,
+  oauthClientSecret?: string
+): Promise<SupabaseProjectRecord | null> {
+  let connection = await getSupabaseProject(userId, projectId)
+  if (!connection) return null
+
+  // Check if token is expired and refresh if possible
+  if (
+    isTokenExpired(connection.expires_at) &&
+    supabaseUrl &&
+    oauthClientId &&
+    oauthClientSecret
+  ) {
+    const refreshed = await refreshSupabaseToken(
+      connection,
+      supabaseUrl,
+      oauthClientId,
+      oauthClientSecret
+    )
+    if (refreshed) {
+      connection = refreshed
+    } else {
+      // Token refresh failed, return stale connection
+      console.warn('Token refresh failed, returning stale connection', {
+        userId,
+        projectId,
+      })
+    }
+  }
+
+  return connection
 }
