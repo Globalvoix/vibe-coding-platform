@@ -9,10 +9,12 @@ import { Sandbox } from '../sandbox'
 import { TabContent, TabItem } from '@/components/tabs'
 import { AppSidebar } from '@/components/sidebar/app-sidebar'
 import { EnvVarsManager } from '@/components/env-vars/env-vars-manager'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { useSandboxStore, useFileExplorerStore } from '../state'
+import { Suspense } from 'react'
+import { WorkspaceProvider } from './workspace-provider'
 
 interface ProjectResponse {
   id: string
@@ -26,11 +28,14 @@ interface ProjectResponse {
   } | null
 }
 
-export default function WorkspacePage() {
+function WorkspaceContent({
+  projectId,
+  promptFromUrl,
+}: {
+  projectId: string | null
+  promptFromUrl: string | null
+}) {
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const promptFromUrl = searchParams.get('prompt')
-  const projectId = searchParams.get('projectId')
   const [initialPrompt, setInitialPrompt] = useState<string>('')
   const [horizontalSizes, setHorizontalSizes] = useState<[number, number] | null>(
     null
@@ -48,7 +53,7 @@ export default function WorkspacePage() {
       useSandboxStore.getState().reset()
       useFileExplorerStore.getState().reset()
     }
-  }, [])
+  }, [projectId])
 
   useEffect(() => {
     let cancelled = false
@@ -183,5 +188,17 @@ export default function WorkspacePage() {
         </div>
       </div>
     </>
+  )
+}
+
+export default function WorkspacePage() {
+  return (
+    <Suspense fallback={<div className="w-full h-screen flex items-center justify-center text-muted-foreground">Loading...</div>}>
+      <WorkspaceProvider>
+        {(projectId, promptFromUrl) => (
+          <WorkspaceContent projectId={projectId} promptFromUrl={promptFromUrl} />
+        )}
+      </WorkspaceProvider>
+    </Suspense>
   )
 }
