@@ -168,7 +168,7 @@ export async function POST(req: Request) {
     // Get project env vars if projectId is provided
     let envVarsContext = ''
     let supabaseContext = ''
-    let supabaseConnectionInfo: typeof import('@/ai/tools').SupabaseConnectionInfo | undefined
+    let supabaseConnectionInfo: SupabaseConnectionInfo | undefined
 
     if (projectId) {
       try {
