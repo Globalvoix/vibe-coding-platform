@@ -20,7 +20,7 @@ import { Message } from '@/components/chat/message'
 import { ModelSelector } from '@/components/settings/model-selector'
 import { Panel, PanelHeader } from '@/components/panels/panels'
 import { Settings } from '@/components/settings/settings'
-import { SupabaseButton } from '@/components/supabase-button/supabase-button'
+import { SupabaseOAuthButton } from '@/components/supabase-connect/supabase-oauth-button'
 import { ComingSoonModal } from '@/components/modals/coming-soon-modal'
 import { useChat } from '@ai-sdk/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -78,7 +78,7 @@ export function Chat({ className, initialPrompt, projectId }: Props) {
     const checkSupabaseStatus = async () => {
       try {
         const response = await fetch(
-          `/api/supabase-connect/status?projectId=${projectId}`
+          `/api/supabase-oauth/status?projectId=${projectId}`
         )
         if (response.ok) {
           const data = (await response.json()) as { connected: boolean }
@@ -250,7 +250,7 @@ export function Chat({ className, initialPrompt, projectId }: Props) {
           />
           <div className="flex items-center justify-between pt-2">
             <div className="flex items-center gap-2">
-              <SupabaseButton projectId={projectId || undefined} isConnected={supabaseConnected} />
+              <SupabaseOAuthButton projectId={projectId || undefined} />
               <button
                 type="button"
                 className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border/60 text-foreground shadow-xs hover:bg-secondary/60 transition-colors chat-toolbar-action-button"
