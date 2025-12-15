@@ -4,10 +4,13 @@ import { tool } from 'ai'
 import description from './create-realtime-backend.md'
 import z from 'zod/v3'
 
+import type { SupabaseConnectionInfo } from './index'
+
 interface Params {
   writer: UIMessageStreamWriter<UIMessage<never, DataPart>>
   projectId?: string
   supabaseConnected?: boolean
+  supabaseConnection?: SupabaseConnectionInfo
 }
 
 const tableColumnSchema = z.object({
