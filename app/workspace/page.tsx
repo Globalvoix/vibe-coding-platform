@@ -112,16 +112,25 @@ function WorkspaceContent({
 
     const timeoutId = window.setTimeout(async () => {
       try {
+        const sandboxState = {
+          sandboxId,
+          paths: sandboxPaths,
+          url,
+          urlUUID,
+        }
+
         await fetch(`/api/projects/${projectId}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sandboxState }),
+        })
+
+        await fetch(`/api/projects/${projectId}/versions`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            sandboxState: {
-              sandboxId,
-              paths: sandboxPaths,
-              url,
-              urlUUID,
-            },
+            action: 'save',
+            name: `Version at ${new Date().toLocaleString()}`,
           }),
         })
       } catch (error) {
