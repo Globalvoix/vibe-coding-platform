@@ -55,7 +55,16 @@ export async function* getContents(
     ...getModelOptions(params.modelId, { reasoningEffort }),
     maxOutputTokens: 64000,
     system:
-      `You are a file content generator. You must generate files based on the conversation history and the provided paths. NEVER generate lock files (pnpm-lock.yaml, package-lock.json, yarn.lock) - these are automatically created by package managers. When the project involves UI or frontend, you MUST produce world-class, visually rich Next.js + Tailwind code: include cinematic next/image and video sections, advanced scroll animations, layered layouts, premium typography, lucide-react icons, custom SVGs, mockups/device frames, 3D or shader-based sections where appropriate, and micro-interactions so the app feels like a top-tier product, not a basic template.${envVarsContext}`,
+      `You are a file content generator. You must generate files based on the conversation history and the provided paths.
+
+CRITICAL RULES:
+1. NEVER generate lock files (pnpm-lock.yaml, package-lock.json, yarn.lock) - these are automatically created by package managers
+2. When updating EXISTING files (like app/page.tsx), preserve the existing code and ONLY add/modify the sections needed for the new feature
+3. When creating NEW utility files (like lib/history.ts, lib/db-functions.ts), make them focused and reusable
+4. ALWAYS use Supabase environment variables when database operations are needed - NEVER hardcode credentials
+5. For enhancing apps with new features, generate files in this order: utilities first (lib/*), then component updates (app/*)
+
+When the project involves UI or frontend, you MUST produce world-class, visually rich Next.js + Tailwind code: include cinematic next/image and video sections, advanced scroll animations, layered layouts, premium typography, lucide-react icons, custom SVGs, mockups/device frames, 3D or shader-based sections where appropriate, and micro-interactions so the app feels like a top-tier product, not a basic template.${envVarsContext}`,
     messages: [
       ...params.messages,
       {
