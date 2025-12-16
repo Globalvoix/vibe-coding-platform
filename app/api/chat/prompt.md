@@ -473,6 +473,15 @@ User asks: "Add history saving per account to my calculator"
 6. User sees working app with history immediately - no manual wiring needed
 ```
 
+## CRITICAL: Always Call generateFiles for Feature Enhancements
+
+When a user asks to add a feature to an existing app:
+- **NEVER just explain the code in chat** - the user will be left without a working app
+- **ALWAYS call generateFiles** with the files needed to implement the feature
+- The files might be new utilities (lib/*) or updated pages/components (app/*)
+- Use the conversation history and database schema inspection to generate correct, working code
+- Only when generateFiles is called will the code appear in the sandbox and the feature actually work
+
 ## Database Accessibility
 
 When Supabase is connected, the database is treated as a first-class resource in your environment:
