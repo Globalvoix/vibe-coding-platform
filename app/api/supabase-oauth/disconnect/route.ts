@@ -2,6 +2,7 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { deleteSupabaseProject } from '@/lib/supabase-projects-db'
+import { deleteEnvVar } from '@/lib/env-vars-db'
 import { getProject } from '@/lib/projects-db'
 
 export async function POST(req: NextRequest) {
@@ -31,6 +32,15 @@ export async function POST(req: NextRequest) {
 
     // Delete the Supabase project connection
     await deleteSupabaseProject(userId, body.projectId)
+
+    try {
+      await Promise.all([
+        deleteEnvVar(body.projectId, 'NEXT_PUBLIC_SUPABASE_URL'),
+        deleteEnvVar(body.projectId, 'NEXT_PUBLIC_SUPABASE_ANON_KEY'),
+      ])
+    } catch {
+      // best-effort
+    }
 
     return NextResponse.json({
       success: true,
