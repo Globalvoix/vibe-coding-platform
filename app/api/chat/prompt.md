@@ -326,7 +326,39 @@ Only if explicitly requested:
 
 # CONNECTED SUPABASE DATABASE ACCESS
 
-When a user has connected their Supabase database to the project, you have automatic access to perform database operations:
+When a user has connected their Supabase database via OAuth to the project:
+
+## Environment Variables Automatically Available
+
+The following environment variables are AUTOMATICALLY extracted from the Supabase OAuth connection:
+- `NEXT_PUBLIC_SUPABASE_URL` - Your Supabase project URL (e.g., https://your-project.supabase.co)
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Your Supabase anon key for client-side access
+
+These will be in the "Available Environment Variables" list when Supabase is connected.
+
+## Automatic Integration in Generated Code
+
+When generating code for a project with Supabase:
+1. **Always include .env.local** with NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY
+2. **Create lib/supabase.ts** with Supabase client initialization using the env vars
+3. **Never hardcode** Supabase credentials in code - always reference env vars
+4. **Example initialization**:
+   ```typescript
+   import { createClient } from '@supabase/supabase-js'
+
+   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+
+   if (!supabaseUrl || !supabaseKey) {
+     throw new Error('Missing Supabase environment variables')
+   }
+
+   export const supabase = createClient(supabaseUrl, supabaseKey)
+   ```
+
+## Database Operations
+
+You also have automatic access to perform database operations:
 
 ## Available Database Operations
 
