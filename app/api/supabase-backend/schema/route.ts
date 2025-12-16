@@ -2,10 +2,7 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { getSupabaseProjectWithRefresh } from '@/lib/supabase-projects-db'
-import {
-  getSupabaseDatabaseQueryUrl,
-  getSupabasePlatformBaseUrl,
-} from '@/lib/supabase-platform'
+import { getSupabaseDatabaseQueryUrl } from '@/lib/supabase-platform'
 
 interface SchemaRequest {
   action: 'create_table' | 'create_function' | 'enable_realtime' | 'execute_sql'
@@ -64,12 +61,9 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const platformBaseUrl = getSupabasePlatformBaseUrl()
-
     const supabaseProject = await getSupabaseProjectWithRefresh(
       userId,
       projectId,
-      platformBaseUrl,
       oauthClientId,
       oauthClientSecret
     )
