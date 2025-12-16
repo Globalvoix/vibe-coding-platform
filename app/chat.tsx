@@ -192,6 +192,35 @@ export function Chat({ className, initialPrompt, projectId }: Props) {
     !forceEnableInput && (status === 'streaming' || status === 'submitted')
   const isInputDisabled = !forceEnableInput && status !== 'ready'
 
+  const handleVersionSelect = (version: ProjectVersion) => {
+    setSelectedVersionId(version.id)
+  }
+
+  const handleVersionRevert = async (version: ProjectVersion) => {
+    try {
+      if (!projectId) return
+      const response = await fetch(`/api/projects/${projectId}/versions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'revert',
+          versionId: version.id,
+        }),
+      })
+      if (response.ok) {
+        toast.success(`Reverted to version from ${new Date(version.created_at).toLocaleString()}`)
+        setShowHistoryPanel(false)
+        setSelectedVersionId(null)
+        window.location.reload()
+      } else {
+        toast.error('Failed to revert to version')
+      }
+    } catch (error) {
+      console.error('Error reverting version:', error)
+      toast.error('Failed to revert to version')
+    }
+  }
+
   return (
     <>
       <Panel className={className}>
