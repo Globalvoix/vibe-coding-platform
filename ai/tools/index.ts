@@ -5,6 +5,7 @@ import { generateFiles } from './generate-files'
 import { getSandboxURL } from './get-sandbox-url'
 import { runCommand } from './run-command'
 import { createRealtimeBackend } from './create-realtime-backend'
+import { createDatabase } from './create-database'
 
 export interface SupabaseConnectionInfo {
   accessToken: string
