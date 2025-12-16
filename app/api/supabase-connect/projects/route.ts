@@ -1,6 +1,7 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
+import { getSupabaseProjectsListUrl } from '@/lib/supabase-platform'
 
 interface SupabaseProjectItem {
   ref: string
@@ -16,7 +17,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const token = req.headers.get('x-supabase-token')
+  const token =
+    req.headers.get('x-supabase-token') ||
+    req.headers.get('x-supabase-access-token')
+
   if (!token) {
     return NextResponse.json(
       { error: 'Missing Supabase token' },
@@ -24,24 +28,13 @@ export async function GET(req: NextRequest) {
     )
   }
 
-  const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
-  if (!supabaseUrl) {
-    return NextResponse.json(
-      { error: 'Supabase not configured' },
-      { status: 500 }
-    )
-  }
-
   try {
-    const projectsResponse = await fetch(
-      new URL('/v1/projects', supabaseUrl).toString(),
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      }
-    )
+    const projectsResponse = await fetch(getSupabaseProjectsListUrl(), {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    })
 
     if (!projectsResponse.ok) {
       console.error('Failed to fetch projects:', projectsResponse.status)
