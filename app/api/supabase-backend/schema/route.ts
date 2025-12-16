@@ -200,7 +200,7 @@ export async function POST(req: NextRequest) {
             Authorization: `Bearer ${supabaseProject.access_token}`,
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ sql }),
+          body: JSON.stringify({ query: sql }),
           signal: controller.signal,
         })
 
