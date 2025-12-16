@@ -2,6 +2,7 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { cookies } from 'next/headers'
+import { getSupabaseOAuthTokenUrl } from '@/lib/supabase-platform'
 
 function getRequestOrigin(req: NextRequest) {
   const forwardedProto = req.headers.get('x-forwarded-proto')
@@ -91,15 +92,13 @@ export async function GET(req: NextRequest) {
     return clearAuthCookies(response)
   }
 
-  const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
   const oauthClientId =
     process.env.SUPABASE_OAUTH_CLIENT_ID ||
     process.env.NEXT_PUBLIC_SUPABASE_OAUTH_CLIENT_ID
   const oauthClientSecret = process.env.SUPABASE_OAUTH_CLIENT_SECRET
 
-  if (!supabaseUrl || !oauthClientId || !oauthClientSecret) {
+  if (!oauthClientId || !oauthClientSecret) {
     console.error('Supabase OAuth config missing', {
-      hasUrl: !!supabaseUrl,
       hasClientId: !!oauthClientId,
       hasSecret: !!oauthClientSecret,
     })
@@ -115,23 +114,24 @@ export async function GET(req: NextRequest) {
 
   try {
     // Exchange authorization code for tokens
-    const tokenResponse = await fetch(
-      new URL('/auth/v1/oauth/token', supabaseUrl).toString(),
-      {
+    const tokenResponse = await fetch(getSupabaseOAuthTokenUrl(), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: new URLSearchParams({
-          grant_type: 'authorization_code',
-          code,
-          client_id: oauthClientId,
-          client_secret: oauthClientSecret,
-          redirect_uri: redirectUrl,
-          code_verifier: codeVerifier,
-        }),
-      }
-    )
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        grant_type: 'authorization_code',
+        code,
+        client_id: oauthClientId,
+        client_secret: oauthClientSecret,
+        redirect_uri: redirectUrl,
+        code_verifier: codeVerifier,
+      }),
+    })
 
     if (!tokenResponse.ok) {
       const errorText = await tokenResponse.text()
