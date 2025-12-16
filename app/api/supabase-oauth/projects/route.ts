@@ -28,13 +28,12 @@ export async function GET(req: NextRequest) {
 
   try {
     const projectsResponse = await fetch(getSupabaseProjectsListUrl(), {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-      }
-    )
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    })
 
     if (!projectsResponse.ok) {
       const errorText = await projectsResponse.text()
