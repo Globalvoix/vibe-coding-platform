@@ -75,6 +75,20 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    if (!supabaseProject.supabase_project_ref?.trim()) {
+      return NextResponse.json(
+        { error: 'Invalid Supabase project reference' },
+        { status: 400 }
+      )
+    }
+
+    if (!supabaseProject.access_token?.trim()) {
+      return NextResponse.json(
+        { error: 'Supabase access token is missing or invalid' },
+        { status: 400 }
+      )
+    }
+
     const body = (await req.json()) as SchemaRequest
 
     let sql: string | null = null
