@@ -195,6 +195,7 @@ export async function POST(req: Request) {
                 projectRef: supabaseProject.supabase_project_ref,
                 projectName: supabaseProject.supabase_project_name || undefined,
                 organizationId: supabaseProject.supabase_org_id || undefined,
+                anonKey: supabaseProject.anon_key || undefined,
                 supabaseUrl: process.env.SUPABASE_PLATFORM_URL || 'https://api.supabase.com',
               }
             }
