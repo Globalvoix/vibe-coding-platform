@@ -42,7 +42,7 @@ export async function executeSupabaseSQL(
       Authorization: `Bearer ${connection.accessToken}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ sql }),
+    body: JSON.stringify({ query: sql }),
   })
 
   if (!response.ok) {
