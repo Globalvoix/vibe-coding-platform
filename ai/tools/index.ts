@@ -43,6 +43,7 @@ export function tools({
       supabaseConnected,
       supabaseConnection,
     }),
+    createDatabase: createDatabase({ writer, supabaseConnection }),
   }
 }
 
