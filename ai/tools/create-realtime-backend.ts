@@ -97,26 +97,38 @@ export const createRealtimeBackend = ({ writer, projectId, supabaseConnected, su
       })
 
       try {
-        const response = await fetch(
+        const url = new URL(
           `/api/supabase-backend/schema?projectId=${encodeURIComponent(projectId)}`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(input),
-          }
+          typeof window === 'undefined' ? 'http://localhost' : window.location.origin
         )
 
+        const response = await fetch(url.toString(), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(input),
+        })
+
         if (!response.ok) {
-          const error = await response.json()
+          let errorMessage = 'Failed to create backend'
+          let errorDetails = undefined
+
+          try {
+            const error = await response.json()
+            errorMessage = error.error || errorMessage
+            errorDetails = error.details
+          } catch {
+            errorMessage = `Server error: ${response.status} ${response.statusText}`
+          }
+
           writer.write({
             id: toolCallId,
             type: 'data-create-realtime-backend',
             data: {
               status: 'error',
-              message: error.error || 'Failed to create backend',
-              details: error.details,
+              message: errorMessage,
+              details: errorDetails,
             },
           })
           return
@@ -135,12 +147,14 @@ export const createRealtimeBackend = ({ writer, projectId, supabaseConnected, su
           },
         })
       } catch (error) {
+        const message = error instanceof Error ? error.message : 'Unknown error'
+        console.error('[create-realtime-backend] Error:', message, error)
         writer.write({
           id: toolCallId,
           type: 'data-create-realtime-backend',
           data: {
             status: 'error',
-            message: error instanceof Error ? error.message : 'Unknown error',
+            message: `Failed to execute operation: ${message}`,
           },
         })
       }
