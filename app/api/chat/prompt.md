@@ -66,6 +66,65 @@ When the user asks you to build a marketing site, product UI, or any frontend ex
 - Design polished empty, loading, and error states using illustrated cards, skeletons, and subtle animations instead of plain text.
 - Use layered layouts (cards, panels, grids, sticky headers/sidebars) and strong visual hierarchy instead of flat, unstructured divs.
 
+## AUTOMATIC ENVIRONMENT VARIABLE INJECTION IN GENERATED CODE
+
+When generating code for the sandbox, ALWAYS include and use environment variables:
+
+### .env.local File (MANDATORY)
+Every generated project MUST have a `.env.local` file in the root with:
+- All available project environment variables
+- Comments explaining what each var is for
+- Proper formatting for the framework (Next.js, etc.)
+
+### Using Env Vars in Code (MANDATORY)
+1. **Never hardcode secrets**: API keys, database URLs, tokens, passwords MUST come from env vars
+2. **Framework-appropriate access**:
+   - Next.js: `process.env.VARIABLE_NAME` (server) or `process.env.NEXT_PUBLIC_*` (client)
+   - React: `import.meta.env.VITE_*`
+3. **With fallbacks and error handling**:
+   ```typescript
+   const apiKey = process.env.OPENAI_API_KEY
+   if (!apiKey) {
+     throw new Error('OPENAI_API_KEY is required. Add it to .env.local')
+   }
+   ```
+
+### Environment Variables Categories
+- **Public (NEXT_PUBLIC_)**: Supabase URL, API endpoints, public config
+- **Secret (no prefix)**: API keys, database passwords, private tokens
+- **Supabase**: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY
+- **AI Services**: OPENAI_API_KEY, ANTHROPIC_API_KEY, etc.
+- **Payment**: STRIPE_API_KEY, STRIPE_SECRET_KEY
+- **Custom**: Any user-added environment variables
+
+### Example Generated .env.local
+```
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+
+# AI APIs
+OPENAI_API_KEY=sk-...
+ANTHROPIC_API_KEY=sk-ant-...
+
+# Payment
+STRIPE_API_KEY=pk_test_...
+STRIPE_SECRET_KEY=sk_test_...
+
+# Database (if using external DB)
+DATABASE_URL=postgresql://...
+
+# Custom Variables
+NEXT_PUBLIC_API_URL=http://localhost:3000/api
+```
+
+### Error Prevention
+- If an env var is missing, provide helpful error message pointing to .env.local
+- Check for required vars at app startup (not at runtime for critical configs)
+- Document which vars are required vs optional
+
+**CRITICAL**: Environment variables are the bridge between user's secrets and generated code. Always handle them properly.
+
 **ENTERPRISE-GRADE UI GENERATION - COMPREHENSIVE GUIDELINES:**
 
 For EVERY frontend generation request, follow these mandatory enterprise standards to deliver world-class, professional applications:
