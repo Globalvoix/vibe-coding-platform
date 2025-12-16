@@ -18,7 +18,7 @@ const description = `Automatically create a Supabase database for the generated 
 This tool should be called when the generated app needs to store or retrieve data.
 It creates a database table and returns configuration needed for the app.`
 
-export const createDatabase = ({ writer }: Params) =>
+export const createDatabase = ({ writer, supabaseConnection }: Params) =>
   tool({
     description,
     inputSchema: z.object({
@@ -34,6 +34,13 @@ export const createDatabase = ({ writer }: Params) =>
         .describe('Why this app needs a database (e.g., "store user notes")'),
     }),
     execute: async ({ projectId, appName, reason }, { toolCallId }) => {
+      const supabaseConnectionParams: SupabaseConnectionParams | undefined =
+        supabaseConnection && supabaseConnection.projectRef && supabaseConnection.anonKey
+          ? {
+              projectRef: supabaseConnection.projectRef,
+              anonKey: supabaseConnection.anonKey,
+            }
+          : undefined
       writer.write({
         id: toolCallId,
         type: 'data-creating-database',
