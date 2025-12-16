@@ -246,14 +246,6 @@ export function Chat({ className, initialPrompt, projectId }: Props) {
                 showHistoryPanel ? 'text-white' : 'text-muted-foreground group-hover:text-white'
               }`} />
             </button>
-            <button
-              onClick={() => handleComingSoon('Sidebar', 'Additional sidebar features are coming soon!')}
-              className="p-1 rounded transition-colors hover:bg-blue-600 group"
-              title="Sidebar"
-              aria-label="Sidebar"
-            >
-              <PanelLeft className="w-3.5 h-3.5 text-muted-foreground group-hover:text-white" />
-            </button>
           </div>
         </PanelHeader>
 
