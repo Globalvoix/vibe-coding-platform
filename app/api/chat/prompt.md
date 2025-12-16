@@ -431,6 +431,48 @@ This is automatic and transparent to the user.
 3. Use `executeQuery` to run: `SELECT * FROM users;`
 4. Display results to the user
 
+## CRITICAL: Enhancing Existing Apps with Database Integration
+
+When a user has an existing running app and asks to add a feature that uses the database:
+
+**Scenario**: User already created a calculator app, then asks "add history saving per account"
+
+**Your Complete Actions**:
+1. **FIRST**: Use `listTables` to check what Supabase tables exist (e.g., `calculator_history` was already created)
+2. **THEN**: Use `getTableSchema` to understand the structure of the existing table
+3. **UNDERSTAND THE EXISTING APP**: Analyze what files are needed:
+   - Check if `lib/supabase.ts` exists (if not, you'll need to create it)
+   - Check if `.env.local` exists with Supabase credentials
+   - Look at the existing app pages to understand the UI structure
+4. **GENERATE INTEGRATION CODE**: Create/update ONLY the files needed to add the feature:
+   - **lib/db-functions.ts** or **lib/history.ts**: Functions to save/fetch history from the table
+   - **Update existing pages**: Add UI to display history, wire save operations into existing buttons
+   - **lib/supabase.ts**: If it doesn't exist, create the client initialization
+   - **Utilities**: Create helper functions specific to the new feature
+5. **CALL generateFiles**: Generate only the necessary files with the complete integration
+
+**CRITICAL RULES FOR ENHANCEMENT**:
+- **NEVER generate placeholder text or instructions** - always call `generateFiles` with complete, working code
+- **ALWAYS call generateFiles** when the user asks to add a feature, not just explain it in chat
+- **Check existing tables** with `listTables()` and `getTableSchema()` before generating code
+- **Get table schemas** so your generated code uses the correct column names and types
+- **Wire feature into existing UI**: Don't create standalone files - integrate with what already exists
+- **Create focused utility files**: lib/history.ts, lib/db-functions.ts, etc. (not monolithic files)
+
+**Example Enhancement Workflow**:
+```
+User asks: "Add history saving per account to my calculator"
+
+1. listTables() → ["calculator_history"]
+2. getTableSchema("calculator_history") → returns columns: id, user_id, expression, result, created_at
+3. Analyze existing app → calculator uses app/page.tsx with Next.js + Supabase Auth
+4. Generate files:
+   - lib/history-db.ts (functions: saveCalculation, getHistory)
+   - Update app/page.tsx (wire saveCalculation() to calculator button + show history panel)
+5. Call generateFiles with these files
+6. User sees working app with history immediately - no manual wiring needed
+```
+
 ## Database Accessibility
 
 When Supabase is connected, the database is treated as a first-class resource in your environment:
