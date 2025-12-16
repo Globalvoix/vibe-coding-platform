@@ -5,6 +5,36 @@ import description from './create-realtime-backend.md'
 import z from 'zod/v3'
 import { getSupabaseDatabaseQueryUrl } from '@/lib/supabase-platform'
 
+const SUPABASE_REQUEST_TIMEOUT_MS = 30_000
+const SUPABASE_MAX_RETRIES = 3
+const SUPABASE_BASE_DELAY_MS = 500
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+function getBackoffDelayMs(attempt: number) {
+  const jitter = Math.floor(Math.random() * 200)
+  return SUPABASE_BASE_DELAY_MS * 2 ** attempt + jitter
+}
+
+function isRetryableFetchError(error: unknown) {
+  if (!error) return false
+  if (typeof error === 'object' && 'name' in error && error.name === 'AbortError') return true
+  if (error instanceof TypeError && /fetch failed/i.test(error.message)) return true
+  return false
+}
+
+function isLikelyReadOnlySql(sql: string) {
+  const normalized = sql.trim().toLowerCase()
+  return (
+    normalized.startsWith('select') ||
+    normalized.startsWith('with') ||
+    normalized.startsWith('show') ||
+    normalized.startsWith('explain')
+  )
+}
+
 interface SupabaseConnectionInfo {
   accessToken: string
   projectRef: string
@@ -62,24 +92,68 @@ async function executeSupabaseSql(params: {
   projectRef: string
   accessToken: string
   sql: string
+  allowRetries: boolean
 }) {
-  const response = await fetch(getSupabaseDatabaseQueryUrl(params.projectRef), {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${params.accessToken}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ sql: params.sql }),
-  })
+  const url = getSupabaseDatabaseQueryUrl(params.projectRef)
 
-  if (!response.ok) {
-    const details = await response.text().catch(() => '')
-    const message = `Supabase request failed (${response.status} ${response.statusText})`
-    return { ok: false as const, message, details }
+  for (let attempt = 0; attempt < SUPABASE_MAX_RETRIES; attempt++) {
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), SUPABASE_REQUEST_TIMEOUT_MS)
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${params.accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ sql: params.sql }),
+        signal: controller.signal,
+      })
+
+      if (!response.ok) {
+        const details = await response.text().catch(() => '')
+        const retryableStatus = response.status >= 500 || response.status === 429
+        const shouldRetry = params.allowRetries && retryableStatus && attempt < SUPABASE_MAX_RETRIES - 1
+
+        if (shouldRetry) {
+          await sleep(getBackoffDelayMs(attempt))
+          continue
+        }
+
+        const message = `Supabase request failed (${response.status} ${response.statusText})`
+        return { ok: false as const, message, details, status: response.status }
+      }
+
+      const result = await response.json().catch(() => null)
+      return { ok: true as const, result }
+    } catch (error) {
+      const shouldRetry =
+        params.allowRetries && isRetryableFetchError(error) && attempt < SUPABASE_MAX_RETRIES - 1
+
+      if (shouldRetry) {
+        await sleep(getBackoffDelayMs(attempt))
+        continue
+      }
+
+      const message = error instanceof Error ? error.message : 'Unknown error'
+      return {
+        ok: false as const,
+        message: `Supabase fetch failed: ${message}`,
+        details: message,
+        status: 503,
+      }
+    } finally {
+      clearTimeout(timeoutId)
+    }
   }
 
-  const result = await response.json().catch(() => null)
-  return { ok: true as const, result }
+  return {
+    ok: false as const,
+    message: 'Supabase fetch failed after retries',
+    details: 'Supabase fetch failed after retries',
+    status: 503,
+  }
 }
 
 export const createRealtimeBackend = ({ writer, projectId, supabaseConnected, supabaseConnection }: Params) =>
@@ -216,7 +290,15 @@ export const createRealtimeBackend = ({ writer, projectId, supabaseConnected, su
           return
         }
 
-        const result = await executeSupabaseSql({ projectRef, accessToken, sql })
+        const allowRetries =
+          input.action !== 'execute_sql' || (input.query ? isLikelyReadOnlySql(input.query) : false)
+
+        const result = await executeSupabaseSql({
+          projectRef,
+          accessToken,
+          sql,
+          allowRetries,
+        })
 
         if (!result.ok) {
           writer.write({

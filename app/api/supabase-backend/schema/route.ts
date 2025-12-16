@@ -4,6 +4,40 @@ import { auth } from '@clerk/nextjs/server'
 import { getSupabaseProjectWithRefresh } from '@/lib/supabase-projects-db'
 import { getSupabaseDatabaseQueryUrl } from '@/lib/supabase-platform'
 
+const SUPABASE_REQUEST_TIMEOUT_MS = 30_000
+const SUPABASE_MAX_RETRIES = 3
+const SUPABASE_BASE_DELAY_MS = 500
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+function getBackoffDelayMs(attempt: number) {
+  const jitter = Math.floor(Math.random() * 200)
+  return SUPABASE_BASE_DELAY_MS * 2 ** attempt + jitter
+}
+
+function isRetryableFetchError(error: unknown) {
+  if (!error) return false
+  if (typeof error === 'object' && 'name' in error && error.name === 'AbortError') return true
+  if (error instanceof TypeError && /fetch failed/i.test(error.message)) return true
+  return false
+}
+
+function isLikelyReadOnlySql(sql: string) {
+  const normalized = sql.trim().toLowerCase()
+  return (
+    normalized.startsWith('select') ||
+    normalized.startsWith('with') ||
+    normalized.startsWith('show') ||
+    normalized.startsWith('explain')
+  )
+}
+
+function sqlStringLiteral(value: string) {
+  return `'${value.replace(/'/g, "''")}'`
+}
+
 interface SchemaRequest {
   action: 'create_table' | 'create_function' | 'enable_realtime' | 'execute_sql'
   query?: string
@@ -120,7 +154,22 @@ export async function POST(req: NextRequest) {
         `$$;`,
       ].join('\n')
     } else if (body.action === 'enable_realtime' && body.table_name) {
-      sql = `ALTER PUBLICATION supabase_realtime ADD TABLE public.${quoteIdent(body.table_name)};`
+      const tableNameLiteral = sqlStringLiteral(body.table_name)
+      sql = [
+        `DO $$`,
+        `BEGIN`,
+        `  IF NOT EXISTS (`,
+        `    SELECT 1`,
+        `    FROM pg_publication_tables`,
+        `    WHERE pubname = 'supabase_realtime'`,
+        `      AND schemaname = 'public'`,
+        `      AND tablename = ${tableNameLiteral}`,
+        `  ) THEN`,
+        `    EXECUTE format('ALTER PUBLICATION supabase_realtime ADD TABLE public.%I;', ${tableNameLiteral});`,
+        `  END IF;`,
+        `END`,
+        `$$;`,
+      ].join('\n')
     } else if (body.action === 'execute_sql' && body.query) {
       sql = body.query
     }
@@ -132,23 +181,86 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const response = await fetch(
-      getSupabaseDatabaseQueryUrl(supabaseProject.supabase_project_ref),
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${supabaseProject.access_token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ sql }),
+    const allowRetries =
+      body.action !== 'execute_sql' || (body.query ? isLikelyReadOnlySql(body.query) : false)
+
+    const url = getSupabaseDatabaseQueryUrl(supabaseProject.supabase_project_ref)
+
+    let response: Response | null = null
+    let lastError: unknown = null
+
+    for (let attempt = 0; attempt < SUPABASE_MAX_RETRIES; attempt++) {
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), SUPABASE_REQUEST_TIMEOUT_MS)
+
+      try {
+        response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${supabaseProject.access_token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ sql }),
+          signal: controller.signal,
+        })
+
+        if (response.ok) break
+
+        const retryableStatus = response.status >= 500 || response.status === 429
+        const shouldRetry = allowRetries && retryableStatus && attempt < SUPABASE_MAX_RETRIES - 1
+
+        if (shouldRetry) {
+          await sleep(getBackoffDelayMs(attempt))
+          continue
+        }
+
+        break
+      } catch (error) {
+        lastError = error
+
+        const shouldRetry =
+          allowRetries && isRetryableFetchError(error) && attempt < SUPABASE_MAX_RETRIES - 1
+
+        if (shouldRetry) {
+          await sleep(getBackoffDelayMs(attempt))
+          continue
+        }
+
+        break
+      } finally {
+        clearTimeout(timeoutId)
       }
-    )
+    }
+
+    if (!response) {
+      const message = lastError instanceof Error ? lastError.message : 'fetch failed'
+      return NextResponse.json(
+        {
+          error: 'Supabase is temporarily unavailable',
+          details: message,
+        },
+        { status: 503 }
+      )
+    }
 
     if (!response.ok) {
-      const errorText = await response.text()
-      console.error('Supabase database query error:', errorText)
+      const errorText = await response.text().catch(() => '')
+
+      if (response.status >= 500 || response.status === 429) {
+        return NextResponse.json(
+          {
+            error: 'Supabase is temporarily unavailable',
+            details: errorText || `${response.status} ${response.statusText}`,
+          },
+          { status: 503 }
+        )
+      }
+
       return NextResponse.json(
-        { error: 'Failed to execute schema operation', details: errorText },
+        {
+          error: 'Failed to execute schema operation',
+          details: errorText || `${response.status} ${response.statusText}`,
+        },
         { status: 400 }
       )
     }
