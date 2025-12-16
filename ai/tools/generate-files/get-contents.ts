@@ -23,6 +23,7 @@ interface Params {
   messages: ModelMessage[]
   modelId: string
   paths: string[]
+  envVars?: Record<string, string>
 }
 
 interface FileContentChunk {
