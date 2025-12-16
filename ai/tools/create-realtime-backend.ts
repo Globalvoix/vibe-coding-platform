@@ -54,6 +54,10 @@ function qualifyRoutineName(name: string) {
   throw new Error('Invalid routine name')
 }
 
+function sqlStringLiteral(value: string) {
+  return `'${value.replace(/'/g, "''")}'`
+}
+
 async function executeSupabaseSql(params: {
   projectRef: string
   accessToken: string
@@ -179,7 +183,8 @@ export const createRealtimeBackend = ({ writer, projectId, supabaseConnected, su
           ].join('\n')
         } else if (input.action === 'enable_realtime' && input.table_name) {
           const tableName = input.table_name
-          const publicationTable = `public.${quoteIdent(tableName)}`
+          const tableNameLiteral = sqlStringLiteral(tableName)
+
           sql = [
             `DO $$`,
             `BEGIN`,
@@ -188,17 +193,13 @@ export const createRealtimeBackend = ({ writer, projectId, supabaseConnected, su
             `    FROM pg_publication_tables`,
             `    WHERE pubname = 'supabase_realtime'`,
             `      AND schemaname = 'public'`,
-            `      AND tablename = ${''}${''}${''}${''}${''}${''}${''}${''}`,
+            `      AND tablename = ${tableNameLiteral}`,
             `  ) THEN`,
-            `    EXECUTE 'ALTER PUBLICATION supabase_realtime ADD TABLE ${publicationTable};';`,
+            `    EXECUTE format('ALTER PUBLICATION supabase_realtime ADD TABLE public.%I;', ${tableNameLiteral});`,
             `  END IF;`,
             `END`,
             `$$;`,
           ].join('\n')
-            .replace(
-              `${''}${''}${''}${''}${''}${''}${''}${''}`,
-              `'${tableName.replace(/'/g, "''")}'`
-            )
         } else if (input.action === 'execute_sql' && input.query) {
           sql = input.query
         }
