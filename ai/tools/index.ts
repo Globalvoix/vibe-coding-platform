@@ -24,6 +24,7 @@ interface Params {
   projectId?: string
   supabaseConnected?: boolean
   supabaseConnection?: SupabaseConnectionInfo
+  envVars?: Record<string, string>
 }
 
 export function tools({
