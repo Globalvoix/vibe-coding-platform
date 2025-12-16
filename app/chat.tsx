@@ -257,73 +257,87 @@ export function Chat({ className, initialPrompt, projectId }: Props) {
           </div>
         </PanelHeader>
 
-      <Conversation className="relative w-full flex-1 min-h-0 bg-background">
-        <ConversationContent className="space-y-4">
-          {allMessages.map((message) => (
-            <Message key={message.id} message={message} />
-          ))}
-        </ConversationContent>
-        <ConversationScrollButton />
-      </Conversation>
-
-      <form
-        className="bg-background p-2"
-        onSubmit={async (event) => {
-          event.preventDefault()
-          validateAndSubmitMessage(input)
-        }}
-      >
-        <PromptInput
-          value={input}
-          onValueChange={setInput}
-          isLoading={isLoading}
-          onSubmit={() => validateAndSubmitMessage(input)}
-          disabled={isInputDisabled}
-          className="w-full"
-        >
-          <PromptInputTextarea
-            placeholder="Type your message..."
-            className="font-mono text-sm"
+        {showHistoryPanel ? (
+          <HistoryPanel
+            projectId={projectId}
+            onClose={() => setShowHistoryPanel(false)}
+            onVersionSelect={handleVersionSelect}
+            onRevert={handleVersionRevert}
+            selectedVersionId={selectedVersionId}
+            isLatestVersion={!selectedVersionId}
           />
-          <div className="flex items-center justify-between pt-2">
-            <div className="flex items-center gap-2">
-              <SupabaseOAuthButton projectId={projectId || undefined} />
-              <button
-                type="button"
-                className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border/60 text-foreground shadow-xs hover:bg-secondary/60 transition-colors chat-toolbar-action-button"
-                aria-label="More options"
+        ) : (
+          <>
+            <Conversation className="relative w-full flex-1 min-h-0 bg-background">
+              <ConversationContent className="space-y-4">
+                {allMessages.map((message) => (
+                  <Message key={message.id} message={message} />
+                ))}
+              </ConversationContent>
+              <ConversationScrollButton />
+            </Conversation>
+
+            <form
+              className="bg-background p-2"
+              onSubmit={async (event) => {
+                event.preventDefault()
+                validateAndSubmitMessage(input)
+              }}
+            >
+              <PromptInput
+                value={input}
+                onValueChange={setInput}
+                isLoading={isLoading}
+                onSubmit={() => validateAndSubmitMessage(input)}
+                disabled={isInputDisabled}
+                className="w-full"
               >
-                <Plus className="w-4 h-4" />
-              </button>
-              <div
-                className="flex items-center gap-2 rounded-full px-2 py-1 border border-border/60 shadow-xs chat-toolbar-settings-group"
-              >
-                <Settings />
-                <ModelSelector />
-              </div>
-            </div>
-            <PromptInputActions>
-              <PromptInputAction
-                tooltip={isLoading ? 'Stop generation' : 'Send message'}
-              >
-                <Button
-                  type="submit"
-                  variant="default"
-                  size="icon"
-                  className="h-8 w-8 rounded-full"
-                  disabled={isInputDisabled || !input.trim()}
-                >
-                  {isLoading ? (
-                    <Square className="size-5 fill-current" />
-                  ) : (
-                    <ArrowUp className="size-5" />
-                  )}
-                </Button>
-              </PromptInputAction>
-            </PromptInputActions>
-          </div>
-        </PromptInput>
-      </form>
+                <PromptInputTextarea
+                  placeholder="Type your message..."
+                  className="font-mono text-sm"
+                />
+                <div className="flex items-center justify-between pt-2">
+                  <div className="flex items-center gap-2">
+                    <SupabaseOAuthButton projectId={projectId || undefined} />
+                    <button
+                      type="button"
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border/60 text-foreground shadow-xs hover:bg-secondary/60 transition-colors chat-toolbar-action-button"
+                      aria-label="More options"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
+                    <div
+                      className="flex items-center gap-2 rounded-full px-2 py-1 border border-border/60 shadow-xs chat-toolbar-settings-group"
+                    >
+                      <Settings />
+                      <ModelSelector />
+                    </div>
+                  </div>
+                  <PromptInputActions>
+                    <PromptInputAction
+                      tooltip={isLoading ? 'Stop generation' : 'Send message'}
+                    >
+                      <Button
+                        type="submit"
+                        variant="default"
+                        size="icon"
+                        className="h-8 w-8 rounded-full"
+                        disabled={isInputDisabled || !input.trim()}
+                      >
+                        {isLoading ? (
+                          <Square className="size-5 fill-current" />
+                        ) : (
+                          <ArrowUp className="size-5" />
+                        )}
+                      </Button>
+                    </PromptInputAction>
+                  </PromptInputActions>
+                </div>
+              </PromptInput>
+            </form>
+          </>
+        )}
+      </Panel>
       <ComingSoonModal
         isOpen={comingSoonModal.isOpen}
         onClose={() =>
@@ -332,7 +346,6 @@ export function Chat({ className, initialPrompt, projectId }: Props) {
         title={comingSoonModal.title}
         description={comingSoonModal.description}
       />
-    </Panel>
     </>
   )
 }
