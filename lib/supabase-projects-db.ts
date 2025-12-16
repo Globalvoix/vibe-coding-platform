@@ -1,4 +1,7 @@
 import { Pool } from 'pg'
+import crypto from 'node:crypto'
+import { decryptEnvVar, encryptEnvVar } from '@/lib/env-encryption'
+import { getSupabaseOAuthTokenUrl } from '@/lib/supabase-platform'
 
 const connectionString = process.env.DATABASE_URL
 
@@ -49,6 +52,22 @@ export interface SupabaseProjectRecord {
   updated_at: string
 }
 
+function decryptIfNeeded(value: string) {
+  try {
+    return decryptEnvVar(value)
+  } catch {
+    return value
+  }
+}
+
+function normalizeRecord(record: SupabaseProjectRecord): SupabaseProjectRecord {
+  return {
+    ...record,
+    access_token: decryptIfNeeded(record.access_token),
+    refresh_token: record.refresh_token ? decryptIfNeeded(record.refresh_token) : null,
+  }
+}
+
 export async function saveSupabaseProject(params: {
   userId: string
   projectId: string
@@ -62,6 +81,12 @@ export async function saveSupabaseProject(params: {
   await ensureSupabaseProjectsTable()
 
   const id = crypto.randomUUID()
+
+  const encryptedAccessToken = encryptEnvVar(params.accessToken)
+  const encryptedRefreshToken = params.refreshToken
+    ? encryptEnvVar(params.refreshToken)
+    : null
+
   const result = await pool.query<SupabaseProjectRecord>(
     `INSERT INTO supabase_projects 
       (id, user_id, project_id, supabase_project_ref, supabase_org_id, 
@@ -84,13 +109,13 @@ export async function saveSupabaseProject(params: {
       params.supabaseProjectRef,
       params.supabaseOrgId ?? null,
       params.supabaseProjectName ?? null,
-      params.accessToken,
-      params.refreshToken ?? null,
+      encryptedAccessToken,
+      encryptedRefreshToken,
       params.expiresAt ? params.expiresAt.toISOString() : null,
     ]
   )
 
-  return result.rows[0]
+  return normalizeRecord(result.rows[0])
 }
 
 export async function getSupabaseProject(
@@ -105,7 +130,8 @@ export async function getSupabaseProject(
     [userId, projectId]
   )
 
-  return result.rows[0] ?? null
+  const record = result.rows[0]
+  return record ? normalizeRecord(record) : null
 }
 
 export async function deleteSupabaseProject(
@@ -133,7 +159,7 @@ export async function listUserSupabaseProjects(
     [userId]
   )
 
-  return result.rows
+  return result.rows.map(normalizeRecord)
 }
 
 export function isTokenExpired(expiresAt: string | null): boolean {
@@ -143,30 +169,26 @@ export function isTokenExpired(expiresAt: string | null): boolean {
 
 export async function refreshSupabaseToken(
   connection: SupabaseProjectRecord,
-  supabaseUrl: string,
   oauthClientId: string,
   oauthClientSecret: string
 ): Promise<SupabaseProjectRecord | null> {
   if (!connection.refresh_token) {
-    return null // Cannot refresh without refresh token
+    return null
   }
 
   try {
-    const tokenResponse = await fetch(
-      new URL('/auth/v1/oauth/token', supabaseUrl).toString(),
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-          grant_type: 'refresh_token',
-          refresh_token: connection.refresh_token,
-          client_id: oauthClientId,
-          client_secret: oauthClientSecret,
-        }),
-      }
-    )
+    const tokenResponse = await fetch(getSupabaseOAuthTokenUrl(), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        grant_type: 'refresh_token',
+        refresh_token: connection.refresh_token,
+        client_id: oauthClientId,
+        client_secret: oauthClientSecret,
+      }),
+    })
 
     if (!tokenResponse.ok) {
       console.error('Token refresh failed', {
@@ -186,22 +208,25 @@ export async function refreshSupabaseToken(
     const expiresIn = tokenData.expires_in || 3600
     const expiresAt = new Date(Date.now() + expiresIn * 1000)
 
-    // Update token in database
+    const newAccessToken = tokenData.access_token
+    const newRefreshToken = tokenData.refresh_token || connection.refresh_token
+
     const result = await pool.query<SupabaseProjectRecord>(
       `UPDATE supabase_projects
        SET access_token = $1, refresh_token = $2, expires_at = $3, updated_at = NOW()
        WHERE user_id = $4 AND project_id = $5
        RETURNING *`,
       [
-        tokenData.access_token,
-        tokenData.refresh_token || connection.refresh_token,
+        encryptEnvVar(newAccessToken),
+        encryptEnvVar(newRefreshToken),
         expiresAt.toISOString(),
         connection.user_id,
         connection.project_id,
       ]
     )
 
-    return result.rows[0] ?? null
+    const updated = result.rows[0]
+    return updated ? normalizeRecord(updated) : null
   } catch (error) {
     console.error('Error refreshing Supabase token', {
       error: error instanceof Error ? error.message : String(error),
@@ -215,30 +240,21 @@ export async function refreshSupabaseToken(
 export async function getSupabaseProjectWithRefresh(
   userId: string,
   projectId: string,
-  supabaseUrl?: string,
   oauthClientId?: string,
   oauthClientSecret?: string
 ): Promise<SupabaseProjectRecord | null> {
   let connection = await getSupabaseProject(userId, projectId)
   if (!connection) return null
 
-  // Check if token is expired and refresh if possible
-  if (
-    isTokenExpired(connection.expires_at) &&
-    supabaseUrl &&
-    oauthClientId &&
-    oauthClientSecret
-  ) {
+  if (isTokenExpired(connection.expires_at) && oauthClientId && oauthClientSecret) {
     const refreshed = await refreshSupabaseToken(
       connection,
-      supabaseUrl,
       oauthClientId,
       oauthClientSecret
     )
     if (refreshed) {
       connection = refreshed
     } else {
-      // Token refresh failed, return stale connection
       console.warn('Token refresh failed, returning stale connection', {
         userId,
         projectId,
