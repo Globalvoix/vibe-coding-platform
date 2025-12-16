@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { saveSupabaseProject } from '@/lib/supabase-projects-db'
 import { getProject } from '@/lib/projects-db'
+import { getSupabasePlatformBaseUrl } from '@/lib/supabase-platform'
 
 interface SelectRequest {
   appProjectId: string
@@ -12,6 +13,35 @@ interface SelectRequest {
   accessToken: string
   refreshToken?: string
   expiresIn?: number
+}
+
+async function fetchProjectAnonKey(projectRef: string, accessToken: string): Promise<string | null> {
+  try {
+    const platformUrl = getSupabasePlatformBaseUrl()
+    const response = await fetch(
+      `${platformUrl}/v1/projects/${encodeURIComponent(projectRef)}/api-keys`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    )
+
+    if (!response.ok) {
+      console.warn(`Failed to fetch API keys for project ${projectRef}:`, response.status)
+      return null
+    }
+
+    const data = (await response.json()) as {
+      anonKey?: string
+      api_keys?: Array<{ name: string; api_key: string }>
+    }
+
+    return data.anonKey || null
+  } catch (error) {
+    console.warn(`Error fetching anon key for project ${projectRef}:`, error)
+    return null
+  }
 }
 
 export async function POST(req: NextRequest) {
