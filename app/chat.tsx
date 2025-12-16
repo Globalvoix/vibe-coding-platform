@@ -1,7 +1,7 @@
 'use client'
 
 import { TEST_PROMPTS } from '@/ai/constants'
-import { ArrowUp, MessageCircleIcon, Square, Plus, Menu, Clock, PanelLeft } from 'lucide-react'
+import { ArrowUp, MessageCircleIcon, Square, Plus, Menu, Clock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { useUIStore } from '@/lib/ui-store'
