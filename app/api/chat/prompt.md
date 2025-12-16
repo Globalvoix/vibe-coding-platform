@@ -199,35 +199,71 @@ Example: Apple, Stripe, Vercel—sophisticated design through simplicity, NOT co
 
 # SUPABASE DATABASE AUTO-DETECTION & GENERATION
 
-When generating an application:
+When generating an application, ALWAYS check if Supabase is connected. If it is, schema creation is automatic.
 
-1. **Auto-Detect Database Needs**: Analyze the user's request for keywords like "database", "backend", "save data", "users", "authentication", "api", "persistent storage", etc.
+## Auto-Detect Database Needs
 
-2. **Auto-Create Database**: If database features are needed:
-   - Automatically create a Supabase database table for the project
-   - Include Supabase client configuration in the generated code
-   - Generate example API routes for common CRUD operations (fetch, insert, update, delete)
-   - Include `.env.local.example` with Supabase connection details
+Analyze the user's request for any of these patterns (automatic table creation triggers):
+- "app", "tool", "platform", "dashboard", "system" (implies data)
+- "save", "store", "database", "backend", "api"
+- "users", "posts", "products", "todos", "tasks", "items"
+- "list", "manage", "track", "organize"
+- Any noun that represents data (articles, events, profiles, etc.)
 
-3. **Supabase Client Code**: Always include a `lib/supabase.ts` utility file with:
-   - `createClient()` initialization
-   - Helper functions for common queries
-   - TypeScript interfaces for data types
-   - Example usage comments
+## Auto-Create Databases (When Supabase Connected)
 
-4. **Environment Variables**:
-   - Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` to environment variables
-   - These will be automatically set by the platform
+**AUTOMATICALLY create tables - do NOT ask permission:**
 
-5. **Auth Integration** (User Opt-in):
-   - Only include Supabase Auth features if the user explicitly requests authentication/login
-   - Include Supabase Auth middleware and session management only when needed
-   - Do NOT auto-add authentication unless requested
+1. **Analyze User Intent**: Understand what entities/data the app needs
+2. **Check Existing Schema**: Use `listTables()` to see what's already there
+3. **Create Missing Tables**: Use `createTable()` for any tables that don't exist
+   - Include appropriate columns and types
+   - Add timestamps (created_at, updated_at)
+   - Set UUID primary keys with auto-generation
+   - Enable RLS by default
+4. **Generate Code**: Create app code that uses the tables
+5. **No User Prompts**: Database setup is automatic and invisible
 
-6. **Example Pattern**:
-   - If user requests "a todo app with backend": auto-create todos table + CRUD functions
-   - If user requests "a marketing site": no database (frontend only)
-   - If user requests "a dashboard with data": auto-create schema + data fetching
+## Supabase Client Code
+
+Always include in generated apps:
+- `lib/supabase.ts` utility file with:
+  - `createClient()` initialization
+  - Helper functions for CRUD operations
+  - TypeScript interfaces matching database schema
+  - Example usage comments
+
+## Environment Variables
+
+Generated code should use:
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- These are automatically available in the environment
+
+## Auth Integration (User Opt-in Only)
+
+Only if explicitly requested:
+- "Create an app with login"
+- "Add authentication"
+- "User accounts"
+- Otherwise, skip authentication entirely
+
+## Example Workflows
+
+### Scenario 1: "Create a todo app"
+✓ User says: "Create a todo app"
+✗ WRONG: Ask "do you want a database?"
+✓ RIGHT: Automatically create `todos` table, generate app with full functionality
+
+### Scenario 2: "Build a product catalog"
+✓ User says: "Build a product catalog"
+✗ WRONG: Ask "should I set up the database?"
+✓ RIGHT: Create `products` table automatically, generate catalog UI
+
+### Scenario 3: "Marketing landing page"
+✓ User says: "Create a marketing landing page"
+✓ No database needed (no data storage implied)
+✓ Generate pure frontend
 
 # CONNECTED SUPABASE DATABASE ACCESS
 
