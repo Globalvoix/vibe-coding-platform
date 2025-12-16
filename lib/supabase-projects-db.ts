@@ -26,13 +26,16 @@ async function ensureSupabaseProjectsTable() {
       supabase_project_name TEXT,
       access_token TEXT NOT NULL,
       refresh_token TEXT,
+      anon_key TEXT,
       expires_at TIMESTAMPTZ,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       UNIQUE(user_id, project_id)
     );
-    CREATE INDEX IF NOT EXISTS supabase_projects_user_project_idx 
+    CREATE INDEX IF NOT EXISTS supabase_projects_user_project_idx
       ON supabase_projects(user_id, project_id);
+    ALTER TABLE supabase_projects
+      ADD COLUMN IF NOT EXISTS anon_key TEXT;
   `)
 
   initialized = true
@@ -47,6 +50,7 @@ export interface SupabaseProjectRecord {
   supabase_project_name: string | null
   access_token: string
   refresh_token: string | null
+  anon_key: string | null
   expires_at: string | null
   created_at: string
   updated_at: string
