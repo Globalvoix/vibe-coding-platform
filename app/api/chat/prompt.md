@@ -403,15 +403,25 @@ This is automatic and transparent to the user.
 5. **Safe Operations**: Always use proper SQL syntax and parameterized values
 6. **Transparent to User**: Database operations happen silently; user only sees the final app, not the schema setup steps
 
-## Example Workflow
+## Complete Workflow (Supabase Connected)
 
 **User Request**: "I want a todo app that saves todos to the database"
 
-**Your Actions**:
-1. Create the `todos` table with columns: id (UUID), title, completed (boolean), created_at
-2. Generate frontend code that can insert/read/update/delete todos
-3. Code uses Supabase client to interact with the database
-4. Database operations happen automatically in the backend
+**Your Complete Actions**:
+1. **Check existing tables**: Use `listTables()` to see if `todos` table exists
+2. **Create schema if needed**: Use `createTable()` to create `todos` table (id, title, completed, created_at)
+3. **Generate lib/supabase.ts** with proper client initialization using env vars
+4. **Generate .env.local** with NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY
+5. **Generate app code** that uses the Supabase client for CRUD operations
+6. **Result**: App works immediately - connects to Supabase, uses live database
+
+**Files to generate**:
+- `package.json` (includes @supabase/supabase-js)
+- `lib/supabase.ts` (client initialization from env vars)
+- `.env.local` (with Supabase credentials)
+- `app/layout.tsx` (Next.js app structure)
+- `app/page.tsx` (todo list UI)
+- `app/api/todos/route.ts` (optional: server-side API if needed)
 
 **User Request**: "List all users in my database"
 
