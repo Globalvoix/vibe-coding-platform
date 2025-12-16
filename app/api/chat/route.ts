@@ -252,6 +252,7 @@ export async function POST(req: Request) {
               projectId,
               supabaseConnected,
               supabaseConnection: supabaseConnectionInfo,
+              envVars: envVarsForTools,
             }),
             onError: (error) => {
               console.error('Error communicating with AI')
