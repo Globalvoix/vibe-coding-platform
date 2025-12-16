@@ -174,7 +174,7 @@ export async function POST(req: Request) {
     if (projectId) {
       try {
         const envVars = await getEnvVarsForChat(projectId)
-        envVarsForTools = envVars
+        envVarsForTools = { ...envVars }
         const envVarKeys = Object.keys(envVars)
         if (envVarKeys.length > 0) {
           envVarsContext = `\n\n## Available Environment Variables for this project:\n${envVarKeys.map((key) => `- ${key}`).join('\n')}\n\nYou have access to these environment variables. Use them when generating code. If you need additional environment variables, ask the user to add them in the Environment Variables tab.`
@@ -188,7 +188,17 @@ export async function POST(req: Request) {
         try {
           const supabaseProject = await getSupabaseProject(userId, projectId)
           if (supabaseProject) {
-            supabaseContext = `\n\n## Supabase Backend Integration:\nThis project is connected to a Supabase PostgreSQL database. You have full access to create tables, functions, enable real-time subscriptions, and manage the database schema. The Supabase project is: ${supabaseProject.supabase_project_name} (Ref: ${supabaseProject.supabase_project_ref}). When generating code, you can automatically set up the database schema and real-time features.`
+            // Extract Supabase env vars from the connection
+            const supabaseUrl = `https://${supabaseProject.supabase_project_ref}.supabase.co`
+            const supabaseAnonKey = supabaseProject.anon_key
+
+            // Add to env vars for code generation
+            if (supabaseUrl && supabaseAnonKey) {
+              envVarsForTools['NEXT_PUBLIC_SUPABASE_URL'] = supabaseUrl
+              envVarsForTools['NEXT_PUBLIC_SUPABASE_ANON_KEY'] = supabaseAnonKey
+            }
+
+            supabaseContext = `\n\n## Supabase Backend Integration:\nThis project is connected to a Supabase PostgreSQL database at ${supabaseUrl}.\n\nAutomatically available environment variables:\n- NEXT_PUBLIC_SUPABASE_URL=${supabaseUrl}\n- NEXT_PUBLIC_SUPABASE_ANON_KEY=${supabaseAnonKey ? '(set)' : '(missing)'}\n\nYou have full access to:\n- Create and manage database tables\n- Create PostgreSQL functions and triggers\n- Enable real-time subscriptions\n- Manage RLS policies\n- Execute arbitrary queries\n\nWhen generating code, automatically include these env vars in .env.local and use them in the Supabase client initialization. The Supabase project is: ${supabaseProject.supabase_project_name} (Ref: ${supabaseProject.supabase_project_ref}).`
 
             // Prepare Supabase connection info for AI tools
             if (supabaseProject.access_token) {
@@ -198,7 +208,7 @@ export async function POST(req: Request) {
                 projectName: supabaseProject.supabase_project_name || undefined,
                 organizationId: supabaseProject.supabase_org_id || undefined,
                 anonKey: supabaseProject.anon_key || undefined,
-                supabaseUrl: process.env.SUPABASE_PLATFORM_URL || 'https://api.supabase.com',
+                supabaseUrl: supabaseUrl,
               }
             }
           }
