@@ -17,7 +17,7 @@ interface Params {
   envVars?: Record<string, string>
 }
 
-export const generateFiles = ({ writer, modelId, userId, projectId }: Params) =>
+export const generateFiles = ({ writer, modelId, userId, projectId, envVars }: Params) =>
   tool({
     description,
     inputSchema: z.object({
