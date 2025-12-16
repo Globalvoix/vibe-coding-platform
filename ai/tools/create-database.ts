@@ -82,7 +82,19 @@ export const createDatabase = ({ writer, supabaseConnection }: Params) =>
           },
         })
 
-        return `Database successfully created for ${appName}. Table name: ${tableName}. Include the Supabase client code from lib/supabase.ts in your generated files.`
+        const supabaseClientCode = supabaseConnectionParams
+          ? generateSupabaseClientCode(projectId, supabaseConnectionParams)
+          : generateSupabaseClientCode(projectId)
+
+        return `Database successfully created for ${appName}. Table name: ${tableName}.
+
+Create a lib/supabase.ts file with the following code:
+
+\`\`\`typescript
+${supabaseClientCode}
+\`\`\`
+
+Include this file in your generated application to handle Supabase database operations.`
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error)
 
