@@ -1,6 +1,7 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
+import { getSupabaseProjectsListUrl } from '@/lib/supabase-platform'
 
 interface SupabaseProjectItem {
   ref: string
@@ -24,18 +25,9 @@ export async function GET(req: NextRequest) {
     )
   }
 
-  const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
-  if (!supabaseUrl) {
-    return NextResponse.json(
-      { error: 'Supabase URL not configured' },
-      { status: 500 }
-    )
-  }
 
   try {
-    const projectsResponse = await fetch(
-      new URL('/v1/projects', supabaseUrl).toString(),
-      {
+    const projectsResponse = await fetch(getSupabaseProjectsListUrl(), {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${accessToken}`,
