@@ -69,11 +69,12 @@ export function HistoryPanel({
     const isYesterday = date.toDateString() === yesterday.toDateString()
 
     if (isToday) {
-      return date.toLocaleTimeString('en-US', {
+      const timeStr = date.toLocaleTimeString('en-US', {
         hour: 'numeric',
         minute: '2-digit',
-        meridiem: 'short',
       })
+      const ampm = date.getHours() >= 12 ? 'PM' : 'AM'
+      return `${timeStr} ${ampm}`
     } else if (isYesterday) {
       return 'Yesterday'
     }
