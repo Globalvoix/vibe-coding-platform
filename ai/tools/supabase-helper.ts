@@ -1,7 +1,9 @@
+import { getSupabaseDatabaseQueryUrl } from '@/lib/supabase-platform'
+
 interface SupabaseConnection {
   accessToken: string
   projectRef: string
-  supabaseUrl: string
+  supabaseUrl?: string
 }
 
 interface CreateTableParams {
@@ -18,31 +20,38 @@ interface CreateAuthPolicyParams {
   withCheckExpression?: string
 }
 
+function unwrapQueryResult(payload: unknown): unknown {
+  if (Array.isArray(payload)) return payload
+  if (!payload || typeof payload !== 'object') return payload
+
+  const record = payload as Record<string, unknown>
+  if (Array.isArray(record.result)) return record.result
+  if (Array.isArray(record.data)) return record.data
+  if (record.result && typeof record.result === 'object') return record.result
+
+  return payload
+}
+
 export async function executeSupabaseSQL(
   connection: SupabaseConnection,
   sql: string
 ): Promise<unknown> {
-  const url = new URL(
-    `/rest/v1/rpc/execute_sql`,
-    connection.supabaseUrl
-  )
-
-  const response = await fetch(url.toString(), {
+  const response = await fetch(getSupabaseDatabaseQueryUrl(connection.projectRef), {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${connection.accessToken}`,
       'Content-Type': 'application/json',
-      'apikey': connection.accessToken,
     },
-    body: JSON.stringify({ query: sql }),
+    body: JSON.stringify({ sql }),
   })
 
   if (!response.ok) {
     const error = await response.text()
-    throw new Error(`Failed to execute SQL: ${error}`)
+    throw new Error(`Failed to execute SQL (${response.status}): ${error}`)
   }
 
-  return response.json()
+  const payload = (await response.json()) as unknown
+  return unwrapQueryResult(payload)
 }
 
 export async function createTable(
@@ -61,7 +70,6 @@ export async function createTable(
 
   await executeSupabaseSQL(connection, sql)
 
-  // Enable RLS if requested
   if (params.rls) {
     const rlsSql = `
       ALTER TABLE "${params.tableName}" ENABLE ROW LEVEL SECURITY;
@@ -74,9 +82,7 @@ export async function createRLSPolicy(
   connection: SupabaseConnection,
   params: CreateAuthPolicyParams
 ): Promise<void> {
-  const usingClause = params.usingExpression
-    ? `USING (${params.usingExpression})`
-    : ''
+  const usingClause = params.usingExpression ? `USING (${params.usingExpression})` : ''
   const withCheckClause = params.withCheckExpression
     ? `WITH CHECK (${params.withCheckExpression})`
     : ''
@@ -165,9 +171,7 @@ export async function createAuthFunction(
   await executeSupabaseSQL(connection, sql)
 }
 
-export async function listTables(
-  connection: SupabaseConnection
-): Promise<string[]> {
+export async function listTables(connection: SupabaseConnection): Promise<string[]> {
   const sql = `
     SELECT table_name
     FROM information_schema.tables
