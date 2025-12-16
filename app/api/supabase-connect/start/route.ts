@@ -1,6 +1,7 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import crypto from 'node:crypto'
+import { getSupabaseOAuthAuthorizeUrl } from '@/lib/supabase-platform'
 
 function getRequestOrigin(req: NextRequest) {
   const forwardedProto = req.headers.get('x-forwarded-proto')
@@ -34,11 +35,11 @@ export async function GET(req: NextRequest) {
     )
   }
 
-  const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
   const oauthClientId =
-    process.env.SUPABASE_OAUTH_CLIENT_ID || process.env.NEXT_PUBLIC_SUPABASE_OAUTH_CLIENT_ID
+    process.env.SUPABASE_OAUTH_CLIENT_ID ||
+    process.env.NEXT_PUBLIC_SUPABASE_OAUTH_CLIENT_ID
 
-  if (!supabaseUrl || !oauthClientId) {
+  if (!oauthClientId) {
     return NextResponse.json(
       { error: 'Supabase OAuth not configured' },
       { status: 500 }
@@ -55,16 +56,17 @@ export async function GET(req: NextRequest) {
   )
   const state = base64UrlEncode(crypto.randomBytes(16))
 
-  const authorizeUrl = new URL('/auth/v1/oauth/authorize', supabaseUrl)
-  authorizeUrl.searchParams.set('response_type', 'code')
-  authorizeUrl.searchParams.set('client_id', oauthClientId)
-  authorizeUrl.searchParams.set('redirect_uri', redirectUrl)
-  authorizeUrl.searchParams.set('code_challenge', codeChallenge)
-  authorizeUrl.searchParams.set('code_challenge_method', 'S256')
-  authorizeUrl.searchParams.set('state', state)
-  authorizeUrl.searchParams.set('scope', 'openid email profile')
+  const scope = process.env.SUPABASE_OAUTH_SCOPES
 
-  const response = NextResponse.redirect(authorizeUrl.toString())
+  const authorizeUrl = getSupabaseOAuthAuthorizeUrl({
+    clientId: oauthClientId,
+    redirectUri: redirectUrl,
+    codeChallenge,
+    state,
+    scope,
+  })
+
+  const response = NextResponse.redirect(authorizeUrl)
 
   const isProd = process.env.NODE_ENV === 'production'
   const cookieOptions = {
