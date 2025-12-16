@@ -107,7 +107,7 @@ async function executeSupabaseSql(params: {
           Authorization: `Bearer ${params.accessToken}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ sql: params.sql }),
+        body: JSON.stringify({ query: params.sql }),
         signal: controller.signal,
       })
 
