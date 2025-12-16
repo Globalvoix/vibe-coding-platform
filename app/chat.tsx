@@ -22,6 +22,7 @@ import { Panel, PanelHeader } from '@/components/panels/panels'
 import { Settings } from '@/components/settings/settings'
 import { SupabaseOAuthButton } from '@/components/supabase-connect/supabase-oauth-button'
 import { ComingSoonModal } from '@/components/modals/coming-soon-modal'
+import { HistoryPanel } from '@/components/history-panel/history-panel'
 import { useChat } from '@ai-sdk/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSharedChatContext } from '@/lib/chat-context'
@@ -30,6 +31,7 @@ import { useSandboxStore } from './state'
 import { useAuth, useClerk } from '@clerk/nextjs'
 import type { ChatUIMessage } from '@/components/chat/types'
 import { useChatPersistence } from '@/lib/use-chat-persistence'
+import type { ProjectVersion } from '@/lib/projects-db'
 
 interface Props {
   className: string
