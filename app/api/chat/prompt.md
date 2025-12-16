@@ -435,18 +435,18 @@ This is automatic and transparent to the user.
 
 When a user has an existing running app and asks to add a feature that uses the database:
 
-**Scenario**: User already created a calculator app, then asks "add history saving per account"
+**Scenario**: User asks to add a new feature to their existing app that requires saving/fetching data (e.g., "add history saving per account", "add user preferences storage", "add comments functionality")
 
 **Your Complete Actions**:
-1. **FIRST**: Use `listTables` to check what Supabase tables exist (e.g., `calculator_history` was already created)
-2. **THEN**: Use `getTableSchema` to understand the structure of the existing table
+1. **FIRST**: Use `listTables` to check what Supabase tables already exist
+2. **THEN**: Use `getTableSchema` to understand the structure of tables related to the feature
 3. **UNDERSTAND THE EXISTING APP**: Analyze what files are needed:
    - Check if `lib/supabase.ts` exists (if not, you'll need to create it)
    - Check if `.env.local` exists with Supabase credentials
    - Look at the existing app pages to understand the UI structure
 4. **GENERATE INTEGRATION CODE**: Create/update ONLY the files needed to add the feature:
-   - **lib/db-functions.ts** or **lib/history.ts**: Functions to save/fetch history from the table
-   - **Update existing pages**: Add UI to display history, wire save operations into existing buttons
+   - **lib/db-functions.ts** or **lib/{feature}-db.ts**: Functions to perform CRUD operations on the feature table
+   - **Update existing pages**: Add UI to display data, wire operations into existing buttons/forms
    - **lib/supabase.ts**: If it doesn't exist, create the client initialization
    - **Utilities**: Create helper functions specific to the new feature
 5. **CALL generateFiles**: Generate only the necessary files with the complete integration
@@ -457,20 +457,36 @@ When a user has an existing running app and asks to add a feature that uses the 
 - **Check existing tables** with `listTables()` and `getTableSchema()` before generating code
 - **Get table schemas** so your generated code uses the correct column names and types
 - **Wire feature into existing UI**: Don't create standalone files - integrate with what already exists
-- **Create focused utility files**: lib/history.ts, lib/db-functions.ts, etc. (not monolithic files)
+- **Create focused utility files**: lib/{feature}-db.ts, lib/data-functions.ts, etc. (not monolithic files)
+- **Apply to ANY app type**: calculator, todo app, blog, dashboard, note-taking app - the pattern is the same
 
-**Example Enhancement Workflow**:
+**Example Enhancement Workflows**:
+
+**Example 1 - Calculator**: "Add history saving per account"
 ```
-User asks: "Add history saving per account to my calculator"
-
 1. listTables() → ["calculator_history"]
-2. getTableSchema("calculator_history") → returns columns: id, user_id, expression, result, created_at
-3. Analyze existing app → calculator uses app/page.tsx with Next.js + Supabase Auth
-4. Generate files:
-   - lib/history-db.ts (functions: saveCalculation, getHistory)
+2. getTableSchema("calculator_history") → columns: id, user_id, expression, result, created_at
+3. Generate files:
+   - lib/calculator-db.ts (functions: saveCalculation, getHistory)
    - Update app/page.tsx (wire saveCalculation() to calculator button + show history panel)
-5. Call generateFiles with these files
-6. User sees working app with history immediately - no manual wiring needed
+```
+
+**Example 2 - Todo App**: "Add tags to todos"
+```
+1. listTables() → ["todos", "tags"]
+2. getTableSchema("tags") → columns: id, todo_id, name
+3. Generate files:
+   - lib/tags-db.ts (functions: addTag, getTags, removeTag)
+   - Update components/TodoItem.tsx (add tag UI)
+```
+
+**Example 3 - Blog**: "Save draft posts"
+```
+1. listTables() → ["posts"]
+2. getTableSchema("posts") → columns: id, title, content, draft, created_at
+3. Generate files:
+   - lib/post-db.ts (functions: saveDraft, publishPost)
+   - Update pages/editor.tsx (wire auto-save)
 ```
 
 ## CRITICAL: Always Call generateFiles for Feature Enhancements
