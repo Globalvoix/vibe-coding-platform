@@ -153,3 +153,66 @@ export async function deleteProject(userId: string, id: string): Promise<void> {
   await ensureProjectsTable()
   await pool.query(`DELETE FROM projects WHERE user_id = $1 AND id = $2`, [userId, id])
 }
+
+export interface ProjectVersion {
+  id: string
+  project_id: string
+  user_id: string
+  name: string
+  sandbox_state: unknown | null
+  created_at: string
+}
+
+export async function createProjectVersion(
+  userId: string,
+  projectId: string,
+  name: string,
+  sandboxState: unknown
+): Promise<ProjectVersion> {
+  await ensureProjectsTable()
+  const id = crypto.randomUUID()
+  const result = await pool.query<ProjectVersion>(
+    `INSERT INTO project_versions (id, project_id, user_id, name, sandbox_state)
+     VALUES ($1, $2, $3, $4, $5)
+     RETURNING *`,
+    [id, projectId, userId, name, JSON.stringify(sandboxState)]
+  )
+  return result.rows[0]
+}
+
+export async function listProjectVersions(userId: string, projectId: string): Promise<ProjectVersion[]> {
+  await ensureProjectsTable()
+  const result = await pool.query<ProjectVersion>(
+    `SELECT id, project_id, user_id, name, sandbox_state, created_at FROM project_versions
+     WHERE user_id = $1 AND project_id = $2
+     ORDER BY created_at DESC`,
+    [userId, projectId]
+  )
+  return result.rows.map((row) => ({
+    ...row,
+    sandbox_state: row.sandbox_state ? JSON.parse(JSON.stringify(row.sandbox_state)) : null,
+  }))
+}
+
+export async function getProjectVersion(userId: string, versionId: string): Promise<ProjectVersion | null> {
+  await ensureProjectsTable()
+  const result = await pool.query<ProjectVersion>(
+    `SELECT id, project_id, user_id, name, sandbox_state, created_at FROM project_versions
+     WHERE user_id = $1 AND id = $2`,
+    [userId, versionId]
+  )
+  const row = result.rows[0]
+  if (!row) return null
+  return {
+    ...row,
+    sandbox_state: row.sandbox_state ? JSON.parse(JSON.stringify(row.sandbox_state)) : null,
+  }
+}
+
+export async function deleteProjectVersion(userId: string, versionId: string): Promise<void> {
+  await ensureProjectsTable()
+  await pool.query(
+    `DELETE FROM project_versions WHERE user_id = $1 AND id = $2`,
+    [userId, versionId]
+  )
+}
