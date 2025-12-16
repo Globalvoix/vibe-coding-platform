@@ -206,12 +206,16 @@ export function Chat({ className, initialPrompt, projectId }: Props) {
           </button>
           <div className="flex items-center gap-1">
             <button
-              onClick={() => handleComingSoon('History', 'Chat history is coming soon!')}
-              className="p-1 rounded transition-colors hover:bg-blue-600 group"
+              onClick={() => setShowHistoryPanel(!showHistoryPanel)}
+              className={`p-1 rounded transition-colors group ${
+                showHistoryPanel ? 'bg-blue-600' : 'hover:bg-blue-600'
+              }`}
               title="History"
               aria-label="History"
             >
-              <Clock className="w-3.5 h-3.5 text-muted-foreground group-hover:text-white" />
+              <Clock className={`w-3.5 h-3.5 ${
+                showHistoryPanel ? 'text-white' : 'text-muted-foreground group-hover:text-white'
+              }`} />
             </button>
             <button
               onClick={() => handleComingSoon('Sidebar', 'Additional sidebar features are coming soon!')}
