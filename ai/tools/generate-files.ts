@@ -14,6 +14,7 @@ interface Params {
   writer: UIMessageStreamWriter<UIMessage<never, DataPart>>
   userId?: string
   projectId?: string
+  envVars?: Record<string, string>
 }
 
 export const generateFiles = ({ writer, modelId, userId, projectId }: Params) =>
