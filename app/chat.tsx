@@ -62,6 +62,8 @@ export function Chat({ className, initialPrompt, projectId }: Props) {
     title: '',
     description: '',
   })
+  const [showHistoryPanel, setShowHistoryPanel] = useState(false)
+  const [selectedVersionId, setSelectedVersionId] = useState<string | null>(null)
 
   // Persist and restore chat messages across page refreshes
   const { allMessages } = useChatPersistence(projectId || null, messages)
