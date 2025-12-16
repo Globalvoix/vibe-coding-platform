@@ -115,10 +115,6 @@ export async function GET(req: NextRequest) {
   try {
     // Exchange authorization code for tokens
     const tokenResponse = await fetch(getSupabaseOAuthTokenUrl(), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
