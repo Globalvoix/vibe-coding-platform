@@ -24,23 +24,42 @@ async function fetchProjectAnonKey(projectRef: string, accessToken: string): Pro
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
         },
       }
     )
 
     if (!response.ok) {
-      console.warn(`Failed to fetch API keys for project ${projectRef}:`, response.status)
+      const errorText = await response.text()
+      console.warn(`Failed to fetch API keys for project ${projectRef}:`, {
+        status: response.status,
+        error: errorText,
+      })
       return null
     }
 
-    const data = (await response.json()) as {
-      anonKey?: string
-      api_keys?: Array<{ name: string; api_key: string }>
+    const data = (await response.json()) as Array<{ name: string; api_key: string }> | { api_keys?: Array<{ name: string; api_key: string }> }
+
+    // Handle both response formats
+    let apiKeys: Array<{ name: string; api_key: string }> = []
+    if (Array.isArray(data)) {
+      apiKeys = data
+    } else if ('api_keys' in data && Array.isArray(data.api_keys)) {
+      apiKeys = data.api_keys
     }
 
-    return data.anonKey || null
+    // Find the anon key
+    const anonKeyObj = apiKeys.find((key) => key.name === 'anon')
+    if (anonKeyObj?.api_key) {
+      return anonKeyObj.api_key
+    }
+
+    console.warn(`Anon key not found in API keys for project ${projectRef}`)
+    return null
   } catch (error) {
-    console.warn(`Error fetching anon key for project ${projectRef}:`, error)
+    console.error(`Error fetching anon key for project ${projectRef}:`, {
+      error: error instanceof Error ? error.message : String(error),
+    })
     return null
   }
 }
