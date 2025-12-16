@@ -1,5 +1,7 @@
 import crypto from 'crypto'
 
+import crypto from 'node:crypto'
+
 const ENCRYPTION_KEY = process.env.ENV_VAR_ENCRYPTION_KEY
 
 if (!ENCRYPTION_KEY) {
