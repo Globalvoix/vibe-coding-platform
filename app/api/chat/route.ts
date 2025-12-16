@@ -192,13 +192,21 @@ export async function POST(req: Request) {
             const supabaseUrl = `https://${supabaseProject.supabase_project_ref}.supabase.co`
             const supabaseAnonKey = supabaseProject.anon_key
 
+            // Log for debugging
+            if (!supabaseAnonKey) {
+              console.warn('Supabase project connected but anon_key is missing', {
+                projectId,
+                supabaseProjectRef: supabaseProject.supabase_project_ref,
+              })
+            }
+
             // Add to env vars for code generation
             if (supabaseUrl && supabaseAnonKey) {
               envVarsForTools['NEXT_PUBLIC_SUPABASE_URL'] = supabaseUrl
               envVarsForTools['NEXT_PUBLIC_SUPABASE_ANON_KEY'] = supabaseAnonKey
             }
 
-            supabaseContext = `\n\n## Supabase Backend Integration:\nThis project is connected to a Supabase PostgreSQL database at ${supabaseUrl}.\n\nAutomatically available environment variables:\n- NEXT_PUBLIC_SUPABASE_URL=${supabaseUrl}\n- NEXT_PUBLIC_SUPABASE_ANON_KEY=${supabaseAnonKey ? '(set)' : '(missing)'}\n\nYou have full access to:\n- Create and manage database tables\n- Create PostgreSQL functions and triggers\n- Enable real-time subscriptions\n- Manage RLS policies\n- Execute arbitrary queries\n\nWhen generating code, automatically include these env vars in .env.local and use them in the Supabase client initialization. The Supabase project is: ${supabaseProject.supabase_project_name} (Ref: ${supabaseProject.supabase_project_ref}).`
+            supabaseContext = `\n\n## Supabase Backend Integration:\nThis project is connected to a Supabase PostgreSQL database at ${supabaseUrl}.\n\nAutomatically available environment variables:\n- NEXT_PUBLIC_SUPABASE_URL=${supabaseUrl}\n- NEXT_PUBLIC_SUPABASE_ANON_KEY=${supabaseAnonKey ? '(set)' : '(missing - check connection settings)'}\n\nYou have full access to:\n- Create and manage database tables\n- Create PostgreSQL functions and triggers\n- Enable real-time subscriptions\n- Manage RLS policies\n- Execute arbitrary queries\n\nWhen generating code, automatically include these env vars in .env.local and use them in the Supabase client initialization. The Supabase project is: ${supabaseProject.supabase_project_name} (Ref: ${supabaseProject.supabase_project_ref}).`
 
             // Prepare Supabase connection info for AI tools
             if (supabaseProject.access_token) {
@@ -211,9 +219,18 @@ export async function POST(req: Request) {
                 supabaseUrl: supabaseUrl,
               }
             }
+          } else {
+            console.warn('Supabase connected flag is true but no project record found', {
+              projectId,
+              userId,
+            })
           }
         } catch (error) {
-          console.warn('Failed to fetch Supabase project:', error)
+          console.error('Failed to fetch Supabase project:', {
+            error: error instanceof Error ? error.message : String(error),
+            projectId,
+            userId,
+          })
         }
       }
     }
