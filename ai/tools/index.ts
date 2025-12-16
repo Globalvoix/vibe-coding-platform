@@ -34,10 +34,11 @@ export function tools({
   projectId,
   supabaseConnected,
   supabaseConnection,
+  envVars,
 }: Params) {
   return {
     createSandbox: createSandbox({ writer, userId, projectId }),
-    generateFiles: generateFiles({ writer, modelId, userId, projectId }),
+    generateFiles: generateFiles({ writer, modelId, userId, projectId, envVars }),
     getSandboxURL: getSandboxURL({ writer }),
     runCommand: runCommand({ writer, userId, projectId }),
     createRealtimeBackend: createRealtimeBackend({
