@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { saveSupabaseProject } from '@/lib/supabase-projects-db'
 import { getProject } from '@/lib/projects-db'
+import { createOrUpdateEnvVar } from '@/lib/env-vars-db'
 import { getSupabasePlatformBaseUrl } from '@/lib/supabase-platform'
 
 interface SelectRequest {
@@ -99,6 +100,35 @@ export async function POST(req: NextRequest) {
       anonKey: anonKey || undefined,
       expiresAt,
     })
+
+    try {
+      if (saved.supabase_project_ref) {
+        const supabaseUrl = `https://${saved.supabase_project_ref}.supabase.co`
+        await createOrUpdateEnvVar(
+          body.appProjectId,
+          userId,
+          'NEXT_PUBLIC_SUPABASE_URL',
+          supabaseUrl,
+          false
+        )
+      }
+
+      if (anonKey) {
+        await createOrUpdateEnvVar(
+          body.appProjectId,
+          userId,
+          'NEXT_PUBLIC_SUPABASE_ANON_KEY',
+          anonKey,
+          false
+        )
+      }
+    } catch (error) {
+      console.warn('Failed to sync Supabase env vars to project env vars', {
+        error: error instanceof Error ? error.message : String(error),
+        userId,
+        projectId: body.appProjectId,
+      })
+    }
 
     return NextResponse.json({
       success: true,
