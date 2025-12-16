@@ -12,6 +12,7 @@ export interface SupabaseConnectionInfo {
   projectName?: string
   organizationId?: string
   supabaseUrl?: string
+  anonKey?: string
 }
 
 interface Params {
