@@ -80,6 +80,7 @@ export async function saveSupabaseProject(params: {
   supabaseProjectName?: string | null
   accessToken: string
   refreshToken?: string | null
+  anonKey?: string | null
   expiresAt?: Date | null
 }): Promise<SupabaseProjectRecord> {
   await ensureSupabaseProjectsTable()
@@ -92,10 +93,10 @@ export async function saveSupabaseProject(params: {
     : null
 
   const result = await pool.query<SupabaseProjectRecord>(
-    `INSERT INTO supabase_projects 
-      (id, user_id, project_id, supabase_project_ref, supabase_org_id, 
-       supabase_project_name, access_token, refresh_token, expires_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+    `INSERT INTO supabase_projects
+      (id, user_id, project_id, supabase_project_ref, supabase_org_id,
+       supabase_project_name, access_token, refresh_token, anon_key, expires_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
      ON CONFLICT (user_id, project_id)
      DO UPDATE SET
        supabase_project_ref = EXCLUDED.supabase_project_ref,
@@ -103,6 +104,7 @@ export async function saveSupabaseProject(params: {
        supabase_project_name = EXCLUDED.supabase_project_name,
        access_token = EXCLUDED.access_token,
        refresh_token = COALESCE(EXCLUDED.refresh_token, supabase_projects.refresh_token),
+       anon_key = COALESCE(EXCLUDED.anon_key, supabase_projects.anon_key),
        expires_at = EXCLUDED.expires_at,
        updated_at = NOW()
      RETURNING *`,
@@ -115,6 +117,7 @@ export async function saveSupabaseProject(params: {
       params.supabaseProjectName ?? null,
       encryptedAccessToken,
       encryptedRefreshToken,
+      params.anonKey ?? null,
       params.expiresAt ? params.expiresAt.toISOString() : null,
     ]
   )
