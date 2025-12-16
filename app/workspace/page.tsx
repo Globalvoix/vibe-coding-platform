@@ -48,12 +48,13 @@ function WorkspaceContent({
 
     sandboxState.reset()
     fileExplorerState.reset()
+    setInitialPrompt('')
 
     return () => {
       useSandboxStore.getState().reset()
       useFileExplorerStore.getState().reset()
     }
-  }, [projectId])
+  }, [projectId, setInitialPrompt])
 
   useEffect(() => {
     let cancelled = false
