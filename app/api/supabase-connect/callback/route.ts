@@ -2,6 +2,7 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { cookies } from 'next/headers'
+import { getSupabaseOAuthTokenUrl } from '@/lib/supabase-platform'
 
 function getRequestOrigin(req: NextRequest) {
   const forwardedProto = req.headers.get('x-forwarded-proto')
@@ -53,12 +54,12 @@ export async function GET(req: NextRequest) {
     return response
   }
 
-  const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
   const oauthClientId =
-    process.env.SUPABASE_OAUTH_CLIENT_ID || process.env.NEXT_PUBLIC_SUPABASE_OAUTH_CLIENT_ID
+    process.env.SUPABASE_OAUTH_CLIENT_ID ||
+    process.env.NEXT_PUBLIC_SUPABASE_OAUTH_CLIENT_ID
   const oauthClientSecret = process.env.SUPABASE_OAUTH_CLIENT_SECRET
 
-  if (!supabaseUrl || !oauthClientId || !oauthClientSecret) {
+  if (!oauthClientId || !oauthClientSecret) {
     console.error('Supabase OAuth not configured')
     const response = NextResponse.redirect(`${origin}/workspace?projectId=${appProjectId}`)
     response.cookies.set('sb_cv', '', { maxAge: 0, path: '/' })
@@ -72,23 +73,20 @@ export async function GET(req: NextRequest) {
     `${origin}/api/supabase-connect/callback`
 
   try {
-    const tokenResponse = await fetch(
-      new URL('/auth/v1/oauth/token', supabaseUrl).toString(),
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-          grant_type: 'authorization_code',
-          code,
-          client_id: oauthClientId,
-          client_secret: oauthClientSecret,
-          redirect_uri: redirectUrl,
-          code_verifier: codeVerifier,
-        }),
-      }
-    )
+    const tokenResponse = await fetch(getSupabaseOAuthTokenUrl(), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        grant_type: 'authorization_code',
+        code,
+        client_id: oauthClientId,
+        client_secret: oauthClientSecret,
+        redirect_uri: redirectUrl,
+        code_verifier: codeVerifier,
+      }),
+    })
 
     if (!tokenResponse.ok) {
       const errorText = await tokenResponse.text()
