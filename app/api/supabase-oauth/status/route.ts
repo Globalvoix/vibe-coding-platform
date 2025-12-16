@@ -18,18 +18,14 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const supabaseUrl =
-      process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
     const oauthClientId =
       process.env.SUPABASE_OAUTH_CLIENT_ID ||
       process.env.NEXT_PUBLIC_SUPABASE_OAUTH_CLIENT_ID
     const oauthClientSecret = process.env.SUPABASE_OAUTH_CLIENT_SECRET
 
-    // Try to get connection and refresh token if needed
     const connection = await getSupabaseProjectWithRefresh(
       userId,
       projectId,
-      supabaseUrl,
       oauthClientId,
       oauthClientSecret
     )
