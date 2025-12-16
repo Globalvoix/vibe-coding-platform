@@ -6,6 +6,7 @@ import { getSandboxURL } from './get-sandbox-url'
 import { runCommand } from './run-command'
 import { createRealtimeBackend } from './create-realtime-backend'
 import { createDatabase } from './create-database'
+import { databaseOperations } from './database-operations'
 
 export interface SupabaseConnectionInfo {
   accessToken: string
@@ -45,6 +46,10 @@ export function tools({
       supabaseConnection,
     }),
     createDatabase: createDatabase({ writer, supabaseConnection }),
+    ...databaseOperations({
+      writer,
+      supabaseConnection,
+    }),
   }
 }
 
