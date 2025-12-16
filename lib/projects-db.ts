@@ -27,6 +27,17 @@ async function ensureProjectsTable() {
     CREATE INDEX IF NOT EXISTS projects_updated_at_idx ON projects(updated_at DESC);
     ALTER TABLE projects
       ADD COLUMN IF NOT EXISTS cloud_enabled BOOLEAN NOT NULL DEFAULT FALSE;
+
+    CREATE TABLE IF NOT EXISTS project_versions (
+      id TEXT PRIMARY KEY,
+      project_id TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+      user_id TEXT NOT NULL,
+      name TEXT NOT NULL,
+      sandbox_state JSONB,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+    CREATE INDEX IF NOT EXISTS project_versions_project_id_idx ON project_versions(project_id);
+    CREATE INDEX IF NOT EXISTS project_versions_created_at_idx ON project_versions(created_at DESC);
   `)
   initialized = true
 }
