@@ -58,7 +58,7 @@ export const generateFiles = ({ writer, modelId, userId, projectId }: Params) =>
       }
 
       const writeFiles = getWriteFiles({ sandbox, toolCallId, writer })
-      const iterator = getContents({ messages, modelId, paths })
+      const iterator = getContents({ messages, modelId, paths, envVars: params.envVars })
       const uploaded: File[] = []
 
       try {
