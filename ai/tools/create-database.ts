@@ -5,10 +5,13 @@ import type { DataPart } from '../messages/data-parts'
 import {
   createProjectDatabase,
   generateSupabaseClientCode,
+  type SupabaseConnectionParams,
 } from '@/lib/supabase-db'
+import type { SupabaseConnectionInfo } from './index'
 
 interface Params {
   writer: UIMessageStreamWriter<UIMessage<never, DataPart>>
+  supabaseConnection?: SupabaseConnectionInfo
 }
 
 const description = `Automatically create a Supabase database for the generated application.
