@@ -107,6 +107,13 @@ export async function POST(req: NextRequest) {
       body.accessToken
     )
 
+    console.log('Supabase project selection', {
+      userId,
+      projectRef: body.supabaseProjectRef,
+      projectName: body.supabaseProjectName,
+      hasAnonKey: !!anonKey,
+    })
+
     // Save the Supabase project connection
     const saved = await saveSupabaseProject({
       userId,
@@ -140,9 +147,14 @@ export async function POST(req: NextRequest) {
           anonKey,
           false
         )
+      } else {
+        console.warn('Anon key not available, skipping NEXT_PUBLIC_SUPABASE_ANON_KEY env var', {
+          userId,
+          projectId: body.appProjectId,
+        })
       }
     } catch (error) {
-      console.warn('Failed to sync Supabase env vars to project env vars', {
+      console.error('Failed to sync Supabase env vars to project env vars', {
         error: error instanceof Error ? error.message : String(error),
         userId,
         projectId: body.appProjectId,
@@ -155,6 +167,7 @@ export async function POST(req: NextRequest) {
         projectRef: saved.supabase_project_ref,
         projectName: saved.supabase_project_name,
         organizationId: saved.supabase_org_id,
+        anonKeyStatus: anonKey ? 'retrieved' : 'missing',
       },
     })
   } catch (error) {
