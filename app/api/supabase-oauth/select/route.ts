@@ -81,6 +81,12 @@ export async function POST(req: NextRequest) {
       ? new Date(Date.now() + body.expiresIn * 1000)
       : null
 
+    // Fetch the anon key for the project
+    const anonKey = await fetchProjectAnonKey(
+      body.supabaseProjectRef,
+      body.accessToken
+    )
+
     // Save the Supabase project connection
     const saved = await saveSupabaseProject({
       userId,
@@ -90,6 +96,7 @@ export async function POST(req: NextRequest) {
       supabaseOrgId: body.supabaseOrgId,
       accessToken: body.accessToken,
       refreshToken: body.refreshToken || null,
+      anonKey: anonKey || undefined,
       expiresAt,
     })
 
