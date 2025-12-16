@@ -1,402 +1,258 @@
 import type { UIMessageStreamWriter, UIMessage } from 'ai'
 import type { DataPart } from '../messages/data-parts'
 import type { SupabaseConnectionInfo } from './index'
+import { tool } from 'ai'
+import z from 'zod/v3'
 import { executeSupabaseSQL } from '@/ai/tools/supabase-helper'
 
-export function databaseOperations({
-  writer,
-  supabaseConnection,
-}: {
+interface Params {
   writer: UIMessageStreamWriter<UIMessage<never, DataPart>>
   supabaseConnection?: SupabaseConnectionInfo
-}) {
+}
+
+export function databaseOperations({ writer, supabaseConnection }: Params) {
   return {
-    executeQuery: async (params: {
-      query: string
-      description?: string
-    }): Promise<{
-      success: boolean
-      result?: unknown
-      error?: string
-      rowsAffected?: number
-    }> => {
-      if (!supabaseConnection) {
-        return {
-          success: false,
-          error: 'No Supabase database connected. Please connect a Supabase project first.',
-        }
-      }
-
-      try {
-        const description = params.description || 'Executing database query'
-        
-        writer.writeMessagePart({
-          type: 'tool-header',
-          toolName: 'executeQuery',
-          toolInput: {
-            query: params.query,
-            description,
-          },
-        })
-
-        // Execute the query
-        const result = await executeSupabaseSQL(supabaseConnection, params.query)
-
-        // Determine rows affected for mutation operations
-        let rowsAffected: number | undefined
-        if (Array.isArray(result) && result.length > 0) {
-          rowsAffected = result.length
+    executeQuery: tool({
+      description:
+        'Execute an arbitrary SQL query on the connected Supabase database. Use for SELECT, INSERT, UPDATE, DELETE, CREATE TABLE, and other SQL operations.',
+      inputSchema: z.object({
+        query: z
+          .string()
+          .describe('The SQL query to execute (e.g., SELECT * FROM users WHERE id = $1)'),
+        description: z
+          .string()
+          .optional()
+          .describe('Optional description of what this query does, for user feedback'),
+      }),
+      execute: async ({ query, description }, { toolCallId }) => {
+        if (!supabaseConnection) {
+          return 'Error: No Supabase database connected. Please connect a Supabase project first.'
         }
 
-        writer.writeMessagePart({
-          type: 'text',
-          text: `✓ Query executed successfully.\n${description}\n\nResult: ${JSON.stringify(result, null, 2)}`,
-        })
+        try {
+          const result = await executeSupabaseSQL(supabaseConnection, query)
 
-        return {
-          success: true,
-          result,
-          rowsAffected,
+          const resultText = Array.isArray(result)
+            ? `${result.length} rows returned`
+            : 'Query executed successfully'
+
+          return `✓ ${description || 'Query executed'}\n\n${resultText}\n\nResult:\n${JSON.stringify(result, null, 2)}`
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : String(error)
+          return `✗ Query failed: ${errorMessage}`
         }
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error)
-        
-        writer.writeMessagePart({
-          type: 'text',
-          text: `✗ Query failed: ${errorMessage}`,
-        })
+      },
+    }),
 
-        return {
-          success: false,
-          error: errorMessage,
+    createTable: tool({
+      description: 'Create a new table in the connected Supabase database with specified columns.',
+      inputSchema: z.object({
+        tableName: z.string().describe('Name of the table to create'),
+        columns: z
+          .array(
+            z.object({
+              name: z.string().describe('Column name'),
+              type: z
+                .enum([
+                  'text',
+                  'varchar',
+                  'integer',
+                  'bigint',
+                  'boolean',
+                  'timestamp',
+                  'timestamptz',
+                  'uuid',
+                  'json',
+                  'jsonb',
+                  'numeric',
+                  'real',
+                  'date',
+                  'time',
+                ])
+                .describe('Column data type (PostgreSQL type)'),
+              nullable: z.boolean().optional().default(true).describe('Allow NULL values'),
+              primaryKey: z.boolean().optional().default(false).describe('Mark as primary key'),
+              unique: z.boolean().optional().default(false).describe('Add unique constraint'),
+              default: z
+                .string()
+                .optional()
+                .describe('Default value (e.g., uuid_generate_v4(), now(), false)'),
+            })
+          )
+          .describe('Array of column definitions'),
+        description: z
+          .string()
+          .optional()
+          .describe('Optional description of what this table is for'),
+      }),
+      execute: async ({ tableName, columns, description }, { toolCallId }) => {
+        if (!supabaseConnection) {
+          return 'Error: No Supabase database connected.'
         }
-      }
-    },
 
-    createTable: async (params: {
-      tableName: string
-      columns: Array<{
-        name: string
-        type: string
-        nullable?: boolean
-        primaryKey?: boolean
-        unique?: boolean
-        default?: string
-      }>
-      description?: string
-    }): Promise<{
-      success: boolean
-      error?: string
-    }> => {
-      if (!supabaseConnection) {
-        return {
-          success: false,
-          error: 'No Supabase database connected.',
-        }
-      }
+        try {
+          const columnDefs = columns
+            .map((col) => {
+              let def = `"${col.name}" ${col.type}`
+              if (col.primaryKey) def += ' PRIMARY KEY'
+              if (col.unique) def += ' UNIQUE'
+              if (!col.nullable) def += ' NOT NULL'
+              if (col.default) def += ` DEFAULT ${col.default}`
+              return def
+            })
+            .join(',\n  ')
 
-      try {
-        const description = params.description || `Creating table "${params.tableName}"`
-        
-        writer.writeMessagePart({
-          type: 'tool-header',
-          toolName: 'createTable',
-          toolInput: {
-            tableName: params.tableName,
-            columns: params.columns,
-            description,
-          },
-        })
-
-        // Build column definitions
-        const columnDefs = params.columns
-          .map((col) => {
-            let def = `"${col.name}" ${col.type}`
-            if (col.primaryKey) def += ' PRIMARY KEY'
-            if (col.unique) def += ' UNIQUE'
-            if (!col.nullable) def += ' NOT NULL'
-            if (col.default) def += ` DEFAULT ${col.default}`
-            return def
-          })
-          .join(',\n  ')
-
-        const sql = `CREATE TABLE IF NOT EXISTS "${params.tableName}" (
+          const sql = `CREATE TABLE IF NOT EXISTS "${tableName}" (
   ${columnDefs}
 );`
 
-        await executeSupabaseSQL(supabaseConnection, sql)
+          await executeSupabaseSQL(supabaseConnection, sql)
 
-        // Enable RLS by default
-        const rlsSql = `ALTER TABLE "${params.tableName}" ENABLE ROW LEVEL SECURITY;`
-        await executeSupabaseSQL(supabaseConnection, rlsSql)
+          // Enable RLS by default
+          const rlsSql = `ALTER TABLE "${tableName}" ENABLE ROW LEVEL SECURITY;`
+          await executeSupabaseSQL(supabaseConnection, rlsSql)
 
-        writer.writeMessagePart({
-          type: 'text',
-          text: `✓ Table "${params.tableName}" created successfully with RLS enabled.`,
-        })
-
-        return { success: true }
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error)
-        
-        writer.writeMessagePart({
-          type: 'text',
-          text: `✗ Failed to create table: ${errorMessage}`,
-        })
-
-        return {
-          success: false,
-          error: errorMessage,
+          return `✓ Table "${tableName}" created successfully with RLS enabled.\n${description || ''}`
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : String(error)
+          return `✗ Failed to create table: ${errorMessage}`
         }
-      }
-    },
+      },
+    }),
 
-    getTableSchema: async (params: {
-      tableName: string
-    }): Promise<{
-      success: boolean
-      schema?: Record<string, unknown>
-      error?: string
-    }> => {
-      if (!supabaseConnection) {
-        return {
-          success: false,
-          error: 'No Supabase database connected.',
+    listTables: tool({
+      description: 'List all tables in the connected Supabase database.',
+      inputSchema: z.object({}),
+      execute: async ({}, { toolCallId }) => {
+        if (!supabaseConnection) {
+          return 'Error: No Supabase database connected.'
         }
-      }
 
-      try {
-        writer.writeMessagePart({
-          type: 'tool-header',
-          toolName: 'getTableSchema',
-          toolInput: { tableName: params.tableName },
-        })
+        try {
+          const sql = `SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY table_name;`
+          const result = (await executeSupabaseSQL(
+            supabaseConnection,
+            sql
+          )) as Array<{ table_name: string }>
 
-        const sql = `
-SELECT column_name, data_type, is_nullable, column_default
-FROM information_schema.columns
-WHERE table_name = '${params.tableName}'
-AND table_schema = 'public'
-ORDER BY ordinal_position;`
+          const tables = result.map((row) => row.table_name)
+          const tableList = tables.length > 0 ? tables.join(', ') : 'No tables found'
 
-        const result = (await executeSupabaseSQL(
-          supabaseConnection,
-          sql
-        )) as Array<{
-          column_name: string
-          data_type: string
-          is_nullable: string
-          column_default: string | null
-        }>
-
-        const schema = result.reduce(
-          (acc, row) => {
-            acc[row.column_name] = {
-              type: row.data_type,
-              nullable: row.is_nullable === 'YES',
-              default: row.column_default,
-            }
-            return acc
-          },
-          {} as Record<string, unknown>
-        )
-
-        writer.writeMessagePart({
-          type: 'text',
-          text: `✓ Table schema for "${params.tableName}":\n\n${JSON.stringify(schema, null, 2)}`,
-        })
-
-        return {
-          success: true,
-          schema,
+          return `✓ Database tables:\n${tableList}`
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : String(error)
+          return `✗ Failed to list tables: ${errorMessage}`
         }
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error)
+      },
+    }),
 
-        writer.writeMessagePart({
-          type: 'text',
-          text: `✗ Failed to get table schema: ${errorMessage}`,
-        })
-
-        return {
-          success: false,
-          error: errorMessage,
+    getTableSchema: tool({
+      description: 'Inspect the schema (columns and types) of an existing table.',
+      inputSchema: z.object({
+        tableName: z.string().describe('Name of the table to inspect'),
+      }),
+      execute: async ({ tableName }, { toolCallId }) => {
+        if (!supabaseConnection) {
+          return 'Error: No Supabase database connected.'
         }
-      }
-    },
 
-    listTables: async (): Promise<{
-      success: boolean
-      tables?: string[]
-      error?: string
-    }> => {
-      if (!supabaseConnection) {
-        return {
-          success: false,
-          error: 'No Supabase database connected.',
+        try {
+          const sql = `SELECT column_name, data_type, is_nullable, column_default FROM information_schema.columns WHERE table_name = '${tableName}' AND table_schema = 'public' ORDER BY ordinal_position;`
+
+          const result = (await executeSupabaseSQL(
+            supabaseConnection,
+            sql
+          )) as Array<{
+            column_name: string
+            data_type: string
+            is_nullable: string
+            column_default: string | null
+          }>
+
+          const schema = result.reduce(
+            (acc, row) => {
+              acc[row.column_name] = {
+                type: row.data_type,
+                nullable: row.is_nullable === 'YES',
+                default: row.column_default,
+              }
+              return acc
+            },
+            {} as Record<string, unknown>
+          )
+
+          return `✓ Table schema for "${tableName}":\n\n${JSON.stringify(schema, null, 2)}`
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : String(error)
+          return `✗ Failed to get table schema: ${errorMessage}`
         }
-      }
+      },
+    }),
 
-      try {
-        writer.writeMessagePart({
-          type: 'tool-header',
-          toolName: 'listTables',
-          toolInput: {},
-        })
-
-        const sql = `
-SELECT table_name
-FROM information_schema.tables
-WHERE table_schema = 'public'
-ORDER BY table_name;`
-
-        const result = (await executeSupabaseSQL(
-          supabaseConnection,
-          sql
-        )) as Array<{ table_name: string }>
-
-        const tables = result.map((row) => row.table_name)
-
-        writer.writeMessagePart({
-          type: 'text',
-          text: `✓ Database tables: ${tables.length > 0 ? tables.join(', ') : 'No tables found'}`,
-        })
-
-        return {
-          success: true,
-          tables,
+    insertData: tool({
+      description: 'Insert a row of data into a table.',
+      inputSchema: z.object({
+        tableName: z.string().describe('Name of the table to insert into'),
+        data: z
+          .record(z.any())
+          .describe('Object with column names as keys and values to insert'),
+        description: z
+          .string()
+          .optional()
+          .describe('Optional description of what is being inserted'),
+      }),
+      execute: async ({ tableName, data, description }, { toolCallId }) => {
+        if (!supabaseConnection) {
+          return 'Error: No Supabase database connected.'
         }
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error)
 
-        writer.writeMessagePart({
-          type: 'text',
-          text: `✗ Failed to list tables: ${errorMessage}`,
-        })
+        try {
+          const columns = Object.keys(data)
+          const values = Object.values(data)
+          const columnList = columns.map((col) => `"${col}"`).join(', ')
+          const valuePlaceholders = values
+            .map((val) => {
+              if (val === null) return 'NULL'
+              if (typeof val === 'string') return `'${val.replace(/'/g, "''")}'`
+              if (typeof val === 'boolean') return val ? 'true' : 'false'
+              if (typeof val === 'number') return String(val)
+              return `'${JSON.stringify(val)}'`
+            })
+            .join(', ')
 
-        return {
-          success: false,
-          error: errorMessage,
+          const sql = `INSERT INTO "${tableName}" (${columnList}) VALUES (${valuePlaceholders}) RETURNING *;`
+
+          const result = await executeSupabaseSQL(supabaseConnection, sql)
+
+          return `✓ ${description || 'Data inserted successfully'}\n\nInserted row:\n${JSON.stringify(result, null, 2)}`
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : String(error)
+          return `✗ Failed to insert data: ${errorMessage}`
         }
-      }
-    },
+      },
+    }),
 
-    insertData: async (params: {
-      tableName: string
-      data: Record<string, unknown>
-      description?: string
-    }): Promise<{
-      success: boolean
-      result?: unknown
-      error?: string
-    }> => {
-      if (!supabaseConnection) {
-        return {
-          success: false,
-          error: 'No Supabase database connected.',
+    updateData: tool({
+      description: 'Update rows in a table with a WHERE condition.',
+      inputSchema: z.object({
+        tableName: z.string().describe('Name of the table to update'),
+        data: z.record(z.any()).describe('Columns and new values to set'),
+        where: z
+          .record(z.any())
+          .optional()
+          .describe('WHERE conditions (e.g., { id: "uuid-value" })'),
+        description: z
+          .string()
+          .optional()
+          .describe('Optional description of what is being updated'),
+      }),
+      execute: async ({ tableName, data, where, description }, { toolCallId }) => {
+        if (!supabaseConnection) {
+          return 'Error: No Supabase database connected.'
         }
-      }
 
-      try {
-        const description = params.description || `Inserting data into "${params.tableName}"`
-        
-        writer.writeMessagePart({
-          type: 'tool-header',
-          toolName: 'insertData',
-          toolInput: {
-            tableName: params.tableName,
-            description,
-          },
-        })
-
-        const columns = Object.keys(params.data)
-        const values = Object.values(params.data)
-        const columnList = columns.map((col) => `"${col}"`).join(', ')
-        const valuePlaceholders = values
-          .map((val) => {
-            if (val === null) return 'NULL'
-            if (typeof val === 'string') return `'${val.replace(/'/g, "''")}'`
-            if (typeof val === 'boolean') return val ? 'true' : 'false'
-            if (typeof val === 'number') return String(val)
-            return `'${JSON.stringify(val)}'`
-          })
-          .join(', ')
-
-        const sql = `INSERT INTO "${params.tableName}" (${columnList})
-VALUES (${valuePlaceholders})
-RETURNING *;`
-
-        const result = await executeSupabaseSQL(supabaseConnection, sql)
-
-        writer.writeMessagePart({
-          type: 'text',
-          text: `✓ Data inserted successfully.\n${description}`,
-        })
-
-        return {
-          success: true,
-          result,
-        }
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error)
-
-        writer.writeMessagePart({
-          type: 'text',
-          text: `✗ Failed to insert data: ${errorMessage}`,
-        })
-
-        return {
-          success: false,
-          error: errorMessage,
-        }
-      }
-    },
-
-    updateData: async (params: {
-      tableName: string
-      data: Record<string, unknown>
-      where?: Record<string, unknown>
-      description?: string
-    }): Promise<{
-      success: boolean
-      result?: unknown
-      error?: string
-    }> => {
-      if (!supabaseConnection) {
-        return {
-          success: false,
-          error: 'No Supabase database connected.',
-        }
-      }
-
-      try {
-        const description = params.description || `Updating data in "${params.tableName}"`
-        
-        writer.writeMessagePart({
-          type: 'tool-header',
-          toolName: 'updateData',
-          toolInput: {
-            tableName: params.tableName,
-            description,
-          },
-        })
-
-        const updateClauses = Object.entries(params.data)
-          .map(([key, val]) => {
-            let value: string
-            if (val === null) value = 'NULL'
-            else if (typeof val === 'string') value = `'${val.replace(/'/g, "''")}'`
-            else if (typeof val === 'boolean') value = val ? 'true' : 'false'
-            else if (typeof val === 'number') value = String(val)
-            else value = `'${JSON.stringify(val)}'`
-
-            return `"${key}" = ${value}`
-          })
-          .join(', ')
-
-        let whereClause = ''
-        if (params.where && Object.keys(params.where).length > 0) {
-          whereClause = ' WHERE ' + Object.entries(params.where)
+        try {
+          const updateClauses = Object.entries(data)
             .map(([key, val]) => {
               let value: string
               if (val === null) value = 'NULL'
@@ -407,164 +263,119 @@ RETURNING *;`
 
               return `"${key}" = ${value}`
             })
-            .join(' AND ')
+            .join(', ')
+
+          let whereClause = ''
+          if (where && Object.keys(where).length > 0) {
+            whereClause =
+              ' WHERE ' +
+              Object.entries(where)
+                .map(([key, val]) => {
+                  let value: string
+                  if (val === null) value = 'NULL'
+                  else if (typeof val === 'string') value = `'${val.replace(/'/g, "''")}'`
+                  else if (typeof val === 'boolean') value = val ? 'true' : 'false'
+                  else if (typeof val === 'number') value = String(val)
+                  else value = `'${JSON.stringify(val)}'`
+
+                  return `"${key}" = ${value}`
+                })
+                .join(' AND ')
+          }
+
+          const sql = `UPDATE "${tableName}" SET ${updateClauses}${whereClause} RETURNING *;`
+
+          const result = await executeSupabaseSQL(supabaseConnection, sql)
+
+          return `✓ ${description || 'Data updated successfully'}\n\nUpdated rows:\n${JSON.stringify(result, null, 2)}`
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : String(error)
+          return `✗ Failed to update data: ${errorMessage}`
+        }
+      },
+    }),
+
+    deleteData: tool({
+      description: 'Delete rows from a table with a WHERE condition.',
+      inputSchema: z.object({
+        tableName: z.string().describe('Name of the table to delete from'),
+        where: z
+          .record(z.any())
+          .optional()
+          .describe('WHERE conditions (e.g., { id: "uuid-value" })'),
+        description: z
+          .string()
+          .optional()
+          .describe('Optional description of what is being deleted'),
+      }),
+      execute: async ({ tableName, where, description }, { toolCallId }) => {
+        if (!supabaseConnection) {
+          return 'Error: No Supabase database connected.'
         }
 
-        const sql = `UPDATE "${params.tableName}"
-SET ${updateClauses}${whereClause}
-RETURNING *;`
+        try {
+          let whereClause = ''
+          if (where && Object.keys(where).length > 0) {
+            whereClause =
+              ' WHERE ' +
+              Object.entries(where)
+                .map(([key, val]) => {
+                  let value: string
+                  if (val === null) value = 'NULL'
+                  else if (typeof val === 'string') value = `'${val.replace(/'/g, "''")}'`
+                  else if (typeof val === 'boolean') value = val ? 'true' : 'false'
+                  else if (typeof val === 'number') value = String(val)
+                  else value = `'${JSON.stringify(val)}'`
 
-        const result = await executeSupabaseSQL(supabaseConnection, sql)
+                  return `"${key}" = ${value}`
+                })
+                .join(' AND ')
+          }
 
-        writer.writeMessagePart({
-          type: 'text',
-          text: `✓ Data updated successfully.\n${description}`,
-        })
+          const sql = `DELETE FROM "${tableName}"${whereClause};`
 
-        return {
-          success: true,
-          result,
+          await executeSupabaseSQL(supabaseConnection, sql)
+
+          return `✓ ${description || 'Data deleted successfully'}`
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : String(error)
+          return `✗ Failed to delete data: ${errorMessage}`
         }
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error)
+      },
+    }),
 
-        writer.writeMessagePart({
-          type: 'text',
-          text: `✗ Failed to update data: ${errorMessage}`,
-        })
-
-        return {
-          success: false,
-          error: errorMessage,
-        }
-      }
-    },
-
-    deleteData: async (params: {
-      tableName: string
-      where?: Record<string, unknown>
-      description?: string
-    }): Promise<{
-      success: boolean
-      rowsDeleted?: number
-      error?: string
-    }> => {
-      if (!supabaseConnection) {
-        return {
-          success: false,
-          error: 'No Supabase database connected.',
-        }
-      }
-
-      try {
-        const description = params.description || `Deleting data from "${params.tableName}"`
-        
-        writer.writeMessagePart({
-          type: 'tool-header',
-          toolName: 'deleteData',
-          toolInput: {
-            tableName: params.tableName,
-            description,
-          },
-        })
-
-        let whereClause = ''
-        if (params.where && Object.keys(params.where).length > 0) {
-          whereClause = ' WHERE ' + Object.entries(params.where)
-            .map(([key, val]) => {
-              let value: string
-              if (val === null) value = 'NULL'
-              else if (typeof val === 'string') value = `'${val.replace(/'/g, "''")}'`
-              else if (typeof val === 'boolean') value = val ? 'true' : 'false'
-              else if (typeof val === 'number') value = String(val)
-              else value = `'${JSON.stringify(val)}'`
-
-              return `"${key}" = ${value}`
-            })
-            .join(' AND ')
+    runMigration: tool({
+      description: 'Execute one or more SQL statements as a database migration.',
+      inputSchema: z.object({
+        sql: z
+          .string()
+          .describe('SQL statements separated by semicolons (e.g., "ALTER TABLE ... ; CREATE INDEX ...")'),
+        description: z
+          .string()
+          .optional()
+          .describe('Optional description of the migration'),
+      }),
+      execute: async ({ sql, description }, { toolCallId }) => {
+        if (!supabaseConnection) {
+          return 'Error: No Supabase database connected.'
         }
 
-        const sql = `DELETE FROM "${params.tableName}"${whereClause};`
+        try {
+          const statements = sql
+            .split(';')
+            .map((s) => s.trim())
+            .filter((s) => s.length > 0)
 
-        await executeSupabaseSQL(supabaseConnection, sql)
+          for (const statement of statements) {
+            await executeSupabaseSQL(supabaseConnection, statement)
+          }
 
-        writer.writeMessagePart({
-          type: 'text',
-          text: `✓ Data deleted successfully.\n${description}`,
-        })
-
-        return {
-          success: true,
+          return `✓ ${description || 'Migration completed successfully'}\n\nExecuted ${statements.length} statement(s)`
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : String(error)
+          return `✗ Migration failed: ${errorMessage}`
         }
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error)
-
-        writer.writeMessagePart({
-          type: 'text',
-          text: `✗ Failed to delete data: ${errorMessage}`,
-        })
-
-        return {
-          success: false,
-          error: errorMessage,
-        }
-      }
-    },
-
-    runMigration: async (params: {
-      sql: string
-      description?: string
-    }): Promise<{
-      success: boolean
-      error?: string
-    }> => {
-      if (!supabaseConnection) {
-        return {
-          success: false,
-          error: 'No Supabase database connected.',
-        }
-      }
-
-      try {
-        const description = params.description || 'Running database migration'
-        
-        writer.writeMessagePart({
-          type: 'tool-header',
-          toolName: 'runMigration',
-          toolInput: {
-            description,
-          },
-        })
-
-        // Split by semicolons and execute each statement
-        const statements = params.sql
-          .split(';')
-          .map((s) => s.trim())
-          .filter((s) => s.length > 0)
-
-        for (const statement of statements) {
-          await executeSupabaseSQL(supabaseConnection, statement)
-        }
-
-        writer.writeMessagePart({
-          type: 'text',
-          text: `✓ Migration completed successfully.\n${description}`,
-        })
-
-        return { success: true }
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error)
-
-        writer.writeMessagePart({
-          type: 'text',
-          text: `✗ Migration failed: ${errorMessage}`,
-        })
-
-        return {
-          success: false,
-          error: errorMessage,
-        }
-      }
-    },
+      },
+    }),
   }
 }
