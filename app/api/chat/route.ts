@@ -167,12 +167,14 @@ export async function POST(req: Request) {
 
     // Get project env vars if projectId is provided
     let envVarsContext = ''
+    let envVarsForTools: Record<string, string> = {}
     let supabaseContext = ''
     let supabaseConnectionInfo: SupabaseConnectionInfo | undefined
 
     if (projectId) {
       try {
         const envVars = await getEnvVarsForChat(projectId)
+        envVarsForTools = envVars
         const envVarKeys = Object.keys(envVars)
         if (envVarKeys.length > 0) {
           envVarsContext = `\n\n## Available Environment Variables for this project:\n${envVarKeys.map((key) => `- ${key}`).join('\n')}\n\nYou have access to these environment variables. Use them when generating code. If you need additional environment variables, ask the user to add them in the Environment Variables tab.`
