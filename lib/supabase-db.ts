@@ -109,19 +109,35 @@ export function generateSupabaseClientCode(
   const projectRef = connection?.projectRef?.trim()
   const anonKey = connection?.anonKey?.trim()
 
+  const tableName = `${projectId}_app_data`
+
   if (projectRef && anonKey) {
     const supabaseUrl = `https://${projectRef}.supabase.co`
-    return `import { createClient } from '@supabase/supabase-js'
 
-// Initialize Supabase client with connected project
+    return `import { createClient, type SupabaseClient } from '@supabase/supabase-js'
+
 const supabaseUrl = '${supabaseUrl}'
 const supabaseKey = '${anonKey}'
-export const supabase = createClient(supabaseUrl, supabaseKey)
 
-// Example: Fetch data from your app table
+let _client: SupabaseClient | null = null
+
+function getSupabaseClient(): SupabaseClient {
+  if (_client) return _client
+  _client = createClient(supabaseUrl, supabaseKey)
+  return _client
+}
+
+export const supabase = new Proxy({} as SupabaseClient, {
+  get(_target, prop) {
+    const client = getSupabaseClient() as any
+    const value = client[prop]
+    return typeof value === 'function' ? value.bind(client) : value
+  },
+})
+
 export async function fetchAppData() {
-  const { data, error } = await supabase
-    .from('${projectId}_app_data')
+  const { data, error } = await getSupabaseClient()
+    .from('${tableName}')
     .select('*')
     .order('created_at', { ascending: false })
 
@@ -133,10 +149,9 @@ export async function fetchAppData() {
   return data || []
 }
 
-// Example: Insert data into your app table
-export async function insertAppData(data: Record<string, any>) {
-  const { data: result, error } = await supabase
-    .from('${projectId}_app_data')
+export async function insertAppData(data: Record<string, unknown>) {
+  const { data: result, error } = await getSupabaseClient()
+    .from('${tableName}')
     .insert([{ data }])
     .select()
 
@@ -148,27 +163,50 @@ export async function insertAppData(data: Record<string, any>) {
   return result?.[0] || null
 }
 
-// Example: Subscribe to real-time changes
-export function subscribeToAppData(callback: (data: any) => void) {
-  return supabase
-    .channel('${projectId}_app_data')
-    .on('postgres_changes', { event: '*', schema: 'public', table: '${projectId}_app_data' }, callback)
+export function subscribeToAppData(callback: (payload: unknown) => void) {
+  return getSupabaseClient()
+    .channel('${tableName}')
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: '${tableName}' },
+      (payload) => callback(payload)
+    )
     .subscribe()
 }
 `
   }
 
-  return `import { createClient } from '@supabase/supabase-js'
+  return `import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 
-// Initialize Supabase client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-export const supabase = createClient(supabaseUrl, supabaseKey)
+let _client: SupabaseClient | null = null
 
-// Example: Fetch data from your app table
+function getSupabaseClient(): SupabaseClient {
+  if (_client) return _client
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error(
+      'Supabase is not configured. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.'
+    )
+  }
+
+  _client = createClient(supabaseUrl, supabaseKey)
+  return _client
+}
+
+export const supabase = new Proxy({} as SupabaseClient, {
+  get(_target, prop) {
+    const client = getSupabaseClient() as any
+    const value = client[prop]
+    return typeof value === 'function' ? value.bind(client) : value
+  },
+})
+
 export async function fetchAppData() {
-  const { data, error } = await supabase
-    .from('${projectId}_app_data')
+  const { data, error } = await getSupabaseClient()
+    .from('${tableName}')
     .select('*')
     .order('created_at', { ascending: false })
 
@@ -180,10 +218,9 @@ export async function fetchAppData() {
   return data || []
 }
 
-// Example: Insert data into your app table
-export async function insertAppData(data: Record<string, any>) {
-  const { data: result, error } = await supabase
-    .from('${projectId}_app_data')
+export async function insertAppData(data: Record<string, unknown>) {
+  const { data: result, error } = await getSupabaseClient()
+    .from('${tableName}')
     .insert([{ data }])
     .select()
 
@@ -193,6 +230,17 @@ export async function insertAppData(data: Record<string, any>) {
   }
 
   return result?.[0] || null
+}
+
+export function subscribeToAppData(callback: (payload: unknown) => void) {
+  return getSupabaseClient()
+    .channel('${tableName}')
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: '${tableName}' },
+      (payload) => callback(payload)
+    )
+    .subscribe()
 }
 `
 }
@@ -209,8 +257,12 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=${anonKey}
 `
   }
 
-  return `# Supabase Configuration
-NEXT_PUBLIC_SUPABASE_URL=${process.env.NEXT_PUBLIC_SUPABASE_URL}
-NEXT_PUBLIC_SUPABASE_ANON_KEY=${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}
-`
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim()
+
+  const lines: string[] = ['# Supabase Configuration']
+  if (url) lines.push(`NEXT_PUBLIC_SUPABASE_URL=${url}`)
+  if (key) lines.push(`NEXT_PUBLIC_SUPABASE_ANON_KEY=${key}`)
+
+  return lines.join('\n') + '\n'
 }
