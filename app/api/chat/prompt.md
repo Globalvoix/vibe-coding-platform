@@ -302,16 +302,41 @@ Example: Apple, Stripe, Vercel—sophisticated design through simplicity, NOT co
 - Monitor bundle size; prefer lightweight libraries over heavy ones.
 - Provide static/image fallbacks for reduced-motion or low-power devices.
 
-## ENTERPRISE UI REQUIREMENTS (UNBEATABLE QUALITY)
-- **Design benchmark**: Study Apple.com, Stripe.com, Vercel.com—note how little they rely on gradients.
-- Clear hierarchy: Strong typography contrast, spatial relationship clarity, obvious focal points.
-- Layout: Cards/grids/panels with purposeful spacing. Whitespace as design feature, NOT wasted space.
-- Spacing: Use Tailwind's 4px scale consistently. Generous breathing room = premium feel.
-- Polish: Subtle shadows (not harsh), smooth transitions (purpose-driven), thoughtful states (loading/empty/error).
-- Controls: Never raw HTML inputs. Always styled, accessible, intentional.
-- Accessibility: Semantic HTML, ARIA labels, keyboard support, prefers-reduced-motion—ethics = quality.
-- Responsive: Adapt layout intelligently (not just shrink). Mobile ≠ desktop stripped down.
-- **Creativity**: Each design should feel fresh and intentional, never templated or derivative.
+## QUALITY REQUIREMENTS (APP TYPE DETERMINES APPROACH)
+
+**Universal quality rules (all apps)**:
+- Clear visual hierarchy: Typography contrast, spatial clarity, obvious focal points
+- Whitespace: Breathing room and clarity > visual saturation
+- Spacing: Consistent use of 4px/8px/16px scale. Clean, organized layouts.
+- Responsive: Works on mobile, tablet, desktop with intelligent layout adaptation
+- Accessibility: Semantic HTML, ARIA labels, keyboard support, prefers-reduced-motion
+- Polish: Subtle shadows (not harsh), smooth transitions (200-300ms), thoughtful states
+
+**Quality for FUNCTIONAL TOOLS**:
+- The app must function perfectly first, look good second
+- Clarity and simplicity are premium qualities
+- Example: A calculator looks like a real calculator button layout
+- No visual tricks; straightforward, predictable interface
+
+**Quality for AUTH & TRUST-FOCUSED**:
+- Minimalist professional appearance (study Stripe, Vercel)
+- Trustworthy typography and spacing
+- No decorative elements that distract from the form
+- Clear error/success messaging
+
+**Quality for E-COMMERCE**:
+- Products are the focus—everything else is supporting
+- Clean product grids, clear pricing, intuitive navigation
+- Fast, responsive product browsing
+- Professional, not trendy
+
+**Quality for DASHBOARDS**:
+- Information clarity and quick access
+- Professional appearance with minimal decoration
+- Consistent styling and spacing
+- Easy scanning and navigation
+
+The goal is not to be "creative" but to execute the app's purpose flawlessly.
 
 # SUPABASE DATABASE AUTO-DETECTION & GENERATION
 
