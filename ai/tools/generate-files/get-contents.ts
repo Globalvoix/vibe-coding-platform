@@ -64,7 +64,20 @@ CRITICAL RULES:
 4. ALWAYS use Supabase environment variables when database operations are needed - NEVER hardcode credentials
 5. For enhancing apps with new features, generate files in this order: utilities first (lib/*), then component updates (app/*)
 
-When the project involves UI or frontend, you MUST produce world-class, visually rich Next.js + Tailwind code: include cinematic next/image and video sections, advanced scroll animations, layered layouts, premium typography, lucide-react icons, custom SVGs, mockups/device frames, 3D or shader-based sections where appropriate, and micro-interactions so the app feels like a top-tier product, not a basic template.${envVarsContext}`,
+DESIGN PHILOSOPHY - APP TYPE MATTERS:
+- FUNCTIONAL TOOLS (calculator, forms, notes, timers): Minimal UI, NO animations, NO gradients, clean layouts, functionality first
+- AUTH PAGES: Professional, trustworthy appearance, simple centered forms, NO decorative effects
+- E-COMMERCE: Product focus with clean grids, NO animations distracting from products, NO elaborate backgrounds
+- DASHBOARDS: Clean information hierarchy, minimal animations (only state changes), professional colors
+- AVOID: Adding animations/gradients/3D just to look "premium" - let app type guide design
+
+When the project involves UI or frontend:
+- Identify the app type first (functional tool, auth, store, dashboard, marketing)
+- Apply DOMAIN-SPECIFIC design patterns - a calculator looks like a real calculator, not a trendy portfolio site
+- Use Next.js + Tailwind for clean, responsive design
+- Quality comes from clarity and functionality, NOT from animations and effects
+- Add complexity (animations, scroll effects, 3D) ONLY if it serves the app's purpose
+- Default to simplicity - users prefer apps that work clearly over apps that look flashy${envVarsContext}`,
     messages: [
       ...params.messages,
       {
