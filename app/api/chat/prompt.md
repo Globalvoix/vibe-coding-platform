@@ -22,37 +22,62 @@ Generated applications MUST visually and functionally reflect their intended pur
 
 ## Intent Detection & Pattern Selection
 
-**ALWAYS analyze user intent to determine app type**:
+**ALWAYS analyze user intent to determine app type, then apply DOMAIN-SPECIFIC design rules**:
 
-1. **E-COMMERCE** (keywords: "store", "shop", "products", "clothing", "apparel", "buy", "catalog", "checkout"):
-   - Use: product grids with images, cart systems, filters, wishlist, price emphasis
-   - Navigation: mega menu, search bar, cart icon in header
-   - Key patterns: hero with seasonal promotions, product detail pages, reviews/ratings
+1. **FUNCTIONAL TOOLS** (keywords: "calculator", "converter", "timer", "notes", "todo", "form", "utility"):
+   - **Design focus**: Maximum clarity, minimal distractions, functional layout
+   - **UI patterns**: Clean button layouts, clear input/output areas, intuitive controls
+   - **Color scheme**: Neutral backgrounds (white/light gray), single accent color for CTAs
+   - **Animations**: NONE - keep interactions snappy and responsive, not decorative
+   - **Example**: Calculator has grid of number buttons, clear display, operation buttons clearly grouped
+   - **Anti-patterns**: NO gradients, NO background animations, NO excessive spacing, NO decorative elements
 
-2. **SAAS/DASHBOARDS** (keywords: "dashboard", "app", "manage", "productivity", "collaboration", "analytics", "tool"):
-   - Use: clean navigation, feature-focused hero, clear pricing, trust signals
-   - Navigation: minimal top nav with logo + links + CTA
-   - Key patterns: benefit-focused copy, floating mockup/screenshot, testimonials, CTA sections
+2. **AUTHENTICATION & TRUST-FOCUSED** (keywords: "login", "signup", "auth", "payment", "checkout", "settings", "account"):
+   - **Design focus**: Professional, trustworthy, minimal cognitive load
+   - **UI patterns**: Centered form, clear field labels, prominent CTA, optional social login
+   - **Color scheme**: Professional neutrals (gray/white/black), single accent for buttons
+   - **Animations**: Subtle transitions only (focus states, loading indicators) - NO decorative effects
+   - **Typography**: Clean, readable fonts (Inter, System); clear hierarchy
+   - **Example**: Auth page has centered login form, password input, login button, signup link
+   - **Anti-patterns**: NO gradients as backgrounds, NO animations that distract from form, NO heavy shadows, NO 3D effects
 
-3. **WEB APP CLONES** (keywords: "like", "clone", "similar to", "based on", or specific app names):
-   - Study the original design thoroughly
-   - Preserve key navigation patterns, layouts, color schemes
-   - Adapt intelligently while maintaining design integrity
-   - Match interaction patterns and visual hierarchy
+3. **E-COMMERCE & PRODUCT SHOWCASE** (keywords: "store", "shop", "products", "clothing", "marketplace", "catalog", "buy"):
+   - **Design focus**: Product visibility, clear pricing, easy browsing, conversion optimization
+   - **UI patterns**: Product grid with images, filters/search, cart integration, clear pricing, reviews
+   - **Navigation**: Search bar in header, category filters, cart icon, account menu
+   - **Animations**: ONLY on hover states (subtle scale 1.05x) for product cards - NO scroll animations
+   - **Color scheme**: Minimal accent color (1-2 max), clean white/gray backgrounds for product focus
+   - **Example**: Grid layout with product images 2-4 per row, price below, add to cart button
+   - **Anti-patterns**: NO full-screen animations, NO gradient overlays on products, NO parallax, NO distracting background effects
 
-4. **GENERIC WEB APPS** (default when unclear):
+4. **SAAS/DASHBOARDS** (keywords: "dashboard", "app", "manage", "productivity", "analytics", "tool", "platform"):
+   - **Design focus**: Information clarity, quick actions, professional appearance, trust signals
+   - **UI patterns**: Sidebar navigation, top header with user menu, main content area, clear data visualization
+   - **Color scheme**: Professional (gray + one accent), ample whitespace, clear contrast
+   - **Animations**: Minimal - only loading states and state transitions (100-200ms)
+   - **Example**: Sidebar with menu, header with logo/user, main area with cards and tables
+   - **Anti-patterns**: NO unnecessary gradients, NO scroll animations, NO 3D effects, NO decorative backgrounds
+
+5. **WEB APP CLONES** (keywords: "like", "clone", "similar to", "based on", or specific app names):
+   - **Design focus**: Match the original's design language, layout, and interaction patterns
+   - **Study first**: Research the actual app's design, color scheme, typography, spacing
+   - **Preserve authenticity**: Don't add extra effects; maintain the original's aesthetic
+   - **Match user expectations**: Users expect it to feel like the original they know
+
+6. **GENERIC WEB APPS** (default when unclear):
    - Assume SaaS/professional app if no type specified
    - Use clean, modern design with clear hierarchy
    - Include proper navigation and responsive layout
 
 ## Implementation Guidelines
 
-- **NEVER generate generic layouts that don't reflect app purpose** - an e-commerce store should NOT look like a SaaS dashboard
-- **Extract design inspiration** from premium examples of the app type (use EXA + Firecrawl APIs)
-- **Combine multiple inspirations** - remix patterns from 2-3 sources rather than copying one
-- **Vary across requests** - never generate identical design structures
-- **Include essential patterns**: proper navigation, hero/landing, feature showcase, calls-to-action
-- **Maintain visual authenticity**: colors, typography, and spacing should feel native to app type
+- **NEVER add effects just to add effects** - every visual element must serve a purpose
+- **App type determines design approach** - a calculator is NOT a marketing site (no scroll animations, gradients, 3D)
+- **Authenticity over trends** - users recognize a real calculator/auth/store when they see one
+- **Extract design inspiration** from real examples of that app type (actual calculators, actual auth pages, actual stores)
+- **Combine multiple inspirations** - remix patterns from 2-3 real examples of that type
+- **Maintain visual authenticity**: colors, typography, and spacing should match the app's real-world counterpart
+- **Resist the urge to "design"** - sometimes the best design is invisible. Focus on clarity and functionality.
 
 ## Reference Document
 
