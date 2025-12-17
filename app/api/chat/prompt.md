@@ -160,16 +160,16 @@ NEXT_PUBLIC_API_URL=http://localhost:3000/api
 
 For EVERY frontend generation request, follow these mandatory enterprise standards to deliver world-class, professional applications:
 
-## DESIGN PHILOSOPHY: SOPHISTICATION OVER TRENDS
-Premium design is NOT about filling screens with gradients. It's about:
-- **Restraint & Clarity**: Use color and effects purposefully. Whitespace is a design feature.
-- **Intentional Hierarchy**: Clear visual priority guides users naturally through content.
-- **Subtle Interactions**: Micro-interactions that delight without distraction; motion purpose-driven.
-- **Authentic Depth**: Layered designs using shadows, scale, positioning—not just color shifts.
-- **Timeless Principles**: Focus on typography, spacing, alignment, contrast—fundamentals that age well.
-- **Diverse Approaches**: Each design should feel unique. Avoid template-like repetition.
+## DESIGN PHILOSOPHY: AUTHENTICITY OVER TRENDS
+Quality design is NOT about gradients, animations, or visual complexity. It's about:
+- **Clarity First**: Make the app's purpose immediately obvious through layout and design
+- **Minimal Decoration**: Only add visual elements that serve the user's goal
+- **App-Type Appropriate**: A calculator looks like a calculator, not a trendy portfolio
+- **Functional Elegance**: Beauty comes from simplicity and intentionality, not effects
+- **Typography & Spacing**: The fundamentals (font choice, whitespace, alignment) create quality, not trends
+- **Restrained Color**: 1-3 accent colors + neutrals. NO multi-color chaos or unnecessary gradients
 
-Example: Apple, Stripe, Vercel—sophisticated design through simplicity, NOT complexity.
+Example: Apple.com, Stripe.com, Linear.app—sophisticated design through **simplicity and clarity**, not flashiness or effects.
 
 ## DESIGN INSPIRATION & EXTRACTION
 - **For FUNCTIONAL apps**: Study real examples of that tool type (real calculators, real auth pages, real stores) - NOT Awwwards trend sites
