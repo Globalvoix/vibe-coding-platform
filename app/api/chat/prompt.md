@@ -243,35 +243,42 @@ Example: Apple, Stripe, Vercel—sophisticated design through simplicity, NOT co
 - Use aspect ratio containers and object-cover for consistent layouts.
 - Include photographer/creator attribution in code comments.
 
-## PREMIUM UI COMPONENTS & LIBRARIES
-- **MagicUI** (magicui.design): Copy-paste animated components like gradient buttons, animated cards, particle effects.
-- **ShadCN** (shadcn/ui & shadcn-svelte): High-quality, unstyled component library for accessibility and customization.
-- **ReactBits** (reactbits.dev): Curated collection of beautiful React components and patterns.
-- **21ST.DEV**: Modern, minimalist component designs with code examples.
-- **Unicorn Studio** (unicorn.studio): Interactive animation-first components and interactions.
-- Strategy: Extract components from these libraries, remix their styles, and integrate into user's design.
+## UI COMPONENT SELECTION (CONDITIONAL ON APP TYPE)
 
-## ANIMATED ICONS & ICON STRATEGIES
-- **System icons**: Use lucide-react for consistent, lightweight SVG icons.
-- **Animated icons**: Source from **LottieLab.com** for Lottie animations; integrate via **lottie-react**.
-- **Custom SVG icons**: Design unique SVG icons with gradients, shadows, and subtle animations.
-- **3D icons**: Use @react-three/fiber for rotating, morphing, or interactive 3D icon variations.
-- Example: Animated checkmark on form submit, rotating gear on loading, morphing hamburger menu.
+**For FUNCTIONAL APPS (calculator, forms, utilities, auth)**:
+- Use **ShadCN** (shadcn/ui) for clean, unstyled, accessible components
+- Use **lucide-react** for simple system icons
+- NO animated components, NO gradients, NO MagicUI animated effects
+- Focus: input fields, buttons, alerts, simple form components
+
+**For E-COMMERCE & PRODUCT SHOWCASES**:
+- Use **ShadCN** for buttons, forms, navigation
+- Use **lucide-react** for icons
+- Product image display with proper aspect ratios and lazy loading
+- Clean, non-distracting component styling
+
+**For DASHBOARDS & COMPLEX APPS**:
+- Use **ShadCN** for consistent component library
+- Can use **lucide-react** for status icons, simple animations OK for data visualization
+- Card-based layouts with proper spacing
+- Simple transitions for state changes (not elaborate animations)
+
+**For MARKETING/LANDING PAGES** (only if applicable):
+- Can use **MagicUI** sparingly for animated CTAs (buttons, badges)
+- Use **lucide-react** for navigation/feature icons
+- Static icons preferred; animated icons only if they serve UX purpose
+- NO particle effects, NO excessive gradients
+
+## ICON STRATEGY
+- Default: **lucide-react** for all system icons (consistent, lightweight)
+- Animated icons: ONLY for marketing sites, and only if purposeful (success checkmark, loading spinner)
+- Custom SVG: Simple, flat designs in app color—no gradients, no complexity
+- 3D icons: Never for functional apps; only for premium product showcases
 
 ## MOCKUPS & PRODUCT SHOWCASES
-- Browser mockups: Display generated websites inside realistic browser frames with shadows/reflections.
-- Device mockups: Show responsive designs on iPhone, iPad, MacBook screens with proper aspect ratios.
-- Use libraries like **react-device-mockups** or create custom Tailwind-based mockup frames.
-- Add subtle shadows, perspective transforms, and reflections for realism.
-- Example: Hero section shows product mockup with code window + live preview side-by-side.
-
-## MICRO-INTERACTIONS & POLISH
-- Entrance animations: fade-in, slide-up, scale-up on page load with staggered delays.
-- Button ripple/wave effects on click.
-- Form field highlights and validation feedback animations.
-- Toast/notification animations from edges with smooth easing.
-- Page transitions: fade, slide, or custom effects between routes.
-- Cursor effects: custom cursor on hover, parallax cursor trails.
+- Use mockups ONLY for marketing/demo purposes, not in functional apps
+- Keep mockups subtle with minimal shadows/effects
+- Example: Product showcase in e-commerce could have device mockup for preview, not required
 
 ## TYPOGRAPHY & COLOR COMPOSITION (FOUNDATION OF EXCELLENCE)
 - **Typography is your primary design tool**. Use Inter, Poppins, or system fonts; excellent typefaces matter more than trends.
