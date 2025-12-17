@@ -172,44 +172,63 @@ Example: Apple, Stripe, Vercel—sophisticated design through simplicity, NOT co
 - REMIX & ADAPT: Combine insights from 3+ sources, create original visual language.
 - NEVER copy designs verbatim; inject user intent, brand personality, unique variations.
 
-## SCROLL ANIMATIONS & INTERACTIONS (MANDATORY for interactive sections)
-- Integrate **Lenis** (lenis.darkroom.engineering) for smooth, physics-based scroll behavior.
-- Implement scroll-triggered animations: elements fade-in, slide, scale, or rotate as user scrolls past them.
-- Use framer-motion's `useScroll`, `useTransform`, and `useMotionValueEvent` for parallax, reveal, and blur effects.
-- Example: Hero sections with parallax backgrounds, cards that slide-in on scroll, text that reveals progressively.
-- Install: `pnpm add lenis framer-motion` and import Lenis at app root layout.
+## ANIMATIONS & MICRO-INTERACTIONS (CONDITIONAL ON APP TYPE)
 
-## ANIMATIONS & MICRO-INTERACTIONS (PURPOSEFUL, NOT GRATUITOUS)
-- Hover states: Subtle scale (1.02x), shadow elevation, or border highlight—not every element needs effect.
+**For FUNCTIONAL apps (calculator, form, utility, auth)**:
+- Minimize animations - focus on responsiveness and clarity
+- Only use: focus states (border highlight), loading spinners (simple CSS), success/error states
+- NO scroll animations, NO decorative effects, NO 3D, NO gradients as backgrounds
+- Transitions: 100-150ms for form interactions (snappy feedback)
+
+**For MARKETING/SAAS sites** (if the app is a landing page or feature showcase):
+- Use subtle scroll-triggered reveals: fade-in, slide-up (not parallax or complex animations)
+- Hover states: subtle scale (1.02x) or shadow elevation on cards
+- Can use Lenis for smooth scroll (optional, not mandatory)
+- Keep animations understated - they should enhance, not distract
+
+**General Animation Rules**:
+- **Principle**: Every animation must serve a purpose (feedback, guidance, or delight). Avoid motion for motion's sake.
+- Hover states: Subtle scale (1.02x), shadow elevation, or border highlight—not on every element.
 - Press states: Tactile feedback (compress 0.98x) only on interactive elements.
 - Focus states: Clear outline or highlight for accessibility; avoid decorative glows.
-- Transitions: 200-300ms easing (ease-out) for snappy UX; slower (400-600ms) for important reveals.
-- Loading states: Elegant skeleton screens, minimal spinners, or progress indicators—no distracting animations.
-- **Principle**: Every animation should serve a purpose (feedback, guidance, delight). Avoid motion for motion's sake.
-- Use **framer-motion** sparingly with proper fallbacks and prefers-reduced-motion support.
+- Transitions: 200-300ms easing (ease-out); longer (400-600ms) only for important reveals.
+- Loading states: Simple spinners or skeleton screens—no elaborate animations.
+- Respect `prefers-reduced-motion` - always provide non-animated alternatives.
 
-## 3D ASSETS & ANIMATIONS (OPTIONAL but encouraged for premium feel)
-- Use **@react-three/fiber** + **three.js** for 3D models, interactive scenes, and advanced graphics.
-- Examples: rotating 3D product displays, animated 3D icons, interactive particle effects, shader-based backgrounds.
-- Import 3D assets from trusted sources (Sketchfab, TurboSquid, or hand-crafted with Blender).
-- ALWAYS use dynamic imports and provide fallback images for low-power devices: `const Model = dynamic(() => import('./3DModel'), { ssr: false })`.
-- Respect `prefers-reduced-motion` and provide static image alternatives.
-
-## SHADERS & ADVANCED VISUAL EFFECTS (RARE, HIGH-IMPACT)
-- Use canvas-based effects **only when they enhance user experience**, NOT as decoration.
-- Strong use cases: Hero sections for creative agencies, immersive product showcases, interactive data visualization.
-- Subtle effects: gentle noise overlays, soft light bleeding, understated parallax—NOT animated rainbow gradients.
-- Avoid: Oversaturated color shifts, distracting mesh animations, effects that fight content readability.
-- When used: Optimize heavily (reduce quality on low-power devices, provide static fallbacks).
-- Library suggestion: `three-stdlib` only when essential for core experience.
+## 3D ASSETS & ADVANCED EFFECTS (ONLY FOR PREMIUM PRODUCT SHOWCASES)
+- **When to use**: E-commerce luxury products, creative agency hero, interactive data visualization
+- **Never use**: Functional tools, auth pages, dashboards, calculators, forms
+- If used: @react-three/fiber + three.js with dynamic imports and static fallbacks
+- Always optimize for low-power devices and provide image alternatives
 
 ## BACKGROUNDS & VISUAL DEPTH (RESTRAINED, PURPOSEFUL)
-- Hero sections: High-quality photography (Unsplash) as primary, subtle overlays if needed (avoid heavy filters).
-- Gradients: Use 2-color subtle gradients sparingly (not on every section). Example: soft to dark at 5% opacity over image.
-- Video backgrounds: Only for hero/key sections; optimize MP4 codec, muted autoplay, performance on mobile.
-- Depth techniques: Layering via shadows, scale, positioning, and z-index—more sophisticated than color alone.
-- Whitespace: Leverage negative space as background design. Premium = breathing room, NOT visual saturation.
-- Color restraint: 2-3 accent colors max + grayscale neutrals. Avoid multi-color gradient chaos.
+
+**For FUNCTIONAL & AUTH apps**:
+- Plain white or neutral gray background (no images, no gradients, no patterns)
+- Depth through layout and shadows, NOT visual effects
+- Ultra-minimal visual noise
+
+**For E-COMMERCE**:
+- Product images are the focus - plain, clean backgrounds behind products
+- NO gradients overlaying products
+- NO decorative background patterns
+- White/light backgrounds to make products pop
+
+**For SAAS/DASHBOARDS**:
+- Neutral backgrounds (white, light gray)
+- Subtle 1% opacity background pattern if needed (not distracting)
+- Use depth via cards, shadows, and spacing—not colors
+
+**For MARKETING SITES** (only if applicable):
+- High-quality photography (Unsplash) for hero, properly attributed
+- 2-color subtle gradients ONLY if they enhance readability (5% opacity max over image)
+- NO animated gradients, NO color shifts, NO busy backgrounds
+
+**General rules**:
+- Whitespace is premium design—breathing room > visual saturation
+- Color restraint: 2-3 accent colors + grayscale neutrals
+- Avoid multi-color gradient chaos
+- NO gradient backgrounds on buttons/inputs unless absolutely necessary
 
 ## IMAGE & VIDEO INTEGRATION
 - Use **next/image** for all static images with automatic optimization, responsive srcSets, and lazy loading.
