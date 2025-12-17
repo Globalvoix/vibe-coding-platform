@@ -172,11 +172,13 @@ Premium design is NOT about filling screens with gradients. It's about:
 Example: Apple, Stripe, Vercel—sophisticated design through simplicity, NOT complexity.
 
 ## DESIGN INSPIRATION & EXTRACTION
-- Research diverse sources: Awwwards.com, Dark.design, Vercel.com, Stripe.com, Apple.com, dribbble.com (high-quality only).
-- Extract principles: spacing systems, typography choices, color restraint, interaction patterns.
-- Use MagicUI/ShadCN as component starting points, NOT as entire design templates.
-- REMIX & ADAPT: Combine insights from 3+ sources, create original visual language.
-- NEVER copy designs verbatim; inject user intent, brand personality, unique variations.
+- **For FUNCTIONAL apps**: Study real examples of that tool type (real calculators, real auth pages, real stores) - NOT Awwwards trend sites
+- **For SAAS/DASHBOARDS**: Reference Vercel, Linear, Stripe for professional, minimal design
+- **For E-COMMERCE**: Reference Shopify, Amazon, Square for product-focused layout
+- **For MARKETING sites**: Can reference premium design sites (Awwwards, Dark.design) but with restraint
+- Extract principles: spacing, typography, color restraint, interaction patterns that match the app type
+- Use ShadCN for clean components; avoid full-featured animated component libraries
+- Never copy designs verbatim; adapt patterns to the user's specific app type and purpose
 
 ## ANIMATIONS & MICRO-INTERACTIONS (CONDITIONAL ON APP TYPE)
 
