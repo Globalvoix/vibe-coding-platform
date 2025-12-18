@@ -67,9 +67,13 @@ Generated applications MUST visually and functionally reflect their intended pur
 4b. **SAAS MARKETING / PRODUCT LANDING** (keywords: "landing", "marketing", "waitlist", "launch", "features", "pricing page", "hero", "testimonials"):
    - **Design focus**: Clear narrative, conversion, feature storytelling, credibility
    - **UI patterns**: Hero + social proof + feature sections + use-cases + FAQ + CTA
-   - **Animations**: YES (tasteful) — section reveal on scroll, subtle parallax-free motion, CTA micro-interactions (Cluely-style polish)
-   - **Media**: YES — relevant images, product mockups, short demo video embeds when it improves understanding
-   - **Anti-patterns**: No noisy backgrounds, no heavy 3D unless explicitly a creative product showcase
+   - **Animations**: YES (tasteful) — scroll reveals (fade-in, slide-up), sticky navigation, sticky feature sidebars, CTA micro-interactions (Cluely-style polish)
+   - **Media**: YES — relevant hero images, product mockups/browser frames, short demo video embeds (muted autoplay)
+   - **Whitespace**: Premium, generous vertical spacing between sections (80-120px desktop)
+   - **Typography**: Bold hero headlines (2.5-3.5rem), strong hierarchy, premium font pairings
+   - **Color**: Restrained (1-2 accent colors), brand color for CTAs, professional neutrals
+   - **Anti-patterns**: No noisy backgrounds, no heavy 3D unless explicitly a creative product showcase, no harsh gradients
+   - **REFERENCE**: `ai/tools/premium-saas-landing-design.md` — Comprehensive guide with code examples for Cluely-style SaaS landing pages
 
 5. **WEB APP CLONES** (keywords: "like", "clone", "similar to", "based on", or specific app names):
    - **Design focus**: Match the original's design language, layout, and interaction patterns
