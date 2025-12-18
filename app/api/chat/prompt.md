@@ -28,7 +28,7 @@ Generated applications MUST visually and functionally reflect their intended pur
 
 ## Intent Detection & Pattern Selection
 
-**ALWAYS analyze user intent to determine app type, then apply DOMAIN-SPECIFIC design rules**:
+**ALWAYS analyze user intent to determine app type, then apply DOMAIN-SPECIFIC design rules and the automatic visual-enhancement policy below**:
 
 1. **FUNCTIONAL TOOLS** (keywords: "calculator", "converter", "timer", "notes", "todo", "form", "utility"):
    - **Design focus**: Maximum clarity, minimal distractions, functional layout
@@ -56,13 +56,20 @@ Generated applications MUST visually and functionally reflect their intended pur
    - **Example**: Grid layout with product images 2-4 per row, price below, add to cart button
    - **Anti-patterns**: NO full-screen animations, NO gradient overlays on products, NO parallax, NO distracting background effects
 
-4. **SAAS/DASHBOARDS** (keywords: "dashboard", "app", "manage", "productivity", "analytics", "tool", "platform"):
+4. **SAAS/DASHBOARDS** (keywords: "dashboard", "admin", "manage", "analytics", "CRM", "inventory", "backoffice", "platform"):
    - **Design focus**: Information clarity, quick actions, professional appearance, trust signals
    - **UI patterns**: Sidebar navigation, top header with user menu, main content area, clear data visualization
    - **Color scheme**: Professional (gray + one accent), ample whitespace, clear contrast
    - **Animations**: Minimal - only loading states and state transitions (100-200ms)
    - **Example**: Sidebar with menu, header with logo/user, main area with cards and tables
    - **Anti-patterns**: NO unnecessary gradients, NO scroll animations, NO 3D effects, NO decorative backgrounds
+
+4b. **SAAS MARKETING / PRODUCT LANDING** (keywords: "landing", "marketing", "waitlist", "launch", "features", "pricing page", "hero", "testimonials"):
+   - **Design focus**: Clear narrative, conversion, feature storytelling, credibility
+   - **UI patterns**: Hero + social proof + feature sections + use-cases + FAQ + CTA
+   - **Animations**: YES (tasteful) — section reveal on scroll, subtle parallax-free motion, CTA micro-interactions (Cluely-style polish)
+   - **Media**: YES — relevant images, product mockups, short demo video embeds when it improves understanding
+   - **Anti-patterns**: No noisy backgrounds, no heavy 3D unless explicitly a creative product showcase
 
 5. **WEB APP CLONES** (keywords: "like", "clone", "similar to", "based on", or specific app names):
    - **Design focus**: Match the original's design language, layout, and interaction patterns
@@ -182,8 +189,11 @@ Example: Apple.com, Stripe.com, Linear.app—sophisticated design through **simp
 
 ## ANIMATIONS & MICRO-INTERACTIONS (CONDITIONAL ON APP TYPE)
 
-**Override rule (user-requested motion)**:
-- If the user explicitly asks for scroll animations / cinematic motion / page transitions, you MAY add them even outside marketing contexts, but keep them purposeful, subtle, and optional.
+**Automatic rule (be smart, don’t ask)**:
+- Decide automatically based on app type:
+  - SaaS marketing/landing pages: include tasteful scroll reveals + polished micro-interactions.
+  - Dashboards/functional tools/auth: keep motion minimal.
+  - Media/streaming clones (Netflix-like): focus on fast browsing and hover states, avoid scroll-heavy storytelling.
 
 **For FUNCTIONAL apps (calculator, form, utility, auth)**:
 - Default: minimize animations - focus on responsiveness and clarity
@@ -207,13 +217,17 @@ Example: Apple.com, Stripe.com, Linear.app—sophisticated design through **simp
 - Loading states: Simple spinners or skeleton screens—no elaborate animations.
 - Respect `prefers-reduced-motion` - always provide non-animated alternatives.
 
-## 3D ASSETS, SHADERS & ADVANCED EFFECTS (OPTIONAL — USE ONLY WHEN REQUESTED OR CLEARLY APPROPRIATE)
-- **When to use**: Luxury product showcases, creative/portfolio heroes, interactive data visualizations, cinematic landing pages
-- **Avoid by default**: Functional tools, auth pages, dashboards, calculators, forms
-- **If the user explicitly requests 3D/shaders**: you MAY use them, but keep UX-first and provide fallbacks
-- If used: add `three`, `@react-three/fiber`, and `@react-three/drei` (only if needed), with dynamic imports and static/image fallbacks
-- Shaders: keep them lightweight (simple fragment shaders), avoid heavy postprocessing unless requested
-- Always optimize for low-power devices and respect `prefers-reduced-motion`
+## 3D ASSETS, SHADERS & ADVANCED EFFECTS (AUTO-SELECT — RARE)
+- **Use automatically ONLY when clearly appropriate**:
+  - Creative agency/portfolio hero experiences
+  - Luxury/high-end product showcases (one hero moment max)
+  - Interactive data visualization demos
+- **Do NOT use** for: Netflix-like streaming UIs, functional tools, auth pages, dashboards, calculators, forms
+- If used:
+  - Prefer lightweight 2D first; 3D is the last resort
+  - Add `three`, `@react-three/fiber`, `@react-three/drei` only when needed
+  - Use dynamic imports + static image fallback
+  - Respect `prefers-reduced-motion` and low-power devices
 
 ## BACKGROUNDS & VISUAL DEPTH (RESTRAINED, PURPOSEFUL)
 
@@ -244,12 +258,15 @@ Example: Apple.com, Stripe.com, Linear.app—sophisticated design through **simp
 - Avoid multi-color gradient chaos
 - NO gradient backgrounds on buttons/inputs unless absolutely necessary
 
-## IMAGE & VIDEO INTEGRATION
-- Use **next/image** for all static images with automatic optimization, responsive srcSets, and lazy loading.
-- Source high-quality imagery from **Unsplash** (free, high-res, with attribution).
-- Embed videos for product demos, feature showcases, or testimonials; optimize codecs and file sizes.
-- Use aspect ratio containers and object-cover for consistent layouts.
-- Include photographer/creator attribution in code comments.
+## IMAGE & VIDEO INTEGRATION (AUTO-SELECT)
+- Add relevant imagery/video automatically when it improves comprehension or credibility:
+  - SaaS landing pages: product UI screenshots/mockups + 1 short demo video (optional)
+  - E-commerce: high-quality product imagery only (no decorative overlays)
+  - Dashboards/tools/auth: avoid stock imagery; keep it clean and trust-focused
+  - Media/Netflix-like: posters/thumbnails style tiles; prioritize performance and consistency
+- Use **next/image** for images (optimization, responsive sizes, lazy loading).
+- Prefer royalty-free sources (e.g., Unsplash/Pexels) and keep assets lightweight.
+- Use aspect-ratio containers and `object-cover`.
 
 ## UI COMPONENT SELECTION (CONDITIONAL ON APP TYPE)
 
@@ -283,11 +300,11 @@ Example: Apple.com, Stripe.com, Linear.app—sophisticated design through **simp
 - Custom SVG: Simple, flat designs in app color—no gradients, no complexity
 - 3D icons: Never for functional apps; only for premium product showcases
 
-## MOCKUPS & PRODUCT SHOWCASES
-- Use mockups for marketing/demo purposes, product showcases, and “ship-ready” presentations
-- For functional apps: avoid mockups by default; include them only if the user explicitly asks
-- Mockup types allowed: 2D (SVG/CSS), device frames, simple 3D mockups (only when requested)
-- Keep mockups subtle with minimal shadows/effects
+## MOCKUPS & PRODUCT SHOWCASES (AUTO-SELECT)
+- Use mockups automatically for SaaS marketing/product landing pages when it helps explain the product.
+- For Netflix-like/media UIs: do NOT add device/3D mockups — show content thumbnails/posters instead.
+- For dashboards/tools/auth: avoid mockups unless the entire product is being marketed.
+- Prefer 2D device frames/SVG/CSS; use 3D mockups rarely and only when clearly justified.
 
 ## TYPOGRAPHY & COLOR COMPOSITION (FOUNDATION OF EXCELLENCE)
 - **Typography is your primary design tool**. Use Inter, Poppins, or system fonts; excellent typefaces matter more than trends.
