@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth, useClerk } from '@clerk/nextjs'
 import { useUIStore } from '@/lib/ui-store'
+import { CREDITS_UPDATED_EVENT } from '@/lib/credits-events'
 import { cn } from '@/lib/utils'
 import { X, Home, LayoutGrid, Users } from 'lucide-react'
 
@@ -94,8 +95,11 @@ export function AppSidebar() {
 
     loadSubscriptionAndCredits()
 
+    window.addEventListener(CREDITS_UPDATED_EVENT, loadSubscriptionAndCredits)
+
     return () => {
       cancelled = true
+      window.removeEventListener(CREDITS_UPDATED_EVENT, loadSubscriptionAndCredits)
     }
   }, [isSignedIn])
 

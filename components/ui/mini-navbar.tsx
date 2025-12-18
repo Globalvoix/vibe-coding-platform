@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useUIStore } from '@/lib/ui-store';
+import { CREDITS_UPDATED_EVENT } from '@/lib/credits-events';
 import { Menu } from 'lucide-react';
 import { useAuth } from '@clerk/nextjs';
 import { SignInButton, SignUpButton, UserButton } from '@clerk/nextjs';
@@ -102,8 +103,11 @@ export function Navbar() {
 
     loadSubscriptionAndCredits();
 
+    window.addEventListener(CREDITS_UPDATED_EVENT, loadSubscriptionAndCredits);
+
     return () => {
       cancelled = true;
+      window.removeEventListener(CREDITS_UPDATED_EVENT, loadSubscriptionAndCredits);
     };
   }, [isSignedIn]);
 

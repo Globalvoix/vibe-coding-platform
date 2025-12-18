@@ -30,6 +30,7 @@ import { useSettings } from '@/components/settings/use-settings'
 import { useSandboxStore } from './state'
 import { useAuth, useClerk } from '@clerk/nextjs'
 import type { ChatUIMessage } from '@/components/chat/types'
+import { emitCreditsUpdated } from '@/lib/credits-events'
 import { useChatPersistence } from '@/lib/use-chat-persistence'
 import type { ProjectVersion } from '@/lib/projects-db'
 
@@ -141,9 +142,20 @@ export function Chat({ className, initialPrompt, projectId }: Props) {
     [isSignedIn, openSignIn, sendMessage, modelId, setInput, reasoningEffort, projectId, supabaseConnected]
   )
 
+  const previousChatStatusRef = useRef(status)
+
   useEffect(() => {
     setChatStatus(status)
   }, [status, setChatStatus])
+
+  useEffect(() => {
+    const previousStatus = previousChatStatusRef.current
+    previousChatStatusRef.current = status
+
+    if (previousStatus !== 'ready' && status === 'ready') {
+      emitCreditsUpdated()
+    }
+  }, [status])
 
   useEffect(() => {
     if (status === 'ready') {
