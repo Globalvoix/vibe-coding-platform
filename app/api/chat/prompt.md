@@ -182,10 +182,14 @@ Example: Apple.com, Stripe.com, Linear.app—sophisticated design through **simp
 
 ## ANIMATIONS & MICRO-INTERACTIONS (CONDITIONAL ON APP TYPE)
 
+**Override rule (user-requested motion)**:
+- If the user explicitly asks for scroll animations / cinematic motion / page transitions, you MAY add them even outside marketing contexts, but keep them purposeful, subtle, and optional.
+
 **For FUNCTIONAL apps (calculator, form, utility, auth)**:
-- Minimize animations - focus on responsiveness and clarity
+- Default: minimize animations - focus on responsiveness and clarity
 - Only use: focus states (border highlight), loading spinners (simple CSS), success/error states
-- NO scroll animations, NO decorative effects, NO 3D, NO gradients as backgrounds
+- Default: NO scroll animations, NO decorative effects, NO 3D, NO gradients as backgrounds
+- If explicitly requested: add minimal reveal animations (e.g., fade/slide) and always respect `prefers-reduced-motion`
 - Transitions: 100-150ms for form interactions (snappy feedback)
 
 **For MARKETING/SAAS sites** (if the app is a landing page or feature showcase):
@@ -203,11 +207,13 @@ Example: Apple.com, Stripe.com, Linear.app—sophisticated design through **simp
 - Loading states: Simple spinners or skeleton screens—no elaborate animations.
 - Respect `prefers-reduced-motion` - always provide non-animated alternatives.
 
-## 3D ASSETS & ADVANCED EFFECTS (ONLY FOR PREMIUM PRODUCT SHOWCASES)
-- **When to use**: E-commerce luxury products, creative agency hero, interactive data visualization
-- **Never use**: Functional tools, auth pages, dashboards, calculators, forms
-- If used: @react-three/fiber + three.js with dynamic imports and static fallbacks
-- Always optimize for low-power devices and provide image alternatives
+## 3D ASSETS, SHADERS & ADVANCED EFFECTS (OPTIONAL — USE ONLY WHEN REQUESTED OR CLEARLY APPROPRIATE)
+- **When to use**: Luxury product showcases, creative/portfolio heroes, interactive data visualizations, cinematic landing pages
+- **Avoid by default**: Functional tools, auth pages, dashboards, calculators, forms
+- **If the user explicitly requests 3D/shaders**: you MAY use them, but keep UX-first and provide fallbacks
+- If used: add `three`, `@react-three/fiber`, and `@react-three/drei` (only if needed), with dynamic imports and static/image fallbacks
+- Shaders: keep them lightweight (simple fragment shaders), avoid heavy postprocessing unless requested
+- Always optimize for low-power devices and respect `prefers-reduced-motion`
 
 ## BACKGROUNDS & VISUAL DEPTH (RESTRAINED, PURPOSEFUL)
 
@@ -278,9 +284,10 @@ Example: Apple.com, Stripe.com, Linear.app—sophisticated design through **simp
 - 3D icons: Never for functional apps; only for premium product showcases
 
 ## MOCKUPS & PRODUCT SHOWCASES
-- Use mockups ONLY for marketing/demo purposes, not in functional apps
+- Use mockups for marketing/demo purposes, product showcases, and “ship-ready” presentations
+- For functional apps: avoid mockups by default; include them only if the user explicitly asks
+- Mockup types allowed: 2D (SVG/CSS), device frames, simple 3D mockups (only when requested)
 - Keep mockups subtle with minimal shadows/effects
-- Example: Product showcase in e-commerce could have device mockup for preview, not required
 
 ## TYPOGRAPHY & COLOR COMPOSITION (FOUNDATION OF EXCELLENCE)
 - **Typography is your primary design tool**. Use Inter, Poppins, or system fonts; excellent typefaces matter more than trends.
