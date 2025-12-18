@@ -201,9 +201,9 @@ Example: Apple.com, Stripe.com, Linear.app—sophisticated design through **simp
 
 **Automatic rule (be smart, don’t ask)**:
 - Decide automatically based on app type:
-  - SaaS marketing/landing pages: include tasteful scroll reveals + polished micro-interactions.
-  - Dashboards/functional tools/auth: keep motion minimal.
-  - Media/streaming clones (Netflix-like): focus on fast browsing and hover states, avoid scroll-heavy storytelling.
+  - **SaaS marketing/landing pages**: Scroll reveals (fade-in 300-400ms, slide-up), sticky navigation, sticky feature sidebars, button hover (1.02x scale), accordion animations (300ms). Reference `ai/tools/premium-saas-landing-design.md`.
+  - **Dashboards/functional tools/auth**: Keep motion minimal—only focus states, loading spinners, state transitions (100-200ms).
+  - **Media/streaming clones (Netflix-like)**: Fast browsing, hover states (scale, shadow), avoid scroll-heavy storytelling.
 
 **For FUNCTIONAL apps (calculator, form, utility, auth)**:
 - Default: minimize animations - focus on responsiveness and clarity
