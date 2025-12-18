@@ -157,10 +157,17 @@ export async function POST(req: Request) {
     }
 
     const credits = await getUserCredits(userId)
+    const CREDITS_PER_PROMPT = 10
 
-    if (credits.balance <= 0) {
+    if (credits.balance < CREDITS_PER_PROMPT) {
       return NextResponse.json(
-        { error: 'You have no AI credits remaining. Please upgrade your plan.' },
+        {
+          error: 'Insufficient credits. This prompt requires 10 credits. Please upgrade your plan or wait for your monthly credits to refresh.',
+          code: 'INSUFFICIENT_CREDITS',
+          currentBalance: credits.balance,
+          requiredCredits: CREDITS_PER_PROMPT,
+          planId: credits.planId,
+        },
         { status: 402 }
       )
     }
