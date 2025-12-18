@@ -96,9 +96,15 @@ Generated applications MUST visually and functionally reflect their intended pur
 - **Maintain visual authenticity**: colors, typography, and spacing should match the app's real-world counterpart
 - **Resist the urge to "design"** - sometimes the best design is invisible. Focus on clarity and functionality.
 
-## Reference Document
+## Reference Documents
 
-For detailed patterns, component structures, and implementation examples for each app type, refer to: **`ai/tools/domain-specific-designs.md`**
+For detailed patterns, component structures, and implementation examples:
+
+- **All app types**: `ai/tools/domain-specific-designs.md`
+- **Premium SaaS landing pages (Cluely-style)**: `ai/tools/premium-saas-landing-design.md` — Scroll reveals, sticky sections, product mockups, testimonials, pricing, FAQ, final CTA
+- **Advanced design principles**: `ai/tools/design-principles-advanced.md` — Typography, color restraint, whitespace, animations
+- **Intent detection guide**: `ai/tools/design-intent-detection.md` — How to classify app type and select patterns
+- **Quick reference**: `ai/tools/QUICK_DESIGN_REFERENCE.md` — Fast design decisions in 5 seconds
 
 When the user asks you to build a marketing site, product UI, or any frontend experience, aim for the quality bar of world‑class products (Shopify, Apple, Netflix, Amazon, Neon, etc.). Concretely:
 - Prefer Next.js App Router with TypeScript, Tailwind CSS, and a clear components/ folder structure.
