@@ -27,6 +27,14 @@ interface BodyData {
   supabaseConnected?: boolean
 }
 
+function calculatePromptCost(text: string): number {
+  const words = text.trim().split(/\s+/).filter((word) => word.length > 0).length
+
+  if (words > 50) return 15
+  if (words > 20) return 12
+  return 10
+}
+
 function extractEnvVarsFromText(text: string) {
   const found: Array<{ key: string; value: string }> = []
 
