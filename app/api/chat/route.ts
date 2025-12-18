@@ -321,6 +321,7 @@ export async function POST(req: Request) {
                   userId,
                   modelId,
                   usage,
+                  creditsRequired: requiredCredits,
                   metadata: { source: 'chat' },
                 })
               } catch (error) {
