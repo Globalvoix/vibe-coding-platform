@@ -164,16 +164,31 @@ export async function POST(req: Request) {
       )
     }
 
-    const credits = await getUserCredits(userId)
-    const CREDITS_PER_PROMPT = 10
+    // Extract user's latest message text to calculate cost
+    let userPromptText = ''
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const message = messages[i]
+      if (message.role === 'user') {
+        for (const part of message.parts ?? []) {
+          if (part.type === 'text') {
+            userPromptText = String(part.text ?? '')
+            break
+          }
+        }
+        if (userPromptText) break
+      }
+    }
 
-    if (credits.balance < CREDITS_PER_PROMPT) {
+    const requiredCredits = calculatePromptCost(userPromptText)
+    const credits = await getUserCredits(userId)
+
+    if (credits.balance < requiredCredits) {
       return NextResponse.json(
         {
-          error: 'Insufficient credits. This prompt requires 10 credits. Please upgrade your plan or wait for your monthly credits to refresh.',
+          error: `Insufficient credits. This prompt requires ${requiredCredits} credits. Please upgrade your plan or wait for your monthly credits to refresh.`,
           code: 'INSUFFICIENT_CREDITS',
           currentBalance: credits.balance,
-          requiredCredits: CREDITS_PER_PROMPT,
+          requiredCredits,
           planId: credits.planId,
         },
         { status: 402 }
