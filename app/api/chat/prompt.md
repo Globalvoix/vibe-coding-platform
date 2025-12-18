@@ -213,10 +213,14 @@ Example: Apple.com, Stripe.com, Linear.app—sophisticated design through **simp
 - Transitions: 100-150ms for form interactions (snappy feedback)
 
 **For MARKETING/SAAS sites** (if the app is a landing page or feature showcase):
-- Use subtle scroll-triggered reveals: fade-in, slide-up (not parallax or complex animations)
-- Hover states: subtle scale (1.02x) or shadow elevation on cards
+- Use scroll-triggered reveals: fade-in (300-400ms), slide-up from bottom (300-400ms), staggered timing (100-150ms between items)
+- Sticky navigation: remains visible on scroll, minimal styling
+- Sticky sidebars: For feature sections, sidebar highlights current feature while content scrolls
+- Hover states: scale 1.02x or shadow elevation on cards, accordion buttons
+- Accordion animations: 300ms smooth expand/collapse on FAQ
 - Can use Lenis for smooth scroll (optional, not mandatory)
 - Keep animations understated - they should enhance, not distract
+- Always respect `prefers-reduced-motion` for accessibility
 
 **General Animation Rules**:
 - **Principle**: Every animation must serve a purpose (feedback, guidance, or delight). Avoid motion for motion's sake.
