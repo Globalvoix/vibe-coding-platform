@@ -315,11 +315,8 @@ export async function recordUsageAndDeductCredits(params: {
 }): Promise<{ deducted: number; remaining: number; costUsd: number } | null> {
   const { userId, modelId, usage, reference, metadata } = params
 
-  const { costUsd, credits } = estimateCostAndCredits(modelId, usage)
-
-  if (credits <= 0) {
-    return null
-  }
+  const CREDITS_PER_PROMPT = 10
+  const creditsToDeduct = CREDITS_PER_PROMPT
 
   await hydrateUserCreditsRow(userId)
 
@@ -339,7 +336,7 @@ export async function recordUsageAndDeductCredits(params: {
 
     const current = currentResult.rows[0]
     const available = current.balance
-    const deducted = Math.min(available, credits)
+    const deducted = Math.min(available, creditsToDeduct)
     const newBalance = available - deducted
 
     await client.query(
@@ -349,6 +346,8 @@ export async function recordUsageAndDeductCredits(params: {
        WHERE user_id = $2`,
       [newBalance, userId]
     )
+
+    const { costUsd } = estimateCostAndCredits(modelId, usage)
 
     await client.query(
       `INSERT INTO credit_transactions (user_id, change, reason, reference, metadata, balance_after)
@@ -362,7 +361,7 @@ export async function recordUsageAndDeductCredits(params: {
           ...(metadata || {}),
           modelId,
           usage: usage ?? null,
-          estimatedCredits: credits,
+          creditsPerPrompt: CREDITS_PER_PROMPT,
           estimatedCostUsd: costUsd,
         },
         newBalance,
