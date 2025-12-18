@@ -361,7 +361,7 @@ export async function recordUsageAndDeductCredits(params: {
           ...(metadata || {}),
           modelId,
           usage: usage ?? null,
-          creditsPerPrompt: CREDITS_PER_PROMPT,
+          creditsDeducted: creditsToDeduct,
           estimatedCostUsd: costUsd,
         },
         newBalance,
