@@ -183,11 +183,6 @@ export default function PricingPage() {
                           <span className="mt-[3px] h-1.5 w-1.5 rounded-full bg-blue-600" />
                           <span className="flex items-center gap-2">
                             {feature}
-                            {isDatabase && (
-                              <span className="ml-auto inline-block px-1.5 py-0.5 text-[10px] font-medium bg-blue-100 text-blue-800 rounded">
-                                Coming Soon
-                              </span>
-                            )}
                           </span>
                         </li>
                       )
