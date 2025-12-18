@@ -312,11 +312,11 @@ export async function recordUsageAndDeductCredits(params: {
   usage?: UsageSnapshot
   reference?: string
   metadata?: Record<string, unknown>
+  creditsRequired?: number
 }): Promise<{ deducted: number; remaining: number; costUsd: number } | null> {
-  const { userId, modelId, usage, reference, metadata } = params
+  const { userId, modelId, usage, reference, metadata, creditsRequired } = params
 
-  const CREDITS_PER_PROMPT = 10
-  const creditsToDeduct = CREDITS_PER_PROMPT
+  const creditsToDeduct = creditsRequired ?? 10
 
   await hydrateUserCreditsRow(userId)
 
