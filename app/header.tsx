@@ -1,6 +1,6 @@
 "use client"
 
-import { VercelDashed } from '@/components/icons/vercel-dashed'
+import { ThinksoftLogo } from '@/components/icons/thinksoft'
 import { Menu } from 'lucide-react'
 import { useUIStore } from '@/lib/ui-store'
 import { cn } from '@/lib/utils'
@@ -23,10 +23,7 @@ export function Header({ className }: Props) {
         >
           <Menu className="w-5 h-5 text-foreground" />
         </button>
-        <VercelDashed className="ml-1 md:ml-2.5 mr-1.5" />
-        <span className="hidden md:inline text-sm uppercase font-mono font-bold tracking-tight">
-          Thinksoft
-        </span>
+        <ThinksoftLogo className="h-6 w-20 ml-1 md:ml-2.5 mr-1.5" />
       </div>
     </header>
   )
