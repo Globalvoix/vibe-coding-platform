@@ -7,6 +7,7 @@ import { AppSidebar } from '@/components/sidebar/app-sidebar'
 import { useRouter } from 'next/navigation'
 import { useUIStore } from '@/lib/ui-store'
 import { cn } from '@/lib/utils'
+import { toast } from 'sonner'
 
 export default function Page() {
   const router = useRouter()
@@ -29,12 +30,17 @@ export default function Page() {
           router.push('/pricing')
           return
         }
+
+        if (typeof data?.error === 'string' && data.error.trim()) {
+          toast.error(data.error)
+          return
+        }
       } catch (error) {
         console.error('Failed to parse project creation error', error)
       }
 
-      console.error('Failed to create project')
-      throw new Error('Failed to create project')
+      toast.error('Failed to create project')
+      return
     }
 
     const project = await response.json()

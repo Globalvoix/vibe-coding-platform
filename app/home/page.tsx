@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { useUIStore } from "@/lib/ui-store";
 import { cn } from "@/lib/utils";
 import { ensureUserSubscription } from "@/app/actions/subscription";
+import { toast } from 'sonner'
 
 export default function HomePage() {
   const router = useRouter();
@@ -36,12 +37,17 @@ export default function HomePage() {
           router.push('/pricing');
           return;
         }
+
+        if (typeof data?.error === 'string' && data.error.trim()) {
+          toast.error(data.error)
+          return
+        }
       } catch (error) {
         console.error('Failed to parse project creation error', error);
       }
 
-      console.error('Failed to create project');
-      throw new Error('Failed to create project');
+      toast.error('Failed to create project')
+      return
     }
 
     const project = await response.json();
