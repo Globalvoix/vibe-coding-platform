@@ -11,8 +11,8 @@ import { Suspense } from 'react'
 import { Inter } from 'next/font/google'
 import './globals.css'
 
-const title = 'Thinksoft - AI-Powered Full-Stack Development Platform'
-const description = `Thinksoft is an AI-powered full-stack development platform that transforms your ideas into production-ready applications. Build complete web apps, SaaS platforms, e-commerce stores, and more using natural language prompts. Integrated with Supabase, Neon, Next.js, Netlify, and advanced AI models.`
+const title = 'Thinksoft - Full-Stack Vibe Coding Platform'
+const description = `Thinksoft is a full-stack vibe coding platform that transforms your ideas into reality. Get beautiful, production-ready frontends with enterprise-grade backends powered by advanced AI. Build complete web apps, SaaS platforms, e-commerce stores, and more with zero boilerplate.`
 
 const inter = Inter({
   subsets: ['latin'],
