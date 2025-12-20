@@ -1,10 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 64" width="200" height="64">
-  <defs>
-    <style>
-      .bg { fill: #0066cc; }
-      .text { fill: #ffffff; font-size: 40px; font-weight: 700; font-family: system-ui, -apple-system, sans-serif; dominant-baseline: middle; }
-    </style>
-  </defs>
-  <rect class="bg" width="200" height="64" rx="8"/>
-  <text class="text" x="100" y="32" text-anchor="middle">Thinksoft</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 160" width="200" height="80">
+  <!-- Black background -->
+  <rect width="400" height="160" fill="#000000"/>
+  <!-- Thinksoft wordmark in white -->
+  <text x="200" y="100" font-family="system-ui, -apple-system, sans-serif" font-size="90" font-weight="700" fill="#ffffff" text-anchor="middle" letter-spacing="-2">
+    Thinksoft
+  </text>
 </svg>
