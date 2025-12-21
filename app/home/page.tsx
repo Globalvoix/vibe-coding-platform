@@ -159,6 +159,90 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
+        <section className="relative bg-gray-50 px-4 py-20 sm:py-28">
+          <div className="mx-auto max-w-6xl">
+            <div className="text-center mb-12 sm:mb-16">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight text-gray-900">
+                Simpler. Smarter. Safer.
+              </h2>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-4">
+              <div className="rounded-2xl bg-white border border-gray-200 p-6 sm:p-8 shadow-sm hover:shadow-md transition-shadow">
+                <div className="mb-4 flex items-center justify-center h-12 w-12 rounded-lg bg-gray-100">
+                  <Image
+                    src="https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F64e5288fcedc47d48cd33262fc43fee5?format=webp&width=800"
+                    alt="API icon"
+                    width={32}
+                    height={32}
+                    className="w-8 h-8"
+                  />
+                </div>
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">
+                  Built-in AI API, No API
+                </h3>
+                <p className="text-sm text-gray-600">
+                  key setup, no config — just websites that work.
+                </p>
+              </div>
+
+              <div className="rounded-2xl bg-white border border-gray-200 p-6 sm:p-8 shadow-sm hover:shadow-md transition-shadow">
+                <div className="mb-4 flex items-center justify-center h-12 w-12 rounded-lg bg-gray-100">
+                  <Image
+                    src="https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F614c0c8e19b1473bb194e5945fc1a5cc?format=webp&width=800"
+                    alt="Database icon"
+                    width={32}
+                    height={32}
+                    className="w-8 h-8"
+                  />
+                </div>
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">
+                  Automatically build your database
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Store and manage data effortlessly.
+                </p>
+              </div>
+
+              <div className="rounded-2xl bg-white border border-gray-200 p-6 sm:p-8 shadow-sm hover:shadow-md transition-shadow">
+                <div className="mb-4 flex items-center justify-center h-12 w-12 rounded-lg bg-gray-100">
+                  <Image
+                    src="https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F5ebe106e0df64716a9f9d184eec75bff?format=webp&width=800"
+                    alt="Security icon"
+                    width={32}
+                    height={32}
+                    className="w-8 h-8"
+                  />
+                </div>
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">
+                  Enterprise-grade security
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Secure infrastructure built into every project.
+                </p>
+              </div>
+
+              <div className="rounded-2xl bg-white border border-gray-200 p-6 sm:p-8 shadow-sm hover:shadow-md transition-shadow">
+                <div className="mb-4 flex items-center justify-center h-12 w-12 rounded-lg bg-gray-100">
+                  <Image
+                    src="https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F816f5512fc40456d9d36afdcdf30996a?format=webp&width=800"
+                    alt="Analytics icon"
+                    width={32}
+                    height={32}
+                    className="w-8 h-8"
+                  />
+                </div>
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">
+                  Your analytics, simplified
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Track visits, conversions, and growth.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
     </>
   );
