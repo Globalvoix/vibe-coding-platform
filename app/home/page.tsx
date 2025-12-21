@@ -10,6 +10,7 @@ import { useUIStore } from "@/lib/ui-store";
 import { cn } from "@/lib/utils";
 import { ensureUserSubscription } from "@/app/actions/subscription";
 import { toast } from 'sonner'
+import Image from "next/image";
 
 export default function HomePage() {
   const router = useRouter();
@@ -64,6 +65,100 @@ export default function HomePage() {
         )}
       >
         <HeroWave onPromptSubmit={handlePromptSubmit} />
+        
+        <section className="relative bg-white px-4 py-20 sm:py-28">
+          <div className="mx-auto max-w-6xl">
+            <div className="text-center mb-12 sm:mb-16">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight text-gray-900">
+                The most advanced coding agents
+              </h2>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-3">
+              <div className="rounded-3xl border border-gray-200 bg-gradient-to-br from-gray-50 to-white overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                <div className="aspect-video bg-gradient-to-br from-amber-100 via-pink-100 to-green-100 relative overflow-hidden flex items-center justify-center">
+                  <div className="grid grid-cols-2 gap-3 p-8 w-full h-full">
+                    <div className="bg-green-600 rounded-lg" />
+                    <div className="bg-pink-300 rounded-lg" />
+                    <div className="bg-green-700 rounded-lg" />
+                    <div className="bg-pink-200 rounded-lg" />
+                  </div>
+                </div>
+                <div className="p-6 sm:p-8">
+                  <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-3">
+                    The Best Models
+                  </h3>
+                  <p className="text-sm sm:text-base text-gray-600 mb-6">
+                    Stay ahead with instant access to cutting-edge AI models. No need for multiple platforms—just powerful models at your command.
+                  </p>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <svg className="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      <span className="text-sm text-gray-700">Gemini 3 Pro</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <svg className="w-5 h-5 text-orange-500" fill="currentColor" viewBox="0 0 20 20">
+                        <circle cx="10" cy="10" r="8" />
+                      </svg>
+                      <span className="text-sm text-gray-700">Claude Sonnet</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <svg className="w-5 h-5 text-gray-900" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 2a1 1 0 011 1v1.22l3.844-1.949a1 1 0 01.912 1.788L12.9 5.91v4.18l3.844-1.949a1 1 0 01.912 1.788L12.9 13.91v1.22a1 1 0 11-2 0v-1.22l-3.844 1.949a1 1 0 01-.912-1.788l3.844-1.949V9.75l-3.844 1.949a1 1 0 01-.912-1.788l3.844-1.949V5.75a1 1 0 011-1z" />
+                      </svg>
+                      <span className="text-sm text-gray-700">GPT-5-Codex</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-3xl border border-gray-200 bg-gradient-to-br from-blue-50 to-purple-50 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                <div className="aspect-video bg-gradient-to-br from-blue-200 via-purple-200 to-pink-200 relative overflow-hidden flex items-center justify-center p-4">
+                  <div className="relative w-full h-full flex items-center justify-center">
+                    <div className="absolute inset-0 bg-gradient-to-br from-green-400/30 to-blue-600/30 rounded-2xl" />
+                    <div className="relative bg-white/80 backdrop-blur rounded-2xl p-4 shadow-lg max-w-xs">
+                      <div className="text-xs font-semibold text-gray-500 mb-2">Community Activities</div>
+                      <div className="flex items-center justify-center">
+                        <span className="text-lg font-bold text-gray-900">My Portfolio</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-6 sm:p-8">
+                  <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-3">
+                    The Best Design
+                  </h3>
+                  <p className="text-sm sm:text-base text-gray-600 mb-4">
+                    Our Boost feature lets you create stunning visual designs without the hassle. Enhance every project with a single click.
+                  </p>
+                </div>
+              </div>
+
+              <div className="rounded-3xl border border-gray-200 bg-gradient-to-br from-slate-900 to-slate-800 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                <div className="aspect-video bg-gradient-to-br from-slate-800 to-slate-900 relative overflow-hidden flex items-center justify-center">
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="text-5xl sm:text-6xl font-bold text-white mb-2">
+                        10<span className="text-3xl sm:text-4xl">x</span>
+                      </div>
+                      <p className="text-sm text-gray-300">Better at Fixing Errors</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-6 sm:p-8">
+                  <h3 className="text-xl sm:text-2xl font-semibold text-white mb-3">
+                    The Best Error Fixer
+                  </h3>
+                  <p className="text-sm sm:text-base text-gray-300">
+                    Automatically test and resolve issues, so you can keep progressing without frustration.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
     </>
   );
