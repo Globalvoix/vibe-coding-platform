@@ -1,7 +1,5 @@
 'use client';
 
-'use client';
-
 import { useEffect } from "react";
 import { HeroWave } from "@/components/ui/ai-input-hero";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
@@ -244,12 +242,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section
-          className="relative py-32 sm:py-40 px-4 overflow-hidden bg-cover bg-center bg-no-repeat"
-          style={{
-            backgroundImage: 'url(https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F8bbb18fa1c314fc691551fd3bdaeae17?format=webp&width=800)'
-          }}
-        >
+        <section className="relative py-32 sm:py-40 px-4 overflow-hidden bg-[url('https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F8bbb18fa1c314fc691551fd3bdaeae17?format=webp&width=800')] bg-cover bg-center bg-no-repeat">
           <div className="absolute inset-0 bg-black/40" />
           <div className="relative mx-auto max-w-3xl text-center">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight text-white mb-8">

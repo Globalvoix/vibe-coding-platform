@@ -8,7 +8,6 @@ import { useAuth, useClerk } from "@clerk/nextjs";
 
 export type HeroWaveProps = {
   className?: string;
-  style?: React.CSSProperties;
   title?: string;
   subtitle?: string;
   placeholder?: string;
@@ -18,7 +17,6 @@ export type HeroWaveProps = {
 
 export function HeroWave({
   className,
-  style,
   title = "Thinksoft",
   subtitle = "The AI Fullstack Engineer. Create beautiful, production-ready websites",
   placeholder = "Describe what you want to create...",
@@ -120,42 +118,22 @@ export function HeroWave({
   return (
     <section
       ref={containerRef}
-      className={className}
-      style={{
-        position: "relative",
-        width: "100%",
-        height: "100vh",
-        backgroundColor: "#ffffff",
-        ...style,
-      }}
+      className={["relative w-full h-screen bg-white", className].filter(Boolean).join(" ")}
       aria-label="Hero section"
     >
       <div className="absolute inset-0 z-0 pointer-events-none">
         <Image
-          src="https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F69266d8720c14390b0056a4dc4fe07a3?format=webp&width=800"
-          alt="Thinksoft blue gradient background"
+          src="https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F4c7af17661ef463cb40f4317c111bec2?format=webp&width=800"
+          alt="Thinksoft background"
           fill
           priority
           className="object-cover"
         />
       </div>
+      <div className="absolute inset-0 z-[1] bg-black/40" />
       <Navbar />
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          zIndex: 10,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          pointerEvents: "none",
-          padding: "24px",
-        }}
-      >
-        <div
-          className="max-w-3xl w-full text-center"
-          style={{ pointerEvents: "auto" }}
-        >
+      <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none p-6">
+        <div className="max-w-3xl w-full text-center pointer-events-auto">
           <h1 className="text-white text-3xl sm:text-5xl font-semibold tracking-tight">
             {title}
           </h1>
