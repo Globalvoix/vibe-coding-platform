@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Navbar } from "@/components/ui/mini-navbar";
 import Image from "next/image";
 import { Spinner } from "@/components/ui/spinner";
