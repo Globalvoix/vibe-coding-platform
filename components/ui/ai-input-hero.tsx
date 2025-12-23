@@ -130,7 +130,7 @@ export function HeroWave({
           className="object-cover"
         />
       </div>
-      <div className="absolute inset-0 z-[1] bg-black/15" />
+      <div className="absolute inset-0 z-[1] bg-black/10" />
       <Navbar variant="home" />
       <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none p-6">
         <div className="max-w-3xl w-full text-center pointer-events-auto">
