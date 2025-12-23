@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useUIStore } from '@/lib/ui-store';
 import { CREDITS_UPDATED_EVENT } from '@/lib/credits-events';
 import { Menu } from 'lucide-react';
+import { ThinksoftLogo } from '@/components/icons/thinksoft';
 import { useAuth } from '@clerk/nextjs';
 import { SignInButton, SignUpButton, UserButton } from '@clerk/nextjs';
 
@@ -22,7 +23,9 @@ const AnimatedNavLink = ({ href, children }: { href: string; children: React.Rea
   );
 };
 
-export function Navbar() {
+type NavbarVariant = 'default' | 'home';
+
+export function Navbar({ variant = 'default' }: { variant?: NavbarVariant }) {
   const [isOpen, setIsOpen] = useState(false);
   const [headerShapeClass, setHeaderShapeClass] = useState('rounded-full');
   const shapeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -111,10 +114,17 @@ export function Navbar() {
     };
   }, [isSignedIn]);
 
-  const navLinksData = [
-    { label: 'Home', href: '/' },
-    { label: 'Pricing', href: '/pricing' },
-  ];
+  const navLinksData =
+    variant === 'home'
+      ? [
+          { label: 'Home', href: '/' },
+          { label: 'Pricing', href: '/pricing' },
+          { label: 'Projects', href: '/projects' },
+        ]
+      : [
+          { label: 'Home', href: '/' },
+          { label: 'Pricing', href: '/pricing' },
+        ];
 
   const isProActive =
     planId === 'pro' && (subscriptionStatus === 'active' || !subscriptionStatus);
@@ -124,17 +134,23 @@ export function Navbar() {
   const authElement = isSignedIn ? (
     <div className="flex items-center gap-2">
       <UserButton afterSignOutUrl="/" />
-      {isProActive && (
+      {variant === 'default' && isProActive && (
         <span className="px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide rounded-full bg-blue-600/10 text-blue-700 border border-blue-500/40">
           Pro
         </span>
       )}
-      {hasCredits && (
+      {variant === 'default' && hasCredits && (
         <span className="px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide rounded-full bg-green-600/10 text-green-700 border border-green-500/40">
           {creditBalance} credits
         </span>
       )}
     </div>
+  ) : variant === 'home' ? (
+    <SignInButton mode="modal">
+      <button className="inline-flex items-center justify-center rounded-full bg-white/90 px-4 py-1.5 text-xs font-medium text-gray-900 shadow-sm hover:bg-white transition-colors">
+        Sign in / Sign up
+      </button>
+    </SignInButton>
   ) : (
     <>
       <SignInButton mode="modal">
@@ -154,53 +170,120 @@ export function Navbar() {
     </>
   );
 
+  const headerClassName =
+    variant === 'home'
+      ? 'fixed top-4 left-1/2 -translate-x-1/2 z-20 w-[calc(100%-2rem)] max-w-6xl rounded-full border border-white/10 bg-black/20 px-6 py-2 backdrop-blur-sm'
+      : `fixed top-6 left-1/2 transform -translate-x-1/2 z-20 flex flex-col items-center pl-6 pr-6 py-3 backdrop-blur-sm ${headerShapeClass} border border-gray-300 bg-white/90 w-[calc(100%-2rem)] sm:w-auto transition-[border-radius] duration-0 ease-in-out`
+
   return (
-    <header className={`fixed top-6 left-1/2 transform -translate-x-1/2 z-20 flex flex-col items-center pl-6 pr-6 py-3 backdrop-blur-sm ${headerShapeClass} border border-gray-300 bg-white/90 w-[calc(100%-2rem)] sm:w-auto transition-[border-radius] duration-0 ease-in-out`}>
-      <div className="flex items-center justify-between w-full gap-x-6 sm:gap-x-8">
-        <div className="flex items-center gap-2">
-          <button
-            onClick={toggleSidebar}
-            className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
-            title="Toggle app menu"
-            aria-label="Toggle app menu"
+    <header className={headerClassName}>
+      {variant === 'home' ? (
+        <div className="flex items-center justify-between gap-6">
+          <a href="/" className="flex items-center gap-2 text-white">
+            <ThinksoftLogo className="h-5 w-auto" />
+          </a>
+
+          <nav className="hidden sm:flex items-center">
+            <div className="flex items-center gap-5 rounded-full bg-white/10 px-5 py-1.5">
+              {navLinksData.map((link) => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  className="text-xs font-medium text-white/80 hover:text-white transition-colors"
+                >
+                  {link.label}
+                </a>
+              ))}
+            </div>
+          </nav>
+
+          <div className="flex items-center gap-2">{authElement}</div>
+        </div>
+      ) : (
+        <>
+          <div className="flex items-center justify-between w-full gap-x-6 sm:gap-x-8">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={toggleSidebar}
+                className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+                title="Toggle app menu"
+                aria-label="Toggle app menu"
+              >
+                <Menu className="w-5 h-5 text-gray-700" />
+              </button>
+            </div>
+
+            <nav className="hidden sm:flex items-center space-x-4 sm:space-x-6 text-sm">
+              {navLinksData.map((link) => (
+                <AnimatedNavLink key={link.href} href={link.href}>
+                  {link.label}
+                </AnimatedNavLink>
+              ))}
+            </nav>
+
+            <div className="hidden sm:flex items-center gap-2 sm:gap-3">{authElement}</div>
+
+            <button
+              className="sm:hidden flex items-center justify-center w-8 h-8 text-gray-700 focus:outline-none"
+              onClick={toggleMenu}
+              aria-label={isOpen ? 'Close Menu' : 'Open Menu'}
+            >
+              {isOpen ? (
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  ></path>
+                </svg>
+              ) : (
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M4 6h16M4 12h16M4 18h16"
+                  ></path>
+                </svg>
+              )}
+            </button>
+          </div>
+
+          <div
+            className={`sm:hidden flex flex-col items-center w-full transition-all ease-in-out duration-300 overflow-hidden ${
+              isOpen
+                ? 'max-h-[1000px] opacity-100 pt-4'
+                : 'max-h-0 opacity-0 pt-0 pointer-events-none'
+            }`}
           >
-            <Menu className="w-5 h-5 text-gray-700" />
-          </button>
-        </div>
-
-        <nav className="hidden sm:flex items-center space-x-4 sm:space-x-6 text-sm">
-          {navLinksData.map((link) => (
-            <AnimatedNavLink key={link.href} href={link.href}>
-              {link.label}
-            </AnimatedNavLink>
-          ))}
-        </nav>
-
-        <div className="hidden sm:flex items-center gap-2 sm:gap-3">
-          {authElement}
-        </div>
-
-        <button className="sm:hidden flex items-center justify-center w-8 h-8 text-gray-700 focus:outline-none" onClick={toggleMenu} aria-label={isOpen ? 'Close Menu' : 'Open Menu'}>
-          {isOpen ? (
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-          ) : (
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-          )}
-        </button>
-      </div>
-
-      <div className={`sm:hidden flex flex-col items-center w-full transition-all ease-in-out duration-300 overflow-hidden ${isOpen ? 'max-h-[1000px] opacity-100 pt-4' : 'max-h-0 opacity-0 pt-0 pointer-events-none'}`}>
-        <nav className="flex flex-col items-center space-y-4 text-base w-full">
-          {navLinksData.map((link) => (
-            <a key={link.href} href={link.href} className="text-gray-700 hover:text-gray-900 transition-colors w-full text-center">
-              {link.label}
-            </a>
-          ))}
-        </nav>
-        <div className="flex flex-col items-center space-y-4 mt-4 w-full">
-          {authElement}
-        </div>
-      </div>
+            <nav className="flex flex-col items-center space-y-4 text-base w-full">
+              {navLinksData.map((link) => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  className="text-gray-700 hover:text-gray-900 transition-colors w-full text-center"
+                >
+                  {link.label}
+                </a>
+              ))}
+            </nav>
+            <div className="flex flex-col items-center space-y-4 mt-4 w-full">{authElement}</div>
+          </div>
+        </>
+      )}
     </header>
   );
 }

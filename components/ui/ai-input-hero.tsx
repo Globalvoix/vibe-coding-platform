@@ -123,15 +123,15 @@ export function HeroWave({
     >
       <div className="absolute inset-0 z-0 pointer-events-none">
         <Image
-          src="https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F4c7af17661ef463cb40f4317c111bec2?format=webp&width=800"
-          alt="Thinksoft background"
+          src="https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2Fe82ff681d02b46d39e57f9c73362f419?format=webp&width=800"
+          alt="Thinksoft home background"
           fill
           priority
           className="object-cover"
         />
       </div>
-      <div className="absolute inset-0 z-[1] bg-black/40" />
-      <Navbar />
+      <div className="absolute inset-0 z-[1] bg-black/15" />
+      <Navbar variant="home" />
       <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none p-6">
         <div className="max-w-3xl w-full text-center pointer-events-auto">
           <h1 className="text-white text-3xl sm:text-5xl font-semibold tracking-tight">
