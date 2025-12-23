@@ -5,6 +5,7 @@ import { useUIStore } from '@/lib/ui-store';
 import { CREDITS_UPDATED_EVENT } from '@/lib/credits-events';
 import { Menu } from 'lucide-react';
 import { ThinksoftLogo } from '@/components/icons/thinksoft';
+import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { SignInButton, SignUpButton, UserButton } from '@clerk/nextjs';
 
@@ -14,12 +15,15 @@ const AnimatedNavLink = ({ href, children }: { href: string; children: React.Rea
   const textSizeClass = 'text-sm';
 
   return (
-    <a href={href} className={`group relative inline-block overflow-hidden h-5 flex items-center ${textSizeClass}`}>
+    <Link
+      href={href}
+      className={`group relative inline-block overflow-hidden h-5 flex items-center ${textSizeClass}`}
+    >
       <div className="flex flex-col transition-transform duration-400 ease-out transform group-hover:-translate-y-1/2">
         <span className={defaultTextColor}>{children}</span>
         <span className={hoverTextColor}>{children}</span>
       </div>
-    </a>
+    </Link>
   );
 };
 
@@ -179,20 +183,20 @@ export function Navbar({ variant = 'default' }: { variant?: NavbarVariant }) {
     <header className={headerClassName}>
       {variant === 'home' ? (
         <div className="flex items-center justify-between gap-6">
-          <a href="/" className="flex items-center gap-2 text-white">
+          <Link href="/" className="flex items-center gap-2 text-white">
             <ThinksoftLogo className="h-5 w-auto" />
-          </a>
+          </Link>
 
           <nav className="hidden sm:flex items-center">
             <div className="flex items-center gap-5 rounded-full bg-white/10 px-5 py-1.5">
               {navLinksData.map((link) => (
-                <a
+                <Link
                   key={link.href}
                   href={link.href}
                   className="text-xs font-medium text-white/80 hover:text-white transition-colors"
                 >
                   {link.label}
-                </a>
+                </Link>
               ))}
             </div>
           </nav>
@@ -271,13 +275,13 @@ export function Navbar({ variant = 'default' }: { variant?: NavbarVariant }) {
           >
             <nav className="flex flex-col items-center space-y-4 text-base w-full">
               {navLinksData.map((link) => (
-                <a
+                <Link
                   key={link.href}
                   href={link.href}
                   className="text-gray-700 hover:text-gray-900 transition-colors w-full text-center"
                 >
                   {link.label}
-                </a>
+                </Link>
               ))}
             </nav>
             <div className="flex flex-col items-center space-y-4 mt-4 w-full">{authElement}</div>
