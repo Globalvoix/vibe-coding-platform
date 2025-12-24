@@ -188,7 +188,7 @@ export function Navbar({ variant = 'default' }: { variant?: NavbarVariant }) {
           </Link>
 
           <nav className="hidden sm:flex items-center">
-            <div className="flex items-center gap-5">
+            <div className="flex items-center gap-5 rounded-lg border border-white/10 bg-white/10 px-5 py-2 backdrop-blur-sm">
               {navLinksData.map((link) => (
                 <Link
                   key={link.href}
