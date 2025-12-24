@@ -8,8 +8,9 @@ import { useUIStore } from "@/lib/ui-store";
 import { cn } from "@/lib/utils";
 import { ensureUserSubscription } from "@/app/actions/subscription";
 import { toast } from 'sonner'
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, ChevronDown, ArrowUpRight } from "lucide-react";
 import Image from "next/image";
+import { motion } from "framer-motion";
 
 export default function Page() {
   const router = useRouter();
@@ -153,6 +154,66 @@ export default function Page() {
                   <a href="#" className="text-sm font-semibold text-gray-900 flex items-center gap-1 hover:opacity-70 transition-opacity">
                     Learn more <ChevronRight className="w-4 h-4" />
                   </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="relative min-h-[600px] flex items-center py-24 px-4 overflow-hidden">
+          {/* Background Image with Blur */}
+          <div className="absolute inset-0 z-0">
+            <Image
+              src="https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2Fa16c6aa95f9d4b7e8e2947134adf6f62?format=webp&width=2000"
+              alt="Research background"
+              fill
+              className="object-cover blur-3xl scale-110 opacity-30"
+              priority
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-white via-white/80 to-white" />
+          </div>
+
+          <div className="relative z-10 mx-auto max-w-6xl w-full">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-start">
+              <div className="flex flex-col items-start">
+                <span className="text-[10px] font-bold tracking-[0.2em] text-gray-900 mb-8 uppercase">Thinksoft Research</span>
+                <h2 className="text-3xl sm:text-4xl font-normal tracking-tight text-gray-900 mb-8 max-w-md leading-[1.2]">
+                  We are building foundational AI models that will be capable of simulating all possible software architectures and experiences.
+                </h2>
+                <button className="px-6 py-2 rounded-full border border-gray-900 text-xs font-bold text-gray-900 hover:bg-gray-900 hover:text-white transition-all duration-300 uppercase tracking-wider">
+                  Learn more
+                </button>
+              </div>
+
+              <div className="flex flex-col w-full">
+                <div className="border-t border-gray-900/10 py-10 group cursor-pointer transition-colors hover:bg-black/5 px-4 -mx-4 rounded-xl">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-xl font-semibold text-gray-900">TS-1</h3>
+                    <ArrowUpRight className="w-5 h-5 text-gray-400 group-hover:text-gray-900 transition-colors" />
+                  </div>
+                  <p className="text-sm text-gray-500 max-w-sm leading-relaxed">
+                    A state-of-the-art model built to interact with the digital world. A major step towards universal software simulation.
+                  </p>
+                </div>
+
+                <div className="border-t border-gray-900/10 py-10 group cursor-pointer transition-colors hover:bg-black/5 px-4 -mx-4 rounded-xl">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-xl font-semibold text-gray-900">Code-4.5</h3>
+                    <ArrowUpRight className="w-5 h-5 text-gray-400 group-hover:text-gray-900 transition-colors" />
+                  </div>
+                  <p className="text-sm text-gray-500 max-w-sm leading-relaxed">
+                    The world's best code model, featuring state-of-the-art logic, prompt adherence and 40% cheaper operational costs.
+                  </p>
+                </div>
+
+                <div className="border-t border-gray-900/10 py-10 group cursor-pointer border-b border-gray-900/10 transition-colors hover:bg-black/5 px-4 -mx-4 rounded-xl">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-xl font-semibold text-gray-900">Enterprise Stack</h3>
+                    <ArrowUpRight className="w-5 h-5 text-gray-400 group-hover:text-gray-900 transition-colors" />
+                  </div>
+                  <p className="text-sm text-gray-500 max-w-sm leading-relaxed">
+                    Our research effort to build AI systems that understand enterprise-grade backend and production-ready frontend dynamics.
+                  </p>
                 </div>
               </div>
             </div>
