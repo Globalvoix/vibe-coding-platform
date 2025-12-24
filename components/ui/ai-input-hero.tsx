@@ -5,6 +5,7 @@ import { Navbar } from "@/components/ui/mini-navbar";
 import Image from "next/image";
 import { Spinner } from "@/components/ui/spinner";
 import { useAuth, useClerk } from "@clerk/nextjs";
+import { motion } from "framer-motion";
 
 export type HeroWaveProps = {
   className?: string;
@@ -200,15 +201,6 @@ export function HeroWave({
       className={["relative w-full h-screen bg-white", className].filter(Boolean).join(" ")}
       aria-label="Hero section"
     >
-      <style jsx>{`
-        @keyframes blink {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0; }
-        }
-        .animate-cursor-blink {
-          animation: blink 1s step-end infinite;
-        }
-      `}</style>
       <div className="absolute inset-0 z-0 pointer-events-none">
         <Image
           src="/home-hero-bg.webp"
@@ -233,7 +225,15 @@ export function HeroWave({
               <span className="text-white border-b-2 border-white pb-0.5 min-w-[4px]">
                 {animatedSubtitleWord}
               </span>
-              <span className="ml-1 w-[2px] h-[1.2em] bg-white animate-cursor-blink" />
+              <motion.span
+                animate={{ opacity: [1, 0] }}
+                transition={{
+                  duration: 0.8,
+                  repeat: Infinity,
+                  ease: "stepEnd",
+                }}
+                className="ml-1 w-[2px] h-[1.2em] bg-white"
+              />
             </span>
           </p>
           <form
