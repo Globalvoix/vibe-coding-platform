@@ -155,12 +155,14 @@ export default function PricingPage() {
       <Navbar variant="home" theme="dark" />
       <main className="relative min-h-screen w-full overflow-hidden flex flex-col items-center justify-center pt-24 pb-16 px-4 sm:px-6">
         {/* Background Image - Covers whole screen */}
-        <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 z-0 pointer-events-none">
           <Image
-            src="https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F63183a6ea4af49f285c3f4964b93e64d?format=webp&width=3200"
+            src="https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F63183a6ea4af49f285c3f4964b93e64d?format=webp&width=4000"
             alt="Pricing background"
             fill
             priority
+            sizes="100vw"
+            quality={100}
             className="object-cover"
             unoptimized
           />
