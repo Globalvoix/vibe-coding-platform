@@ -155,6 +155,8 @@ export function HeroWave({
               <PromptBox
                 placeholder="What can i build for you today ."
                 isLoading={isLoading}
+                showMic={false}
+                showTools={false}
                 onPromptSubmit={async (val) => {
                   if (!isSignedIn) {
                     openSignIn();
