@@ -205,7 +205,7 @@ export default function PricingPage() {
     <>
       <AppSidebar />
       <Navbar variant="home" theme="dark" />
-      <main className="relative min-h-[90vh] w-full overflow-hidden flex flex-col items-center justify-start pt-16 pb-12 px-4 sm:px-6">
+      <main className="relative min-h-screen w-full overflow-hidden flex flex-col items-center justify-center pt-24 pb-16 px-4 sm:px-6">
         {/* Background Image - Covers whole screen */}
         <div className="absolute inset-0 z-0 pointer-events-none">
           <Image
@@ -221,7 +221,7 @@ export default function PricingPage() {
         </div>
 
         <section className="relative z-10 w-full max-w-6xl">
-          <div className="text-center mb-8">
+          <div className="text-center mb-10">
             <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight text-white mb-3">
               Pricing
             </h1>
@@ -319,7 +319,7 @@ export default function PricingPage() {
         </section>
       </main>
 
-      <section className="w-full bg-white py-6 sm:py-8">
+      <section className="w-full bg-white py-12 sm:py-16">
         <Logos3
           heading="Trusted by 101K+ users in 80+ countries"
           logos={logos}

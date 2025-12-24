@@ -81,13 +81,13 @@ const Logos3 = ({
   const logosToDisplay = logos && logos.length > 0 ? logos : defaultLogos;
 
   return (
-    <section className={cn("py-4 md:py-6", className)}>
+    <section className={cn("py-10 md:py-12", className)}>
       <div className="container flex flex-col items-center text-center">
-        <h2 className="my-2 text-lg font-bold text-gray-900 sm:text-xl tracking-tight">
+        <h2 className="my-4 text-sm font-semibold text-gray-900 sm:text-base tracking-tight">
           {heading}
         </h2>
       </div>
-      <div className="pt-2 md:pt-4">
+      <div className="pt-6 md:pt-8">
         <div className="relative mx-auto flex items-center justify-center w-full">
           <Carousel
             opts={{ loop: true }}
