@@ -154,8 +154,8 @@ export default function PricingPage() {
       <AppSidebar />
       <Navbar variant="home" theme="dark" />
       <main className="relative min-h-screen w-full overflow-hidden flex flex-col items-center pt-24 pb-16 px-4 sm:px-6">
-        {/* Background Image */}
-        <div className="absolute inset-0 z-0">
+        {/* Background Image - Reduced height and cleared overlay */}
+        <div className="absolute top-0 left-0 right-0 h-[620px] z-0">
           <Image
             src="https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F347f46b7c68b478a96530803a3da589f?format=webp&width=2000"
             alt="Pricing background"
@@ -164,7 +164,6 @@ export default function PricingPage() {
             className="object-cover"
             unoptimized
           />
-          <div className="absolute inset-0 bg-black/10" />
         </div>
 
         <section className="relative z-10 w-full max-w-6xl">
