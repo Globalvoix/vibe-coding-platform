@@ -242,6 +242,7 @@ export function HeroWave({
               <PromptBox
                 placeholder={animatedPlaceholder}
                 isLoading={isLoading}
+                onChange={(e) => setPrompt(e.target.value)}
                 onPromptSubmit={async (val) => {
                   if (!isSignedIn) {
                     openSignIn();
