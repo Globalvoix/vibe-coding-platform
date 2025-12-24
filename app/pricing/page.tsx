@@ -319,7 +319,7 @@ export default function PricingPage() {
         </section>
       </main>
 
-      <section className="w-full bg-white px-4 py-16 sm:py-20">
+      <section className="w-full bg-white py-16 sm:py-20">
         <Logos3
           heading="Trusted by 101K+ users in 80+ countries"
           logos={logos}
