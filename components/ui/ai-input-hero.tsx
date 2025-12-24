@@ -121,15 +121,16 @@ export function HeroWave({
       className={["relative w-full h-screen bg-white", className].filter(Boolean).join(" ")}
       aria-label="Hero section"
     >
-      <div
-        className="absolute inset-0 z-0 pointer-events-none"
-        style={{
-          backgroundImage: 'url(https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2Fd54866b949d54a96915bc8ec400c1750?format=webp&width=1600)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-        }}
-      />
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <Image
+          src="https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2Fd54866b949d54a96915bc8ec400c1750?format=webp&width=1600"
+          alt="Thinksoft home background"
+          fill
+          priority
+          quality={100}
+          className="object-cover"
+        />
+      </div>
       <div className="absolute inset-0 z-[1] bg-black/5" />
       <Navbar variant="home" />
       <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none p-6">
