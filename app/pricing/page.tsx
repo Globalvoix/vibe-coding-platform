@@ -320,12 +320,11 @@ export default function PricingPage() {
       </main>
 
       <section className="w-full bg-white px-4 py-16 sm:py-20">
-        <div className="mx-auto max-w-6xl">
-          <h2 className="mb-8 text-center font-semibold text-gray-900 text-lg tracking-tight md:text-xl">
-            Trusted by 653K+ users in 180+ countries
-          </h2>
-          <LogoCloud logos={logos} />
-        </div>
+        <Logos3
+          heading="Trusted by 653K+ users in 180+ countries"
+          logos={logos}
+          className="w-full"
+        />
       </section>
     </>
   );
