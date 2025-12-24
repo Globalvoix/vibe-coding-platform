@@ -7,8 +7,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { useAuth, useClerk } from "@clerk/nextjs";
 import { motion } from "framer-motion";
 import { ChevronRight, ChevronDown } from "lucide-react";
-import Image from "next/image";
-import { motion } from "framer-motion";
+import { PromptBox } from "./prompt-box";
 
 export function HeroWave({
   className,
