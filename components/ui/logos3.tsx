@@ -83,7 +83,7 @@ const Logos3 = ({
   return (
     <section className={cn("py-4 md:py-6", className)}>
       <div className="container flex flex-col items-center text-center">
-        <h2 className="my-2 text-sm font-semibold text-gray-900 sm:text-base tracking-tight">
+        <h2 className="my-2 text-lg font-bold text-gray-900 sm:text-xl tracking-tight">
           {heading}
         </h2>
       </div>
