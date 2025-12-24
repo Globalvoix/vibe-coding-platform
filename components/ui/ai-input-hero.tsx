@@ -137,10 +137,10 @@ export function HeroWave({
 
   useEffect(() => {
     subtitleTypingStateRef.current.running = true;
-    const typeSpeed = 70;
-    const deleteSpeed = 40;
-    const pauseAtEnd = 1200;
-    const pauseBetween = 500;
+    const typeSpeed = 150;
+    const deleteSpeed = 100;
+    const pauseAtEnd = 2000;
+    const pauseBetween = 800;
 
     function schedule(fn: () => void, delay: number) {
       const id = window.setTimeout(fn, delay);
@@ -219,10 +219,10 @@ export function HeroWave({
           <h1 className="text-white text-3xl sm:text-5xl font-semibold tracking-tight">
             {title}
           </h1>
-          <p className="text-white/80 mt-3 sm:mt-4 text-sm sm:text-base flex flex-wrap items-center justify-center whitespace-pre-wrap">
-            <span>{baseSubtitlePrefix} </span>
-            <span className="relative inline-flex items-center">
-              <span className="text-white border-b-2 border-white pb-0.5 min-w-[4px]">
+          <p className="text-white mt-3 sm:mt-4 text-sm sm:text-base flex flex-wrap items-center justify-center whitespace-pre-wrap gap-x-1">
+            <span>{baseSubtitlePrefix}</span>
+            <span className="relative inline-flex items-baseline">
+              <span className="text-white min-w-[4px]">
                 {animatedSubtitleWord}
               </span>
               <motion.span
@@ -230,9 +230,9 @@ export function HeroWave({
                 transition={{
                   duration: 0.8,
                   repeat: Infinity,
-                  ease: "stepEnd",
+                  ease: "linear",
                 }}
-                className="ml-1 w-[2px] h-[1.2em] bg-white"
+                className="inline-block w-[2px] h-[1em] bg-white ml-0.5 translate-y-[2px]"
               />
             </span>
           </p>
