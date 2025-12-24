@@ -34,75 +34,63 @@ export default function PricingPage() {
       id: 'free',
       tierName: "Starter",
       name: "Free",
-      tokens: "1M tokens",
+      credits: "20 credits/mo",
       price: "$0",
-      priceSub: "",
-      description: "For getting started",
+      priceSub: "/mo",
+      description: "Get started with AI-generated frontends and a single workspace.",
       features: [
-        "1M tokens",
-        "Public projects",
-        "Data used to train our model",
-        "Templates",
+        "20 credits per month",
+        "Up to 5 apps/workspaces",
+        "Unlimited database creations",
+        "Basic frontend generation",
       ],
       highlight: false,
     },
     {
       id: 'pro',
-      tierName: "Personal",
-      name: "$25",
-      tokens: "5M tokens",
-      price: "$25",
-      priceSub: "/m billed monthly",
-      description: "For light, exploratory, and personal use",
+      tierName: "Pro",
+      name: "$15",
+      credits: "200 credits/mo",
+      price: "$15",
+      priceSub: "/mo",
+      description: "For individual builders shipping advanced frontends every week.",
       features: [
-        "5M tokens",
-        "Credit rollover",
-        "Private projects",
-        "Unlimited custom domains",
-        "Code download",
-        "Remove Rocket branding",
-        "Opt out of data training",
-        "Templates",
-      ],
-      highlight: false,
-    },
-    {
-      id: 'business',
-      tierName: "Rocket",
-      name: "$50",
-      tokens: "10.5M tokens",
-      price: "$50",
-      priceSub: "/m billed monthly",
-      description: "For professional and frequent use",
-      features: [
-        "10.5M tokens (5% bonus tokens)",
-        "Credit rollover",
-        "Private projects",
-        "Unlimited custom domains",
-        "Code download",
-        "Remove Rocket branding",
-        "Opt out of data training",
-        "Templates",
+        "200 credits per month",
+        "Unlimited apps/workspaces",
+        "Unlimited database creations",
+        "Advanced frontend generation",
       ],
       highlight: true,
     },
     {
-      id: 'enterprise',
-      tierName: "Booster",
-      name: "$100",
-      tokens: "22M tokens",
-      price: "$100",
-      priceSub: "/m billed monthly",
-      description: "For power users' daily use as core tool",
+      id: 'business',
+      tierName: "Business",
+      name: "$50",
+      credits: "600 credits/mo",
+      price: "$50",
+      priceSub: "/mo",
+      description: "For teams running multiple products and environments.",
       features: [
-        "22M tokens (10% bonus tokens)",
-        "Credit rollover",
-        "Private projects",
-        "Unlimited custom domains",
-        "Code download",
-        "Remove Rocket branding",
-        "Opt out of data training",
-        "Templates",
+        "600 credits per month",
+        "Unlimited apps/workspaces",
+        "Unlimited database creations",
+        "Advanced frontend generation",
+      ],
+      highlight: false,
+    },
+    {
+      id: 'enterprise',
+      tierName: "Enterprise",
+      name: "$500",
+      credits: "6000 credits/mo",
+      price: "$500",
+      priceSub: "/mo",
+      description: "For organizations that need custom limits and enterprise guarantees.",
+      features: [
+        "6000 credits per month",
+        "Unlimited apps/workspaces",
+        "Unlimited database creations",
+        "Enterprise-grade frontend generation",
       ],
       highlight: false,
     },
@@ -166,7 +154,7 @@ export default function PricingPage() {
     <>
       <AppSidebar />
       <Navbar variant="home" theme="dark" />
-      <main className="relative min-h-screen w-full overflow-hidden flex flex-col items-center pt-32 pb-24 px-4 sm:px-6">
+      <main className="relative min-h-screen w-full overflow-hidden flex flex-col items-center pt-24 pb-16 px-4 sm:px-6">
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <Image
@@ -177,26 +165,25 @@ export default function PricingPage() {
             className="object-cover"
             unoptimized
           />
-          {/* Subtle overlay to ensure text readability if needed, but the image looks good as is */}
           <div className="absolute inset-0 bg-black/10" />
         </div>
 
-        <section className="relative z-10 w-full max-w-7xl">
-          <div className="text-center mb-12">
-            <h1 className="text-5xl sm:text-6xl font-semibold tracking-tight text-white mb-4">
+        <section className="relative z-10 w-full max-w-6xl">
+          <div className="text-center mb-10">
+            <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight text-white mb-3">
               Pricing
             </h1>
-            <p className="text-lg sm:text-xl text-white/90">
+            <p className="text-base sm:text-lg text-white/90">
               Start for free. Upgrade as you go.
             </p>
 
             {/* Monthly/Yearly Toggle */}
-            <div className="mt-10 flex items-center justify-center">
+            <div className="mt-8 flex items-center justify-center">
               <div className="bg-black/20 backdrop-blur-md p-1 rounded-xl flex items-center border border-white/10">
                 <button
                   onClick={() => setBillingCycle('monthly')}
                   className={cn(
-                    "px-6 py-2 rounded-lg text-sm font-medium transition-all",
+                    "px-5 py-1.5 rounded-lg text-sm font-medium transition-all",
                     billingCycle === 'monthly'
                       ? "bg-white text-black shadow-sm"
                       : "text-white/60 hover:text-white"
@@ -207,7 +194,7 @@ export default function PricingPage() {
                 <button
                   onClick={() => setBillingCycle('yearly')}
                   className={cn(
-                    "px-6 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2",
+                    "px-5 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2",
                     billingCycle === 'yearly'
                       ? "bg-white text-black shadow-sm"
                       : "text-white/60 hover:text-white"
@@ -222,58 +209,63 @@ export default function PricingPage() {
             </div>
           </div>
 
-          <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-4 max-w-6xl mx-auto">
             {plans.map((plan) => (
               <div
                 key={plan.id}
                 className={cn(
-                  "flex flex-col rounded-[2.5rem] bg-white p-8 transition-all hover:scale-[1.02] duration-300",
-                  plan.highlight ? "ring-4 ring-white/20" : ""
+                  "flex flex-col rounded-3xl bg-white p-6 transition-all hover:scale-[1.01] duration-300",
+                  plan.highlight ? "ring-2 ring-white/30 shadow-xl" : "shadow-lg"
                 )}
               >
                 <div className="flex-1">
-                  <div className="flex items-center justify-between mb-8">
-                    <span className="text-sm font-bold text-gray-900 uppercase tracking-wider">
+                  <div className="flex items-center justify-between mb-6">
+                    <span className="text-xs font-bold text-gray-900 uppercase tracking-wider">
                       {plan.tierName}
                     </span>
-                    <span className="text-xs font-bold text-[#00D1FF] uppercase tracking-wider">
-                      {plan.tokens}
+                    <span className="text-[10px] font-bold text-[#00D1FF] uppercase tracking-wider">
+                      {plan.credits}
                     </span>
                   </div>
 
-                  <div className="mb-6">
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-6xl font-bold text-gray-900 tracking-tighter">
+                  <div className="mb-5">
+                    <div className="flex items-baseline gap-0.5">
+                      <span className="text-4xl font-bold text-gray-900 tracking-tighter">
                         {plan.name}
                       </span>
                       {plan.priceSub && (
-                        <span className="text-xs font-medium text-gray-500">
+                        <span className="text-[10px] font-medium text-gray-400">
                           {plan.priceSub}
                         </span>
                       )}
                     </div>
-                    <p className="mt-4 text-xs font-medium text-gray-500 h-8">
+                    <p className="mt-3 text-[11px] font-medium text-gray-500 h-10 leading-relaxed">
                       {plan.description}
                     </p>
                   </div>
 
                   <Button
                     onClick={() => handleGetStarted(plan.id)}
-                    className="w-full h-12 rounded-xl bg-black text-white hover:bg-black/90 transition-colors text-sm font-bold mb-10"
+                    className={cn(
+                      "w-full h-10 rounded-lg text-xs font-bold mb-8 transition-colors",
+                      plan.highlight 
+                        ? "bg-blue-600 text-white hover:bg-blue-700" 
+                        : "bg-black text-white hover:bg-black/90"
+                    )}
                     disabled={isLoading}
                   >
                     {isLoading ? 'Loading...' : isUserOnPlan(plan.id) ? 'Current Plan' : 'Get Started'}
                   </Button>
 
-                  <div className="space-y-6">
-                    <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">
+                  <div className="space-y-4">
+                    <h3 className="text-[9px] font-bold text-gray-400 uppercase tracking-[0.2em]">
                       What you get
                     </h3>
-                    <ul className="space-y-4">
+                    <ul className="space-y-3">
                       {plan.features.map((feature) => (
-                        <li key={feature} className="flex items-start gap-3">
+                        <li key={feature} className="flex items-start gap-2.5">
                           <svg
-                            className="w-4 h-4 text-gray-900 shrink-0 mt-0.5"
+                            className="w-3.5 h-3.5 text-gray-900 shrink-0 mt-0.5"
                             viewBox="0 0 24 24"
                             fill="none"
                             xmlns="http://www.w3.org/2000/svg"
@@ -292,7 +284,7 @@ export default function PricingPage() {
                               transform="rotate(45 12 12)"
                             />
                           </svg>
-                          <span className="text-xs font-medium text-gray-700 leading-tight">
+                          <span className="text-[11px] font-medium text-gray-600 leading-tight">
                             {feature}
                           </span>
                         </li>
