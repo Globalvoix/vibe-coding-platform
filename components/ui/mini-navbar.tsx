@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useUIStore } from '@/lib/ui-store';
 import { CREDITS_UPDATED_EVENT } from '@/lib/credits-events';
+import { cn } from '@/lib/utils';
 import { Menu } from 'lucide-react';
 import { ThinksoftLogo } from '@/components/icons/thinksoft';
 import Link from 'next/link';
