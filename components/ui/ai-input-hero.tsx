@@ -233,7 +233,7 @@ export function HeroWave({
               <span className="text-white border-b-2 border-white pb-0.5 min-w-[4px]">
                 {animatedSubtitleWord}
               </span>
-              <span className="ml-1 w-[2px] h-[1.2em] bg-white animate-[blink_1s_step-end_infinite]" />
+              <span className="ml-1 w-[2px] h-[1.2em] bg-white animate-cursor-blink" />
             </span>
           </p>
           <form
