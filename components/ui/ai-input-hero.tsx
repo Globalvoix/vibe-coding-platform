@@ -200,6 +200,15 @@ export function HeroWave({
       className={["relative w-full h-screen bg-white", className].filter(Boolean).join(" ")}
       aria-label="Hero section"
     >
+      <style jsx>{`
+        @keyframes blink {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0; }
+        }
+        .animate-cursor-blink {
+          animation: blink 1s step-end infinite;
+        }
+      `}</style>
       <div className="absolute inset-0 z-0 pointer-events-none">
         <Image
           src="/home-hero-bg.webp"
