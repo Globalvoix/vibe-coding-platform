@@ -112,7 +112,7 @@ export function HeroWave({
   return (
     <section
       ref={containerRef}
-      className={["relative w-full h-screen bg-white", className].filter(Boolean).join(" ")}
+      className={["relative w-full min-h-[90vh] sm:h-screen bg-white", className].filter(Boolean).join(" ")}
       aria-label="Hero section"
     >
       <div className="absolute inset-0 z-0 pointer-events-none">
