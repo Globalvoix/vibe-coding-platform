@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Spinner } from "@/components/ui/spinner";
 import { useAuth, useClerk } from "@clerk/nextjs";
 import { motion } from "framer-motion";
+import { PromptBox } from "./prompt-box";
 
 export type HeroWaveProps = {
   className?: string;
