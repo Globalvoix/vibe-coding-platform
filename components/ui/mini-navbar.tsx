@@ -150,7 +150,7 @@ export function Navbar({ variant = 'default' }: { variant?: NavbarVariant }) {
     </div>
   ) : variant === 'home' ? (
     <SignInButton mode="modal">
-      <button className="inline-flex items-center justify-center rounded-full bg-white px-4 py-1.5 text-xs font-medium text-gray-900 shadow-sm hover:bg-white transition-colors">
+      <button className="inline-flex items-center justify-center rounded-lg bg-white px-4 py-1.5 text-xs font-medium text-gray-900 shadow-sm hover:bg-white transition-colors">
         Sign in / Sign up
       </button>
     </SignInButton>
