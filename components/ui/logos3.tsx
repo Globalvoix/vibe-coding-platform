@@ -92,6 +92,7 @@ const Logos3 = ({
           <Carousel
             opts={{ loop: true }}
             plugins={[AutoScroll({ playOnInit: true })]}
+            className="w-full"
           >
             <CarouselContent className="ml-0">
               {logosToDisplay.map((logo) => (
