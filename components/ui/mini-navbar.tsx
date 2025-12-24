@@ -29,7 +29,7 @@ const AnimatedNavLink = ({ href, children }: { href: string; children: React.Rea
 
 type NavbarVariant = 'default' | 'home';
 
-export function Navbar({ variant = 'default' }: { variant?: NavbarVariant }) {
+export function Navbar({ variant = 'default', theme = 'dark' }: { variant?: NavbarVariant, theme?: 'light' | 'dark' }) {
   const [isOpen, setIsOpen] = useState(false);
   const [headerShapeClass, setHeaderShapeClass] = useState('rounded-full');
   const shapeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -179,6 +179,8 @@ export function Navbar({ variant = 'default' }: { variant?: NavbarVariant }) {
       ? 'fixed top-4 left-1/2 -translate-x-1/2 z-20 w-[calc(100%-2rem)] max-w-6xl px-6 py-2'
       : `fixed top-6 left-1/2 transform -translate-x-1/2 z-20 flex flex-col items-center pl-6 pr-6 py-3 backdrop-blur-sm ${headerShapeClass} border border-gray-300 bg-white/90 w-[calc(100%-2rem)] sm:w-auto transition-[border-radius] duration-0 ease-in-out`
 
+  const isLight = theme === 'light';
+
   return (
     <header className={headerClassName}>
       {variant === 'home' ? (
@@ -186,24 +188,33 @@ export function Navbar({ variant = 'default' }: { variant?: NavbarVariant }) {
           <div className="flex items-center gap-3">
             <button
               onClick={toggleSidebar}
-              className="p-1.5 hover:bg-white/10 rounded-lg transition-colors"
+              className={cn(
+                "p-1.5 rounded-lg transition-colors",
+                isLight ? "hover:bg-gray-100" : "hover:bg-white/10"
+              )}
               title="Toggle app menu"
               aria-label="Toggle app menu"
             >
-              <Menu className="w-5 h-5 text-white" />
+              <Menu className={cn("w-5 h-5", isLight ? "text-gray-900" : "text-white")} />
             </button>
-            <Link href="/" className="flex items-center gap-2 text-white">
+            <Link href="/" className={cn("flex items-center gap-2", isLight ? "text-gray-900" : "text-white")}>
               <ThinksoftLogo className="h-6 w-auto" />
             </Link>
           </div>
 
           <nav className="hidden sm:flex items-center">
-            <div className="flex items-center gap-6 rounded-md bg-white/10 px-6 py-2.5 backdrop-blur-sm">
+            <div className={cn(
+              "flex items-center gap-6 rounded-md px-6 py-2.5 backdrop-blur-sm",
+              isLight ? "bg-gray-100" : "bg-white/10"
+            )}>
               {navLinksData.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="text-sm font-medium text-white/80 hover:text-white transition-colors"
+                  className={cn(
+                    "text-sm font-medium transition-colors",
+                    isLight ? "text-gray-600 hover:text-gray-900" : "text-white/80 hover:text-white"
+                  )}
                 >
                   {link.label}
                 </Link>
@@ -211,7 +222,24 @@ export function Navbar({ variant = 'default' }: { variant?: NavbarVariant }) {
             </div>
           </nav>
 
-          <div className="flex items-center gap-2">{authElement}</div>
+          <div className="flex items-center gap-2">
+            {isSignedIn ? (
+              <div className="flex items-center gap-2">
+                <UserButton afterSignOutUrl="/" />
+              </div>
+            ) : (
+              <SignInButton mode="modal">
+                <button className={cn(
+                  "inline-flex items-center justify-center rounded-md px-5 py-2 text-sm font-medium shadow-sm transition-colors",
+                  isLight
+                    ? "bg-gray-900 text-white hover:bg-gray-800"
+                    : "bg-white text-gray-900 hover:bg-gray-50"
+                )}>
+                  Sign in / Sign up
+                </button>
+              </SignInButton>
+            )}
+          </div>
         </div>
       ) : (
         <>
