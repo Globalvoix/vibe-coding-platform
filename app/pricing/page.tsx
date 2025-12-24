@@ -175,37 +175,6 @@ export default function PricingPage() {
             <p className="text-base sm:text-lg text-white/90">
               Start for free. Upgrade as you go.
             </p>
-
-            {/* Monthly/Yearly Toggle */}
-            <div className="mt-8 flex items-center justify-center">
-              <div className="bg-black/20 backdrop-blur-md p-1 rounded-xl flex items-center border border-white/10">
-                <button
-                  onClick={() => setBillingCycle('monthly')}
-                  className={cn(
-                    "px-5 py-1.5 rounded-lg text-sm font-medium transition-all",
-                    billingCycle === 'monthly'
-                      ? "bg-white text-black shadow-sm"
-                      : "text-white/60 hover:text-white"
-                  )}
-                >
-                  Monthly
-                </button>
-                <button
-                  onClick={() => setBillingCycle('yearly')}
-                  className={cn(
-                    "px-5 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2",
-                    billingCycle === 'yearly'
-                      ? "bg-white text-black shadow-sm"
-                      : "text-white/60 hover:text-white"
-                  )}
-                >
-                  Yearly
-                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-green-500/20 text-green-400 border border-green-500/30">
-                    Save 20%
-                  </span>
-                </button>
-              </div>
-            </div>
           </div>
 
           <div className="grid gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-4 max-w-6xl mx-auto">
