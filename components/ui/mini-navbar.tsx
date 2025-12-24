@@ -150,7 +150,7 @@ export function Navbar({ variant = 'default' }: { variant?: NavbarVariant }) {
     </div>
   ) : variant === 'home' ? (
     <SignInButton mode="modal">
-      <button className="inline-flex items-center justify-center rounded-lg bg-white px-4 py-1.5 text-xs font-medium text-gray-900 shadow-sm hover:bg-white transition-colors">
+      <button className="inline-flex items-center justify-center rounded-md bg-white px-4 py-1.5 text-xs font-medium text-gray-900 shadow-sm hover:bg-white transition-colors">
         Sign in / Sign up
       </button>
     </SignInButton>
@@ -188,7 +188,7 @@ export function Navbar({ variant = 'default' }: { variant?: NavbarVariant }) {
           </Link>
 
           <nav className="hidden sm:flex items-center">
-            <div className="flex items-center gap-5 rounded-lg bg-white/10 px-5 py-2 backdrop-blur-sm">
+            <div className="flex items-center gap-5 rounded-md bg-white/10 px-5 py-2 backdrop-blur-sm">
               {navLinksData.map((link) => (
                 <Link
                   key={link.href}
