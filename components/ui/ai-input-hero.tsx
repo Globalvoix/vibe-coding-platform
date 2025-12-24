@@ -25,25 +25,10 @@ export function HeroWave({
   buttonText = "Generate",
   onPromptSubmit,
 }: HeroWaveProps) {
-  const [prompt, setPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const { isSignedIn } = useAuth();
   const { openSignIn } = useClerk();
-
-  const basePlaceholder = "Make me a";
-  const suggestionsRef = useRef<string[]>([
-    " fitness app",
-    " recipe generator",
-    " marketing landing page",
-    " travel itinerary planner",
-    " blog engine",
-    " customer support chatbot",
-    " personal finance dashboard",
-  ]);
-  const [animatedPlaceholder, setAnimatedPlaceholder] = useState<string>(
-    basePlaceholder
-  );
 
   const baseSubtitlePrefix = "The AI Fullstack Engineer. Create beautiful, production-ready";
   const subtitleWordsRef = useRef<string[]>([
@@ -62,79 +47,7 @@ export function HeroWave({
     running: true,
   });
 
-  const typingStateRef = useRef({
-    suggestionIndex: 0,
-    charIndex: 0,
-    deleting: false,
-    running: true,
-  });
-  const timersRef = useRef<number[]>([]);
   const subtitleTimersRef = useRef<number[]>([]);
-
-  useEffect(() => {
-    typingStateRef.current.running = true;
-    const typeSpeed = 70;
-    const deleteSpeed = 40;
-    const pauseAtEnd = 1200;
-    const pauseBetween = 500;
-
-    function schedule(fn: () => void, delay: number) {
-      const id = window.setTimeout(fn, delay);
-      timersRef.current.push(id);
-    }
-
-    function clearTimers() {
-      for (const id of timersRef.current) window.clearTimeout(id);
-      timersRef.current = [];
-    }
-
-    function step() {
-      if (!typingStateRef.current.running) return;
-      if (prompt !== "") {
-        setAnimatedPlaceholder(basePlaceholder);
-        schedule(step, 300);
-        return;
-      }
-
-      const state = typingStateRef.current;
-      const suggestions = suggestionsRef.current;
-      const current = suggestions[state.suggestionIndex % suggestions.length] || "";
-
-      if (!state.deleting) {
-        const nextIndex = state.charIndex + 1;
-        const next = current.slice(0, nextIndex);
-        setAnimatedPlaceholder(basePlaceholder + next);
-        state.charIndex = nextIndex;
-        if (nextIndex >= current.length) {
-          schedule(() => {
-            state.deleting = true;
-            step();
-          }, pauseAtEnd);
-        } else {
-          schedule(step, typeSpeed);
-        }
-      } else {
-        const nextIndex = Math.max(0, state.charIndex - 1);
-        const next = current.slice(0, nextIndex);
-        setAnimatedPlaceholder(basePlaceholder + next);
-        state.charIndex = nextIndex;
-        if (nextIndex <= 0) {
-          state.deleting = false;
-          state.suggestionIndex = (state.suggestionIndex + 1) % suggestions.length;
-          schedule(step, pauseBetween);
-        } else {
-          schedule(step, deleteSpeed);
-        }
-      }
-    }
-
-    clearTimers();
-    schedule(step, 400);
-    return () => {
-      typingStateRef.current.running = false;
-      clearTimers();
-    };
-  }, [prompt]);
 
   useEffect(() => {
     subtitleTypingStateRef.current.running = true;
@@ -240,9 +153,8 @@ export function HeroWave({
           <div className="mt-6 sm:mt-8 flex items-center justify-center">
             <div className="relative w-full sm:w-[720px] pointer-events-auto">
               <PromptBox
-                placeholder={animatedPlaceholder}
+                placeholder="What can i build for you today ."
                 isLoading={isLoading}
-                onChange={(e) => setPrompt(e.target.value)}
                 onPromptSubmit={async (val) => {
                   if (!isSignedIn) {
                     openSignIn();
