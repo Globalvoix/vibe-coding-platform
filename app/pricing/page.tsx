@@ -20,7 +20,6 @@ export default function PricingPage() {
   const { user, isSignedIn } = useUser()
   const [userSubscription, setUserSubscription] = useState<UserSubscription | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly')
 
   // Checkout links for Lemon Squeezy
   const checkoutLinks: Record<string, string> = {
