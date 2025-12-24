@@ -81,9 +81,9 @@ const Logos3 = ({
   const logosToDisplay = logos && logos.length > 0 ? logos : defaultLogos;
 
   return (
-    <section className={cn("py-10 md:py-12", className)}>
-      <div className="container flex flex-col items-center text-center">
-        <h2 className="my-4 text-sm font-semibold text-gray-900 sm:text-base tracking-tight">
+    <section className={cn("py-10 md:py-12 w-full", className)}>
+      <div className="container mx-auto flex flex-col items-center text-center px-4">
+        <h2 className="my-4 text-xl font-bold text-gray-900 sm:text-2xl md:text-3xl tracking-tight">
           {heading}
         </h2>
       </div>
