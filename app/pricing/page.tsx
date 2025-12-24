@@ -205,7 +205,7 @@ export default function PricingPage() {
     <>
       <AppSidebar />
       <Navbar variant="home" theme="dark" />
-      <main className="relative min-h-screen w-full overflow-hidden flex flex-col items-center justify-center pt-24 pb-16 px-4 sm:px-6">
+      <main className="relative min-h-screen w-full overflow-hidden flex flex-col items-center justify-start pt-16 pb-12 px-4 sm:px-6">
         {/* Background Image - Covers whole screen */}
         <div className="absolute inset-0 z-0 pointer-events-none">
           <Image
