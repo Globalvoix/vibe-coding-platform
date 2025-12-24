@@ -65,12 +65,12 @@ const logos = [
 
 const faqs = [
   {
-    question: "Can I try Rocket for free?",
+    question: "Can I try Thinksoft for free?",
     answer: "Yes. Our Starter plan lets you start building with generous limits- no payment details needed. Upgrade only when you're ready to scale."
   },
   {
     question: "Which plan is best for me?",
-    answer: "If you're exploring or testing, start with the Starter plan for free. For solo creators or startups shipping live apps, the Personal plan is ideal. Rocket and Booster plans are for higher and frequent usage."
+    answer: "If you're exploring or testing, start with the Starter plan for free. For solo creators or startups shipping live apps, the Personal plan is ideal. Thinksoft and Booster plans are for higher and frequent usage."
   },
   {
     question: "What if my tokens are exhausted in any paid plans? Can I buy more tokens?",
