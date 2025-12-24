@@ -128,7 +128,7 @@ export function HeroWave({
           fill
           priority
           sizes="100vw"
-          quality={100}
+          unoptimized
           className="object-cover"
         />
       </div>
