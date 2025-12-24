@@ -7,61 +7,9 @@ import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import { Navbar } from "@/components/ui/mini-navbar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Logos3 } from "@/components/ui/logos3";
 import { ChevronDown } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-
-const logos = [
-  {
-    id: "logo-1",
-    description: "Nvidia",
-    image: "https://svgl.app/library/nvidia-wordmark-light.svg",
-    className: "h-7 w-auto",
-  },
-  {
-    id: "logo-2",
-    description: "Supabase",
-    image: "https://svgl.app/library/supabase_wordmark_light.svg",
-    className: "h-7 w-auto",
-  },
-  {
-    id: "logo-3",
-    description: "OpenAI",
-    image: "https://svgl.app/library/openai_wordmark_light.svg",
-    className: "h-7 w-auto",
-  },
-  {
-    id: "logo-4",
-    description: "Turso",
-    image: "https://svgl.app/library/turso-wordmark-light.svg",
-    className: "h-7 w-auto",
-  },
-  {
-    id: "logo-5",
-    description: "Vercel",
-    image: "https://svgl.app/library/vercel_wordmark.svg",
-    className: "h-7 w-auto",
-  },
-  {
-    id: "logo-6",
-    description: "GitHub",
-    image: "https://svgl.app/library/github_wordmark_light.svg",
-    className: "h-7 w-auto",
-  },
-  {
-    id: "logo-7",
-    description: "Claude AI",
-    image: "https://svgl.app/library/claude-ai-wordmark-icon_light.svg",
-    className: "h-7 w-auto",
-  },
-  {
-    id: "logo-8",
-    description: "Clerk",
-    image: "https://svgl.app/library/clerk-wordmark-light.svg",
-    className: "h-7 w-auto",
-  },
-];
 
 const faqs = [
   {
