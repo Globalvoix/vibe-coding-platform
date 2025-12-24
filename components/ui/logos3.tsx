@@ -1,6 +1,7 @@
 "use client";
 
 import AutoScroll from "embla-carousel-auto-scroll";
+import { cn } from "@/lib/utils";
 
 import {
   Carousel,
@@ -21,61 +22,66 @@ interface Logos3Props {
   className?: string;
 }
 
+const defaultLogos: Logo[] = [
+  {
+    id: "logo-1",
+    description: "Logo 1",
+    image: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/astro-wordmark.svg",
+    className: "h-7 w-auto",
+  },
+  {
+    id: "logo-2",
+    description: "Logo 2",
+    image: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/figma-wordmark.svg",
+    className: "h-7 w-auto",
+  },
+  {
+    id: "logo-3",
+    description: "Logo 3",
+    image: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/nextjs-wordmark.svg",
+    className: "h-7 w-auto",
+  },
+  {
+    id: "logo-4",
+    description: "Logo 4",
+    image: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/react-wordmark.svg",
+    className: "h-7 w-auto",
+  },
+  {
+    id: "logo-5",
+    description: "Logo 5",
+    image: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/shadcn-ui-wordmark.svg",
+    className: "h-7 w-auto",
+  },
+  {
+    id: "logo-6",
+    description: "Logo 6",
+    image: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/supabase-wordmark.svg",
+    className: "h-7 w-auto",
+  },
+  {
+    id: "logo-7",
+    description: "Logo 7",
+    image: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/tailwind-wordmark.svg",
+    className: "h-4 w-auto",
+  },
+  {
+    id: "logo-8",
+    description: "Logo 8",
+    image: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/vercel-wordmark.svg",
+    className: "h-7 w-auto",
+  },
+];
+
 const Logos3 = ({
   heading = "Trusted by these companies",
-  logos = [
-    {
-      id: "logo-1",
-      description: "Logo 1",
-      image: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/astro-wordmark.svg",
-      className: "h-7 w-auto",
-    },
-    {
-      id: "logo-2",
-      description: "Logo 2",
-      image: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/figma-wordmark.svg",
-      className: "h-7 w-auto",
-    },
-    {
-      id: "logo-3",
-      description: "Logo 3",
-      image: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/nextjs-wordmark.svg",
-      className: "h-7 w-auto",
-    },
-    {
-      id: "logo-4",
-      description: "Logo 4",
-      image: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/react-wordmark.svg",
-      className: "h-7 w-auto",
-    },
-    {
-      id: "logo-5",
-      description: "Logo 5",
-      image: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/shadcn-ui-wordmark.svg",
-      className: "h-7 w-auto",
-    },
-    {
-      id: "logo-6",
-      description: "Logo 6",
-      image: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/supabase-wordmark.svg",
-      className: "h-7 w-auto",
-    },
-    {
-      id: "logo-7",
-      description: "Logo 7",
-      image: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/tailwind-wordmark.svg",
-      className: "h-4 w-auto",
-    },
-    {
-      id: "logo-8",
-      description: "Logo 8",
-      image: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/vercel-wordmark.svg",
-      className: "h-7 w-auto",
-    },
-  ],
+  logos = defaultLogos,
+  className,
 }: Logos3Props) => {
+  const logosToDisplay = logos && logos.length > 0 ? logos : defaultLogos;
+
   return (
-    <section className={className}>
+    <section className={cn("py-12 md:py-16 lg:py-20", className)}>
       <div className="container flex flex-col items-center text-center">
         <h1 className="my-6 text-2xl font-bold text-pretty lg:text-4xl">
           {heading}
@@ -88,7 +94,7 @@ const Logos3 = ({
             plugins={[AutoScroll({ playOnInit: true })]}
           >
             <CarouselContent className="ml-0">
-              {logos.map((logo) => (
+              {logosToDisplay.map((logo) => (
                 <CarouselItem
                   key={logo.id}
                   className="flex basis-1/3 justify-center pl-0 sm:basis-1/4 md:basis-1/5 lg:basis-1/6"
