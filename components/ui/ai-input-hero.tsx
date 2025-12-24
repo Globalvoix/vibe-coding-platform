@@ -133,10 +133,10 @@ export function HeroWave({
           <h1 className="text-white text-4xl sm:text-6xl font-semibold tracking-tight">
             {title}
           </h1>
-          <p className="text-white mt-3 sm:mt-4 text-sm sm:text-base flex flex-wrap items-baseline justify-center whitespace-pre-wrap">
-            <span>{baseSubtitlePrefix} </span>
-            <span className="relative inline-flex items-baseline">
-              <span className="text-white min-w-[4px] border-b-2 border-white pb-0.5">
+          <p className="text-white mt-3 sm:mt-4 text-sm sm:text-base text-center">
+            <span className="inline">{baseSubtitlePrefix} </span>
+            <span className="relative inline-flex items-baseline min-w-[120px] text-left">
+              <span className="text-white border-b-2 border-white pb-0.5">
                 {animatedSubtitleWord}
               </span>
               <motion.span
@@ -146,7 +146,7 @@ export function HeroWave({
                   repeat: Infinity,
                   ease: "linear",
                 }}
-                className="inline-block w-[2.5px] h-[1.1em] bg-white ml-0.5 translate-y-[2px]"
+                className="inline-block w-[2px] h-[1em] bg-white ml-1 translate-y-[2px]"
               />
             </span>
           </p>
