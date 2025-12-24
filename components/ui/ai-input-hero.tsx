@@ -219,7 +219,7 @@ export function HeroWave({
           <h1 className="text-white text-3xl sm:text-5xl font-semibold tracking-tight">
             {title}
           </h1>
-          <p className="text-white mt-3 sm:mt-4 text-sm sm:text-base flex flex-wrap items-center justify-center whitespace-pre-wrap gap-x-1">
+          <p className="text-white mt-3 sm:mt-4 text-sm sm:text-base flex flex-wrap items-baseline justify-center whitespace-pre-wrap gap-x-1">
             <span>{baseSubtitlePrefix}</span>
             <span className="relative inline-flex items-baseline">
               <span className="text-white min-w-[4px]">
@@ -232,7 +232,7 @@ export function HeroWave({
                   repeat: Infinity,
                   ease: "linear",
                 }}
-                className="inline-block w-[2px] h-[1em] bg-white ml-0.5 translate-y-[2px]"
+                className="inline-block w-[2px] h-[1em] bg-white ml-0.5 translate-y-[3px]"
               />
             </span>
           </p>
