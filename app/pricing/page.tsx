@@ -7,6 +7,7 @@ import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import { Navbar } from "@/components/ui/mini-navbar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Logos3 } from "@/components/ui/logos3";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 
@@ -265,6 +266,8 @@ export default function PricingPage() {
             ))}
           </div>
         </section>
+
+        <Logos3 />
       </main>
     </>
   );
