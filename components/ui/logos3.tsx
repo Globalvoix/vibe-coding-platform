@@ -27,49 +27,49 @@ const defaultLogos: Logo[] = [
     id: "logo-1",
     description: "Logo 1",
     image: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/astro-wordmark.svg",
-    className: "h-7 w-auto",
+    className: "h-5 w-auto",
   },
   {
     id: "logo-2",
     description: "Logo 2",
     image: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/figma-wordmark.svg",
-    className: "h-7 w-auto",
+    className: "h-5 w-auto",
   },
   {
     id: "logo-3",
     description: "Logo 3",
     image: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/nextjs-wordmark.svg",
-    className: "h-7 w-auto",
+    className: "h-5 w-auto",
   },
   {
     id: "logo-4",
     description: "Logo 4",
     image: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/react-wordmark.svg",
-    className: "h-7 w-auto",
+    className: "h-5 w-auto",
   },
   {
     id: "logo-5",
     description: "Logo 5",
     image: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/shadcn-ui-wordmark.svg",
-    className: "h-7 w-auto",
+    className: "h-5 w-auto",
   },
   {
     id: "logo-6",
     description: "Logo 6",
     image: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/supabase-wordmark.svg",
-    className: "h-7 w-auto",
+    className: "h-5 w-auto",
   },
   {
     id: "logo-7",
     description: "Logo 7",
     image: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/tailwind-wordmark.svg",
-    className: "h-4 w-auto",
+    className: "h-3 w-auto",
   },
   {
     id: "logo-8",
     description: "Logo 8",
     image: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/vercel-wordmark.svg",
-    className: "h-7 w-auto",
+    className: "h-5 w-auto",
   },
 ];
 
@@ -81,13 +81,13 @@ const Logos3 = ({
   const logosToDisplay = logos && logos.length > 0 ? logos : defaultLogos;
 
   return (
-    <section className={cn("py-12 md:py-16 lg:py-20", className)}>
+    <section className={cn("py-8 md:py-10", className)}>
       <div className="container flex flex-col items-center text-center">
-        <h1 className="my-6 text-2xl font-bold text-pretty lg:text-4xl">
+        <h2 className="my-4 text-sm font-semibold text-gray-900 sm:text-base tracking-tight">
           {heading}
-        </h1>
+        </h2>
       </div>
-      <div className="pt-10 md:pt-16 lg:pt-20">
+      <div className="pt-4 md:pt-6">
         <div className="relative mx-auto flex items-center justify-center w-full">
           <Carousel
             opts={{ loop: true }}
