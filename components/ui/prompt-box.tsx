@@ -193,11 +193,13 @@ const toolsList = [
 interface PromptBoxProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   onPromptSubmit?: (value: string) => void;
   isLoading?: boolean;
+  showMic?: boolean;
+  showTools?: boolean;
 }
 
 // --- The Final, Self-Contained PromptBox Component ---
 export const PromptBox = React.forwardRef<HTMLTextAreaElement, PromptBoxProps>(
-  ({ className, onPromptSubmit, isLoading, ...props }, ref) => {
+  ({ className, onPromptSubmit, isLoading, showMic = true, showTools = true, ...props }, ref) => {
     const internalTextareaRef = React.useRef<HTMLTextAreaElement>(null);
     const fileInputRef = React.useRef<HTMLInputElement>(null);
     const [value, setValue] = React.useState("");
@@ -313,32 +315,34 @@ export const PromptBox = React.forwardRef<HTMLTextAreaElement, PromptBoxProps>(
                 </TooltipContent>
               </Tooltip>
 
-              <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <PopoverTrigger asChild>
-                      <button type="button" className="flex h-8 items-center gap-2 rounded-full p-2 text-sm text-foreground dark:text-white transition-colors hover:bg-accent dark:hover:bg-[#515151] focus-visible:outline-none focus-visible:ring-ring">
-                        <Settings2Icon className="h-4 w-4" />
-                        {!selectedTool && 'Tools'}
-                      </button>
-                    </PopoverTrigger>
-                  </TooltipTrigger>
-                  <TooltipContent side="top" showArrow={true}>
-                    <p>Explore Tools</p>
-                  </TooltipContent>
-                </Tooltip>
-                <PopoverContent side="top" align="start">
-                  <div className="flex flex-col gap-1">
-                    {toolsList.map(tool => (
-                      <button key={tool.id} onClick={() => { setSelectedTool(tool.id); setIsPopoverOpen(false); }} className="flex w-full items-center gap-2 rounded-md p-2 text-left text-sm hover:bg-accent dark:hover:bg-[#515151]">
-                        <tool.icon className="h-4 w-4" />
-                        <span>{tool.name}</span>
-                        {tool.extra && <span className="ml-auto text-xs text-muted-foreground dark:text-gray-400">{tool.extra}</span>}
-                      </button>
-                    ))}
-                  </div>
-                </PopoverContent>
-              </Popover>
+              {showTools && (
+                <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <PopoverTrigger asChild>
+                        <button type="button" className="flex h-8 items-center gap-2 rounded-full p-2 text-sm text-foreground dark:text-white transition-colors hover:bg-accent dark:hover:bg-[#515151] focus-visible:outline-none focus-visible:ring-ring">
+                          <Settings2Icon className="h-4 w-4" />
+                          {!selectedTool && 'Tools'}
+                        </button>
+                      </PopoverTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" showArrow={true}>
+                      <p>Explore Tools</p>
+                    </TooltipContent>
+                  </Tooltip>
+                  <PopoverContent side="top" align="start">
+                    <div className="flex flex-col gap-1">
+                      {toolsList.map(tool => (
+                        <button key={tool.id} onClick={() => { setSelectedTool(tool.id); setIsPopoverOpen(false); }} className="flex w-full items-center gap-2 rounded-md p-2 text-left text-sm hover:bg-accent dark:hover:bg-[#515151]">
+                          <tool.icon className="h-4 w-4" />
+                          <span>{tool.name}</span>
+                          {tool.extra && <span className="ml-auto text-xs text-muted-foreground dark:text-gray-400">{tool.extra}</span>}
+                        </button>
+                      ))}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              )}
 
               {activeTool && (
                 <>
@@ -353,17 +357,19 @@ export const PromptBox = React.forwardRef<HTMLTextAreaElement, PromptBoxProps>(
 
               {/* Right-aligned buttons container */}
               <div className="ml-auto flex items-center gap-2">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button type="button" className="flex h-8 w-8 items-center justify-center rounded-full text-foreground dark:text-white transition-colors hover:bg-accent dark:hover:bg-[#515151] focus-visible:outline-none">
-                      <MicIcon className="h-5 w-5" />
-                      <span className="sr-only">Record voice</span>
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="top" showArrow={true}>
-                    <p>Record voice</p>
-                  </TooltipContent>
-                </Tooltip>
+                {showMic && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button type="button" className="flex h-8 w-8 items-center justify-center rounded-full text-foreground dark:text-white transition-colors hover:bg-accent dark:hover:bg-[#515151] focus-visible:outline-none">
+                        <MicIcon className="h-5 w-5" />
+                        <span className="sr-only">Record voice</span>
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" showArrow={true}>
+                      <p>Record voice</p>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
 
                 <Tooltip>
                   <TooltipTrigger asChild>
