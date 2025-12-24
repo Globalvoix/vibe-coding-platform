@@ -222,7 +222,7 @@ export function HeroWave({
           <p className="text-white mt-3 sm:mt-4 text-sm sm:text-base flex flex-wrap items-baseline justify-center whitespace-pre-wrap gap-x-1">
             <span>{baseSubtitlePrefix}</span>
             <span className="relative inline-flex items-baseline">
-              <span className="text-white min-w-[4px] border-b-2 border-white pb-0.5">
+              <span className="text-white min-w-[4px] underline underline-offset-[6px] decoration-2 decoration-white">
                 {animatedSubtitleWord}
               </span>
               <motion.span
