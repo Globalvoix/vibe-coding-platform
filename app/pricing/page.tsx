@@ -7,6 +7,8 @@ import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import { Navbar } from "@/components/ui/mini-navbar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import Image from "next/image";
+import { cn } from "@/lib/utils";
 
 interface UserSubscription {
   plan_id: string
@@ -18,6 +20,7 @@ export default function PricingPage() {
   const { user, isSignedIn } = useUser()
   const [userSubscription, setUserSubscription] = useState<UserSubscription | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly')
 
   // Checkout links for Lemon Squeezy
   const checkoutLinks: Record<string, string> = {
@@ -29,53 +32,77 @@ export default function PricingPage() {
   const plans = [
     {
       id: 'free',
+      tierName: "Starter",
       name: "Free",
-      price: "$0/mo",
-      description: "Get started with AI-generated frontends and a single workspace.",
+      tokens: "1M tokens",
+      price: "$0",
+      priceSub: "",
+      description: "For getting started",
       features: [
-        "20 credits per month",
-        "Up to 5 apps/workspaces",
-        "Unlimited database creations",
-        "Basic frontend generation",
+        "1M tokens",
+        "Public projects",
+        "Data used to train our model",
+        "Templates",
       ],
       highlight: false,
     },
     {
       id: 'pro',
-      name: "Pro",
-      price: "$15/mo",
-      description: "For individual builders shipping advanced frontends every week.",
+      tierName: "Personal",
+      name: "$25",
+      tokens: "5M tokens",
+      price: "$25",
+      priceSub: "/m billed monthly",
+      description: "For light, exploratory, and personal use",
       features: [
-        "200 credits per month",
-        "Unlimited apps/workspaces",
-        "Unlimited database creations",
-        "Advanced frontend generation",
-      ],
-      highlight: true,
-    },
-    {
-      id: 'business',
-      name: "Business",
-      price: "$50/mo",
-      description: "For teams running multiple products and environments.",
-      features: [
-        "600 credits per month",
-        "Unlimited apps/workspaces",
-        "Unlimited database creations",
-        "Advanced frontend generation",
+        "5M tokens",
+        "Credit rollover",
+        "Private projects",
+        "Unlimited custom domains",
+        "Code download",
+        "Remove Rocket branding",
+        "Opt out of data training",
+        "Templates",
       ],
       highlight: false,
     },
     {
-      id: 'enterprise',
-      name: "Enterprise",
-      price: "$500/mo",
-      description: "For organizations that need custom limits and enterprise guarantees.",
+      id: 'business',
+      tierName: "Rocket",
+      name: "$50",
+      tokens: "10.5M tokens",
+      price: "$50",
+      priceSub: "/m billed monthly",
+      description: "For professional and frequent use",
       features: [
-        "6000 credits per month",
-        "Unlimited apps/workspaces",
-        "Unlimited database creations",
-        "Enterprise-grade frontend generation",
+        "10.5M tokens (5% bonus tokens)",
+        "Credit rollover",
+        "Private projects",
+        "Unlimited custom domains",
+        "Code download",
+        "Remove Rocket branding",
+        "Opt out of data training",
+        "Templates",
+      ],
+      highlight: true,
+    },
+    {
+      id: 'enterprise',
+      tierName: "Booster",
+      name: "$100",
+      tokens: "22M tokens",
+      price: "$100",
+      priceSub: "/m billed monthly",
+      description: "For power users' daily use as core tool",
+      features: [
+        "22M tokens (10% bonus tokens)",
+        "Credit rollover",
+        "Private projects",
+        "Unlimited custom domains",
+        "Code download",
+        "Remove Rocket branding",
+        "Opt out of data training",
+        "Templates",
       ],
       highlight: false,
     },
@@ -138,66 +165,141 @@ export default function PricingPage() {
   return (
     <>
       <AppSidebar />
-      <Navbar variant="home" theme="light" />
-      <main className="min-h-screen bg-white flex flex-col items-center pt-32 pb-16 px-4">
-        <section className="w-full max-w-5xl text-center">
-          <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-gray-900">
-            Pricing
-          </h1>
-          <p className="mt-3 text-sm sm:text-base text-gray-600">
-            Choose the plan that fits how you build with Thinksoft.
-          </p>
+      <Navbar variant="home" theme="dark" />
+      <main className="relative min-h-screen w-full overflow-hidden flex flex-col items-center pt-32 pb-24 px-4 sm:px-6">
+        {/* Background Image */}
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F347f46b7c68b478a96530803a3da589f?format=webp&width=2000"
+            alt="Pricing background"
+            fill
+            priority
+            className="object-cover"
+            unoptimized
+          />
+          {/* Subtle overlay to ensure text readability if needed, but the image looks good as is */}
+          <div className="absolute inset-0 bg-black/10" />
+        </div>
 
-          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <section className="relative z-10 w-full max-w-7xl">
+          <div className="text-center mb-12">
+            <h1 className="text-5xl sm:text-6xl font-semibold tracking-tight text-white mb-4">
+              Pricing
+            </h1>
+            <p className="text-lg sm:text-xl text-white/90">
+              Start for free. Upgrade as you go.
+            </p>
+
+            {/* Monthly/Yearly Toggle */}
+            <div className="mt-10 flex items-center justify-center">
+              <div className="bg-black/20 backdrop-blur-md p-1 rounded-xl flex items-center border border-white/10">
+                <button
+                  onClick={() => setBillingCycle('monthly')}
+                  className={cn(
+                    "px-6 py-2 rounded-lg text-sm font-medium transition-all",
+                    billingCycle === 'monthly'
+                      ? "bg-white text-black shadow-sm"
+                      : "text-white/60 hover:text-white"
+                  )}
+                >
+                  Monthly
+                </button>
+                <button
+                  onClick={() => setBillingCycle('yearly')}
+                  className={cn(
+                    "px-6 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2",
+                    billingCycle === 'yearly'
+                      ? "bg-white text-black shadow-sm"
+                      : "text-white/60 hover:text-white"
+                  )}
+                >
+                  Yearly
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-green-500/20 text-green-400 border border-green-500/30">
+                    Save 20%
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-4">
             {plans.map((plan) => (
               <div
                 key={plan.id}
-                className={`flex flex-col justify-between rounded-2xl border bg-white shadow-sm px-5 py-6 text-left ${
-                  plan.highlight
-                    ? "border-blue-600 shadow-md"
-                    : "border-gray-200"
-                }`}
+                className={cn(
+                  "flex flex-col rounded-[2.5rem] bg-white p-8 transition-all hover:scale-[1.02] duration-300",
+                  plan.highlight ? "ring-4 ring-white/20" : ""
+                )}
               >
-                <div>
-                  <div className="flex items-center justify-between gap-2">
-                    <h2 className="text-base font-semibold text-gray-900">
-                      {plan.name}
-                    </h2>
-                    {isUserOnPlan(plan.id) && (
-                      <Badge variant="default" className="text-xs">
-                        Current Plan
-                      </Badge>
-                    )}
+                <div className="flex-1">
+                  <div className="flex items-center justify-between mb-8">
+                    <span className="text-sm font-bold text-gray-900 uppercase tracking-wider">
+                      {plan.tierName}
+                    </span>
+                    <span className="text-xs font-bold text-[#00D1FF] uppercase tracking-wider">
+                      {plan.tokens}
+                    </span>
                   </div>
-                  <p className="mt-2 text-2xl font-semibold text-gray-900">
-                    {plan.price}
-                  </p>
-                  <p className="mt-2 text-xs text-gray-600">
-                    {plan.description}
-                  </p>
-                  <ul className="mt-4 space-y-1 text-xs text-gray-700">
-                    {plan.features.map((feature) => {
-                      const isDatabase = feature.includes('database creations')
-                      return (
-                        <li key={feature} className="flex items-start gap-2">
-                          <span className="mt-[3px] h-1.5 w-1.5 rounded-full bg-blue-600" />
-                          <span className="flex items-center gap-2">
+
+                  <div className="mb-6">
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-6xl font-bold text-gray-900 tracking-tighter">
+                        {plan.name}
+                      </span>
+                      {plan.priceSub && (
+                        <span className="text-xs font-medium text-gray-500">
+                          {plan.priceSub}
+                        </span>
+                      )}
+                    </div>
+                    <p className="mt-4 text-xs font-medium text-gray-500 h-8">
+                      {plan.description}
+                    </p>
+                  </div>
+
+                  <Button
+                    onClick={() => handleGetStarted(plan.id)}
+                    className="w-full h-12 rounded-xl bg-black text-white hover:bg-black/90 transition-colors text-sm font-bold mb-10"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? 'Loading...' : isUserOnPlan(plan.id) ? 'Current Plan' : 'Get Started'}
+                  </Button>
+
+                  <div className="space-y-6">
+                    <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">
+                      What you get
+                    </h3>
+                    <ul className="space-y-4">
+                      {plan.features.map((feature) => (
+                        <li key={feature} className="flex items-start gap-3">
+                          <svg
+                            className="w-4 h-4 text-gray-900 shrink-0 mt-0.5"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M12 4V20M4 12H20"
+                              stroke="currentColor"
+                              strokeWidth="2.5"
+                              strokeLinecap="round"
+                            />
+                            <path
+                              d="M12 4L12 20M4 12L20 12"
+                              stroke="currentColor"
+                              strokeWidth="2.5"
+                              strokeLinecap="round"
+                              transform="rotate(45 12 12)"
+                            />
+                          </svg>
+                          <span className="text-xs font-medium text-gray-700 leading-tight">
                             {feature}
                           </span>
                         </li>
-                      )
-                    })}
-                  </ul>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
-
-                <Button
-                  onClick={() => handleGetStarted(plan.id)}
-                  className="mt-6 w-full text-xs"
-                  variant={plan.highlight ? "default" : "outline"}
-                  disabled={isLoading}
-                >
-                  {isLoading ? 'Loading...' : isUserOnPlan(plan.id) ? 'Current Plan' : 'Get started'}
-                </Button>
               </div>
             ))}
           </div>
