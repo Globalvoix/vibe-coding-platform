@@ -201,7 +201,8 @@ export function Navbar({ variant = 'default', theme = 'dark' }: { variant?: Navb
   return (
     <header className={headerClassName}>
       {variant === 'home' ? (
-        <div className={cn("flex items-center justify-between w-full", isScrolled ? "gap-8" : "gap-6")}>
+        <>
+          <div className={cn("flex items-center justify-between w-full", isScrolled ? "gap-8" : "gap-6")}>
           <div className="flex items-center gap-3">
             <button
               onClick={toggleSidebar}
@@ -259,7 +260,69 @@ export function Navbar({ variant = 'default', theme = 'dark' }: { variant?: Navb
               </SignInButton>
             )}
           </div>
+
+          <button
+            className="sm:hidden flex items-center justify-center w-8 h-8 transition-colors shrink-0"
+            onClick={toggleMenu}
+            aria-label={isOpen ? 'Close Menu' : 'Open Menu'}
+          >
+            {isOpen ? (
+              <svg
+                className={cn("w-6 h-6", isScrolled ? "text-white" : isCurrentlyLight ? "text-gray-900" : "text-white")}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M6 18L18 6M6 6l12 12"
+                ></path>
+              </svg>
+            ) : (
+              <svg
+                className={cn("w-6 h-6", isScrolled ? "text-white" : isCurrentlyLight ? "text-gray-900" : "text-white")}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M4 6h16M4 12h16M4 18h16"
+                ></path>
+              </svg>
+            )}
+          </button>
         </div>
+
+        <div
+          className={`sm:hidden flex flex-col items-center w-full transition-all ease-in-out duration-300 overflow-hidden ${
+            isOpen
+              ? 'max-h-[1000px] opacity-100 pt-4'
+              : 'max-h-0 opacity-0 pt-0 pointer-events-none'
+          }`}
+        >
+          <nav className="flex flex-col items-center space-y-4 text-base w-full">
+            {navLinksData.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={cn(
+                  "font-medium transition-colors w-full text-center",
+                  isScrolled ? "text-white hover:text-white/80" : isCurrentlyLight ? "text-gray-900 hover:text-gray-700" : "text-white hover:text-white/80"
+                )}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+        </div>
+        </>
       ) : (
         <>
           <div className="flex items-center justify-between w-full gap-x-6 sm:gap-x-8">
