@@ -8,6 +8,7 @@ import { Navbar } from "@/components/ui/mini-navbar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Logos3 } from "@/components/ui/logos3";
+import { ChevronDown } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 
@@ -60,6 +61,45 @@ const logos = [
     image: "https://svgl.app/library/clerk-wordmark-light.svg",
     className: "h-7 w-auto",
   },
+];
+
+const faqs = [
+  {
+    question: "Can I try Rocket for free?",
+    answer: "Yes. Our Starter plan lets you start building with generous limits- no payment details needed. Upgrade only when you're ready to scale."
+  },
+  {
+    question: "Which plan is best for me?",
+    answer: "If you're exploring or testing, start with the Starter plan for free. For solo creators or startups shipping live apps, the Personal plan is ideal. Rocket and Booster plans are for higher and frequent usage."
+  },
+  {
+    question: "What if my tokens are exhausted in any paid plans? Can I buy more tokens?",
+    answer: "You'll get notified before hitting limits. If you run out of tokens, you can purchase additional tokens anytime- no need to change your plan. And if you need consistently more tokens, upgrading to a higher plan which gives you better value."
+  },
+  {
+    question: "If I have not used my token limits in any particular month, does credit roll over?",
+    answer: "No unused tokens don't roll-over. They are lost."
+  },
+  {
+    question: "Do I need any long-term commitment?",
+    answer: "No, you can subscribe on a monthly basis and cancel at any time."
+  },
+  {
+    question: "Do I need to provide credit card details to start?",
+    answer: "Nope. You can sign up and build for free with our Starter plan without a card."
+  },
+  {
+    question: "What payment methods do you accept?",
+    answer: "We accept all major credit and debit cards and payment via Paypal."
+  },
+  {
+    question: "Can I switch or cancel my subscription anytime?",
+    answer: "Yes. You can upgrade, downgrade, or cancel anytime- your projects and data remain yours. But you dont get a refund."
+  },
+  {
+    question: "How do refunds work?",
+    answer: "We have a strict no refund under any circumstances policy."
+  }
 ];
 
 interface UserSubscription {
