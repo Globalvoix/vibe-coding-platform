@@ -150,7 +150,7 @@ export function Navbar({ variant = 'default' }: { variant?: NavbarVariant }) {
     </div>
   ) : variant === 'home' ? (
     <SignInButton mode="modal">
-      <button className="inline-flex items-center justify-center rounded-full bg-white/90 px-4 py-1.5 text-xs font-medium text-gray-900 shadow-sm hover:bg-white transition-colors">
+      <button className="inline-flex items-center justify-center rounded-full bg-white px-4 py-1.5 text-xs font-medium text-gray-900 shadow-sm hover:bg-white transition-colors">
         Sign in / Sign up
       </button>
     </SignInButton>
@@ -175,7 +175,7 @@ export function Navbar({ variant = 'default' }: { variant?: NavbarVariant }) {
 
   const headerClassName =
     variant === 'home'
-      ? 'fixed top-4 left-1/2 -translate-x-1/2 z-20 w-[calc(100%-2rem)] max-w-6xl rounded-full border border-white/10 bg-black/20 px-6 py-2'
+      ? 'fixed top-4 left-1/2 -translate-x-1/2 z-20 w-[calc(100%-2rem)] max-w-6xl px-6 py-2'
       : `fixed top-6 left-1/2 transform -translate-x-1/2 z-20 flex flex-col items-center pl-6 pr-6 py-3 backdrop-blur-sm ${headerShapeClass} border border-gray-300 bg-white/90 w-[calc(100%-2rem)] sm:w-auto transition-[border-radius] duration-0 ease-in-out`
 
   return (
@@ -188,7 +188,7 @@ export function Navbar({ variant = 'default' }: { variant?: NavbarVariant }) {
           </Link>
 
           <nav className="hidden sm:flex items-center">
-            <div className="flex items-center gap-5 rounded-full bg-white/10 px-5 py-1.5">
+            <div className="flex items-center gap-5">
               {navLinksData.map((link) => (
                 <Link
                   key={link.href}
