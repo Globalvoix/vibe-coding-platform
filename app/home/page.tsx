@@ -254,6 +254,27 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
+        <section className="relative h-screen min-h-[600px] flex items-center justify-center px-4 overflow-hidden">
+          <video
+            autoPlay
+            muted
+            loop
+            className="absolute inset-0 w-full h-full object-cover"
+          >
+            <source src="https://cdn.builder.io/o/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F564828ee0283404ca22d62e2577662bc?alt=media&token=485ba4fa-a8d0-41d6-811e-e76285adad63&apiKey=1d734cd0ef68491eb64e3e5bf6a74b6f" type="video/mp4" />
+          </video>
+          <div className="absolute inset-0 bg-black/40" />
+          <div className="relative z-10 flex flex-col items-center justify-center text-center">
+            <h2 className="text-4xl sm:text-5xl font-normal text-white mb-6">
+              Available now in<br />
+              Thinksoft.
+            </h2>
+            <button className="px-6 py-2 rounded-full bg-white text-xs font-bold text-gray-900 hover:bg-gray-100 transition-all duration-300 uppercase tracking-wider">
+              Try Now
+            </button>
+          </div>
+        </section>
       </div>
     </>
   );
