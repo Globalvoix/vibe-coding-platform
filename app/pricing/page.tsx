@@ -364,14 +364,6 @@ export default function PricingPage() {
         </section>
       </main>
 
-      <section className="w-full bg-white py-12 sm:py-16">
-        <Logos3
-          heading="Trusted by 101K+ users in 80+ countries"
-          logos={logos}
-          className="w-full"
-        />
-      </section>
-
       {/* FAQ Section */}
       <section className="w-full bg-white pb-24 px-4 sm:px-6">
         <div className="max-w-3xl mx-auto">
