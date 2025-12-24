@@ -219,7 +219,7 @@ export function HeroWave({
             {title}
           </h1>
           <p className="text-white/80 mt-3 sm:mt-4 text-sm sm:text-base">
-            {subtitle}
+            {baseSubtitlePrefix} <span className="inline-block min-w-[80px]">{animatedSubtitleWord}</span>
           </p>
           <form
             className="mt-6 sm:mt-8 flex items-center justify-center"
