@@ -130,7 +130,7 @@ export function HeroWave({
       <Navbar variant="home" />
       <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none p-6">
         <div className="max-w-3xl w-full text-center pointer-events-auto">
-          <h1 className="text-white text-3xl sm:text-5xl font-semibold tracking-tight">
+          <h1 className="text-white text-4xl sm:text-6xl font-semibold tracking-tight">
             {title}
           </h1>
           <p className="text-white mt-3 sm:mt-4 text-sm sm:text-base flex flex-wrap items-baseline justify-center whitespace-pre-wrap">

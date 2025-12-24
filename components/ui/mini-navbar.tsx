@@ -151,7 +151,7 @@ export function Navbar({ variant = 'default' }: { variant?: NavbarVariant }) {
     </div>
   ) : variant === 'home' ? (
     <SignInButton mode="modal">
-      <button className="inline-flex items-center justify-center rounded-md bg-white px-4 py-1.5 text-xs font-medium text-gray-900 shadow-sm hover:bg-white transition-colors">
+      <button className="inline-flex items-center justify-center rounded-md bg-white px-5 py-2 text-sm font-medium text-gray-900 shadow-sm hover:bg-white transition-colors">
         Sign in / Sign up
       </button>
     </SignInButton>
@@ -184,16 +184,16 @@ export function Navbar({ variant = 'default' }: { variant?: NavbarVariant }) {
       {variant === 'home' ? (
         <div className="flex items-center justify-between gap-6">
           <Link href="/" className="flex items-center gap-2 text-white">
-            <ThinksoftLogo className="h-5 w-auto" />
+            <ThinksoftLogo className="h-6 w-auto" />
           </Link>
 
           <nav className="hidden sm:flex items-center">
-            <div className="flex items-center gap-5 rounded-md bg-white/10 px-5 py-2 backdrop-blur-sm">
+            <div className="flex items-center gap-6 rounded-md bg-white/10 px-6 py-2.5 backdrop-blur-sm">
               {navLinksData.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="text-xs font-medium text-white/80 hover:text-white transition-colors"
+                  className="text-sm font-medium text-white/80 hover:text-white transition-colors"
                 >
                   {link.label}
                 </Link>
