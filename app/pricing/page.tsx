@@ -371,6 +371,46 @@ export default function PricingPage() {
           className="w-full"
         />
       </section>
+
+      {/* FAQ Section */}
+      <section className="w-full bg-white pb-24 px-4 sm:px-6">
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-3xl font-bold text-center mb-12 text-gray-900">FAQs</h2>
+          <div className="space-y-3">
+            {faqs.map((faq, index) => (
+              <div
+                key={index}
+                className="rounded-xl bg-[#F5F5F3] overflow-hidden transition-all duration-200"
+              >
+                <button
+                  onClick={() => toggleFaq(index)}
+                  className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-gray-200/50 transition-colors"
+                >
+                  <span className="text-sm font-medium text-gray-900 pr-8">
+                    {faq.question}
+                  </span>
+                  <ChevronDown
+                    className={cn(
+                      "w-4 h-4 text-gray-500 transition-transform duration-200",
+                      openFaq === index && "rotate-180"
+                    )}
+                  />
+                </button>
+                <div
+                  className={cn(
+                    "px-6 overflow-hidden transition-all duration-200 ease-in-out",
+                    openFaq === index ? "max-h-96 pb-5" : "max-h-0"
+                  )}
+                >
+                  <p className="text-sm text-gray-600 leading-relaxed">
+                    {faq.answer}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
     </>
   );
 }
