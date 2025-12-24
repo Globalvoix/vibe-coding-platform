@@ -188,31 +188,34 @@ export default function Page() {
               <div className="flex flex-col w-full">
                 <div className="border-t border-gray-900/10 py-10 group cursor-pointer transition-colors hover:bg-black/5 px-4 -mx-4 rounded-xl">
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-xl font-semibold text-gray-900">TS-1</h3>
+                    <h3 className="text-xl font-semibold text-gray-900">Claude 4.5 Sonnet</h3>
                     <ArrowUpRight className="w-5 h-5 text-gray-400 group-hover:text-gray-900 transition-colors" />
                   </div>
                   <p className="text-sm text-gray-500 max-w-sm leading-relaxed">
-                    A state-of-the-art model built to interact with the digital world. A major step towards universal software simulation.
+                    Advanced reasoning and multi-step problem solving. Perfect for complex architectural decisions and intelligent code generation workflows.
                   </p>
                 </div>
 
                 <div className="border-t border-gray-900/10 py-10 group cursor-pointer transition-colors hover:bg-black/5 px-4 -mx-4 rounded-xl">
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-xl font-semibold text-gray-900">Code-4.5</h3>
+                    <h3 className="text-xl font-semibold text-gray-900">GPT-5</h3>
                     <ArrowUpRight className="w-5 h-5 text-gray-400 group-hover:text-gray-900 transition-colors" />
                   </div>
                   <p className="text-sm text-gray-500 max-w-sm leading-relaxed">
-                    The world's best code model, featuring state-of-the-art logic, prompt adherence and 40% cheaper operational costs.
+                    Next-generation language model with superior performance and reasoning capabilities. Optimized for rapid iteration and production-grade output.
                   </p>
                 </div>
 
                 <div className="border-t border-gray-900/10 py-10 group cursor-pointer border-b border-gray-900/10 transition-colors hover:bg-black/5 px-4 -mx-4 rounded-xl">
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-xl font-semibold text-gray-900">Enterprise Stack</h3>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-xl font-semibold text-gray-900">Gemini 3 Pro</h3>
+                      <span className="text-xs font-semibold px-2 py-1 bg-gray-100 text-gray-600 rounded-full uppercase tracking-wider">Coming Soon</span>
+                    </div>
                     <ArrowUpRight className="w-5 h-5 text-gray-400 group-hover:text-gray-900 transition-colors" />
                   </div>
                   <p className="text-sm text-gray-500 max-w-sm leading-relaxed">
-                    Our research effort to build AI systems that understand enterprise-grade backend and production-ready frontend dynamics.
+                    Google's latest multimodal AI with enhanced vision and reasoning. Bringing unified intelligence for building intelligent fullstack applications.
                   </p>
                 </div>
               </div>
