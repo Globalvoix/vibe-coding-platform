@@ -7,9 +7,44 @@ import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import { Navbar } from "@/components/ui/mini-navbar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Logos3 } from "@/components/ui/logos3";
+import { LogoCloud } from "@/components/ui/logo-cloud-3";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+
+const logos = [
+  {
+    src: "https://svgl.app/library/nvidia-wordmark-light.svg",
+    alt: "Nvidia Logo",
+  },
+  {
+    src: "https://svgl.app/library/supabase_wordmark_light.svg",
+    alt: "Supabase Logo",
+  },
+  {
+    src: "https://svgl.app/library/openai_wordmark_light.svg",
+    alt: "OpenAI Logo",
+  },
+  {
+    src: "https://svgl.app/library/turso-wordmark-light.svg",
+    alt: "Turso Logo",
+  },
+  {
+    src: "https://svgl.app/library/vercel_wordmark.svg",
+    alt: "Vercel Logo",
+  },
+  {
+    src: "https://svgl.app/library/github_wordmark_light.svg",
+    alt: "GitHub Logo",
+  },
+  {
+    src: "https://svgl.app/library/claude-ai-wordmark-icon_light.svg",
+    alt: "Claude AI Logo",
+  },
+  {
+    src: "https://svgl.app/library/clerk-wordmark-light.svg",
+    alt: "Clerk Logo",
+  },
+];
 
 interface UserSubscription {
   plan_id: string
@@ -267,7 +302,16 @@ export default function PricingPage() {
           </div>
         </section>
 
-        <Logos3 />
+        <section className="relative mx-auto max-w-3xl mt-24 mb-12 z-10">
+          <h2 className="mb-5 text-center font-medium text-white text-xl tracking-tight md:text-3xl">
+            <span className="text-white/60">Trusted by experts.</span>
+            <br />
+            <span className="font-semibold">Used by the leaders.</span>
+          </h2>
+          <div className="mx-auto my-5 h-px max-w-sm bg-white/20 [mask-image:linear-gradient(to_right,transparent,black,transparent)]" />
+          <LogoCloud logos={logos} />
+          <div className="mt-5 h-px bg-white/20 [mask-image:linear-gradient(to_right,transparent,black,transparent)]" />
+        </section>
       </main>
     </>
   );
