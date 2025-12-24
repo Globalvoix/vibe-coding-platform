@@ -6,16 +6,9 @@ import Image from "next/image";
 import { Spinner } from "@/components/ui/spinner";
 import { useAuth, useClerk } from "@clerk/nextjs";
 import { motion } from "framer-motion";
-import { PromptBox } from "./prompt-box";
-
-export type HeroWaveProps = {
-  className?: string;
-  title?: string;
-  subtitle?: string;
-  placeholder?: string;
-  buttonText?: string;
-  onPromptSubmit?: (value: string) => void;
-};
+import { ChevronRight, ChevronDown } from "lucide-react";
+import Image from "next/image";
+import { motion } from "framer-motion";
 
 export function HeroWave({
   className,
@@ -29,6 +22,13 @@ export function HeroWave({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const { isSignedIn } = useAuth();
   const { openSignIn } = useClerk();
+
+  const scrollToNext = () => {
+    const nextSection = containerRef.current?.nextElementSibling;
+    if (nextSection) {
+      nextSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   const baseSubtitlePrefix = "The AI Fullstack Engineer. Create beautiful, production-ready";
   const subtitleWordsRef = useRef<string[]>([
@@ -178,6 +178,17 @@ export function HeroWave({
           </div>
         </div>
       </div>
+
+      <motion.button
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 2, duration: 1, repeat: Infinity, repeatType: "reverse" }}
+        onClick={scrollToNext}
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 text-white/50 hover:text-white transition-colors cursor-pointer flex flex-col items-center gap-2"
+      >
+        <span className="text-[10px] uppercase tracking-widest font-medium">Scroll to explore</span>
+        <ChevronDown className="w-5 h-5" />
+      </motion.button>
     </section>
   );
 }
