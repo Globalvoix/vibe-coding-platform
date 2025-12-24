@@ -183,9 +183,19 @@ export function Navbar({ variant = 'default' }: { variant?: NavbarVariant }) {
     <header className={headerClassName}>
       {variant === 'home' ? (
         <div className="flex items-center justify-between gap-6">
-          <Link href="/" className="flex items-center gap-2 text-white">
-            <ThinksoftLogo className="h-6 w-auto" />
-          </Link>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={toggleSidebar}
+              className="p-1.5 hover:bg-white/10 rounded-lg transition-colors"
+              title="Toggle app menu"
+              aria-label="Toggle app menu"
+            >
+              <Menu className="w-5 h-5 text-white" />
+            </button>
+            <Link href="/" className="flex items-center gap-2 text-white">
+              <ThinksoftLogo className="h-6 w-auto" />
+            </Link>
+          </div>
 
           <nav className="hidden sm:flex items-center">
             <div className="flex items-center gap-6 rounded-md bg-white/10 px-6 py-2.5 backdrop-blur-sm">
