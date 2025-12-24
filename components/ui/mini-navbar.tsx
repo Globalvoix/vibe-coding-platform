@@ -175,7 +175,7 @@ export function Navbar({ variant = 'default' }: { variant?: NavbarVariant }) {
 
   const headerClassName =
     variant === 'home'
-      ? 'fixed top-4 left-1/2 -translate-x-1/2 z-20 w-[calc(100%-2rem)] max-w-6xl rounded-full border border-white/10 bg-black/20 px-6 py-2 backdrop-blur-sm'
+      ? 'fixed top-4 left-1/2 -translate-x-1/2 z-20 w-[calc(100%-2rem)] max-w-6xl rounded-full border border-white/10 bg-black/20 px-6 py-2'
       : `fixed top-6 left-1/2 transform -translate-x-1/2 z-20 flex flex-col items-center pl-6 pr-6 py-3 backdrop-blur-sm ${headerShapeClass} border border-gray-300 bg-white/90 w-[calc(100%-2rem)] sm:w-auto transition-[border-radius] duration-0 ease-in-out`
 
   return (
