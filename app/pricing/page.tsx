@@ -112,6 +112,11 @@ export default function PricingPage() {
   const { user, isSignedIn } = useUser()
   const [userSubscription, setUserSubscription] = useState<UserSubscription | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [openFaq, setOpenFaq] = useState<number | null>(null)
+
+  const toggleFaq = (index: number) => {
+    setOpenFaq(openFaq === index ? null : index)
+  }
 
   // Checkout links for Lemon Squeezy
   const checkoutLinks: Record<string, string> = {
