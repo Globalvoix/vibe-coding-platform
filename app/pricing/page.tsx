@@ -221,7 +221,7 @@ export default function PricingPage() {
         </div>
 
         <section className="relative z-10 w-full max-w-6xl">
-          <div className="text-center mb-10">
+          <div className="text-center mb-8">
             <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight text-white mb-3">
               Pricing
             </h1>
@@ -319,7 +319,7 @@ export default function PricingPage() {
         </section>
       </main>
 
-      <section className="w-full bg-white py-10 sm:py-12">
+      <section className="w-full bg-white py-6 sm:py-8">
         <Logos3
           heading="Trusted by 101K+ users in 80+ countries"
           logos={logos}
