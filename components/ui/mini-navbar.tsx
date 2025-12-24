@@ -32,6 +32,7 @@ type NavbarVariant = 'default' | 'home';
 
 export function Navbar({ variant = 'default', theme = 'dark' }: { variant?: NavbarVariant, theme?: 'light' | 'dark' }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const [headerShapeClass, setHeaderShapeClass] = useState('rounded-full');
   const shapeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { toggleSidebar } = useUIStore();
@@ -43,6 +44,15 @@ export function Navbar({ variant = 'default', theme = 'dark' }: { variant?: Navb
   const toggleMenu = () => {
     setIsOpen(!isOpen);
   };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     if (shapeTimeoutRef.current) {
@@ -177,44 +187,50 @@ export function Navbar({ variant = 'default', theme = 'dark' }: { variant?: Navb
 
   const headerClassName =
     variant === 'home'
-      ? 'fixed top-4 left-1/2 -translate-x-1/2 z-20 w-[calc(100%-2rem)] max-w-6xl px-6 py-2'
+      ? cn(
+          'fixed top-4 left-1/2 -translate-x-1/2 z-20 transition-all duration-300 ease-in-out',
+          isScrolled
+            ? 'w-auto px-6 py-2 rounded-full bg-black shadow-lg border border-white/10'
+            : 'w-[calc(100%-2rem)] max-w-6xl px-6 py-2'
+        )
       : `fixed top-6 left-1/2 transform -translate-x-1/2 z-20 flex flex-col items-center pl-6 pr-6 py-3 backdrop-blur-sm ${headerShapeClass} border border-gray-300 bg-white/90 w-[calc(100%-2rem)] sm:w-auto transition-[border-radius] duration-0 ease-in-out`
 
   const isLight = theme === 'light';
+  const isCurrentlyLight = isLight && !isScrolled;
 
   return (
     <header className={headerClassName}>
       {variant === 'home' ? (
-        <div className="flex items-center justify-between gap-6">
+        <div className={cn("flex items-center justify-between w-full", isScrolled ? "gap-8" : "gap-6")}>
           <div className="flex items-center gap-3">
             <button
               onClick={toggleSidebar}
               className={cn(
                 "p-1.5 rounded-lg transition-colors",
-                isLight ? "hover:bg-gray-100" : "hover:bg-white/10"
+                isScrolled ? "hover:bg-white/10" : isCurrentlyLight ? "hover:bg-gray-100" : "hover:bg-white/10"
               )}
               title="Toggle app menu"
               aria-label="Toggle app menu"
             >
-              <Menu className={cn("w-5 h-5", isLight ? "text-gray-900" : "text-white")} />
+              <Menu className={cn("w-5 h-5", isScrolled ? "text-white" : isCurrentlyLight ? "text-gray-900" : "text-white")} />
             </button>
-            <Link href="/" className={cn("flex items-center gap-2", isLight ? "text-gray-900" : "text-white")}>
+            <Link href="/" className={cn("flex items-center gap-2 shrink-0", isScrolled ? "text-white" : isCurrentlyLight ? "text-gray-900" : "text-white")}>
               <ThinksoftLogo className="h-6 w-auto" />
             </Link>
           </div>
 
-          <nav className="hidden sm:flex items-center">
+          <nav className="hidden sm:flex items-center mx-4">
             <div className={cn(
-              "flex items-center gap-6 rounded-md px-6 py-2.5 backdrop-blur-sm",
-              isLight ? "bg-gray-100" : "bg-white/10"
+              "flex items-center gap-6 rounded-md px-6 py-2.5 backdrop-blur-sm transition-all duration-300",
+              isScrolled ? "bg-transparent px-0 py-0" : isCurrentlyLight ? "bg-gray-100" : "bg-white/10"
             )}>
               {navLinksData.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
                   className={cn(
-                    "text-sm font-medium transition-colors",
-                    isLight ? "text-gray-600 hover:text-gray-900" : "text-white/80 hover:text-white"
+                    "text-sm font-medium transition-colors whitespace-nowrap",
+                    isScrolled ? "text-white/80 hover:text-white" : isCurrentlyLight ? "text-gray-600 hover:text-gray-900" : "text-white/80 hover:text-white"
                   )}
                 >
                   {link.label}
@@ -223,7 +239,7 @@ export function Navbar({ variant = 'default', theme = 'dark' }: { variant?: Navb
             </div>
           </nav>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             {isSignedIn ? (
               <div className="flex items-center gap-2">
                 <UserButton afterSignOutUrl="/" />
@@ -231,8 +247,10 @@ export function Navbar({ variant = 'default', theme = 'dark' }: { variant?: Navb
             ) : (
               <SignInButton mode="modal">
                 <button className={cn(
-                  "inline-flex items-center justify-center rounded-md px-5 py-2 text-sm font-medium shadow-sm transition-colors",
-                  isLight
+                  "inline-flex items-center justify-center rounded-md px-5 py-2 text-sm font-medium shadow-sm transition-colors whitespace-nowrap",
+                  isScrolled
+                    ? "bg-white text-black hover:bg-gray-100"
+                    : isCurrentlyLight
                     ? "bg-gray-900 text-white hover:bg-gray-800"
                     : "bg-white text-gray-900 hover:bg-gray-50"
                 )}>
