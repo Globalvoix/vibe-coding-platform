@@ -134,6 +134,66 @@ export function HeroWave({
     };
   }, [prompt]);
 
+  useEffect(() => {
+    subtitleTypingStateRef.current.running = true;
+    const typeSpeed = 70;
+    const deleteSpeed = 40;
+    const pauseAtEnd = 1200;
+    const pauseBetween = 500;
+
+    function schedule(fn: () => void, delay: number) {
+      const id = window.setTimeout(fn, delay);
+      subtitleTimersRef.current.push(id);
+    }
+
+    function clearTimers() {
+      for (const id of subtitleTimersRef.current) window.clearTimeout(id);
+      subtitleTimersRef.current = [];
+    }
+
+    function step() {
+      if (!subtitleTypingStateRef.current.running) return;
+
+      const state = subtitleTypingStateRef.current;
+      const words = subtitleWordsRef.current;
+      const current = words[state.wordIndex % words.length] || "";
+
+      if (!state.deleting) {
+        const nextIndex = state.charIndex + 1;
+        const next = current.slice(0, nextIndex);
+        setAnimatedSubtitleWord(next);
+        state.charIndex = nextIndex;
+        if (nextIndex >= current.length) {
+          schedule(() => {
+            state.deleting = true;
+            step();
+          }, pauseAtEnd);
+        } else {
+          schedule(step, typeSpeed);
+        }
+      } else {
+        const nextIndex = Math.max(0, state.charIndex - 1);
+        const next = current.slice(0, nextIndex);
+        setAnimatedSubtitleWord(next);
+        state.charIndex = nextIndex;
+        if (nextIndex <= 0) {
+          state.deleting = false;
+          state.wordIndex = (state.wordIndex + 1) % words.length;
+          schedule(step, pauseBetween);
+        } else {
+          schedule(step, deleteSpeed);
+        }
+      }
+    }
+
+    clearTimers();
+    schedule(step, 400);
+    return () => {
+      subtitleTypingStateRef.current.running = false;
+      clearTimers();
+    };
+  }, []);
+
   return (
     <section
       ref={containerRef}
