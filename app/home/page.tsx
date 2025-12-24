@@ -242,18 +242,35 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="relative py-32 sm:py-40 px-4 overflow-hidden bg-[url('https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F8bbb18fa1c314fc691551fd3bdaeae17?format=webp&width=800')] bg-cover bg-center bg-no-repeat">
-          <div className="absolute inset-0 bg-black/40" />
-          <div className="relative mx-auto max-w-3xl text-center">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight text-white mb-8">
-              Ready to Build?
-            </h2>
-            <button
-              onClick={() => handlePromptSubmit('')}
-              className="inline-flex items-center justify-center rounded-full bg-white px-8 py-3 text-sm font-semibold text-gray-900 hover:bg-gray-100 transition-colors"
-            >
-              Start Building
-            </button>
+        <section className="relative py-24 sm:py-32 px-4 overflow-hidden bg-[#0A0A0A]">
+          <div className="relative mx-auto max-w-6xl">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+              <div>
+                <h2 className="text-4xl sm:text-5xl md:text-6xl font-normal tracking-tight text-white leading-[1.1]">
+                  Generate fullstack <br />
+                  software better with AI
+                </h2>
+              </div>
+              <div className="flex flex-col items-start md:pl-12">
+                <p className="text-lg text-gray-400 mb-10 max-w-md leading-relaxed">
+                  From first prompt to full deployment, create apps that work with your data, your systems, and your rules.
+                </p>
+                <div className="flex flex-wrap gap-4">
+                  <button
+                    onClick={() => handlePromptSubmit('')}
+                    className="inline-flex items-center justify-center rounded-full bg-[#E5E7EB] px-8 py-4 text-sm font-semibold text-gray-900 hover:bg-white transition-colors min-w-[160px]"
+                  >
+                    Start for free
+                  </button>
+                  <button
+                    onClick={() => router.push('/pricing')}
+                    className="inline-flex items-center justify-center rounded-full bg-[#1A1A1A] border border-gray-800 px-8 py-4 text-sm font-semibold text-white hover:bg-gray-800 transition-colors min-w-[160px]"
+                  >
+                    Book a demo
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
       </div>
