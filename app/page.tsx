@@ -238,7 +238,10 @@ export default function Page() {
               Available now in<br />
               Thinksoft.
             </h2>
-            <button className="px-6 py-2 rounded-full bg-white text-xs font-bold text-gray-900 hover:bg-gray-100 transition-all duration-300 uppercase tracking-wider">
+            <button
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              className="px-6 py-2 rounded-full bg-white text-xs font-bold text-gray-900 hover:bg-gray-100 transition-all duration-300 uppercase tracking-wider"
+            >
               Try Now
             </button>
           </div>
