@@ -313,7 +313,7 @@ export default function PricingPage() {
       </main>
 
       {/* FAQ Section */}
-      <section className="w-full bg-white pb-24 px-4 sm:px-6">
+      <section className="w-full bg-white mt-12 sm:mt-16 pb-24 px-4 sm:px-6">
         <div className="max-w-3xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-12 text-gray-900">FAQs</h2>
           <div className="space-y-3">
