@@ -218,13 +218,13 @@ export function HeroWave({
           <h1 className="text-white text-3xl sm:text-5xl font-semibold tracking-tight">
             {title}
           </h1>
-          <p className="text-white/80 mt-3 sm:mt-4 text-sm sm:text-base flex items-center justify-center gap-1">
-            <span>{baseSubtitlePrefix}</span>
+          <p className="text-white/80 mt-3 sm:mt-4 text-sm sm:text-base flex flex-wrap items-center justify-center whitespace-pre-wrap">
+            <span>{baseSubtitlePrefix} </span>
             <span className="relative inline-flex items-center">
               <span className="text-white border-b-2 border-white pb-0.5 min-w-[4px]">
                 {animatedSubtitleWord}
               </span>
-              <span className="ml-0.5 w-[2px] h-[1.2em] bg-white animate-pulse" />
+              <span className="ml-1 w-[2px] h-[1.2em] bg-white animate-[blink_1s_step-end_infinite]" />
             </span>
           </p>
           <form
