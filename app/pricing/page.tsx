@@ -301,18 +301,16 @@ export default function PricingPage() {
             ))}
           </div>
         </section>
-
-        <section className="relative mx-auto max-w-3xl mt-24 mb-12 z-10">
-          <h2 className="mb-5 text-center font-medium text-white text-xl tracking-tight md:text-3xl">
-            <span className="text-white/60">Trusted by experts.</span>
-            <br />
-            <span className="font-semibold">Used by the leaders.</span>
-          </h2>
-          <div className="mx-auto my-5 h-px max-w-sm bg-white/20 [mask-image:linear-gradient(to_right,transparent,black,transparent)]" />
-          <LogoCloud logos={logos} />
-          <div className="mt-5 h-px bg-white/20 [mask-image:linear-gradient(to_right,transparent,black,transparent)]" />
-        </section>
       </main>
+
+      <section className="w-full bg-white px-4 py-16 sm:py-20">
+        <div className="mx-auto max-w-6xl">
+          <h2 className="mb-8 text-center font-semibold text-gray-900 text-lg tracking-tight md:text-xl">
+            Trusted by 653K+ users in 180+ countries
+          </h2>
+          <LogoCloud logos={logos} />
+        </div>
+      </section>
     </>
   );
 }
