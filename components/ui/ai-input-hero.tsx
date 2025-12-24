@@ -42,6 +42,24 @@ export function HeroWave({
   const [animatedPlaceholder, setAnimatedPlaceholder] = useState<string>(
     basePlaceholder
   );
+
+  const baseSubtitlePrefix = "The AI Fullstack Engineer. Create beautiful, production-ready";
+  const subtitleWordsRef = useRef<string[]>([
+    "websites",
+    "web apps",
+    "internal tools",
+    "mobile apps",
+    "landing pages",
+    "dashboards",
+  ]);
+  const [animatedSubtitleWord, setAnimatedSubtitleWord] = useState<string>("websites");
+  const subtitleTypingStateRef = useRef({
+    wordIndex: 0,
+    charIndex: 0,
+    deleting: false,
+    running: true,
+  });
+
   const typingStateRef = useRef({
     suggestionIndex: 0,
     charIndex: 0,
@@ -49,6 +67,7 @@ export function HeroWave({
     running: true,
   });
   const timersRef = useRef<number[]>([]);
+  const subtitleTimersRef = useRef<number[]>([]);
 
   useEffect(() => {
     typingStateRef.current.running = true;
