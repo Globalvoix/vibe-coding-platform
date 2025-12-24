@@ -45,14 +45,14 @@ export function HeroWave({
 
   const baseSubtitlePrefix = "The AI Fullstack Engineer. Create beautiful, production-ready";
   const subtitleWordsRef = useRef<string[]>([
-    "websites",
-    "web apps",
-    "internal tools",
-    "mobile apps",
-    "landing pages",
-    "dashboards",
+    "website.",
+    "web app.",
+    "internal tool.",
+    "mobile app.",
+    "landing page.",
+    "dashboard.",
   ]);
-  const [animatedSubtitleWord, setAnimatedSubtitleWord] = useState<string>("websites");
+  const [animatedSubtitleWord, setAnimatedSubtitleWord] = useState<string>("website.");
   const subtitleTypingStateRef = useRef({
     wordIndex: 0,
     charIndex: 0,
@@ -218,8 +218,14 @@ export function HeroWave({
           <h1 className="text-white text-3xl sm:text-5xl font-semibold tracking-tight">
             {title}
           </h1>
-          <p className="text-white/80 mt-3 sm:mt-4 text-sm sm:text-base">
-            {baseSubtitlePrefix} <span className="inline-block min-w-[80px]">{animatedSubtitleWord}</span>
+          <p className="text-white/80 mt-3 sm:mt-4 text-sm sm:text-base flex items-center justify-center gap-1">
+            <span>{baseSubtitlePrefix}</span>
+            <span className="relative inline-flex items-center">
+              <span className="text-white border-b-2 border-white pb-0.5 min-w-[4px]">
+                {animatedSubtitleWord}
+              </span>
+              <span className="ml-0.5 w-[2px] h-[1.2em] bg-white animate-pulse" />
+            </span>
           </p>
           <form
             className="mt-6 sm:mt-8 flex items-center justify-center"
