@@ -3,7 +3,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useUIStore } from '@/lib/ui-store';
 import { CREDITS_UPDATED_EVENT } from '@/lib/credits-events';
-import { Menu, Rocket } from 'lucide-react';
+import { Menu } from 'lucide-react';
+import { ThinksoftLogo } from '@/components/icons/thinksoft';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { SignInButton, SignUpButton, UserButton } from '@clerk/nextjs';
@@ -183,8 +184,7 @@ export function Navbar({ variant = 'default' }: { variant?: NavbarVariant }) {
       {variant === 'home' ? (
         <div className="flex items-center justify-between gap-6">
           <Link href="/" className="flex items-center gap-2 text-white">
-            <Rocket className="h-4 w-4" />
-            <span className="text-sm font-semibold tracking-tight">Thinksoft</span>
+            <ThinksoftLogo className="h-5 w-auto" />
           </Link>
 
           <nav className="hidden sm:flex items-center">
