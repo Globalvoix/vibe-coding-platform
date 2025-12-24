@@ -237,65 +237,30 @@ export function HeroWave({
               />
             </span>
           </p>
-          <form
-            className="mt-6 sm:mt-8 flex items-center justify-center"
-            onSubmit={async (e) => {
-              e.preventDefault();
+          <div className="mt-6 sm:mt-8 flex items-center justify-center">
+            <div className="relative w-full sm:w-[720px] pointer-events-auto">
+              <PromptBox
+                placeholder={animatedPlaceholder}
+                isLoading={isLoading}
+                onPromptSubmit={async (val) => {
+                  if (!isSignedIn) {
+                    openSignIn();
+                    return;
+                  }
 
-              if (!isSignedIn) {
-                openSignIn();
-                return;
-              }
-
-              if (!isLoading && prompt.trim()) {
-                try {
-                  setIsLoading(true);
-                  await onPromptSubmit?.(prompt);
-                  // On success, navigation to workspace unmounts this component,
-                  // so we intentionally do not reset isLoading here.
-                } catch (error) {
-                  console.error('Prompt submission failed', error);
-                  setIsLoading(false);
-                }
-              }
-            }}
-          >
-            <div className="relative w-full sm:w-[720px]">
-              <div className="relative rounded-2xl p-[2px] shadow-[0_2px_8px_rgba(0,0,0,0.1)] bg-gradient-to-br from-gray-50 to-gray-100">
-                <textarea
-                  value={prompt}
-                  onChange={(e) => setPrompt(e.target.value)}
-                  placeholder={animatedPlaceholder}
-                  rows={5}
-                  disabled={isLoading}
-                  className="w-full h-32 sm:h-36 resize-none rounded-2xl bg-white border border-gray-200 text-gray-900 placeholder:text-gray-400 outline-none focus:outline-none px-4 py-4 pr-16 disabled:opacity-50 disabled:cursor-not-allowed"
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={isLoading}
-                aria-label={buttonText}
-                className="absolute right-3 bottom-3 inline-flex items-center justify-center w-10 h-10 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isLoading ? (
-                  <Spinner size="sm" color="white" />
-                ) : (
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="w-5 h-5"
-                  >
-                    <path d="M7 17L17 7" />
-                    <path d="M7 7h10v10" />
-                  </svg>
-                )}
-              </button>
+                  if (!isLoading && val.trim()) {
+                    try {
+                      setIsLoading(true);
+                      await onPromptSubmit?.(val);
+                    } catch (error) {
+                      console.error('Prompt submission failed', error);
+                      setIsLoading(false);
+                    }
+                  }
+                }}
+              />
             </div>
-          </form>
+          </div>
         </div>
       </div>
     </section>
