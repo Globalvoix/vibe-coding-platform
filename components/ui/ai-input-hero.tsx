@@ -9,6 +9,15 @@ import { motion } from "framer-motion";
 import { ChevronRight, ChevronDown } from "lucide-react";
 import { PromptBox } from "./prompt-box";
 
+export type HeroWaveProps = {
+  className?: string;
+  title?: string;
+  subtitle?: string;
+  placeholder?: string;
+  buttonText?: string;
+  onPromptSubmit?: (value: string) => void;
+};
+
 export function HeroWave({
   className,
   title = "Thinksoft",
