@@ -107,7 +107,7 @@ export default function Page() {
                 <div className="flex flex-col justify-center">
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">The Best AI Models</h3>
                   <p className="text-sm text-gray-500 mb-4 leading-relaxed">
-                    Leverage state-of-the-art models like GPT-4, Claude 3.5, and Gemini 1.5 Pro for unparalleled code generation accuracy.
+                    Leverage state-of-the-art models like GPT-5, Claude 4.5, and Gemini 3 Pro for unparalleled code generation accuracy.
                   </p>
                   <a href="#" className="text-sm font-semibold text-gray-900 flex items-center gap-1 hover:opacity-70 transition-opacity">
                     Learn more <ChevronRight className="w-4 h-4" />
@@ -178,9 +178,12 @@ export default function Page() {
               <div className="flex flex-col items-start">
                 <span className="text-[10px] font-bold tracking-[0.2em] text-gray-900 mb-8 uppercase">Thinksoft Research</span>
                 <h2 className="text-3xl sm:text-4xl font-normal tracking-tight text-gray-900 mb-8 max-w-md leading-[1.2]">
-                  We are building foundational AI models that will be capable of simulating all possible software architectures and experiences.
+                  We are using foundational AI models that will be capable of simulating all possible software architectures and experiences.
                 </h2>
-                <button className="px-6 py-2 rounded-full border border-gray-900 text-xs font-bold text-gray-900 hover:bg-gray-900 hover:text-white transition-all duration-300 uppercase tracking-wider">
+                <button
+                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                  className="px-6 py-2 rounded-full border border-gray-900 text-xs font-bold text-gray-900 hover:bg-gray-900 hover:text-white transition-all duration-300 uppercase tracking-wider"
+                >
                   Learn more
                 </button>
               </div>
