@@ -40,7 +40,7 @@ function WorkspaceContent({
   const [horizontalSizes, setHorizontalSizes] = useState<[number, number] | null>(
     null
   )
-  const { sandboxId, paths: sandboxPaths, url, urlUUID } = useSandboxStore()
+  const { sandboxId, paths: sandboxPaths, url, urlUUID, currentProjectId, setCurrentProjectId } = useSandboxStore()
 
   useEffect(() => {
     const sandboxState = useSandboxStore.getState()
@@ -48,6 +48,7 @@ function WorkspaceContent({
 
     sandboxState.reset()
     fileExplorerState.reset()
+    sandboxState.setCurrentProjectId(projectId)
     setInitialPrompt('')
 
     return () => {
@@ -109,7 +110,7 @@ function WorkspaceContent({
   }, [projectId, promptFromUrl])
 
   useEffect(() => {
-    if (!projectId) return
+    if (!projectId || !currentProjectId || projectId !== currentProjectId) return
 
     const timeoutId = window.setTimeout(async () => {
       try {
@@ -140,7 +141,7 @@ function WorkspaceContent({
     }, 1000)
 
     return () => window.clearTimeout(timeoutId)
-  }, [projectId, sandboxId, sandboxPaths, url, urlUUID])
+  }, [projectId, currentProjectId, sandboxId, sandboxPaths, url, urlUUID])
 
   return (
     <>
