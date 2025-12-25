@@ -16,6 +16,8 @@ interface SandboxStore {
   paths: string[]
   reset: () => void
   sandboxId?: string
+  currentProjectId?: string | null
+  setCurrentProjectId: (id: string | null) => void
   setChatStatus: (status: ChatStatus) => void
   setSandboxId: (id: string) => void
   setStatus: (status: 'running' | 'stopped') => void
@@ -71,9 +73,12 @@ export const useSandboxStore = create<SandboxStore>()((set) => ({
   commands: [],
   generatedFiles: new Set<string>(),
   paths: [],
+  currentProjectId: null,
+  setCurrentProjectId: (id) => set(() => ({ currentProjectId: id })),
   reset: () =>
     set(() => ({
       sandboxId: undefined,
+      currentProjectId: null,
       commands: [],
       paths: [],
       url: undefined,
