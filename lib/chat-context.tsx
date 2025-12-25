@@ -49,9 +49,9 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   }, [setChatStatus, router])
 
   const setMessages = (messages: ChatUIMessage[]) => {
-    // @ts-ignore - Chat object from @ai-sdk/react should have setMessages
+    // @ts-expect-error - Chat object from @ai-sdk/react should have setMessages
     if (typeof chat.setMessages === 'function') {
-      // @ts-ignore
+      // @ts-expect-error
       chat.setMessages(messages)
     }
   }
