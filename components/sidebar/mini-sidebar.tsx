@@ -159,8 +159,8 @@ export function MiniSidebar() {
                  exit={{ opacity: 0 }}
                  className="flex flex-col overflow-hidden"
                >
-                 <span className="text-[12px] text-gray-900 font-semibold truncate">User Profile</span>
-                 <span className="text-[10px] text-gray-500 font-medium truncate">Settings</span>
+                 <span className="text-[12px] text-gray-900 font-medium truncate">User Profile</span>
+                 <span className="text-[10px] text-gray-500 truncate">Settings</span>
                </motion.div>
              )}
            </AnimatePresence>
