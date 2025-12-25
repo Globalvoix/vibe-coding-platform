@@ -1,25 +1,49 @@
 'use client'
 
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { 
-  Home, 
-  LayoutGrid, 
-  Users, 
-  Search, 
-  Star, 
+import {
+  Home,
+  LayoutGrid,
+  Users,
+  Search,
+  Star,
   PanelLeft,
   Compass,
   Package,
   Library,
-  Inbox
+  Inbox,
+  Coins
 } from 'lucide-react'
 import { useAuth } from '@clerk/nextjs'
+import { CREDITS_UPDATED_EVENT } from '@/lib/credits-events'
 
 export function MiniSidebar() {
   const router = useRouter()
   const pathname = usePathname()
+  const { isSignedIn } = useAuth()
+  const [creditBalance, setCreditBalance] = useState<number | null>(null)
+
+  useEffect(() => {
+    if (!isSignedIn) return
+
+    async function loadCredits() {
+      try {
+        const response = await fetch('/api/user/credits')
+        if (response.ok) {
+          const data = await response.json()
+          setCreditBalance(typeof data.credits === 'number' ? data.credits : 0)
+        }
+      } catch (err) {
+        console.error('Failed to load credits', err)
+      }
+    }
+
+    loadCredits()
+    window.addEventListener(CREDITS_UPDATED_EVENT, loadCredits)
+    return () => window.removeEventListener(CREDITS_UPDATED_EVENT, loadCredits)
+  }, [isSignedIn])
 
   const navItems = [
     { icon: Home, label: 'Home', href: '/home', active: pathname === '/home' },
@@ -91,6 +115,16 @@ export function MiniSidebar() {
 
       {/* User Profile / Inbox */}
       <div className="flex flex-col gap-4 items-center">
+        {isSignedIn && creditBalance !== null && (
+          <div className="group relative">
+            <div className="p-2 text-emerald-600 bg-emerald-50 rounded-xl cursor-help">
+              <Coins className="w-5 h-5 stroke-[2px]" />
+            </div>
+            <span className="absolute left-full ml-4 px-2 py-1 bg-gray-900 text-white text-[11px] font-medium rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-[60] shadow-xl">
+              {creditBalance} credits
+            </span>
+          </div>
+        )}
         <div className="w-8 h-8 rounded-full bg-[#5B21B6] flex items-center justify-center text-white text-[10px] font-bold shadow-sm cursor-pointer hover:ring-2 hover:ring-offset-2 hover:ring-[#5B21B6]/20 transition-all">
           P
         </div>
