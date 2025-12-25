@@ -373,17 +373,7 @@ export default function ProjectsPage() {
               Array.from({ length: 7 }).map((_, i) => (
                 <div key={i} className="animate-pulse flex flex-col h-[300px] bg-gray-100 rounded-[24px]" />
               ))
-            ) : filteredProjects.length === 0 ? (
-              <div className="col-span-full py-24 text-center">
-                <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <LayoutGrid className="w-10 h-10 text-gray-200" />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">No projects found</h3>
-                <p className="text-[14px] text-gray-500 max-w-sm mx-auto">
-                  Try adjusting your search or filters to find your projects.
-                </p>
-              </div>
-            ) : (
+            ) : filteredProjects.length === 0 ? null : (
               filteredProjects.map((project) => (
                 <ProjectCard
                   key={project.id}
