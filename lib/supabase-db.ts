@@ -37,7 +37,8 @@ export function detectNeedsDatabase(prompt: string): boolean {
 }
 
 export async function createProjectDatabase(
-  projectId: string
+  projectId: string,
+  appName?: string
 ): Promise<{
   success: boolean
   error?: string
@@ -47,6 +48,7 @@ export async function createProjectDatabase(
   }
 }> {
   try {
+    void appName
     const projectResult = await pool.query<{ cloud_enabled: boolean }>(
       `SELECT cloud_enabled FROM projects WHERE id = $1`,
       [projectId]
