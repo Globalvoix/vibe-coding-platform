@@ -41,6 +41,7 @@ export function Navbar({ variant = 'default', theme = 'dark' }: { variant?: Navb
   const { toggleSidebar } = useUIStore();
   const { isSignedIn } = useAuth();
   const { openSignIn } = useClerk();
+  const router = useRouter();
   const pathname = usePathname();
   const isProjectsPage = pathname === '/projects';
   const [planId, setPlanId] = useState<string | null>(null);
@@ -55,6 +56,8 @@ export function Navbar({ variant = 'default', theme = 'dark' }: { variant?: Navb
     if (!isSignedIn) {
       e.preventDefault();
       openSignIn();
+    } else {
+      router.push('/projects');
     }
   };
 
