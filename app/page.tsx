@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from "react";
+import { Snowfall } from "@/components/ui/snowfall";
 import { HeroWave } from "@/components/ui/ai-input-hero";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import { useRouter } from "next/navigation";
@@ -56,6 +57,7 @@ export default function Page() {
 
   return (
     <>
+      <Snowfall />
       <AppSidebar />
       <div
         className={cn(
