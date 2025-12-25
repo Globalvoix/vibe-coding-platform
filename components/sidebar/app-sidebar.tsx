@@ -118,7 +118,7 @@ export function AppSidebar() {
     <>
       <div
         className={cn(
-          'fixed left-0 top-0 h-screen w-64 bg-background/60 border-r border-border/70 z-30 transform transition-transform duration-300 overflow-y-auto backdrop-blur-md backdrop-saturate-150 shadow-lg',
+          'fixed left-0 top-0 h-screen w-64 bg-white border-r border-gray-100 z-[100] transform transition-transform duration-300 overflow-y-auto shadow-2xl',
           sidebarOpen ? 'translate-x-0' : '-translate-x-full',
           isAnimating && 'pointer-events-none'
         )}
