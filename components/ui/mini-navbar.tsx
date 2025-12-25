@@ -10,7 +10,7 @@ import Link from 'next/link';
 import { useAuth, useClerk } from '@clerk/nextjs';
 import { SignInButton, SignUpButton } from '@clerk/nextjs';
 import { UserButtonWrapper } from './user-button-wrapper';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 const AnimatedNavLink = ({ href, children, onClick }: { href: string; children: React.ReactNode; onClick?: (e: React.MouseEvent) => void }) => {
   const defaultTextColor = 'text-gray-600';
