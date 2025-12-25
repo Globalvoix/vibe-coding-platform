@@ -401,9 +401,22 @@ export function Navbar({ variant = 'default', theme = 'dark' }: { variant?: Navb
 
             <nav className="hidden sm:flex items-center space-x-4 sm:space-x-6 text-sm">
               {navLinksData.map((link) => (
-                <AnimatedNavLink key={link.href} href={link.href}>
-                  {link.label}
-                </AnimatedNavLink>
+                link.label === 'Projects' ? (
+                  <button
+                    key={link.href}
+                    onClick={handleProjectsClick}
+                    className="group relative inline-block overflow-hidden h-5 flex items-center text-sm cursor-pointer"
+                  >
+                    <div className="flex flex-col transition-transform duration-400 ease-out transform group-hover:-translate-y-1/2">
+                      <span className="text-gray-600">{link.label}</span>
+                      <span className="text-gray-900">{link.label}</span>
+                    </div>
+                  </button>
+                ) : (
+                  <AnimatedNavLink key={link.href} href={link.href}>
+                    {link.label}
+                  </AnimatedNavLink>
+                )
               ))}
             </nav>
 
