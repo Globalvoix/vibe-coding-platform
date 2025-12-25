@@ -1,4 +1,5 @@
 import { ChristmasCap } from '../ui/christmas-cap';
+import { cn } from '@/lib/utils';
 
 interface Props {
   className?: string
