@@ -131,8 +131,8 @@ export function MiniSidebar() {
                   exit={{ opacity: 0 }}
                   className="flex flex-col"
                 >
-                  <span className="text-[11px] text-emerald-700 font-semibold">{creditBalance} credits</span>
-                  <span className="text-[9px] text-emerald-600/60 font-medium">Balance</span>
+                  <span className="text-[11px] text-emerald-700 font-medium">{creditBalance} credits</span>
+                  <span className="text-[9px] text-emerald-600/60">Balance</span>
                 </motion.div>
               )}
             </AnimatePresence>
