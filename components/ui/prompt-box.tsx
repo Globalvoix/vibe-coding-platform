@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 import * as PopoverPrimitive from "@radix-ui/react-popover";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
@@ -59,7 +60,6 @@ PopoverContent.displayName = PopoverPrimitive.Content.displayName;
 
 const Dialog = DialogPrimitive.Root;
 const DialogPortal = DialogPrimitive.Portal;
-const DialogTrigger = DialogPrimitive.Trigger;
 const DialogOverlay = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Overlay>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
@@ -276,14 +276,14 @@ export const PromptBox = React.forwardRef<HTMLTextAreaElement, PromptBoxProps>(
           <Dialog open={isImageDialogOpen} onOpenChange={setIsImageDialogOpen}>
             <div className="relative mb-1 w-fit rounded-[1rem] px-1 pt-1">
               <button type="button" className="transition-transform" onClick={() => setIsImageDialogOpen(true)}>
-                <img src={imagePreview} alt="Image preview" className="h-14.5 w-14.5 rounded-[1rem]" />
+                <Image src={imagePreview} alt="Image preview" width={58} height={58} className="h-14.5 w-14.5 rounded-[1rem]" />
               </button>
               <button onClick={handleRemoveImage} className="absolute right-2 top-2 z-10 flex h-4 w-4 items-center justify-center rounded-full bg-white/50 dark:bg-[#303030] text-black dark:text-white transition-colors hover:bg-accent dark:hover:bg-[#515151]" aria-label="Remove image">
                 <XIcon className="h-4 w-4" />
               </button>
             </div>
             <DialogContent>
-              <img src={imagePreview} alt="Full size preview" className="w-full max-h-[95vh] object-contain rounded-[24px]" />
+              <Image src={imagePreview} alt="Full size preview" width={600} height={800} className="w-full max-h-[95vh] object-contain rounded-[24px]" />
             </DialogContent>
           </Dialog>
         )}
