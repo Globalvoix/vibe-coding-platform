@@ -234,22 +234,22 @@ export default function ProjectsPage() {
 
           {/* Filters Bar */}
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-12">
-            <div className="flex flex-col lg:flex-row lg:items-center gap-4 flex-1">
-              <div className="relative w-full lg:max-w-[280px]">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search projects..."
-                  className="w-full bg-white border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 text-[13px] font-medium text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500/50 transition-all shadow-sm"
-                />
-              </div>
+            <div className="relative w-full lg:max-w-[280px]">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search projects..."
+                className="w-full bg-white border border-gray-200 rounded-xl pl-10 pr-4 py-2 text-[12px] font-medium text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500/50 transition-all shadow-sm"
+              />
+            </div>
 
+            <div className="flex items-center gap-4 lg:ml-auto">
               <div className="flex items-center gap-2 overflow-x-auto pb-2 lg:pb-0 scrollbar-hide">
                 {/* Sort Dropdown */}
-                <FilterDropdown 
-                  label={sortBy === 'last-edited' ? 'Last edited' : sortBy === 'created' ? 'Date created' : 'Alphabetical'} 
+                <FilterDropdown
+                  label={sortBy === 'last-edited' ? 'Last edited' : sortBy === 'created' ? 'Date created' : 'Alphabetical'}
                   active={sortBy !== 'last-edited'}
                 >
                   <div className="flex flex-col p-1 min-w-[180px]">
@@ -257,9 +257,9 @@ export default function ProjectsPage() {
                     <DropdownItem label="Last edited" active={sortBy === 'last-edited'} onClick={() => setSortBy('last-edited')} />
                     <DropdownItem label="Date created" active={sortBy === 'created'} onClick={() => setSortBy('created')} />
                     <DropdownItem label="Alphabetical" active={sortBy === 'alphabetical'} onClick={() => setSortBy('alphabetical')} />
-                    
+
                     <div className="h-[1px] bg-gray-100 my-1 mx-1" />
-                    
+
                     <span className="text-[11px] font-bold text-gray-400 px-3 py-2 uppercase tracking-wider">Order</span>
                     <DropdownItem label="Newest first" active={order === 'newest'} onClick={() => setOrder('newest')} />
                     <DropdownItem label="Oldest first" active={order === 'oldest'} onClick={() => setOrder('oldest')} />
@@ -295,9 +295,9 @@ export default function ProjectsPage() {
                     <div className="px-3 py-2">
                        <div className="relative">
                          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
-                         <input 
-                           type="text" 
-                           placeholder="Search creators..." 
+                         <input
+                           type="text"
+                           placeholder="Search creators..."
                            className="w-full bg-gray-50 border-none rounded-lg pl-8 pr-3 py-1.5 text-[12px] focus:ring-1 focus:ring-blue-500/30"
                            value={creatorSearch}
                            onChange={(e) => setCreatorSearch(e.target.value)}
@@ -311,27 +311,27 @@ export default function ProjectsPage() {
                   </div>
                 </FilterDropdown>
               </div>
-            </div>
 
-            <div className="flex items-center gap-3 self-end lg:self-auto">
+              <div className="h-6 w-[1px] bg-gray-100 hidden lg:block" />
+
               <div className="flex items-center bg-[#F5F5F0] border border-gray-200/50 rounded-xl p-1 shadow-sm">
                 <button
                   onClick={() => setViewMode('grid')}
                   className={cn(
-                    "px-3 py-1.5 rounded-lg transition-all",
+                    "px-3 py-1 rounded-lg transition-all",
                     viewMode === 'grid' ? "bg-white text-gray-900 shadow-xs" : "text-gray-400 hover:text-gray-600"
                   )}
                 >
-                  <LayoutGrid className="w-4 h-4" />
+                  <LayoutGrid className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={() => setViewMode('list')}
                   className={cn(
-                    "px-3 py-1.5 rounded-lg transition-all",
+                    "px-3 py-1 rounded-lg transition-all",
                     viewMode === 'list' ? "bg-white text-gray-900 shadow-xs" : "text-gray-400 hover:text-gray-600"
                   )}
                 >
-                  <List className="w-4 h-4" />
+                  <List className="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
