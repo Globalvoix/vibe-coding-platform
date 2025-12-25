@@ -3,7 +3,6 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth, useClerk } from '@clerk/nextjs'
-import { AppSidebar } from '@/components/sidebar/app-sidebar'
 import { MiniSidebar } from '@/components/sidebar/mini-sidebar'
 import { Navbar } from '@/components/ui/mini-navbar'
 import { useUIStore } from '@/lib/ui-store'
@@ -218,12 +217,7 @@ export default function ProjectsPage() {
     <>
       <MiniSidebar />
       <Navbar variant="home" theme="dark" />
-      <div
-        className={cn(
-          'transition-all duration-300 ease-out min-h-screen bg-white pl-[72px]',
-          sidebarOpen ? 'translate-x-64' : 'translate-x-0'
-        )}
-      >
+      <div className="min-h-screen bg-white pl-[72px]">
         <main className="max-w-[1440px] mx-auto px-6 py-12 lg:px-10">
           {/* Header Section */}
           <div className="flex items-center gap-3 mb-10">
