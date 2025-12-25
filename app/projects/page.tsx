@@ -406,21 +406,21 @@ export default function ProjectsPage() {
 
 function FilterDropdown({ label, active = false, children }: { label: string; active?: boolean; children: React.ReactNode }) {
   const [open, setOpen] = useState(false)
-  
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <button className={cn(
-          "flex items-center gap-2 px-4 py-2.5 rounded-xl border transition-all text-[13px] font-medium whitespace-nowrap shadow-sm outline-none",
+          "flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all text-[12px] font-medium whitespace-nowrap shadow-sm outline-none",
           open || active
-            ? "bg-white border-gray-300 text-gray-900 ring-2 ring-gray-100" 
+            ? "bg-white border-gray-300 text-gray-900 ring-2 ring-gray-100"
             : "bg-white border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50"
         )}>
           {label}
-          <ChevronDown className={cn("w-4 h-4 text-gray-400 transition-transform duration-200", open && "rotate-180")} />
+          <ChevronDown className={cn("w-3.5 h-3.5 text-gray-400 transition-transform duration-200", open && "rotate-180")} />
         </button>
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-auto p-0 bg-white border border-gray-200 shadow-xl rounded-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+      <PopoverContent align="start" className="w-auto p-0 bg-white border border-gray-200 shadow-xl rounded-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         {children}
       </PopoverContent>
     </Popover>
