@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import { useAuth, useClerk } from '@clerk/nextjs'
 import { AppSidebar } from '@/components/sidebar/app-sidebar'
 import { Navbar } from '@/components/ui/mini-navbar'
+import { useUIStore } from '@/lib/ui-store'
+import { cn } from '@/lib/utils'
 import type { ProjectRecord } from '@/lib/projects-db'
 
 export default function ProjectsPage() {
