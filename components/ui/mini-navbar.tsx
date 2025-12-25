@@ -8,7 +8,8 @@ import { Menu } from 'lucide-react';
 import { ThinksoftLogo } from '@/components/icons/thinksoft';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
-import { SignInButton, SignUpButton, UserButton } from '@clerk/nextjs';
+import { SignInButton, SignUpButton } from '@clerk/nextjs';
+import { UserButtonWrapper } from './user-button-wrapper';
 
 const AnimatedNavLink = ({ href, children }: { href: string; children: React.ReactNode }) => {
   const defaultTextColor = 'text-gray-600';
@@ -148,7 +149,7 @@ export function Navbar({ variant = 'default', theme = 'dark' }: { variant?: Navb
 
   const authElement = isSignedIn ? (
     <div className="flex items-center gap-2">
-      <UserButton afterSignOutUrl="/" />
+      <UserButtonWrapper afterSignOutUrl="/" />
       {variant === 'default' && isProActive && (
         <span className="px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide rounded-full bg-blue-600/10 text-blue-700 border border-blue-500/40">
           Pro
@@ -243,7 +244,7 @@ export function Navbar({ variant = 'default', theme = 'dark' }: { variant?: Navb
           <div className="flex items-center gap-2 shrink-0">
             {isSignedIn ? (
               <div className="flex items-center gap-2">
-                <UserButton afterSignOutUrl="/" />
+      <UserButtonWrapper afterSignOutUrl="/" />
               </div>
             ) : (
               <SignInButton mode="modal">
