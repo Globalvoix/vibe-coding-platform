@@ -17,6 +17,7 @@ export default function ProjectsPage() {
   const router = useRouter()
   const { isSignedIn } = useAuth()
   const { openSignIn } = useClerk()
+  const { sidebarOpen } = useUIStore()
 
   useEffect(() => {
     let cancelled = false
