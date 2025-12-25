@@ -8,9 +8,8 @@ import { useUIStore } from "@/lib/ui-store";
 import { cn } from "@/lib/utils";
 import { ensureUserSubscription } from "@/app/actions/subscription";
 import { toast } from 'sonner'
-import { ChevronRight, ChevronDown, ArrowUpRight } from "lucide-react";
+import { ChevronRight, ArrowUpRight } from "lucide-react";
 import Image from "next/image";
-import { motion } from "framer-motion";
 
 export default function Page() {
   const router = useRouter();
@@ -218,7 +217,7 @@ export default function Page() {
                     <ArrowUpRight className="w-5 h-5 text-gray-400 group-hover:text-gray-900 transition-colors" />
                   </div>
                   <p className="text-sm text-gray-500 max-w-sm leading-relaxed">
-                    Google's latest multimodal AI with enhanced vision and reasoning. Bringing unified intelligence for building intelligent fullstack applications.
+                    Google&apos;s latest multimodal AI with enhanced vision and reasoning. Bringing unified intelligence for building intelligent fullstack applications.
                   </p>
                 </div>
               </div>
