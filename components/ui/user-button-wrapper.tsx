@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { UserButton } from '@clerk/nextjs';
-import { ChristmasCap } from './christmas-cap';
 
 type UserButtonProps = React.ComponentProps<typeof UserButton>;
 
