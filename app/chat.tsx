@@ -106,19 +106,21 @@ export function Chat({ className, initialPrompt, projectId }: Props) {
   }, [projectId])
 
   useEffect(() => {
+    if (!projectId) return
     if (input.trim()) {
-      localStorage.setItem('prompt-draft', input)
+      localStorage.setItem(`prompt-draft-${projectId}`, input)
     }
-  }, [input])
+  }, [input, projectId])
 
   useEffect(() => {
+    if (!projectId) return
     if (typeof window !== 'undefined' && !input) {
-      const stored = localStorage.getItem('prompt-draft')
+      const stored = localStorage.getItem(`prompt-draft-${projectId}`)
       if (stored) {
         setInput(stored)
       }
     }
-  }, [])
+  }, [projectId, input])
 
   const validateAndSubmitMessage = useCallback(
     (text: string) => {
@@ -142,7 +144,9 @@ export function Chat({ className, initialPrompt, projectId }: Props) {
           }
         )
         setInput('')
-        localStorage.removeItem('prompt-draft')
+        if (projectId) {
+          localStorage.removeItem(`prompt-draft-${projectId}`)
+        }
       }
     },
     [isSignedIn, openSignIn, sendMessage, modelId, setInput, reasoningEffort, projectId, supabaseConnected]
