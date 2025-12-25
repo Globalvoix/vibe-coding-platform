@@ -32,6 +32,8 @@ import {
 } from 'lucide-react'
 import Image from 'next/image'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Copy, Heart } from 'lucide-react'
+import { toast } from 'sonner'
 
 type ViewMode = 'grid' | 'list'
 type SortOption = 'last-edited' | 'created' | 'alphabetical'
@@ -101,6 +103,24 @@ export default function ProjectsPage() {
 
   const handleOpen = (id: string) => {
     router.push(`/workspace?projectId=${id}`)
+  }
+
+  const handleFork = async (id: string) => {
+    try {
+      setIsLoading(true)
+      const response = await fetch(`/api/projects/${id}/fork`, {
+        method: 'POST'
+      })
+      if (!response.ok) throw new Error('Failed to fork project')
+      const forked = await response.json()
+      setProjects((prev) => [forked, ...prev])
+      toast.success('Project forked successfully')
+    } catch (err) {
+      console.error(err)
+      toast.error('Failed to fork project')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleRename = async (id: string) => {
@@ -379,6 +399,7 @@ export default function ProjectsPage() {
                   onOpen={handleOpen}
                   onRename={handleRename}
                   onDelete={handleDelete}
+                  onFork={handleFork}
                   formatDistance={formatDistance}
                   creatorEmail={creators.find(c => c.id === project.user_id)?.email || 'user@example.com'}
                 />
@@ -429,20 +450,22 @@ function DropdownItem({ label, active, onClick }: { label: string; active: boole
   )
 }
 
-function ProjectCard({ 
-  project, 
-  viewMode, 
-  onOpen, 
-  onRename, 
-  onDelete, 
+function ProjectCard({
+  project,
+  viewMode,
+  onOpen,
+  onRename,
+  onDelete,
+  onFork,
   formatDistance,
   creatorEmail
-}: { 
-  project: ProjectRecord; 
-  viewMode: ViewMode; 
+}: {
+  project: ProjectRecord;
+  viewMode: ViewMode;
   onOpen: (id: string) => void;
   onRename: (id: string) => void;
   onDelete: (id: string) => void;
+  onFork: (id: string) => void;
   formatDistance: (date: string) => string;
   creatorEmail: string;
 }) {
@@ -542,14 +565,21 @@ function ProjectCard({
           </div>
           
           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0">
-            <button 
+            <button
+              onClick={(e) => { e.stopPropagation(); onFork(project.id); }}
+              className="p-2 hover:bg-gray-100 rounded-xl transition-colors text-gray-400 hover:text-gray-900"
+              title="Duplicate"
+            >
+              <Copy className="w-4 h-4" />
+            </button>
+            <button
               onClick={(e) => { e.stopPropagation(); onRename(project.id); }}
               className="p-2 hover:bg-gray-100 rounded-xl transition-colors text-gray-400 hover:text-gray-900"
               title="Rename"
             >
               <Edit2 className="w-4 h-4" />
             </button>
-            <button 
+            <button
               onClick={(e) => { e.stopPropagation(); onDelete(project.id); }}
               className="p-2 hover:bg-red-50 rounded-xl transition-colors text-gray-400 hover:text-red-500"
               title="Delete"
