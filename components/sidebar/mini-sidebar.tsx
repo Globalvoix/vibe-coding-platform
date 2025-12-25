@@ -81,8 +81,8 @@ export function MiniSidebar() {
             className={cn(
               "flex items-center w-full gap-3 p-2 rounded-[6px] transition-all duration-200 group relative",
               item.active
-                ? "bg-[#EFEFE9] text-gray-900 font-semibold"
-                : "text-gray-500 hover:text-gray-900 hover:bg-gray-100/50 font-medium"
+                ? "bg-[#EFEFE9] text-gray-900"
+                : "text-gray-500 hover:text-gray-900 hover:bg-gray-100/50"
             )}
             title={!sidebarOpen ? item.label : undefined}
           >
