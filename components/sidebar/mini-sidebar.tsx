@@ -96,7 +96,7 @@ export function MiniSidebar() {
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -10 }}
-                  className="text-[13px] whitespace-nowrap overflow-hidden"
+                  className="text-[12px] font-medium whitespace-nowrap overflow-hidden"
                 >
                   {item.label}
                 </motion.span>
