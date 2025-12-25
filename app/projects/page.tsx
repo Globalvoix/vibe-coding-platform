@@ -4,6 +4,7 @@ import { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth, useClerk } from '@clerk/nextjs'
 import { AppSidebar } from '@/components/sidebar/app-sidebar'
+import { MiniSidebar } from '@/components/sidebar/mini-sidebar'
 import { Navbar } from '@/components/ui/mini-navbar'
 import { useUIStore } from '@/lib/ui-store'
 import { cn } from '@/lib/utils'
@@ -215,11 +216,11 @@ export default function ProjectsPage() {
 
   return (
     <>
-      <AppSidebar />
+      <MiniSidebar />
       <Navbar variant="home" theme="dark" />
       <div
         className={cn(
-          'transition-transform duration-300 ease-out min-h-screen bg-white',
+          'transition-all duration-300 ease-out min-h-screen bg-white pl-[72px]',
           sidebarOpen ? 'translate-x-64' : 'translate-x-0'
         )}
       >
