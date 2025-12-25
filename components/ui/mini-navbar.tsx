@@ -255,16 +255,29 @@ export function Navbar({ variant = 'default', theme = 'dark' }: { variant?: Navb
                 isScrolled ? "bg-transparent px-0 py-0" : isCurrentlyLight ? "bg-gray-100" : "bg-white/10"
               )}>
                 {navLinksData.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className={cn(
-                      "text-sm font-medium transition-colors whitespace-nowrap",
-                      isScrolled ? "text-white/80 hover:text-white" : isCurrentlyLight ? "text-gray-600 hover:text-gray-900" : "text-white/80 hover:text-white"
-                    )}
-                  >
-                    {link.label}
-                  </Link>
+                  link.label === 'Projects' ? (
+                    <button
+                      key={link.href}
+                      onClick={handleProjectsClick}
+                      className={cn(
+                        "text-sm font-medium transition-colors whitespace-nowrap cursor-pointer",
+                        isScrolled ? "text-white/80 hover:text-white" : isCurrentlyLight ? "text-gray-600 hover:text-gray-900" : "text-white/80 hover:text-white"
+                      )}
+                    >
+                      {link.label}
+                    </button>
+                  ) : (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className={cn(
+                        "text-sm font-medium transition-colors whitespace-nowrap",
+                        isScrolled ? "text-white/80 hover:text-white" : isCurrentlyLight ? "text-gray-600 hover:text-gray-900" : "text-white/80 hover:text-white"
+                      )}
+                    >
+                      {link.label}
+                    </Link>
+                  )
                 ))}
               </div>
             </nav>
