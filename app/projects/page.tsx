@@ -219,7 +219,7 @@ export default function ProjectsPage() {
       <Navbar variant="home" theme="dark" />
       <div
         className={cn(
-          'transition-transform duration-300 ease-out min-h-screen bg-[#F9F9F8]',
+          'transition-transform duration-300 ease-out min-h-screen bg-white',
           sidebarOpen ? 'translate-x-64' : 'translate-x-0'
         )}
       >
