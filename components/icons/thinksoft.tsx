@@ -8,7 +8,6 @@ interface Props {
 export function ThinksoftLogo({ className }: Props) {
   return (
     <div className={cn("relative inline-flex items-center", className)}>
-      <ChristmasCap className="absolute -top-1 -left-1 w-4 h-4 z-10 -rotate-12 drop-shadow-sm pointer-events-none" />
       <svg
         height="24"
         viewBox="0 0 100 40"
