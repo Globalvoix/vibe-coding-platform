@@ -12,6 +12,7 @@ import { useRouter } from 'next/navigation'
 
 interface ChatContextValue {
   chat: Chat<ChatUIMessage>
+  setMessages: (messages: ChatUIMessage[]) => void
 }
 
 const ChatContext = createContext<ChatContextValue | undefined>(undefined)
@@ -47,8 +48,16 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     })
   }, [setChatStatus, router])
 
+  const setMessages = (messages: ChatUIMessage[]) => {
+    // @ts-ignore - Chat object from @ai-sdk/react should have setMessages
+    if (typeof chat.setMessages === 'function') {
+      // @ts-ignore
+      chat.setMessages(messages)
+    }
+  }
+
   return (
-    <ChatContext.Provider value={{ chat }}>{children}</ChatContext.Provider>
+    <ChatContext.Provider value={{ chat, setMessages }}>{children}</ChatContext.Provider>
   )
 }
 
