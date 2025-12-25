@@ -40,7 +40,7 @@ export function Navbar({ variant = 'default', theme = 'dark' }: { variant?: Navb
   const shapeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { toggleSidebar } = useUIStore();
   const { isSignedIn } = useAuth();
-  const { signIn } = useSignIn();
+  const { openSignIn } = useClerk();
   const pathname = usePathname();
   const isProjectsPage = pathname === '/projects';
   const [planId, setPlanId] = useState<string | null>(null);
@@ -54,17 +54,7 @@ export function Navbar({ variant = 'default', theme = 'dark' }: { variant?: Navb
   const handleProjectsClick = (e: React.MouseEvent) => {
     if (!isSignedIn) {
       e.preventDefault();
-      if (signIn) {
-        signIn.create({
-          strategy: 'oauth_google',
-        }).catch(() => {
-          if (signIn) {
-            signIn.create({
-              strategy: 'email_code',
-            });
-          }
-        });
-      }
+      openSignIn();
     }
   };
 
