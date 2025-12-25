@@ -10,6 +10,7 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { SignInButton, SignUpButton } from '@clerk/nextjs';
 import { UserButtonWrapper } from './user-button-wrapper';
+import { usePathname } from 'next/navigation';
 
 const AnimatedNavLink = ({ href, children }: { href: string; children: React.ReactNode }) => {
   const defaultTextColor = 'text-gray-600';
@@ -38,6 +39,8 @@ export function Navbar({ variant = 'default', theme = 'dark' }: { variant?: Navb
   const shapeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { toggleSidebar } = useUIStore();
   const { isSignedIn } = useAuth();
+  const pathname = usePathname();
+  const isProjectsPage = pathname === '/projects';
   const [planId, setPlanId] = useState<string | null>(null);
   const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null);
   const [creditBalance, setCreditBalance] = useState<number | null>(null);
@@ -216,30 +219,34 @@ export function Navbar({ variant = 'default', theme = 'dark' }: { variant?: Navb
             >
               <Menu className={cn("w-5 h-5", isScrolled ? "text-white" : isCurrentlyLight ? "text-gray-900" : "text-white")} />
             </button>
-            <Link href="/" className={cn("flex items-center gap-2 shrink-0", isScrolled ? "text-white" : isCurrentlyLight ? "text-gray-900" : "text-white")}>
-              <ThinksoftLogo className="h-6 w-auto" />
-            </Link>
+            {!isProjectsPage && (
+              <Link href="/" className={cn("flex items-center gap-2 shrink-0", isScrolled ? "text-white" : isCurrentlyLight ? "text-gray-900" : "text-white")}>
+                <ThinksoftLogo className="h-6 w-auto" />
+              </Link>
+            )}
           </div>
 
-          <nav className="hidden sm:flex items-center mx-4">
-            <div className={cn(
-              "flex items-center gap-6 rounded-md px-6 py-2.5 backdrop-blur-sm transition-all duration-300",
-              isScrolled ? "bg-transparent px-0 py-0" : isCurrentlyLight ? "bg-gray-100" : "bg-white/10"
-            )}>
-              {navLinksData.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={cn(
-                    "text-sm font-medium transition-colors whitespace-nowrap",
-                    isScrolled ? "text-white/80 hover:text-white" : isCurrentlyLight ? "text-gray-600 hover:text-gray-900" : "text-white/80 hover:text-white"
-                  )}
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </div>
-          </nav>
+          {!isProjectsPage && (
+            <nav className="hidden sm:flex items-center mx-4">
+              <div className={cn(
+                "flex items-center gap-6 rounded-md px-6 py-2.5 backdrop-blur-sm transition-all duration-300",
+                isScrolled ? "bg-transparent px-0 py-0" : isCurrentlyLight ? "bg-gray-100" : "bg-white/10"
+              )}>
+                {navLinksData.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={cn(
+                      "text-sm font-medium transition-colors whitespace-nowrap",
+                      isScrolled ? "text-white/80 hover:text-white" : isCurrentlyLight ? "text-gray-600 hover:text-gray-900" : "text-white/80 hover:text-white"
+                    )}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
+            </nav>
+          )}
 
           <div className="flex items-center gap-2 shrink-0">
             {isSignedIn ? (
@@ -250,7 +257,9 @@ export function Navbar({ variant = 'default', theme = 'dark' }: { variant?: Navb
               <SignInButton mode="modal">
                 <button className={cn(
                   "inline-flex items-center justify-center rounded-md px-5 py-2 text-sm font-medium shadow-sm transition-colors whitespace-nowrap",
-                  isScrolled
+                  isProjectsPage
+                    ? "bg-black text-white hover:bg-black/90"
+                    : isScrolled
                     ? "bg-white text-black hover:bg-gray-100"
                     : isCurrentlyLight
                     ? "bg-gray-900 text-white hover:bg-gray-800"
