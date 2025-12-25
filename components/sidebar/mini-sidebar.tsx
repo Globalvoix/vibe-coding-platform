@@ -117,7 +117,7 @@ export function MiniSidebar() {
       <div className="flex flex-col gap-4 w-full px-2 mt-auto">
         {isSignedIn && creditBalance !== null && (
           <div className={cn(
-            "flex items-center gap-3 p-2 rounded-xl transition-all group relative",
+            "flex items-center gap-3 p-2 rounded-[6px] transition-all group relative",
             sidebarOpen ? "bg-emerald-50/30 border border-emerald-100/50" : ""
           )}>
             <div className="min-w-[24px] flex justify-center ml-1">
