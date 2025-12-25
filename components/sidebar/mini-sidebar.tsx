@@ -20,8 +20,7 @@ import { useAuth } from '@clerk/nextjs'
 export function MiniSidebar() {
   const router = useRouter()
   const pathname = usePathname()
-  const { user } = useAuth()
-  
+
   const navItems = [
     { icon: Home, label: 'Home', href: '/home', active: pathname === '/home' },
     { icon: Search, label: 'Search', href: '#', active: false },
@@ -37,37 +36,37 @@ export function MiniSidebar() {
   ]
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-[72px] bg-[#FDFDFB] border-r border-gray-100 flex flex-col items-center py-6 z-40">
+    <aside className="fixed left-0 top-0 h-screen w-[72px] bg-[#FDFDFB] border-r border-gray-100 flex flex-col items-center py-6 z-50">
       {/* Top Toggle */}
       <button className="p-2 mb-6 text-gray-400 hover:text-gray-900 transition-colors">
-        <PanelLeft className="w-5 h-5" />
+        <PanelLeft className="w-5 h-5 stroke-[1.5px]" />
       </button>
 
-      {/* User Avatar */}
+      {/* User Avatar - Workspace */}
       <div className="mb-8">
-        <div className="w-10 h-10 rounded-xl bg-[#BE123C] flex items-center justify-center text-white font-bold text-lg shadow-sm">
+        <div className="w-10 h-10 rounded-xl bg-[#BE123C] flex items-center justify-center text-white font-bold text-lg shadow-sm hover:scale-105 transition-transform cursor-pointer">
           M
         </div>
       </div>
 
       {/* Main Nav */}
-      <nav className="flex flex-col gap-4 w-full items-center flex-1">
+      <nav className="flex flex-col gap-3 w-full items-center flex-1">
         {navItems.map((item, i) => (
           <button
             key={i}
             onClick={() => item.href !== '#' && router.push(item.href)}
             className={cn(
               "p-2.5 rounded-xl transition-all duration-200 group relative",
-              item.active 
-                ? "bg-[#EFEFE9] text-gray-900" 
-                : "text-gray-400 hover:text-gray-900 hover:bg-gray-50"
+              item.active
+                ? "bg-[#EFEFE9] text-gray-900"
+                : "text-gray-500 hover:text-gray-900 hover:bg-gray-100/50"
             )}
             title={item.label}
           >
-            <item.icon className={cn("w-5 h-5", item.active ? "stroke-[2.5px]" : "stroke-[2px]")} />
-            
+            <item.icon className={cn("w-5 h-5", item.active ? "stroke-[2px]" : "stroke-[1.5px]")} />
+
             {/* Tooltip */}
-            <span className="absolute left-full ml-4 px-2 py-1 bg-gray-900 text-white text-[11px] font-medium rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
+            <span className="absolute left-full ml-4 px-2 py-1 bg-gray-900 text-white text-[11px] font-medium rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-[60] shadow-xl">
               {item.label}
             </span>
           </button>
@@ -75,28 +74,28 @@ export function MiniSidebar() {
       </nav>
 
       {/* Bottom Nav */}
-      <div className="flex flex-col gap-4 w-full items-center mb-6">
+      <div className="flex flex-col gap-3 w-full items-center mb-6">
         {bottomItems.map((item, i) => (
           <button
             key={i}
-            className="p-2.5 text-gray-400 hover:text-gray-900 transition-colors group relative"
+            className="p-2.5 text-gray-500 hover:text-gray-900 transition-colors group relative"
             title={item.label}
           >
-            <item.icon className="w-5 h-5" />
-            <span className="absolute left-full ml-4 px-2 py-1 bg-gray-900 text-white text-[11px] font-medium rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
+            <item.icon className="w-5 h-5 stroke-[1.5px]" />
+            <span className="absolute left-full ml-4 px-2 py-1 bg-gray-900 text-white text-[11px] font-medium rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-[60] shadow-xl">
               {item.label}
             </span>
           </button>
         ))}
       </div>
 
-      {/* User Button / Inbox */}
+      {/* User Profile / Inbox */}
       <div className="flex flex-col gap-4 items-center">
-        <div className="w-8 h-8 rounded-full bg-[#5B21B6] flex items-center justify-center text-white text-[10px] font-bold">
+        <div className="w-8 h-8 rounded-full bg-[#5B21B6] flex items-center justify-center text-white text-[10px] font-bold shadow-sm cursor-pointer hover:ring-2 hover:ring-offset-2 hover:ring-[#5B21B6]/20 transition-all">
           P
         </div>
-        <button className="p-2 text-gray-400 hover:text-gray-900 transition-colors">
-          <Inbox className="w-5 h-5" />
+        <button className="p-2 text-gray-500 hover:text-gray-900 transition-colors">
+          <Inbox className="w-5 h-5 stroke-[1.5px]" />
         </button>
       </div>
     </aside>
