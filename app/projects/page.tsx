@@ -245,8 +245,15 @@ export default function ProjectsPage() {
       >
         <main className="max-w-[1440px] mx-auto px-6 py-12 lg:px-10">
           {/* Header Section */}
-          <div className="flex items-center gap-3 mb-10">
+          <div className="flex items-center justify-between mb-10">
             <h1 className="text-2xl font-semibold text-[#111111] tracking-tight">Projects</h1>
+            <button
+              onClick={() => router.push('/home')}
+              className="flex items-center gap-2 px-4 py-2 bg-[#111111] text-white rounded-xl text-[13px] font-semibold hover:bg-black transition-all shadow-sm"
+            >
+              <Plus className="w-4 h-4" />
+              New Project
+            </button>
           </div>
 
           {/* Filters Bar */}
