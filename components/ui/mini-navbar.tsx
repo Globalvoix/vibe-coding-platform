@@ -357,16 +357,29 @@ export function Navbar({ variant = 'default', theme = 'dark' }: { variant?: Navb
           >
             <nav className="flex flex-col items-center space-y-4 text-base w-full">
               {navLinksData.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={cn(
-                    "font-medium transition-colors w-full text-center",
-                    isScrolled ? "text-white hover:text-white/80" : isCurrentlyLight ? "text-gray-900 hover:text-gray-700" : "text-white hover:text-white/80"
-                  )}
-                >
-                  {link.label}
-                </Link>
+                link.label === 'Projects' ? (
+                  <button
+                    key={link.href}
+                    onClick={handleProjectsClick}
+                    className={cn(
+                      "font-medium transition-colors w-full text-center cursor-pointer",
+                      isScrolled ? "text-white hover:text-white/80" : isCurrentlyLight ? "text-gray-900 hover:text-gray-700" : "text-white hover:text-white/80"
+                    )}
+                  >
+                    {link.label}
+                  </button>
+                ) : (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={cn(
+                      "font-medium transition-colors w-full text-center",
+                      isScrolled ? "text-white hover:text-white/80" : isCurrentlyLight ? "text-gray-900 hover:text-gray-700" : "text-white hover:text-white/80"
+                    )}
+                  >
+                    {link.label}
+                  </Link>
+                )
               ))}
             </nav>
           </div>
