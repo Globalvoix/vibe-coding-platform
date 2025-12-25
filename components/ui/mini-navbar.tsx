@@ -250,28 +250,28 @@ export function Navbar({ variant = 'default', theme = 'dark' }: { variant?: Navb
             </nav>
           )}
 
-          <div className="flex items-center gap-2 shrink-0">
-            {isSignedIn ? (
-              <div className="flex items-center gap-2">
-      <UserButtonWrapper afterSignOutUrl="/" />
-              </div>
-            ) : (
-              <SignInButton mode="modal">
-                <button className={cn(
-                  "inline-flex items-center justify-center rounded-md px-5 py-2 text-sm font-medium shadow-sm transition-colors whitespace-nowrap",
-                  isProjectsPage
-                    ? "bg-black text-white hover:bg-black/90"
-                    : isScrolled
-                    ? "bg-white text-black hover:bg-gray-100"
-                    : isCurrentlyLight
-                    ? "bg-gray-900 text-white hover:bg-gray-800"
-                    : "bg-white text-gray-900 hover:bg-gray-50"
-                )}>
-                  Sign in / Sign up
-                </button>
-              </SignInButton>
-            )}
-          </div>
+          {!isProjectsPage && (
+            <div className="flex items-center gap-2 shrink-0">
+              {isSignedIn ? (
+                <div className="flex items-center gap-2">
+        <UserButtonWrapper afterSignOutUrl="/" />
+                </div>
+              ) : (
+                <SignInButton mode="modal">
+                  <button className={cn(
+                    "inline-flex items-center justify-center rounded-md px-5 py-2 text-sm font-medium shadow-sm transition-colors whitespace-nowrap",
+                    isScrolled
+                      ? "bg-white text-black hover:bg-gray-100"
+                      : isCurrentlyLight
+                      ? "bg-gray-900 text-white hover:bg-gray-800"
+                      : "bg-white text-gray-900 hover:bg-gray-50"
+                  )}>
+                    Sign in / Sign up
+                  </button>
+                </SignInButton>
+              )}
+            </div>
+          )}
 
           {!isProjectsPage && (
             <button
