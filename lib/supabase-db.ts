@@ -37,8 +37,7 @@ export function detectNeedsDatabase(prompt: string): boolean {
 }
 
 export async function createProjectDatabase(
-  projectId: string,
-  appName: string
+  projectId: string
 ): Promise<{
   success: boolean
   error?: string
