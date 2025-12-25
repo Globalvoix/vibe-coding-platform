@@ -208,17 +208,19 @@ export function Navbar({ variant = 'default', theme = 'dark' }: { variant?: Navb
         <>
           <div className={cn("flex items-center justify-between w-full", isScrolled ? "gap-8" : "gap-6")}>
           <div className="flex items-center gap-3">
-            <button
-              onClick={toggleSidebar}
-              className={cn(
-                "p-1.5 rounded-lg transition-colors",
-                isScrolled ? "hover:bg-white/10" : isCurrentlyLight ? "hover:bg-gray-100" : "hover:bg-white/10"
-              )}
-              title="Toggle app menu"
-              aria-label="Toggle app menu"
-            >
-              <Menu className={cn("w-5 h-5", isScrolled ? "text-white" : isCurrentlyLight ? "text-gray-900" : "text-white")} />
-            </button>
+            {!isProjectsPage && (
+              <button
+                onClick={toggleSidebar}
+                className={cn(
+                  "p-1.5 rounded-lg transition-colors",
+                  isScrolled ? "hover:bg-white/10" : isCurrentlyLight ? "hover:bg-gray-100" : "hover:bg-white/10"
+                )}
+                title="Toggle app menu"
+                aria-label="Toggle app menu"
+              >
+                <Menu className={cn("w-5 h-5", isScrolled ? "text-white" : isCurrentlyLight ? "text-gray-900" : "text-white")} />
+              </button>
+            )}
             {!isProjectsPage && (
               <Link href="/" className={cn("flex items-center gap-2 shrink-0", isScrolled ? "text-white" : isCurrentlyLight ? "text-gray-900" : "text-white")}>
                 <ThinksoftLogo className="h-6 w-auto" />
