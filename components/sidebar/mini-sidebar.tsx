@@ -87,16 +87,16 @@ export function MiniSidebar() {
             title={!sidebarOpen ? item.label : undefined}
           >
             <div className="min-w-[24px] flex justify-center ml-1">
-               <item.icon className={cn("w-[18px] h-[18px]", item.active ? "stroke-[2px]" : "stroke-[1.5px]")} />
+               <item.icon className="w-[18px] h-[18px] stroke-[2px]" />
             </div>
-            
+
             <AnimatePresence>
               {sidebarOpen && (
                 <motion.span
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -10 }}
-                  className="text-[12px] font-medium whitespace-nowrap overflow-hidden"
+                  className="text-[12px] font-semibold whitespace-nowrap overflow-hidden"
                 >
                   {item.label}
                 </motion.span>
