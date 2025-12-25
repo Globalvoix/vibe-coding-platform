@@ -111,7 +111,13 @@ export default function ProjectsPage() {
     <>
       <AppSidebar />
       <Navbar variant="home" theme="dark" />
-      <main className="min-h-screen bg-background px-4 py-6 md:px-8 md:py-10">
+      <div
+        className={cn(
+          'transition-transform duration-300 ease-out',
+          sidebarOpen ? 'translate-x-64' : 'translate-x-0'
+        )}
+      >
+        <main className="min-h-screen bg-background px-4 py-6 md:px-8 md:py-10">
         <header className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight">
@@ -194,6 +200,7 @@ export default function ProjectsPage() {
           </div>
         )}
       </main>
+      </div>
     </>
   )
 }
