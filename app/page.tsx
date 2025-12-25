@@ -68,7 +68,7 @@ export default function Page() {
         <section className="relative py-24 sm:py-32 px-4 bg-white">
           <div className="mx-auto max-w-6xl">
             <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight text-gray-900 mb-16 max-w-2xl leading-tight">
-              Thinksoft is being used by the world's leading organizations across industries
+              Thinksoft is being used by the world&apos;s leading organizations across industries
             </h2>
 
             <div className="grid gap-x-12 gap-y-16 md:grid-cols-2">
