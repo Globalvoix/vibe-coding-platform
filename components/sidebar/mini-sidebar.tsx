@@ -144,27 +144,15 @@ export function MiniSidebar() {
           </div>
         )}
         
-        <div className={cn(
-          "flex items-center gap-3 p-1 rounded-full",
-          sidebarOpen ? "bg-gray-50/50" : ""
-        )}>
-           <div className="w-8 h-8 rounded-full bg-[#5B21B6] flex items-center justify-center text-white text-[10px] font-bold shadow-sm cursor-pointer shrink-0 ml-1">
-             P
-           </div>
-           <AnimatePresence>
-             {sidebarOpen && (
-               <motion.div
-                 initial={{ opacity: 0 }}
-                 animate={{ opacity: 1 }}
-                 exit={{ opacity: 0 }}
-                 className="flex flex-col overflow-hidden"
-               >
-                 <span className="text-[12px] text-gray-900 font-medium truncate">User Profile</span>
-                 <span className="text-[10px] text-gray-500 truncate">Settings</span>
-               </motion.div>
-             )}
-           </AnimatePresence>
-        </div>
+        <UserButton
+          afterSignOutUrl="/"
+          appearance={{
+            elements: {
+              userButtonAvatarBox: "w-8 h-8",
+              userButtonTrigger: "focus:shadow-none"
+            }
+          }}
+        />
       </div>
     </motion.aside>
   )
