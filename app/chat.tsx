@@ -42,7 +42,7 @@ interface Props {
 }
 
 export function Chat({ className, initialPrompt, projectId }: Props) {
-  const { chat, setMessages } = useSharedChatContext()
+  const { chat } = useSharedChatContext()
   const { modelId, reasoningEffort } = useSettings()
   const { messages, sendMessage, status } = useChat<ChatUIMessage>({ chat })
   const { setChatStatus } = useSandboxStore()
@@ -65,12 +65,6 @@ export function Chat({ className, initialPrompt, projectId }: Props) {
   })
   const [showHistoryPanel, setShowHistoryPanel] = useState(false)
   const [selectedVersionId, setSelectedVersionId] = useState<string | null>(null)
-
-  // Clear messages when projectId changes to prevent data leakage
-  useEffect(() => {
-    setMessages([])
-    hasSubmittedInitialPromptRef.current = false
-  }, [projectId, setMessages])
 
   // Persist and restore chat messages across page refreshes
   const { allMessages } = useChatPersistence(projectId || null, messages)
