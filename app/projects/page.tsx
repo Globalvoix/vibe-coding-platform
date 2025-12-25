@@ -217,7 +217,7 @@ export default function ProjectsPage() {
     <>
       <MiniSidebar />
       <Navbar variant="home" theme="dark" />
-      <div className="min-h-screen bg-white pl-[72px]">
+      <div className="min-h-screen bg-white pl-[60px]">
         <main className="max-w-[1440px] mx-auto px-6 py-12 lg:px-10">
           {/* Header Section */}
           <div className="flex items-center gap-3 mb-10">
