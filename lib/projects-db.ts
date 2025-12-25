@@ -154,6 +154,24 @@ export async function deleteProject(userId: string, id: string): Promise<void> {
   await pool.query(`DELETE FROM projects WHERE user_id = $1 AND id = $2`, [userId, id])
 }
 
+export async function forkProject(userId: string, id: string): Promise<ProjectRecord | null> {
+  await ensureProjectsTable()
+  const project = await getProject(userId, id)
+  if (!project) return null
+
+  const newId = crypto.randomUUID()
+  const newName = `Copy of ${project.name}`
+
+  const result = await pool.query<ProjectRecord>(
+    `INSERT INTO projects (id, user_id, name, initial_prompt, sandbox_state)
+     VALUES ($1, $2, $3, $4, $5)
+     RETURNING *`,
+    [newId, userId, newName, project.initial_prompt, project.sandbox_state]
+  )
+
+  return result.rows[0]
+}
+
 export interface ProjectVersion {
   id: string
   project_id: string
