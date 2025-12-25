@@ -361,9 +361,7 @@ export default function ProjectsPage() {
                 className="group flex flex-col h-[300px] bg-white border border-dashed border-gray-200 rounded-[24px] hover:border-blue-400 hover:bg-blue-50/10 transition-all duration-300"
               >
                 <div className="flex-1 flex items-center justify-center">
-                  <div className="w-14 h-14 rounded-full bg-gray-50 group-hover:bg-blue-100 flex items-center justify-center transition-all duration-300 scale-95 group-hover:scale-100">
-                    <Plus className="w-7 h-7 text-gray-300 group-hover:text-blue-500 transition-colors" />
-                  </div>
+                  <Plus className="w-10 h-10 text-gray-300 group-hover:text-blue-500 transition-all duration-300 scale-95 group-hover:scale-105" />
                 </div>
                 <div className="p-6 border-t border-gray-50/50 w-full text-left">
                   <p className="text-[14px] font-semibold text-gray-800">Create new project</p>
