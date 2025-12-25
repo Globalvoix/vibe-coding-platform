@@ -7,13 +7,7 @@ import {
   Home,
   LayoutGrid,
   Users,
-  Search,
-  Star,
   PanelLeft,
-  Compass,
-  Package,
-  Library,
-  Inbox,
   Coins
 } from 'lucide-react'
 import { useAuth } from '@clerk/nextjs'
