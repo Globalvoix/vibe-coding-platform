@@ -219,7 +219,10 @@ export default function ProjectsPage() {
       <AppSidebar />
       <MiniSidebar />
       <Navbar variant="home" theme="dark" />
-      <div className="min-h-screen bg-white pl-[60px]">
+      <div className={cn(
+        'transition-all duration-300 ease-out min-h-screen bg-white pl-[60px]',
+        sidebarOpen && 'md:ml-64'
+      )}>
         <main className="max-w-[1440px] mx-auto px-6 py-12 lg:px-10">
           {/* Header Section */}
           <div className="flex items-center gap-3 mb-10">
