@@ -11,8 +11,9 @@ import { useAuth } from '@clerk/nextjs';
 import { SignInButton, SignUpButton } from '@clerk/nextjs';
 import { UserButtonWrapper } from './user-button-wrapper';
 import { usePathname } from 'next/navigation';
+import { useSignIn } from '@clerk/nextjs';
 
-const AnimatedNavLink = ({ href, children }: { href: string; children: React.ReactNode }) => {
+const AnimatedNavLink = ({ href, children, onClick }: { href: string; children: React.ReactNode; onClick?: (e: React.MouseEvent) => void }) => {
   const defaultTextColor = 'text-gray-600';
   const hoverTextColor = 'text-gray-900';
   const textSizeClass = 'text-sm';
@@ -20,6 +21,7 @@ const AnimatedNavLink = ({ href, children }: { href: string; children: React.Rea
   return (
     <Link
       href={href}
+      onClick={onClick}
       className={`group relative inline-block overflow-hidden h-5 flex items-center ${textSizeClass}`}
     >
       <div className="flex flex-col transition-transform duration-400 ease-out transform group-hover:-translate-y-1/2">
