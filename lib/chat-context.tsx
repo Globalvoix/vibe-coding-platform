@@ -12,12 +12,17 @@ import { useRouter } from 'next/navigation'
 
 interface ChatContextValue {
   chat: Chat<ChatUIMessage>
-  setMessages: (messages: ChatUIMessage[]) => void
 }
 
 const ChatContext = createContext<ChatContextValue | undefined>(undefined)
 
-export function ChatProvider({ children }: { children: ReactNode }) {
+export function ChatProvider({
+  children,
+  scopeKey,
+}: {
+  children: ReactNode
+  scopeKey?: string
+}) {
   const mapDataToState = useDataStateMapper()
   const mapDataToStateRef = useRef(mapDataToState)
   mapDataToStateRef.current = mapDataToState
@@ -46,19 +51,9 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         setChatStatus('ready')
       },
     })
-  }, [setChatStatus, router])
+  }, [setChatStatus, router, scopeKey])
 
-  const setMessages = (messages: ChatUIMessage[]) => {
-    // @ts-expect-error - Chat object from @ai-sdk/react should have setMessages
-    if (typeof chat.setMessages === 'function') {
-      // @ts-expect-error
-      chat.setMessages(messages)
-    }
-  }
-
-  return (
-    <ChatContext.Provider value={{ chat, setMessages }}>{children}</ChatContext.Provider>
-  )
+  return <ChatContext.Provider value={{ chat }}>{children}</ChatContext.Provider>
 }
 
 export function useSharedChatContext() {
