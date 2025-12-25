@@ -314,11 +314,11 @@ export default function ProjectsPage() {
             </div>
 
             <div className="flex items-center gap-3 self-end lg:self-auto">
-              <div className="flex items-center bg-[#F5F5F0] border border-gray-200/50 rounded-lg p-1 shadow-sm">
+              <div className="flex items-center bg-[#F5F5F0] border border-gray-200/50 rounded-xl p-1 shadow-sm">
                 <button
                   onClick={() => setViewMode('grid')}
                   className={cn(
-                    "p-1.5 rounded-md transition-all",
+                    "px-3 py-1.5 rounded-lg transition-all",
                     viewMode === 'grid' ? "bg-white text-gray-900 shadow-xs" : "text-gray-400 hover:text-gray-600"
                   )}
                 >
@@ -327,7 +327,7 @@ export default function ProjectsPage() {
                 <button
                   onClick={() => setViewMode('list')}
                   className={cn(
-                    "p-1.5 rounded-md transition-all",
+                    "px-3 py-1.5 rounded-lg transition-all",
                     viewMode === 'list' ? "bg-white text-gray-900 shadow-xs" : "text-gray-400 hover:text-gray-600"
                   )}
                 >
