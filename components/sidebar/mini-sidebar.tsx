@@ -11,12 +11,14 @@ import {
   Coins
 } from 'lucide-react'
 import { useAuth } from '@clerk/nextjs'
+import { useUIStore } from '@/lib/ui-store'
 import { CREDITS_UPDATED_EVENT } from '@/lib/credits-events'
 
 export function MiniSidebar() {
   const router = useRouter()
   const pathname = usePathname()
   const { isSignedIn } = useAuth()
+  const { toggleSidebar } = useUIStore()
   const [creditBalance, setCreditBalance] = useState<number | null>(null)
 
   useEffect(() => {
@@ -42,13 +44,18 @@ export function MiniSidebar() {
   const navItems = [
     { icon: Home, label: 'Home', href: '/home', active: pathname === '/home' },
     { icon: LayoutGrid, label: 'All Projects', href: '/projects', active: pathname === '/projects' },
-    { icon: Users, label: 'Shared with me', href: '#', active: false },
+    { icon: Users, label: 'Shared with me', href: '/shared', active: pathname === '/shared' },
   ]
 
   return (
     <aside className="fixed left-0 top-0 h-screen w-[60px] bg-[#FDFDFB] border-r border-gray-100 flex flex-col items-center py-6 z-50">
       {/* Top Toggle */}
-      <button className="p-2 mb-6 text-gray-400 hover:text-gray-900 transition-colors">
+      <button
+        onClick={toggleSidebar}
+        className="p-2 mb-6 text-gray-400 hover:text-gray-900 transition-colors"
+        title="Toggle sidebar"
+        aria-label="Toggle sidebar"
+      >
         <PanelLeft className="w-5 h-5 stroke-[1.2px]" />
       </button>
 
