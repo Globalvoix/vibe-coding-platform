@@ -470,13 +470,23 @@ export function Navbar({ variant = 'default', theme = 'dark' }: { variant?: Navb
           >
             <nav className="flex flex-col items-center space-y-4 text-base w-full">
               {navLinksData.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="text-gray-700 hover:text-gray-900 transition-colors w-full text-center"
-                >
-                  {link.label}
-                </Link>
+                link.label === 'Projects' ? (
+                  <button
+                    key={link.href}
+                    onClick={handleProjectsClick}
+                    className="text-gray-700 hover:text-gray-900 transition-colors w-full text-center cursor-pointer"
+                  >
+                    {link.label}
+                  </button>
+                ) : (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className="text-gray-700 hover:text-gray-900 transition-colors w-full text-center"
+                  >
+                    {link.label}
+                  </Link>
+                )
               ))}
             </nav>
             <div className="flex flex-col items-center space-y-4 mt-4 w-full">{authElement}</div>
