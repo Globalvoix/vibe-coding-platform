@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth, useClerk } from '@clerk/nextjs'
 import { AppSidebar } from '@/components/sidebar/app-sidebar'
+import { Navbar } from '@/components/ui/mini-navbar'
 import type { ProjectRecord } from '@/lib/projects-db'
 
 export default function ProjectsPage() {
