@@ -361,7 +361,7 @@ export default function ProjectsPage() {
                 className="group flex flex-col h-[300px] bg-white border border-dashed border-gray-200 rounded-[24px] hover:border-blue-400 hover:bg-blue-50/10 transition-all duration-300"
               >
                 <div className="flex-1 flex items-center justify-center">
-                  <Plus className="w-10 h-10 text-gray-300 group-hover:text-blue-500 transition-all duration-300 scale-95 group-hover:scale-105" />
+                  <Plus className="w-10 h-10 text-gray-300 group-hover:text-blue-500 transition-all duration-300" />
                 </div>
                 <div className="p-6 border-t border-gray-50/50 w-full text-left">
                   <p className="text-[14px] font-semibold text-gray-800">Create new project</p>
@@ -463,12 +463,12 @@ function ProjectCard({
   
   if (!isGrid) {
     return (
-      <div 
-        className="group grid grid-cols-[1fr,150px,250px,40px] gap-6 items-center px-6 py-4 bg-white border border-gray-100 rounded-2xl hover:border-blue-400/30 hover:shadow-lg hover:shadow-blue-500/5 transition-all duration-300 cursor-pointer"
+      <div
+        className="group grid grid-cols-[1fr,150px,250px,40px] gap-6 items-center px-6 py-4 bg-white border border-gray-100 rounded-2xl hover:border-blue-400/30 transition-all duration-300 cursor-pointer"
         onClick={() => onOpen(project.id)}
       >
         <div className="flex items-center gap-4 min-w-0">
-          <div className="relative w-20 h-12 rounded-lg bg-[#111111] overflow-hidden shrink-0 group-hover:scale-105 transition-transform duration-300">
+          <div className="relative w-20 h-12 rounded-lg bg-[#111111] overflow-hidden shrink-0">
             <Image
               src={`https://api.dicebear.com/7.x/identicon/svg?seed=${project.id}&backgroundColor=111111`}
               alt="Preview"
@@ -503,11 +503,11 @@ function ProjectCard({
 
   return (
     <div
-      className="group flex flex-col bg-white border border-gray-200 rounded-[24px] hover:border-blue-400/50 hover:shadow-2xl hover:shadow-blue-500/5 transition-all duration-500 overflow-hidden cursor-pointer h-[300px]"
+      className="group flex flex-col bg-white border border-gray-200 rounded-[24px] hover:border-blue-400/50 hover:shadow-md transition-all duration-500 overflow-hidden cursor-pointer h-[300px]"
       onClick={() => onOpen(project.id)}
     >
       {/* Preview Section */}
-      <div className="relative bg-[#111111] overflow-hidden transition-transform duration-500 group-hover:scale-[1.02] flex-1">
+      <div className="relative bg-[#111111] overflow-hidden flex-1">
         <div className="absolute inset-0 flex items-center justify-center">
           <Image
             src={`https://api.dicebear.com/7.x/identicon/svg?seed=${project.id}&backgroundColor=111111&fontFamily=Inter`}
