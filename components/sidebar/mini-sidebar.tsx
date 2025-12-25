@@ -52,13 +52,6 @@ export function MiniSidebar() {
         <PanelLeft className="w-5 h-5 stroke-[1.2px]" />
       </button>
 
-      {/* User Avatar - Workspace */}
-      <div className="mb-8">
-        <div className="w-9 h-9 rounded-xl bg-[#BE123C] flex items-center justify-center text-white font-bold text-lg shadow-sm hover:scale-105 transition-transform cursor-pointer">
-          M
-        </div>
-      </div>
-
       {/* Main Nav */}
       <nav className="flex flex-col gap-4 w-full items-center flex-1">
         {navItems.map((item, i) => (
@@ -95,9 +88,6 @@ export function MiniSidebar() {
             </span>
           </div>
         )}
-        <div className="w-8 h-8 rounded-full bg-[#5B21B6] flex items-center justify-center text-white text-[10px] font-bold shadow-sm cursor-pointer hover:ring-2 hover:ring-offset-2 hover:ring-[#5B21B6]/20 transition-all">
-          P
-        </div>
       </div>
     </aside>
   )
