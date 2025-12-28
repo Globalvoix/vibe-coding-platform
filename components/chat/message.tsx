@@ -1,4 +1,4 @@
-import { LightbulbIcon, ChevronDownIcon, ChevronUpIcon, CodeIcon, BookmarkIcon, PlayIcon } from 'lucide-react'
+import { LightbulbIcon, ChevronDownIcon, ChevronUpIcon, CodeIcon, BookmarkIcon, PlayIcon, ChevronRightIcon } from 'lucide-react'
 import type { ChatUIMessage } from './types'
 import { MessagePart } from './message-part'
 import { memo, createContext, useContext, useState, useEffect } from 'react'
