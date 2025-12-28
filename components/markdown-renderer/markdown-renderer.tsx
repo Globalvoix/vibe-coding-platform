@@ -57,20 +57,15 @@ export const MarkdownRenderer = memo(function MarkdownRenderer({
           {children}
         </h3>
       ),
-      ul: ({ children, ...props }) => (
-        <ul className="list-disc pl-5 mb-3 space-y-1.5 text-foreground/80 font-sans" {...props}>
-          {children}
-        </ul>
-      ),
-      ol: ({ children, ...props }) => (
-        <ol className="list-decimal pl-5 mb-3 space-y-1.5 text-foreground/80 font-sans" {...props}>
-          {children}
-        </ol>
-      ),
       p: ({ children, ...props }) => (
-        <p className="mb-3 last:mb-0 leading-relaxed text-foreground/85 font-sans" {...props}>
+        <p className="mb-4 last:mb-0 leading-[1.6] text-foreground/90 font-sans text-[15px]" {...props}>
           {children}
         </p>
+      ),
+      ul: ({ children, ...props }) => (
+        <ul className="list-disc pl-5 mb-4 space-y-2 text-foreground/80 font-sans text-[14px]" {...props}>
+          {children}
+        </ul>
       ),
       blockquote: ({ children, ...props }) => (
         <blockquote
