@@ -5,7 +5,7 @@ export function ToolHeader(props: { className?: string; children: ReactNode }) {
   return (
     <div
       className={cn(
-        'flex items-center gap-1 text-muted-foreground mb-1 font-semibold',
+        'flex items-center gap-2 text-foreground/60 mb-1 font-medium',
         props.className
       )}
     >

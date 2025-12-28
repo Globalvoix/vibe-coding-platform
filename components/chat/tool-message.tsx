@@ -8,7 +8,7 @@ export function ToolMessage(props: {
   return (
     <div
       className={cn(
-        'text-sm px-3.5 py-3 border border-border bg-background rounded-md font-mono',
+        'text-[13px] py-1 text-foreground/70 font-sans',
         props.className
       )}
     >
