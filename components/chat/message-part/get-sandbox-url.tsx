@@ -29,7 +29,7 @@ export function GetSandboxURL({
         </div>
       </div>
 
-      {isDone && (
+      {isDone && message.url && (
         <div className="mt-3">
           <a
             href={message.url}
