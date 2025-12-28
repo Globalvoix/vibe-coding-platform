@@ -43,32 +43,32 @@ export const MarkdownRenderer = memo(function MarkdownRenderer({
         </pre>
       ),
       h1: ({ children, ...props }) => (
-        <h1 className="text-lg font-semibold mb-2 mt-4 first:mt-0" {...props}>
+        <h1 className="text-xl font-semibold mb-3 mt-6 first:mt-0 text-foreground/90 font-sans" {...props}>
           {children}
         </h1>
       ),
       h2: ({ children, ...props }) => (
-        <h2 className="text-base font-semibold mb-2 mt-3 first:mt-0" {...props}>
+        <h2 className="text-lg font-semibold mb-2.5 mt-5 first:mt-0 text-foreground/90 font-sans" {...props}>
           {children}
         </h2>
       ),
       h3: ({ children, ...props }) => (
-        <h3 className="text-sm font-semibold mb-1 mt-2 first:mt-0" {...props}>
+        <h3 className="text-md font-semibold mb-2 mt-4 first:mt-0 text-foreground/90 font-sans" {...props}>
           {children}
         </h3>
       ),
       ul: ({ children, ...props }) => (
-        <ul className="list-disc pl-4 mb-2 space-y-1" {...props}>
+        <ul className="list-disc pl-5 mb-3 space-y-1.5 text-foreground/80 font-sans" {...props}>
           {children}
         </ul>
       ),
       ol: ({ children, ...props }) => (
-        <ol className="list-decimal pl-4 mb-2 space-y-1" {...props}>
+        <ol className="list-decimal pl-5 mb-3 space-y-1.5 text-foreground/80 font-sans" {...props}>
           {children}
         </ol>
       ),
       p: ({ children, ...props }) => (
-        <p className="mb-2 last:mb-0" {...props}>
+        <p className="mb-3 last:mb-0 leading-relaxed text-foreground/85 font-sans" {...props}>
           {children}
         </p>
       ),
