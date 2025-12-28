@@ -11,26 +11,24 @@ interface Props {
 export function CreateSandbox({ message }: Props) {
   return (
     <ToolMessage>
-      <ToolHeader>
-        <BoxIcon className="w-3.5 h-3.5" />
-        Create Sandbox
-      </ToolHeader>
-      <div className="relative pl-6 min-h-5">
-        <Spinner
-          className="absolute left-0 top-0"
-          loading={message.status === 'loading'}
-        >
-          {message.status === 'error' ? (
-            <XIcon className="w-4 h-4 text-red-700" />
+      <div className="flex items-center justify-between">
+        <ToolHeader className="mb-0">
+          <BoxIcon className="w-3.5 h-3.5" />
+          <span>
+            {message.status === 'done' && 'Sandbox created'}
+            {message.status === 'loading' && 'Creating sandbox...'}
+            {message.status === 'error' && 'Failed to create sandbox'}
+          </span>
+        </ToolHeader>
+        <div className="flex items-center gap-2">
+          {message.status === 'loading' ? (
+            <Spinner loading={true} className="w-3.5 h-3.5" />
+          ) : message.status === 'error' ? (
+            <XIcon className="w-3.5 h-3.5 text-red-500/70" />
           ) : (
-            <CheckIcon className="w-4 h-4" />
+            <CheckIcon className="w-3.5 h-3.5 text-green-500/70" />
           )}
-        </Spinner>
-        <span>
-          {message.status === 'done' && 'Sandbox created successfully'}
-          {message.status === 'loading' && 'Creating Sandbox'}
-          {message.status === 'error' && 'Failed to create sandbox'}
-        </span>
+        </div>
       </div>
     </ToolMessage>
   )

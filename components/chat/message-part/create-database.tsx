@@ -11,29 +11,22 @@ interface Props {
 export function CreateDatabase({ message }: Props) {
   return (
     <ToolMessage>
-      <ToolHeader>
-        <DatabaseIcon className="w-3.5 h-3.5" />
-        Create Database
-      </ToolHeader>
-      <div className="relative pl-6 min-h-5">
-        <Spinner
-          className="absolute left-0 top-0"
-          loading={message.status === 'creating'}
-        >
-          {message.status === 'error' ? (
-            <XIcon className="w-4 h-4 text-red-700" />
-          ) : (
-            <CheckIcon className="w-4 h-4" />
-          )}
-        </Spinner>
-        <div>
+      <div className="flex items-center justify-between">
+        <ToolHeader className="mb-0">
+          <DatabaseIcon className="w-3.5 h-3.5" />
           <span>
-            {message.status === 'creating' && `Creating database for ${message.appName || 'app'}`}
+            {message.status === 'creating' && 'Creating database...'}
             {message.status === 'success' && `Database created: ${message.tableName}`}
-            {message.status === 'error' && `Failed to create database: ${message.error?.message || 'unknown error'}`}
+            {message.status === 'error' && 'Failed to create database'}
           </span>
-          {message.reason && message.status === 'success' && (
-            <p className="text-xs text-muted-foreground mt-1">Reason: {message.reason}</p>
+        </ToolHeader>
+        <div className="flex items-center gap-2">
+          {message.status === 'creating' ? (
+            <Spinner loading={true} className="w-3.5 h-3.5" />
+          ) : message.status === 'error' ? (
+            <XIcon className="w-3.5 h-3.5 text-red-500/70" />
+          ) : (
+            <CheckIcon className="w-3.5 h-3.5 text-green-500/70" />
           )}
         </div>
       </div>
