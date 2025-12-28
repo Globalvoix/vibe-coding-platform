@@ -1,7 +1,9 @@
+import { LightbulbIcon, ChevronDownIcon, ChevronUpIcon } from 'lucide-react'
 import type { ReasoningUIPart } from 'ai'
 import { MarkdownRenderer } from '@/components/markdown-renderer/markdown-renderer'
 import { MessageSpinner } from '../message-spinner'
 import { useReasoningContext } from '../message'
+import { cn } from '@/lib/utils'
 
 export function Reasoning({
   part,
@@ -17,33 +19,43 @@ export function Reasoning({
     return null
   }
 
-  const text = part.text || '_Thinking_'
+  const text = part.text || 'Thinking...'
   const isStreaming = part.state === 'streaming'
-  const firstLine = text.split('\n')[0].replace(/\*\*/g, '')
-  const hasMoreContent = text.includes('\n') || text.length > 80
+
+  // Try to extract a clean title or just use "Thought"
+  const firstLine = text.split('\n')[0].replace(/\*\*/g, '').trim()
+  const displayTitle = firstLine && firstLine.length < 60 ? firstLine : 'Thought'
 
   const handleClick = () => {
-    if (hasMoreContent && context) {
+    if (context) {
       const newIndex = isExpanded ? null : partIndex
       context.setExpandedReasoningIndex(newIndex)
     }
   }
 
   return (
-    <div
-      className="text-sm border border-border bg-background rounded-md cursor-pointer hover:bg-accent/30 transition-colors"
-      onClick={handleClick}
-    >
-      <div className="px-3 py-2">
-        <div className="text-secondary-foreground font-mono leading-normal">
-          {isExpanded || !hasMoreContent ? (
-            <MarkdownRenderer content={text} />
+    <div className="flex flex-col gap-2 my-2">
+      <button
+        onClick={handleClick}
+        className="flex items-center gap-2 text-[#8A8A85] hover:text-foreground transition-colors group w-fit"
+      >
+        <div className="flex items-center gap-1.5 text-[13px] font-medium">
+          <LightbulbIcon className="w-3.5 h-3.5" />
+          <span>{isStreaming ? 'Thinking...' : 'Thought'}</span>
+          {isExpanded ? (
+            <ChevronUpIcon className="w-3.5 h-3.5 opacity-50 group-hover:opacity-100" />
           ) : (
-            <div className="overflow-hidden">{firstLine}</div>
+            <ChevronDownIcon className="w-3.5 h-3.5 opacity-50 group-hover:opacity-100" />
           )}
-          {isStreaming && isExpanded && <MessageSpinner />}
         </div>
-      </div>
+      </button>
+
+      {isExpanded && (
+        <div className="text-[14px] leading-relaxed text-foreground/80 font-sans pl-5 border-l border-border/60 ml-1.5 py-1">
+          <MarkdownRenderer content={text} />
+          {isStreaming && <MessageSpinner />}
+        </div>
+      )}
     </div>
   )
 }

@@ -43,16 +43,19 @@ export const Message = memo(function Message({ message }: Props) {
     >
       <div
         className={cn(
-          'flex gap-3 px-4 py-2',
+          'flex gap-3 px-4 py-3',
           message.role === 'assistant' ? 'justify-start' : 'justify-end'
         )}
       >
         <div className={cn(
-          "max-w-[min(800px,100%)] w-full space-y-2",
+          "max-w-[min(800px,95%)] w-full space-y-2",
           message.role === 'user' && "flex flex-col items-end"
         )}>
           {/* Message Content */}
-          <div className="space-y-3">
+          <div className={cn(
+            "space-y-3 w-fit",
+            message.role === 'user' && "bg-[#F4F4F1] px-4 py-2.5 rounded-[22px] text-foreground/90 shadow-sm border border-border/40"
+          )}>
             {message.parts.map((part, index) => (
               <MessagePart key={index} part={part} partIndex={index} />
             ))}
