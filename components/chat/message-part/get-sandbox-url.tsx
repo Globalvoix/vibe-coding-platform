@@ -1,5 +1,5 @@
 import type { DataPart } from '@/ai/messages/data-parts'
-import { CheckIcon, LinkIcon } from 'lucide-react'
+import { CheckIcon, ExternalLinkIcon, GlobeIcon } from 'lucide-react'
 import { Spinner } from './spinner'
 import { ToolHeader } from '../tool-header'
 import { ToolMessage } from '../tool-message'
@@ -9,27 +9,42 @@ export function GetSandboxURL({
 }: {
   message: DataPart['get-sandbox-url']
 }) {
+  const isDone = !!message.url && message.status !== 'loading'
+
   return (
     <ToolMessage>
-      <ToolHeader>
-        <LinkIcon className="w-3.5 h-3.5" />
-        <span>Get Sandbox URL</span>
-      </ToolHeader>
-      <div className="relative pl-6 min-h-5">
-        <Spinner
-          className="absolute left-0 top-0"
-          loading={message.status === 'loading'}
-        >
-          <CheckIcon className="w-4 h-4" />
-        </Spinner>
-        {message.url ? (
-          <a href={message.url} target="_blank">
-            {message.url}
-          </a>
-        ) : (
-          <span>Getting Sandbox URL</span>
-        )}
+      <div className="flex items-center justify-between">
+        <ToolHeader className="mb-0">
+          <GlobeIcon className="w-3.5 h-3.5" />
+          <span>
+            {message.status === 'loading' ? 'Publishing app...' : 'App published'}
+          </span>
+        </ToolHeader>
+        <div className="flex items-center gap-2">
+          {message.status === 'loading' ? (
+            <Spinner loading={true} className="w-3.5 h-3.5" />
+          ) : (
+            <CheckIcon className="w-3.5 h-3.5 text-green-500/70" />
+          )}
+        </div>
       </div>
+
+      {isDone && (
+        <div className="mt-3">
+          <a
+            href={message.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-between gap-3 px-4 py-3 bg-[#F4F4F1] hover:bg-black/5 border border-border/40 rounded-xl transition-all group shadow-sm"
+          >
+            <div className="flex flex-col min-w-0">
+              <span className="text-[12px] font-medium text-foreground/50 uppercase tracking-wider">Live Preview</span>
+              <span className="text-[14px] font-medium text-foreground truncate">{message.url.replace(/^https?:\/\//, '')}</span>
+            </div>
+            <ExternalLinkIcon className="w-4 h-4 text-foreground/40 group-hover:text-foreground transition-colors shrink-0" />
+          </a>
+        </div>
+      )}
     </ToolMessage>
   )
 }

@@ -17,37 +17,41 @@ const actionLabels: Record<string, string> = {
 
 export function CreateRealtimeBackend({ message }: Props) {
   const actionLabel = message.action ? actionLabels[message.action] : 'Managing backend'
+  const isPending = message.status === 'loading'
+  const isError = message.status === 'error'
 
   return (
     <ToolMessage>
-      <ToolHeader>
-        <Zap className="w-3.5 h-3.5" />
-        Real-time Backend
-      </ToolHeader>
-      <div className="relative pl-6 min-h-5">
-        <Spinner
-          className="absolute left-0 top-0"
-          loading={message.status === 'loading'}
-        >
-          {message.status === 'error' ? (
-            <XIcon className="w-4 h-4 text-red-700" />
-          ) : (
-            <CheckIcon className="w-4 h-4" />
-          )}
-        </Spinner>
-        <div>
+      <div className="flex items-center justify-between">
+        <ToolHeader className="mb-0">
+          <Zap className="w-3.5 h-3.5" />
           <span>
-            {message.status === 'loading' && `${actionLabel}...`}
-            {message.status === 'success' && message.message}
-            {message.status === 'error' && `Error: ${message.message}`}
+            {isPending && `${actionLabel}...`}
+            {!isPending && !isError && 'Backend updated'}
+            {isError && 'Backend error'}
           </span>
-          {message.details && message.status === 'error' && (
-            <p className="text-xs text-muted-foreground mt-1 font-mono">
+        </ToolHeader>
+        <div className="flex items-center gap-2">
+          {isPending ? (
+            <Spinner loading={true} className="w-3.5 h-3.5" />
+          ) : isError ? (
+            <XIcon className="w-3.5 h-3.5 text-red-500/70" />
+          ) : (
+            <CheckIcon className="w-3.5 h-3.5 text-green-500/70" />
+          )}
+        </div>
+      </div>
+
+      {message.message && !isPending && (
+        <div className="mt-2 pl-5 text-[13px] text-foreground/60 border-l border-border/60 ml-1.5 py-1">
+          {message.message}
+          {message.details && isError && (
+            <p className="text-[12px] opacity-70 mt-1 font-mono bg-red-500/5 p-1 rounded">
               {message.details}
             </p>
           )}
         </div>
-      </div>
+      )}
     </ToolMessage>
   )
 }
