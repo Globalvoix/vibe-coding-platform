@@ -64,19 +64,20 @@ export const Message = memo(function Message({ message }: Props) {
 
           {/* Assistant Message Actions */}
           {message.role === 'assistant' && message.parts.some(p => p.type.startsWith('data-')) && (
-            <div className="flex items-center gap-2 pt-2">
-              <div className="flex items-center gap-0.5 bg-[#F4F4F1] rounded-xl border border-border/40 overflow-hidden shadow-sm">
-                <button className="flex items-center gap-2 px-3 py-2 text-[13px] font-medium hover:bg-black/5 transition-colors">
-                  <span>Preview this version</span>
-                  <ChevronRightIcon className="w-3.5 h-3.5 opacity-50" />
-                </button>
-              </div>
-              <button className="p-2 bg-[#F4F4F1] rounded-xl border border-border/40 shadow-sm hover:bg-black/5 transition-colors">
-                <BookmarkIcon className="w-3.5 h-3.5 text-foreground/60" />
+            <div className="flex items-center gap-3 pt-2">
+              <button className="flex items-center justify-between w-full max-w-[320px] px-5 py-4 bg-[#DCE4F5] hover:bg-[#D0DAF0] rounded-[20px] transition-colors group shadow-sm text-left">
+                <div className="flex flex-col gap-1 min-w-0">
+                  <span className="text-[15px] font-semibold text-[#1A1A1A] truncate">
+                    {/* Fallback to a generic title if we can't find a better one */}
+                    {message.parts.find(p => p.type === 'text')?.text?.split('\n')[0].replace(/[#*]/g, '').trim().substring(0, 40) || 'Updated version'}
+                  </span>
+                  <span className="text-[14px] text-[#4A4A4A]">Previewing latest version</span>
+                </div>
+                <ChevronRightIcon className="w-5 h-5 text-[#1A1A1A]/30 group-hover:text-[#1A1A1A] transition-colors shrink-0" />
               </button>
-              <button className="flex items-center gap-1.5 px-3 py-2 bg-[#F4F4F1] rounded-xl border border-border/40 shadow-sm hover:bg-black/5 transition-colors text-[13px] font-medium text-foreground/70">
-                <CodeIcon className="w-3.5 h-3.5" />
-                <span>Code</span>
+
+              <button className="p-2.5 text-foreground/40 hover:text-foreground transition-colors">
+                <BookmarkIcon className="w-5 h-5" />
               </button>
             </div>
           )}
