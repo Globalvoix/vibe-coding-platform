@@ -67,10 +67,10 @@ export function Sandbox({ className }: Props) {
         key={tab.id}
         onClick={() => setActiveTab(tab.id)}
         className={cn(
-          'inline-flex items-center justify-center transition-all duration-400 ease-in-out',
+          'inline-flex items-center justify-center transition-all duration-[400ms] ease-in-out',
           isActive
-            ? 'h-[30px] px-3 bg-[#D2E3FC] border border-[#1A73E8] text-[#0F172A] rounded-md text-xs font-semibold shadow-sm'
-            : 'h-[30px] w-[30px] bg-background border border-[#E5E7EB] text-[#111827]/80 rounded-md hover:bg-black/5 hover:border-[#111827]/40 hover:text-[#111827]'
+            ? 'h-[28px] px-3 bg-[#D2E3FC] border border-[#1A73E8] text-[#0F172A] rounded-md text-[11px] font-semibold shadow-sm'
+            : 'h-[28px] w-[28px] bg-background border border-[#E5E7EB] text-[#111827]/80 rounded-md hover:bg-black/5 hover:border-[#111827]/40 hover:text-[#111827]'
         )}
         aria-pressed={isActive}
         aria-label={tab.label}
@@ -84,7 +84,7 @@ export function Sandbox({ className }: Props) {
               initial={{ width: 0, opacity: 0, marginLeft: 0 }}
               animate={{ width: "auto", opacity: 1, marginLeft: 6 }}
               exit={{ width: 0, opacity: 0, marginLeft: 0 }}
-              transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+              transition={{ duration: 0.45, ease: [0.23, 1, 0.32, 1] }}
               className="whitespace-nowrap overflow-hidden"
             >
               {tab.label}
@@ -137,7 +137,7 @@ export function Sandbox({ className }: Props) {
               <TooltipTrigger asChild>
                 <button
                   type="button"
-                  className="h-[30px] w-[30px] flex items-center justify-center bg-transparent text-[#111827]/70 hover:text-[#111827] hover:bg-[#F3F4F6] rounded-md transition-all duration-200"
+                  className="h-[28px] w-[28px] flex items-center justify-center bg-transparent text-[#111827]/70 hover:text-[#111827] hover:bg-[#F3F4F6] rounded-md transition-all duration-200"
                   aria-label="Add tab"
                 >
                   <Plus className="w-3.5 h-3.5" />
