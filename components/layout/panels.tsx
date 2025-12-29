@@ -45,9 +45,13 @@ export function Vertical({ defaultLayout, top, middle, bottom }: VProps) {
   return (
     <PanelGroup direction="vertical" onLayout={onLayout}>
       <Panel defaultSize={defaultLayout[0]}>{top}</Panel>
-      <PanelResizeHandle className="h-2" />
+      <PanelResizeHandle className="group relative h-3 -my-1 flex items-center justify-center cursor-row-resize select-none">
+        <div className="w-full h-px bg-border/60 group-hover:bg-border transition-colors" />
+      </PanelResizeHandle>
       <Panel defaultSize={defaultLayout[1]}>{middle}</Panel>
-      <PanelResizeHandle className="h-2" />
+      <PanelResizeHandle className="group relative h-3 -my-1 flex items-center justify-center cursor-row-resize select-none">
+        <div className="w-full h-px bg-border/60 group-hover:bg-border transition-colors" />
+      </PanelResizeHandle>
       <Panel defaultSize={defaultLayout[2]}>{bottom}</Panel>
     </PanelGroup>
   )
