@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 import { useState, useRef } from 'react'
 import { Globe, Code2, LineChart, Cloud, Plus } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Preview } from './preview'
 import { FileExplorer } from './file-explorer'
 import { Logs } from './logs'
@@ -59,7 +60,7 @@ export function Sandbox({ className }: Props) {
   const renderTabButton = (tab: TabConfig) => {
     const isActive = activeTab === tab.id
 
-    return (
+    const button = (
       <button
         type="button"
         key={tab.id}
@@ -68,7 +69,7 @@ export function Sandbox({ className }: Props) {
           'inline-flex items-center justify-center transition-all duration-200 ease-in-out',
           isActive
             ? 'h-[30px] px-3 bg-[#D2E3FC] border border-[#1A73E8] text-[#0F172A] rounded-md gap-1.5 text-xs font-semibold shadow-sm'
-            : 'h-[30px] w-[30px] bg-[#D2E3FC] border border-[#1A73E8] text-[#0F172A]/70 hover:bg-[#C6DAFC] rounded-md'
+            : 'h-[30px] w-[30px] bg-white border border-[#E5E7EB] text-[#111827]/80 rounded-md hover:bg-[#F8F9FA] hover:border-[#111827]/40 hover:text-[#111827]'
         )}
         aria-pressed={isActive}
         aria-label={tab.label}
@@ -78,6 +79,21 @@ export function Sandbox({ className }: Props) {
         </div>
         {isActive && <span className="whitespace-nowrap">{tab.label}</span>}
       </button>
+    )
+
+    if (isActive) return button
+
+    return (
+      <Tooltip key={tab.id} delayDuration={0}>
+        <TooltipTrigger asChild>{button}</TooltipTrigger>
+        <TooltipContent
+          side="bottom"
+          sideOffset={10}
+          className="bg-[#111827] text-white border-transparent px-3 py-2 text-[13px] rounded-md"
+        >
+          {tab.label}
+        </TooltipContent>
+      </Tooltip>
     )
   }
 
@@ -100,16 +116,30 @@ export function Sandbox({ className }: Props) {
   return (
     <div className={cn('flex h-full min-h-0 flex-col', className)}>
       <div className="flex items-center justify-between gap-3 border-b border-[#E5E7EB] bg-white px-3 py-2 h-[50px]">
-        <div className="flex items-center gap-1.5">
-          {tabs.map(renderTabButton)}
-          <button
-            type="button"
-            className="h-[30px] w-[30px] flex items-center justify-center bg-[#D2E3FC] border border-[#1A73E8] text-[#0F172A]/70 hover:bg-[#C6DAFC] rounded-md transition-all duration-200"
-            title="Add tab"
-          >
-            <Plus className="w-3.5 h-3.5" />
-          </button>
-        </div>
+        <TooltipProvider>
+          <div className="flex items-center gap-1.5">
+            {tabs.map(renderTabButton)}
+
+            <Tooltip delayDuration={0}>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  className="h-[30px] w-[30px] flex items-center justify-center bg-transparent text-[#111827]/70 hover:text-[#111827] hover:bg-[#F3F4F6] rounded-md transition-all duration-200"
+                  aria-label="Add tab"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent
+                side="bottom"
+                sideOffset={10}
+                className="bg-[#111827] text-white border-transparent px-3 py-2 text-[13px] rounded-md"
+              >
+                Add
+              </TooltipContent>
+            </Tooltip>
+          </div>
+        </TooltipProvider>
 
         {activeTab === 'preview' && currentUrl && (
           <div className="flex items-center gap-2 flex-1 min-w-0 max-w-md">
