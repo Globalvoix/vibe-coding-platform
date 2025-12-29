@@ -56,7 +56,13 @@ export const MarkdownRenderer = memo(function MarkdownRenderer({
   const components = useMemo<Components>(
     () => ({
       a: ({ children, href, ...props }) => (
-        <a href={href} target="_blank" rel="noopener noreferrer" {...props}>
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline underline-offset-4 decoration-border/70 hover:decoration-border text-foreground/90"
+          {...props}
+        >
           {children}
         </a>
       ),
@@ -87,33 +93,66 @@ export const MarkdownRenderer = memo(function MarkdownRenderer({
         </pre>
       ),
       h1: ({ children, ...props }) => (
-        <h1 className="text-xl font-semibold mb-3 mt-6 first:mt-0 text-foreground/90 font-sans" {...props}>
+        <h1
+          className="text-[18px] font-semibold mb-3 mt-5 first:mt-0 text-foreground/90 font-sans tracking-[-0.01em]"
+          {...props}
+        >
           {children}
         </h1>
       ),
       h2: ({ children, ...props }) => (
-        <h2 className="text-lg font-semibold mb-2.5 mt-5 first:mt-0 text-foreground/90 font-sans" {...props}>
+        <h2
+          className="text-[16px] font-semibold mb-2 mt-4 first:mt-0 text-foreground/90 font-sans tracking-[-0.01em]"
+          {...props}
+        >
           {children}
         </h2>
       ),
       h3: ({ children, ...props }) => (
-        <h3 className="text-md font-semibold mb-2 mt-4 first:mt-0 text-foreground/90 font-sans" {...props}>
+        <h3
+          className="text-[15px] font-semibold mb-2 mt-4 first:mt-0 text-foreground/90 font-sans tracking-[-0.01em]"
+          {...props}
+        >
           {children}
         </h3>
       ),
       p: ({ children, ...props }) => (
-        <p className="mb-4 last:mb-0 leading-[1.6] text-foreground/90 font-sans text-[15px]" {...props}>
+        <p
+          className="mb-3 last:mb-0 leading-[1.65] text-foreground/90 font-sans text-[15px]"
+          {...props}
+        >
           {children}
         </p>
       ),
       ul: ({ children, ...props }) => (
-        <ul className="list-disc pl-5 mb-4 space-y-2 text-foreground/80 font-sans text-[14px]" {...props}>
+        <ul
+          className="list-disc pl-6 mb-3 space-y-1.5 text-foreground/85 font-sans text-[15px]"
+          {...props}
+        >
           {children}
         </ul>
       ),
+      ol: ({ children, ...props }) => (
+        <ol
+          className="list-decimal pl-6 mb-3 space-y-1.5 text-foreground/85 font-sans text-[15px]"
+          {...props}
+        >
+          {children}
+        </ol>
+      ),
+      li: ({ children, ...props }) => (
+        <li className="marker:text-foreground/25 leading-[1.65]" {...props}>
+          {children}
+        </li>
+      ),
+      strong: ({ children, ...props }) => (
+        <strong className="font-semibold text-foreground" {...props}>
+          {children}
+        </strong>
+      ),
       blockquote: ({ children, ...props }) => (
         <blockquote
-          className="border-l-4 border-muted pl-4 italic my-2"
+          className="border-l-2 border-border/60 pl-4 italic my-3 text-foreground/80"
           {...props}
         >
           {children}
