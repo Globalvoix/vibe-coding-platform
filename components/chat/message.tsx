@@ -1,9 +1,8 @@
-import { LightbulbIcon, ChevronDownIcon, ChevronUpIcon, CodeIcon, BookmarkIcon, PlayIcon, ChevronRightIcon, Code2Icon } from 'lucide-react'
+import { BookmarkIcon, ChevronRightIcon, Code2Icon } from 'lucide-react'
 import type { ChatUIMessage } from './types'
 import { MessagePart } from './message-part'
 import { memo, createContext, useContext, useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
 
 interface Props {
   message: ChatUIMessage

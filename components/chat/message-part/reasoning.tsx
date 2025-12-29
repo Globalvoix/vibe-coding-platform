@@ -3,7 +3,6 @@ import type { ReasoningUIPart } from 'ai'
 import { MarkdownRenderer } from '@/components/markdown-renderer/markdown-renderer'
 import { MessageSpinner } from '../message-spinner'
 import { useReasoningContext } from '../message'
-import { cn } from '@/lib/utils'
 
 export function Reasoning({
   part,
@@ -24,8 +23,6 @@ export function Reasoning({
 
   // Try to extract a clean title or just use "Thought"
   const firstLine = text.split('\n')[0].replace(/\*\*/g, '').trim()
-  const displayTitle = firstLine && firstLine.length < 60 ? firstLine : 'Thought'
-
   const handleClick = () => {
     if (context) {
       const newIndex = isExpanded ? null : partIndex
