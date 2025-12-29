@@ -14,7 +14,7 @@ export function Settings() {
       <PopoverTrigger asChild>
         <Button
           className="cursor-pointer h-8 w-8 rounded-full border border-border/60 shadow-xs"
-          style={{ backgroundColor: '#F1F5F9' }}
+          style={{ backgroundColor: '#F7F4ED' }}
           variant="ghost"
           size="icon"
         >
