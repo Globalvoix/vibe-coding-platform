@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react'
 import { useState, useRef } from 'react'
-import { Globe, Code2, LineChart, Cloud, Plus } from 'lucide-react'
+import { Globe, Code2, LineChart, Cloud, Plus, ArrowUpRight, RotateCw, LayoutTemplate } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Preview } from './preview'
@@ -115,9 +115,9 @@ export function Sandbox({ className }: Props) {
 
   return (
     <div className={cn('flex h-full min-h-0 flex-col', className)}>
-      <div className="flex items-center justify-between gap-3 border-b border-[#E5E7EB] bg-white px-3 py-2 h-[50px]">
+      <div className="flex items-center gap-3 border-b border-[#E5E7EB] bg-white px-3 py-2 h-[50px]">
         <TooltipProvider>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 shrink-0">
             {tabs.map(renderTabButton)}
 
             <Tooltip delayDuration={0}>
@@ -142,55 +142,58 @@ export function Sandbox({ className }: Props) {
         </TooltipProvider>
 
         {activeTab === 'preview' && currentUrl && (
-          <div className="flex items-center gap-2 flex-1 min-w-0 max-w-md">
-            <input
-              type="text"
-              className="font-mono text-xs h-6 border border-gray-300 px-3 bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[200px] flex-1"
-              onChange={(event) => setInputValue(event.target.value)}
-              onClick={(event) => event.currentTarget.select()}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter') {
-                  event.currentTarget.blur()
-                }
-              }}
-              value={inputValue}
-              placeholder="Enter URL..."
-            />
-            <button
-              onClick={handleRefresh}
-              type="button"
-              className={cn(
-                'p-1 rounded hover:bg-gray-200 transition-colors',
-                {
-                  'animate-spin': isLoading,
-                }
-              )}
-              title="Refresh"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-            </button>
-            <button
-              onClick={openInNewTab}
-              type="button"
-              className="p-1 rounded hover:bg-gray-200 transition-colors"
-              title="Open in new tab"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-              </svg>
-            </button>
+          <div className="flex items-center justify-center flex-1 min-w-0">
+            <div className="flex items-center bg-[#F1F3F4] rounded-full px-3 py-1 gap-2 max-w-xl w-full mx-4 transition-all hover:bg-[#E8EAED] group">
+              <LayoutTemplate className="w-3.5 h-3.5 text-[#5F6368]" />
+              <input
+                type="text"
+                className="font-mono text-[13px] bg-transparent border-none focus:outline-none text-[#202124] w-full placeholder:text-[#5F6368] h-6"
+                onChange={(event) => setInputValue(event.target.value)}
+                onClick={(event) => event.currentTarget.select()}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    event.currentTarget.blur()
+                  }
+                }}
+                value={inputValue}
+                placeholder="Enter URL..."
+              />
+              <div className="flex items-center gap-1 ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
+                 <button
+                  onClick={openInNewTab}
+                  type="button"
+                  className="p-1 rounded-full hover:bg-black/5 text-[#5F6368] transition-colors"
+                  title="Open in new tab"
+                >
+                  <ArrowUpRight className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={handleRefresh}
+                  type="button"
+                  className={cn(
+                    'p-1 rounded-full hover:bg-black/5 text-[#5F6368] transition-colors',
+                    {
+                      'animate-spin': isLoading,
+                    }
+                  )}
+                  title="Refresh"
+                >
+                  <RotateCw className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
           </div>
         )}
 
-        <button
-          onClick={handlePublish}
-          type="button"
-          className="ml-auto px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-md transition-colors"
-        >
-          Publish
-        </button>
+        <div className="ml-auto shrink-0">
+          <button
+            onClick={handlePublish}
+            type="button"
+            className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-md transition-colors"
+          >
+            Publish
+          </button>
+        </div>
       </div>
 
       <div className="relative flex-1 min-h-0 overflow-hidden">
