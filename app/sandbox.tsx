@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react'
 import { useState, useRef } from 'react'
-import { Globe, Code2, BarChart3 } from 'lucide-react'
+import { Globe, Code2, LineChart, Cloud, Plus } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Preview } from './preview'
 import { FileExplorer } from './file-explorer'
@@ -14,7 +14,7 @@ interface Props {
   className?: string
 }
 
-type SandboxTabId = 'preview' | 'code' | 'console'
+type SandboxTabId = 'preview' | 'code' | 'console' | 'cloud'
 
 interface TabConfig {
   id: SandboxTabId
@@ -40,6 +40,11 @@ export function Sandbox({ className }: Props) {
       icon: <Globe className="w-4 h-4" />,
     },
     {
+      id: 'cloud',
+      label: 'Cloud',
+      icon: <Cloud className="w-4 h-4" />,
+    },
+    {
       id: 'code',
       label: 'Code',
       icon: <Code2 className="w-4 h-4" />,
@@ -47,7 +52,7 @@ export function Sandbox({ className }: Props) {
     {
       id: 'console',
       label: 'Console',
-      icon: <BarChart3 className="w-4 h-4" />,
+      icon: <LineChart className="w-4 h-4" />,
     },
   ]
 
@@ -60,18 +65,18 @@ export function Sandbox({ className }: Props) {
         key={tab.id}
         onClick={() => setActiveTab(tab.id)}
         className={cn(
-          'inline-flex items-center justify-center rounded-lg border text-xs font-bold transition-all duration-300 ease-in-out',
+          'inline-flex items-center justify-center transition-all duration-200 ease-in-out',
           isActive
-            ? 'h-8 px-4 bg-blue-100 border-blue-300 text-black'
-            : 'h-8 w-8 bg-background border-border text-muted-foreground hover:bg-muted/40'
+            ? 'h-[34px] px-3.5 bg-[#D2E3FC] border-[1.5px] border-[#3B5A9A] text-[#001D35] rounded-[10px] gap-2 font-medium text-sm shadow-sm'
+            : 'h-[34px] w-[34px] bg-[#F8F9FA] border border-[#E5E7EB] text-[#5F6368] hover:bg-[#F1F3F4] rounded-[10px]'
         )}
         aria-pressed={isActive}
         aria-label={tab.label}
       >
-        <span className="flex items-center gap-2">
+        <div className="flex items-center justify-center shrink-0">
           {tab.icon}
-          {isActive && <span className="hidden sm:inline">{tab.label}</span>}
-        </span>
+        </div>
+        {isActive && <span className="whitespace-nowrap">{tab.label}</span>}
       </button>
     )
   }
@@ -94,9 +99,16 @@ export function Sandbox({ className }: Props) {
 
   return (
     <div className={cn('flex h-full min-h-0 flex-col', className)}>
-      <div className="flex items-center justify-between gap-3 border-b border-primary/18 bg-background px-3 py-2">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between gap-3 border-b border-[#E5E7EB] bg-white px-3 py-2 h-[50px]">
+        <div className="flex items-center gap-1.5">
           {tabs.map(renderTabButton)}
+          <button
+            type="button"
+            className="h-[34px] w-[34px] flex items-center justify-center bg-[#F8F9FA] border border-[#E5E7EB] text-[#5F6368] hover:bg-[#F1F3F4] rounded-[10px] transition-all duration-200"
+            title="Add tab"
+          >
+            <Plus className="w-4 h-4" />
+          </button>
         </div>
 
         {activeTab === 'preview' && currentUrl && (
@@ -165,6 +177,15 @@ export function Sandbox({ className }: Props) {
 
         {activeTab === 'code' && (
           <FileExplorer className="flex-1 min-h-0 overflow-hidden" />
+        )}
+
+        {activeTab === 'cloud' && (
+          <div className="flex-1 flex items-center justify-center text-muted-foreground">
+            <div className="text-center">
+              <Cloud className="w-12 h-12 mx-auto mb-4 opacity-20" />
+              <p className="text-sm font-medium">Cloud features coming soon</p>
+            </div>
+          </div>
         )}
 
         {activeTab === 'console' && (
