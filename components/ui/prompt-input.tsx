@@ -84,10 +84,9 @@ function PromptInput({
       >
         <div
           className={cn(
-            'border-border/60 rounded-[28px] border px-5 py-4 shadow-sm transition-shadow focus-within:shadow-md',
+            'border-border/60 rounded-[22px] border px-4 py-3 shadow-sm transition-shadow focus-within:shadow-md bg-[#F7F4ED]',
             className
           )}
-          style={{ backgroundColor: '#F7F4ED' }}
         >
           {children}
         </div>
@@ -135,7 +134,7 @@ function PromptInputTextarea({
       onChange={(e) => setValue(e.target.value)}
       onKeyDown={handleKeyDown}
       className={cn(
-        'text-primary min-h-[56px] w-full resize-none border-none bg-transparent shadow-none outline-none focus-visible:ring-0 focus-visible:ring-offset-0',
+        'text-primary min-h-[44px] w-full resize-none border-none bg-transparent shadow-none outline-none focus-visible:ring-0 focus-visible:ring-offset-0',
         className
       )}
       rows={1}
