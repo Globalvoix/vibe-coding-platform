@@ -84,7 +84,7 @@ function PromptInput({
       >
         <div
           className={cn(
-            'border-border/60 rounded-[22px] border px-4 py-3 shadow-sm transition-shadow focus-within:shadow-md bg-[#F7F4ED]',
+            'border-border/60 rounded-[22px] border px-4 py-3 shadow-sm transition-shadow focus-within:shadow-md bg-[#F1F5F9]',
             className
           )}
         >
