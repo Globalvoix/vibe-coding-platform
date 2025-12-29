@@ -189,7 +189,7 @@ export function Sandbox({ className }: Props) {
           <button
             onClick={handlePublish}
             type="button"
-            className="px-5 py-1.5 bg-[#1A73E8] hover:bg-[#1557B0] text-white text-xs font-bold rounded-full transition-colors shadow-sm"
+            className="px-4 py-1.5 bg-[#1A73E8] hover:bg-[#1557B0] text-white text-xs font-semibold rounded-md transition-colors"
           >
             Publish
           </button>
