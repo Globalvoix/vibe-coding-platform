@@ -84,7 +84,7 @@ export function Sandbox({ className }: Props) {
               initial={{ width: 0, opacity: 0, marginLeft: 0 }}
               animate={{ width: "auto", opacity: 1, marginLeft: 6 }}
               exit={{ width: 0, opacity: 0, marginLeft: 0 }}
-              transition={{ duration: 0.2, ease: "easeInOut" }}
+              transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
               className="whitespace-nowrap overflow-hidden"
             >
               {tab.label}
@@ -156,7 +156,7 @@ export function Sandbox({ className }: Props) {
 
         {activeTab === 'preview' && (
           <div className="flex items-center justify-center flex-1 min-w-0 pr-24">
-            <div className="flex items-center rounded-full border border-black/10 bg-background px-2 h-7 gap-1.5 w-full max-w-[420px]">
+            <div className="flex items-center rounded-full border border-black/10 bg-background px-2 h-7 gap-1.5 w-full max-w-[320px]">
               <LayoutTemplate className="w-3 h-3 text-[#111827]" />
 
               <div
