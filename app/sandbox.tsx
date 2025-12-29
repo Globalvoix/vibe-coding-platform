@@ -88,8 +88,8 @@ export function Sandbox({ className }: Props) {
         <TooltipTrigger asChild>{button}</TooltipTrigger>
         <TooltipContent
           side="bottom"
-          sideOffset={8}
-          className="bg-[#111827] text-white border-transparent px-2.5 py-1.5 text-[12px] rounded-md"
+          sideOffset={6}
+          className="bg-[#111827] text-white border-transparent px-2 py-1 text-[11px] rounded-md"
         >
           {tab.label}
         </TooltipContent>
@@ -132,8 +132,8 @@ export function Sandbox({ className }: Props) {
               </TooltipTrigger>
               <TooltipContent
           side="bottom"
-          sideOffset={8}
-          className="bg-[#111827] text-white border-transparent px-2.5 py-1.5 text-[12px] rounded-md"
+          sideOffset={6}
+          className="bg-[#111827] text-white border-transparent px-2 py-1 text-[11px] rounded-md"
         >
                 Add
               </TooltipContent>
@@ -196,10 +196,10 @@ export function Sandbox({ className }: Props) {
       <div className="relative flex-1 min-h-0 overflow-hidden">
         <div
           className={cn(
-            'absolute inset-0 transition-all duration-200 ease-out will-change-transform',
+            'absolute inset-0 transition-[opacity,transform] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-[opacity,transform] transform-gpu',
             activeTab === 'preview'
-              ? 'opacity-100 translate-y-0'
-              : 'opacity-0 translate-y-1 pointer-events-none'
+              ? 'opacity-100 translate-y-0 scale-100'
+              : 'opacity-0 translate-y-1 scale-[0.995] pointer-events-none'
           )}
         >
           <Preview
@@ -214,10 +214,10 @@ export function Sandbox({ className }: Props) {
 
         <div
           className={cn(
-            'absolute inset-0 transition-all duration-200 ease-out will-change-transform',
+            'absolute inset-0 transition-[opacity,transform] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-[opacity,transform] transform-gpu',
             activeTab === 'code'
-              ? 'opacity-100 translate-y-0'
-              : 'opacity-0 translate-y-1 pointer-events-none'
+              ? 'opacity-100 translate-y-0 scale-100'
+              : 'opacity-0 translate-y-1 scale-[0.995] pointer-events-none'
           )}
         >
           <FileExplorer className="h-full w-full min-h-0 overflow-hidden" />
@@ -225,10 +225,10 @@ export function Sandbox({ className }: Props) {
 
         <div
           className={cn(
-            'absolute inset-0 transition-all duration-200 ease-out will-change-transform',
+            'absolute inset-0 transition-[opacity,transform] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-[opacity,transform] transform-gpu',
             activeTab === 'cloud'
-              ? 'opacity-100 translate-y-0'
-              : 'opacity-0 translate-y-1 pointer-events-none'
+              ? 'opacity-100 translate-y-0 scale-100'
+              : 'opacity-0 translate-y-1 scale-[0.995] pointer-events-none'
           )}
         >
           <div className="h-full w-full flex items-center justify-center text-muted-foreground">
@@ -241,10 +241,10 @@ export function Sandbox({ className }: Props) {
 
         <div
           className={cn(
-            'absolute inset-0 transition-all duration-200 ease-out will-change-transform',
+            'absolute inset-0 transition-[opacity,transform] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-[opacity,transform] transform-gpu',
             activeTab === 'console'
-              ? 'opacity-100 translate-y-0'
-              : 'opacity-0 translate-y-1 pointer-events-none'
+              ? 'opacity-100 translate-y-0 scale-100'
+              : 'opacity-0 translate-y-1 scale-[0.995] pointer-events-none'
           )}
         >
           <Logs className="h-full w-full min-h-0 overflow-hidden" />
