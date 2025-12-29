@@ -128,9 +128,9 @@ export function Sandbox({ className }: Props) {
 
   return (
     <div className={cn('flex h-full min-h-0 flex-col bg-background', className)}>
-      <div className="flex items-center gap-3 border-b border-black/5 bg-background px-3 py-2 h-[50px]">
+      <div className="flex items-center justify-between border-b border-black/5 bg-background px-3 h-[50px]">
         <TooltipProvider>
-          <div className="flex items-center gap-1.5 shrink-0">
+          <div className="flex items-center gap-1.5 min-w-[240px]">
             {tabs.map(renderTabButton)}
 
             <Tooltip delayDuration={0}>
@@ -144,23 +144,23 @@ export function Sandbox({ className }: Props) {
                 </button>
               </TooltipTrigger>
               <TooltipContent
-          side="bottom"
-          sideOffset={6}
-          className="bg-[#111827] text-white border-transparent px-2 py-1 text-[11px] rounded-md"
-        >
+                side="bottom"
+                sideOffset={6}
+                className="bg-[#111827] text-white border-transparent px-2 py-1 text-[11px] rounded-md"
+              >
                 Add
               </TooltipContent>
             </Tooltip>
           </div>
         </TooltipProvider>
 
-        {activeTab === 'preview' && (
-          <div className="flex items-center justify-center flex-1 min-w-0 pr-24">
-            <div className="flex items-center rounded-full border border-black/10 bg-background px-2 h-7 gap-1.5 w-full max-w-[320px]">
-              <LayoutTemplate className="w-3 h-3 text-[#111827]" />
+        {activeTab === 'preview' ? (
+          <div className="flex-1 flex justify-center px-4">
+            <div className="flex items-center rounded-full border border-black/10 bg-background px-3 h-8 gap-2 w-full max-w-[300px] shadow-sm">
+              <LayoutTemplate className="w-3.5 h-3.5 text-[#111827]" />
 
               <div
-                className="min-w-0 flex-1 font-mono text-[11px] text-[#111827]/80 truncate select-text"
+                className="min-w-0 flex-1 font-mono text-[11px] text-[#111827] truncate select-text"
                 title={currentUrl || inputValue}
                 aria-label="Current preview URL"
               >
@@ -181,18 +181,18 @@ export function Sandbox({ className }: Props) {
                   onClick={openInNewTab}
                   type="button"
                   className={cn(
-                    'p-0.5 rounded-full hover:bg-black/5 text-[#111827] transition-colors',
+                    'p-1 rounded-full hover:bg-black/5 text-[#111827] transition-colors',
                     !currentUrl && 'pointer-events-none opacity-50'
                   )}
                   title="Open in new tab"
                 >
-                  <ArrowUpRight className="w-3 h-3" />
+                  <ArrowUpRight className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={handleRefresh}
                   type="button"
                   className={cn(
-                    'p-0.5 rounded-full hover:bg-black/5 text-[#111827] transition-colors',
+                    'p-1 rounded-full hover:bg-black/5 text-[#111827] transition-colors',
                     {
                       'animate-spin': isLoading,
                       'pointer-events-none opacity-50': !currentUrl,
@@ -200,14 +200,16 @@ export function Sandbox({ className }: Props) {
                   )}
                   title="Refresh"
                 >
-                  <RotateCw className="w-3 h-3" />
+                  <RotateCw className="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
           </div>
+        ) : (
+          <div className="flex-1" />
         )}
 
-        <div className="ml-auto shrink-0">
+        <div className="min-w-[240px] flex justify-end">
           <button
             onClick={handlePublish}
             type="button"
