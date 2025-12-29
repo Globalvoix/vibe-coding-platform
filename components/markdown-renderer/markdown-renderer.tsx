@@ -4,11 +4,55 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeRaw from 'rehype-raw'
 
+function sanitizeSandboxPreviewUrls(markdown: string) {
+  const lines = markdown.split('\n')
+  const out: string[] = []
+  let inFence = false
+
+  for (const rawLine of lines) {
+    const line = rawLine
+
+    if (line.trim().startsWith('```')) {
+      inFence = !inFence
+      out.push(line)
+      continue
+    }
+
+    if (inFence) {
+      out.push(line)
+      continue
+    }
+
+    const isPreviewUrlLine =
+      /^\s*Preview URL:\s*https?:\/\/sb-[\w-]+\.vercel\.run\S*\s*$/i.test(
+        line
+      ) || /^\s*https?:\/\/sb-[\w-]+\.vercel\.run\S*\s*$/i.test(line)
+
+    if (isPreviewUrlLine) continue
+
+    const replaced = line.replace(
+      /https?:\/\/sb-[\w-]+\.vercel\.run\S*/gi,
+      ''
+    )
+
+    if (/^\s*Preview URL:\s*$/i.test(replaced)) continue
+
+    out.push(replaced)
+  }
+
+  return out
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
+}
+
 export const MarkdownRenderer = memo(function MarkdownRenderer({
   content,
 }: {
   content: string
 }) {
+  const safeContent = useMemo(() => sanitizeSandboxPreviewUrls(content), [content])
+
   const components = useMemo<Components>(
     () => ({
       a: ({ children, href, ...props }) => (
