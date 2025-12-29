@@ -6,6 +6,8 @@ import { cn } from '@/lib/utils'
 
 interface Props {
   message: ChatUIMessage
+  isLast?: boolean
+  isGenerating?: boolean
 }
 
 interface ReasoningContextType {
@@ -20,7 +22,7 @@ export const useReasoningContext = () => {
   return context
 }
 
-export const Message = memo(function Message({ message }: Props) {
+export const Message = memo(function Message({ message, isLast, isGenerating }: Props) {
   const [expandedReasoningIndex, setExpandedReasoningIndex] = useState<
     number | null
   >(null)
