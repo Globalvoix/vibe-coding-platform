@@ -67,7 +67,7 @@ export function Sandbox({ className }: Props) {
         key={tab.id}
         onClick={() => setActiveTab(tab.id)}
         className={cn(
-          'inline-flex items-center justify-center transition-all duration-200 ease-in-out',
+          'inline-flex items-center justify-center transition-all duration-400 ease-in-out',
           isActive
             ? 'h-[30px] px-3 bg-[#D2E3FC] border border-[#1A73E8] text-[#0F172A] rounded-md text-xs font-semibold shadow-sm'
             : 'h-[30px] w-[30px] bg-background border border-[#E5E7EB] text-[#111827]/80 rounded-md hover:bg-black/5 hover:border-[#111827]/40 hover:text-[#111827]'
