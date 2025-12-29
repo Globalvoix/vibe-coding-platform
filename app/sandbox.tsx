@@ -144,10 +144,10 @@ export function Sandbox({ className }: Props) {
         {activeTab === 'preview' && (
           <div className="flex items-center justify-center flex-1 min-w-0">
             <div className="flex items-center rounded-full border border-black/10 bg-background px-2 h-6 gap-1.5 w-full max-w-[340px] mx-3">
-              <LayoutTemplate className="w-3.5 h-3.5 text-[#111827]/60" />
+              <LayoutTemplate className="w-3 h-3 text-[#111827]/60" />
 
               <div
-                className="min-w-0 flex-1 font-mono text-[12px] text-[#111827]/90 truncate select-text"
+                className="min-w-0 flex-1 font-mono text-[11px] text-[#111827]/80 truncate select-text"
                 title={currentUrl || inputValue}
                 aria-label="Current preview URL"
               >
@@ -168,18 +168,18 @@ export function Sandbox({ className }: Props) {
                   onClick={openInNewTab}
                   type="button"
                   className={cn(
-                    'p-1 rounded-full hover:bg-black/5 text-[#111827]/60 hover:text-[#111827]/80 transition-colors',
+                    'p-0.5 rounded-full hover:bg-black/5 text-[#111827]/60 hover:text-[#111827]/80 transition-colors',
                     !currentUrl && 'pointer-events-none opacity-50'
                   )}
                   title="Open in new tab"
                 >
-                  <ArrowUpRight className="w-3.5 h-3.5" />
+                  <ArrowUpRight className="w-3 h-3" />
                 </button>
                 <button
                   onClick={handleRefresh}
                   type="button"
                   className={cn(
-                    'p-1 rounded-full hover:bg-black/5 text-[#111827]/60 hover:text-[#111827]/80 transition-colors',
+                    'p-0.5 rounded-full hover:bg-black/5 text-[#111827]/60 hover:text-[#111827]/80 transition-colors',
                     {
                       'animate-spin': isLoading,
                       'pointer-events-none opacity-50': !currentUrl,
@@ -187,7 +187,7 @@ export function Sandbox({ className }: Props) {
                   )}
                   title="Refresh"
                 >
-                  <RotateCw className="w-3.5 h-3.5" />
+                  <RotateCw className="w-3 h-3" />
                 </button>
               </div>
             </div>
