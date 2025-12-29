@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react'
 import { useState, useRef } from 'react'
 import { Globe, Code2, LineChart, Cloud, Plus, ArrowUpRight, RotateCw, LayoutTemplate } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Preview } from './preview'
@@ -68,7 +69,7 @@ export function Sandbox({ className }: Props) {
         className={cn(
           'inline-flex items-center justify-center transition-all duration-200 ease-in-out',
           isActive
-            ? 'h-[30px] px-3 bg-[#D2E3FC] border border-[#1A73E8] text-[#0F172A] rounded-md gap-1.5 text-xs font-semibold shadow-sm'
+            ? 'h-[30px] px-3 bg-[#D2E3FC] border border-[#1A73E8] text-[#0F172A] rounded-md text-xs font-semibold shadow-sm'
             : 'h-[30px] w-[30px] bg-background border border-[#E5E7EB] text-[#111827]/80 rounded-md hover:bg-black/5 hover:border-[#111827]/40 hover:text-[#111827]'
         )}
         aria-pressed={isActive}
@@ -77,7 +78,19 @@ export function Sandbox({ className }: Props) {
         <div className="flex items-center justify-center shrink-0">
           {tab.icon}
         </div>
-        {isActive && <span className="whitespace-nowrap">{tab.label}</span>}
+        <AnimatePresence initial={false}>
+          {isActive && (
+            <motion.span
+              initial={{ width: 0, opacity: 0, marginLeft: 0 }}
+              animate={{ width: "auto", opacity: 1, marginLeft: 6 }}
+              exit={{ width: 0, opacity: 0, marginLeft: 0 }}
+              transition={{ duration: 0.2, ease: "easeInOut" }}
+              className="whitespace-nowrap overflow-hidden"
+            >
+              {tab.label}
+            </motion.span>
+          )}
+        </AnimatePresence>
       </button>
     )
 
