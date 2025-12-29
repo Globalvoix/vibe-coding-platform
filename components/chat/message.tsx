@@ -63,28 +63,28 @@ export const Message = memo(function Message({ message }: Props) {
 
           {/* Assistant Message Actions */}
           {message.role === 'assistant' && message.parts.some(p => p.type.startsWith('data-')) && (
-            <div className="flex items-center gap-3 pt-2">
-              <div className="relative w-full max-w-[340px]">
-                <button className="flex items-center justify-between w-full px-5 py-4 bg-[#D2E3FC] hover:bg-[#C6DAFC] rounded-xl border border-[#1A73E8] transition-colors group shadow-sm text-left">
+            <div className="flex items-center gap-2.5 pt-2">
+              <div className="relative w-full max-w-[290px]">
+                <button className="flex items-center justify-between w-full px-4 py-3 bg-[#D2E3FC] hover:bg-[#C6DAFC] rounded-xl border border-[#1A73E8] transition-colors group shadow-sm text-left">
                   <div className="flex flex-col gap-1 min-w-0">
-                    <span className="text-[15px] font-bold text-[#0F172A] truncate">
+                    <span className="text-[14px] font-bold text-[#0F172A] truncate">
                       {/* Fallback to a generic title if we can't find a better one */}
                       {message.parts.find(p => p.type === 'text')?.text?.split('\n')[0].replace(/[#*]/g, '').trim().substring(0, 40) || 'Updated version'}
                     </span>
-                    <span className="text-[14px] text-[#475569] font-medium">Previewing latest version</span>
+                    <span className="text-[13px] text-[#475569] font-medium">Previewing latest version</span>
                   </div>
                   <ChevronRightIcon className="w-5 h-5 text-[#0F172A]/30 group-hover:text-[#0F172A] transition-colors shrink-0" />
                 </button>
 
                 {/* Code Button overlapping bottom right */}
-                <button className="absolute -bottom-2 -right-2 flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-gray-50 rounded-lg border border-gray-200 shadow-md transition-all text-[13px] font-semibold text-[#475569] group/code">
-                  <Code2Icon className="w-3.5 h-3.5 text-[#475569]/70 group-hover/code:text-[#475569]" />
+                <button className="absolute -bottom-2 -right-2 flex items-center gap-1 px-2.5 py-1 bg-[#F8F7F2] hover:bg-[#F2F1EA] rounded-md border border-black/5 shadow-sm transition-colors text-[12px] font-semibold text-[#475569] group/code">
+                  <Code2Icon className="w-3 h-3 text-[#475569]/70 group-hover/code:text-[#475569]" />
                   <span>Code</span>
                 </button>
               </div>
 
-              <button className="p-2.5 text-[#475569]/40 hover:text-[#475569] transition-colors">
-                <BookmarkIcon className="w-5 h-5" />
+              <button className="p-2 text-[#0F172A]/30 hover:text-[#0F172A]/60 hover:bg-black/5 rounded-md transition-colors">
+                <BookmarkIcon className="w-4 h-4" strokeWidth={1.5} />
               </button>
             </div>
           )}
