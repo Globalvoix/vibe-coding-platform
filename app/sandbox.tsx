@@ -67,7 +67,7 @@ export function Sandbox({ className }: Props) {
         className={cn(
           'inline-flex items-center justify-center transition-all duration-200 ease-in-out',
           isActive
-            ? 'h-[34px] px-3.5 bg-[#D2E3FC] border-[1.5px] border-[#3B5A9A] text-[#001D35] rounded-[10px] gap-2 font-medium text-sm shadow-sm'
+            ? 'h-[34px] px-3.5 bg-[#D2E3FC] border-[1.5px] border-[#3B5A9A] text-[#001D35] rounded-full gap-2 font-medium text-sm shadow-sm'
             : 'h-[34px] w-[34px] bg-[#F8F9FA] border border-[#E5E7EB] text-[#5F6368] hover:bg-[#F1F3F4] rounded-[10px]'
         )}
         aria-pressed={isActive}
