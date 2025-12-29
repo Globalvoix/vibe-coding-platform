@@ -69,7 +69,7 @@ export function Sandbox({ className }: Props) {
           'inline-flex items-center justify-center transition-all duration-200 ease-in-out',
           isActive
             ? 'h-[30px] px-3 bg-[#D2E3FC] border border-[#1A73E8] text-[#0F172A] rounded-md gap-1.5 text-xs font-semibold shadow-sm'
-            : 'h-[30px] w-[30px] bg-white border border-[#E5E7EB] text-[#111827]/80 rounded-md hover:bg-[#F8F9FA] hover:border-[#111827]/40 hover:text-[#111827]'
+            : 'h-[30px] w-[30px] bg-background border border-[#E5E7EB] text-[#111827]/80 rounded-md hover:bg-[#F8F9FA] hover:border-[#111827]/40 hover:text-[#111827]'
         )}
         aria-pressed={isActive}
         aria-label={tab.label}
@@ -114,8 +114,8 @@ export function Sandbox({ className }: Props) {
   }
 
   return (
-    <div className={cn('flex h-full min-h-0 flex-col', className)}>
-      <div className="flex items-center gap-3 border-b border-black/5 bg-transparent px-3 py-2 h-[50px]">
+    <div className={cn('flex h-full min-h-0 flex-col bg-background', className)}>
+      <div className="flex items-center gap-3 border-b border-black/5 bg-background px-3 py-2 h-[50px]">
         <TooltipProvider>
           <div className="flex items-center gap-1.5 shrink-0">
             {tabs.map(renderTabButton)}
@@ -141,7 +141,7 @@ export function Sandbox({ className }: Props) {
           </div>
         </TooltipProvider>
 
-        {activeTab === 'preview' && currentUrl && (
+        {activeTab === 'preview' && (
           <div className="flex items-center justify-center flex-1 min-w-0">
             <div className="flex items-center bg-[#F1F3F4] rounded-full px-3 py-1 gap-2 max-w-xl w-full mx-4 transition-all hover:bg-[#E8EAED] group">
               <LayoutTemplate className="w-3.5 h-3.5 text-[#5F6368]" />
@@ -162,7 +162,7 @@ export function Sandbox({ className }: Props) {
                  <button
                   onClick={openInNewTab}
                   type="button"
-                  className="p-1 rounded-full hover:bg-black/5 text-[#5F6368] transition-colors"
+                  className={cn("p-1 rounded-full hover:bg-black/5 text-[#5F6368] transition-colors", !currentUrl && "pointer-events-none opacity-50")}
                   title="Open in new tab"
                 >
                   <ArrowUpRight className="w-3.5 h-3.5" />
@@ -174,6 +174,7 @@ export function Sandbox({ className }: Props) {
                     'p-1 rounded-full hover:bg-black/5 text-[#5F6368] transition-colors',
                     {
                       'animate-spin': isLoading,
+                      'pointer-events-none opacity-50': !currentUrl
                     }
                   )}
                   title="Refresh"
