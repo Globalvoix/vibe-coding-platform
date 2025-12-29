@@ -35,13 +35,13 @@ export function GetSandboxURL({
             href={message.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-between gap-3 px-4 py-3 bg-[#F4F4F1] hover:bg-black/5 border border-border/40 rounded-xl transition-all group shadow-sm"
+            className="flex items-center justify-between gap-3 px-4 py-3 bg-[#E8F0FE] hover:bg-[#DEE7F8] border border-[#1A73E8] rounded-xl transition-all group shadow-sm"
           >
             <div className="flex flex-col min-w-0">
-              <span className="text-[12px] font-medium text-foreground/50 uppercase tracking-wider">Live Preview</span>
-              <span className="text-[14px] font-medium text-foreground truncate">{message.url.replace(/^https?:\/\//, '')}</span>
+              <span className="text-[11px] font-bold text-[#1A73E8]/70 uppercase tracking-wider">Live Preview</span>
+              <span className="text-[14px] font-semibold text-[#0F172A] truncate">{message.url.replace(/^https?:\/\//, '')}</span>
             </div>
-            <ExternalLinkIcon className="w-4 h-4 text-foreground/40 group-hover:text-foreground transition-colors shrink-0" />
+            <ExternalLinkIcon className="w-4 h-4 text-[#0F172A]/40 group-hover:text-[#1A73E8] transition-colors shrink-0" />
           </a>
         </div>
       )}
