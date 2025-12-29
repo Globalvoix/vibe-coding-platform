@@ -64,8 +64,8 @@ export const Message = memo(function Message({ message, isLast, isGenerating }: 
           </div>
 
           {/* Assistant Message Actions */}
-          {message.role === 'assistant' && message.parts.some(p => p.type.startsWith('data-')) && (
-            <div className="flex items-center gap-2.5 pt-2">
+          {message.role === 'assistant' && message.parts.some(p => p.type.startsWith('data-')) && !isGenerating && (
+            <div className="flex items-center gap-2.5 pt-2 animate-in fade-in slide-in-from-top-2 duration-500">
               <div className="relative w-full max-w-[290px]">
                 <button className="flex items-center justify-between w-full px-4 py-3 bg-[#D2E3FC] hover:bg-[#C6DAFC] rounded-xl border border-[#1A73E8] transition-colors group shadow-sm text-left">
                   <div className="flex flex-col gap-1 min-w-0">
