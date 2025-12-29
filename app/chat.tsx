@@ -275,8 +275,13 @@ export function Chat({ className, initialPrompt, projectId }: Props) {
           <>
             <Conversation className="relative w-full flex-1 min-h-0 bg-background">
               <ConversationContent className="space-y-4">
-                {allMessages.map((message) => (
-                  <Message key={message.id} message={message} />
+                {allMessages.map((message, index) => (
+                  <Message
+                    key={message.id}
+                    message={message}
+                    isLast={index === allMessages.length - 1}
+                    isGenerating={index === allMessages.length - 1 && isLoading}
+                  />
                 ))}
               </ConversationContent>
               <ConversationScrollButton />
