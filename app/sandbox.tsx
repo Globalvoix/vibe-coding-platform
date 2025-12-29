@@ -115,7 +115,7 @@ export function Sandbox({ className }: Props) {
 
   return (
     <div className={cn('flex h-full min-h-0 flex-col', className)}>
-      <div className="flex items-center gap-3 border-b border-[#E5E7EB] bg-white px-3 py-2 h-[50px]">
+      <div className="flex items-center gap-3 border-b border-black/5 bg-transparent px-3 py-2 h-[50px]">
         <TooltipProvider>
           <div className="flex items-center gap-1.5 shrink-0">
             {tabs.map(renderTabButton)}
@@ -189,7 +189,7 @@ export function Sandbox({ className }: Props) {
           <button
             onClick={handlePublish}
             type="button"
-            className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-md transition-colors"
+            className="px-5 py-1.5 bg-[#1A73E8] hover:bg-[#1557B0] text-white text-xs font-bold rounded-full transition-colors shadow-sm"
           >
             Publish
           </button>
