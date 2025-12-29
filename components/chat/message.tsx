@@ -55,7 +55,7 @@ export const Message = memo(function Message({ message }: Props) {
           {/* Message Content */}
           <div className={cn(
             "space-y-3 w-fit",
-            message.role === 'user' && "bg-[#F4F4F1] px-4 py-2.5 rounded-[22px] text-foreground/90 shadow-sm border border-border/40"
+            message.role === 'user' && "bg-[#F8F7F2] px-4 py-2.5 rounded-[22px] text-foreground/90 shadow-sm border border-border/40"
           )}>
             {message.parts.map((part, index) => (
               <MessagePart key={index} part={part} partIndex={index} />
@@ -66,7 +66,7 @@ export const Message = memo(function Message({ message }: Props) {
           {message.role === 'assistant' && message.parts.some(p => p.type.startsWith('data-')) && (
             <div className="flex items-center gap-3 pt-2">
               <div className="relative w-full max-w-[340px]">
-                <button className="flex items-center justify-between w-full px-5 py-4 bg-[#E8F0FE] hover:bg-[#DEE7F8] rounded-xl border border-[#1A73E8] transition-colors group shadow-sm text-left">
+                <button className="flex items-center justify-between w-full px-5 py-4 bg-[#D2E3FC] hover:bg-[#C6DAFC] rounded-xl border border-[#1A73E8] transition-colors group shadow-sm text-left">
                   <div className="flex flex-col gap-1 min-w-0">
                     <span className="text-[15px] font-bold text-[#0F172A] truncate">
                       {/* Fallback to a generic title if we can't find a better one */}
