@@ -4,6 +4,7 @@ import { Spinner } from './spinner'
 import { ToolHeader } from '../tool-header'
 import { ToolMessage } from '../tool-message'
 import { cn } from '@/lib/utils'
+import { useState } from 'react'
 
 export function RunCommand({ message }: { message: DataPart['run-command'] }) {
   const [isExpanded, setIsExpanded] = useState(false)
