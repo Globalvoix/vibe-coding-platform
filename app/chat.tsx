@@ -304,7 +304,7 @@ export function Chat({ className, initialPrompt, projectId }: Props) {
                   placeholder="Type your message..."
                   className="text-base"
                 />
-                <div className="flex items-center justify-between pt-2">
+                <div className="flex items-center justify-between pt-1.5">
                   <div className="flex items-center gap-2">
                     <SupabaseOAuthButton projectId={projectId || undefined} />
                     <button
