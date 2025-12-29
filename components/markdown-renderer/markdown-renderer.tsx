@@ -70,14 +70,14 @@ export const MarkdownRenderer = memo(function MarkdownRenderer({
         const match = /language-(\w+)/.exec(className || '')
         return match ? (
           <code
-            className={`${className} bg-[#F4F4F1] dark:bg-zinc-800 px-1.5 py-0.5 rounded text-[13px] font-mono text-[#444] dark:text-zinc-300`}
+            className={`${className} bg-[#F3F3EF] dark:bg-zinc-800 px-1.5 py-0.5 rounded-md text-[13px] font-mono text-[#2D2D2D] dark:text-zinc-300 border border-black/[0.02]`}
             {...props}
           >
             {children}
           </code>
         ) : (
           <code
-            className="bg-[#F4F4F1] dark:bg-zinc-800 px-1.5 py-0.5 rounded text-[13px] font-mono text-[#444] dark:text-zinc-300"
+            className="bg-[#F3F3EF] dark:bg-zinc-800 px-1.5 py-0.5 rounded-md text-[13px] font-mono text-[#2D2D2D] dark:text-zinc-300 border border-black/[0.02]"
             {...props}
           >
             {children}
@@ -86,7 +86,7 @@ export const MarkdownRenderer = memo(function MarkdownRenderer({
       },
       pre: ({ children, ...props }) => (
         <pre
-          className="bg-[#F4F4F1] dark:bg-zinc-900/50 p-4 rounded-xl overflow-x-auto text-[13px] border border-border/40 my-4 font-mono shadow-sm"
+          className="bg-[#F9F9F7] dark:bg-zinc-900/50 p-5 rounded-2xl overflow-x-auto text-[13px] border border-black/[0.04] my-5 font-mono shadow-[0_4px_12px_-4px_rgba(0,0,0,0.03)]"
           {...props}
         >
           {children}
@@ -94,7 +94,7 @@ export const MarkdownRenderer = memo(function MarkdownRenderer({
       ),
       h1: ({ children, ...props }) => (
         <h1
-          className="text-[18px] font-semibold mb-3 mt-5 first:mt-0 text-foreground/90 font-sans tracking-[-0.01em]"
+          className="text-[20px] font-bold mb-4 mt-6 first:mt-0 text-foreground font-sans tracking-tight"
           {...props}
         >
           {children}
@@ -102,7 +102,7 @@ export const MarkdownRenderer = memo(function MarkdownRenderer({
       ),
       h2: ({ children, ...props }) => (
         <h2
-          className="text-[16px] font-semibold mb-2 mt-4 first:mt-0 text-foreground/90 font-sans tracking-[-0.01em]"
+          className="text-[18px] font-bold mb-3 mt-5 first:mt-0 text-foreground font-sans tracking-tight"
           {...props}
         >
           {children}
@@ -110,7 +110,7 @@ export const MarkdownRenderer = memo(function MarkdownRenderer({
       ),
       h3: ({ children, ...props }) => (
         <h3
-          className="text-[15px] font-semibold mb-2 mt-4 first:mt-0 text-foreground/90 font-sans tracking-[-0.01em]"
+          className="text-[16px] font-semibold mb-2 mt-4 first:mt-0 text-foreground/90 font-sans tracking-tight"
           {...props}
         >
           {children}
@@ -118,7 +118,7 @@ export const MarkdownRenderer = memo(function MarkdownRenderer({
       ),
       p: ({ children, ...props }) => (
         <p
-          className="mb-4 last:mb-0 leading-[1.7] text-foreground/90 font-sans text-[15px]"
+          className="mb-5 last:mb-0 leading-[1.75] text-foreground/85 font-sans text-[15px]"
           {...props}
         >
           {children}
@@ -126,7 +126,7 @@ export const MarkdownRenderer = memo(function MarkdownRenderer({
       ),
       ul: ({ children, ...props }) => (
         <ul
-          className="list-disc pl-6 mb-4 space-y-2 text-foreground/85 font-sans text-[15px]"
+          className="list-disc pl-6 mb-5 space-y-2.5 text-foreground/85 font-sans text-[15px]"
           {...props}
         >
           {children}
@@ -134,25 +134,25 @@ export const MarkdownRenderer = memo(function MarkdownRenderer({
       ),
       ol: ({ children, ...props }) => (
         <ol
-          className="list-decimal pl-6 mb-4 space-y-2 text-foreground/85 font-sans text-[15px]"
+          className="list-decimal pl-6 mb-5 space-y-2.5 text-foreground/85 font-sans text-[15px]"
           {...props}
         >
           {children}
         </ol>
       ),
       li: ({ children, ...props }) => (
-        <li className="marker:text-foreground/25 leading-[1.65]" {...props}>
+        <li className="marker:text-foreground/30 leading-[1.7]" {...props}>
           {children}
         </li>
       ),
       strong: ({ children, ...props }) => (
-        <strong className="font-semibold text-foreground" {...props}>
+        <strong className="font-bold text-foreground" {...props}>
           {children}
         </strong>
       ),
       blockquote: ({ children, ...props }) => (
         <blockquote
-          className="border-l-2 border-border/60 pl-4 italic my-3 text-foreground/80"
+          className="border-l-3 border-[#D2E3FC] bg-[#F3F3EF]/50 pl-5 pr-4 py-3 rounded-r-xl my-5 text-foreground/80 italic font-medium text-[15px]"
           {...props}
         >
           {children}
