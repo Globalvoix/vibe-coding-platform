@@ -143,26 +143,34 @@ export function Sandbox({ className }: Props) {
 
         {activeTab === 'preview' && (
           <div className="flex items-center justify-center flex-1 min-w-0">
-            <div className="flex items-center bg-[#F1F3F4] rounded-full px-3 py-1 gap-2 max-w-xl w-full mx-4 transition-all hover:bg-[#E8EAED] group">
-              <LayoutTemplate className="w-3.5 h-3.5 text-[#5F6368]" />
-              <input
-                type="text"
-                className="font-mono text-[13px] bg-transparent border-none focus:outline-none text-[#202124] w-full placeholder:text-[#5F6368] h-6"
-                onChange={(event) => setInputValue(event.target.value)}
-                onClick={(event) => event.currentTarget.select()}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter') {
-                    event.currentTarget.blur()
+            <div className="flex items-center rounded-full border border-black/10 bg-white px-2.5 h-7 gap-2 w-full max-w-[420px] mx-4">
+              <LayoutTemplate className="w-3.5 h-3.5 text-[#111827]/60" />
+
+              <div
+                className="min-w-0 flex-1 font-mono text-[12px] text-[#111827]/90 truncate select-text"
+                title={currentUrl || inputValue}
+                aria-label="Current preview URL"
+              >
+                {(() => {
+                  const raw = inputValue || currentUrl
+                  if (!raw) return '/'
+                  try {
+                    const parsed = new URL(raw)
+                    return parsed.pathname || '/'
+                  } catch {
+                    return raw
                   }
-                }}
-                value={inputValue}
-                placeholder="Enter URL..."
-              />
-              <div className="flex items-center gap-1 ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
-                 <button
+                })()}
+              </div>
+
+              <div className="flex items-center gap-1">
+                <button
                   onClick={openInNewTab}
                   type="button"
-                  className={cn("p-1 rounded-full hover:bg-black/5 text-[#5F6368] transition-colors", !currentUrl && "pointer-events-none opacity-50")}
+                  className={cn(
+                    'p-1 rounded-full hover:bg-black/5 text-[#111827]/60 hover:text-[#111827]/80 transition-colors',
+                    !currentUrl && 'pointer-events-none opacity-50'
+                  )}
                   title="Open in new tab"
                 >
                   <ArrowUpRight className="w-3.5 h-3.5" />
@@ -171,10 +179,10 @@ export function Sandbox({ className }: Props) {
                   onClick={handleRefresh}
                   type="button"
                   className={cn(
-                    'p-1 rounded-full hover:bg-black/5 text-[#5F6368] transition-colors',
+                    'p-1 rounded-full hover:bg-black/5 text-[#111827]/60 hover:text-[#111827]/80 transition-colors',
                     {
                       'animate-spin': isLoading,
-                      'pointer-events-none opacity-50': !currentUrl
+                      'pointer-events-none opacity-50': !currentUrl,
                     }
                   )}
                   title="Refresh"
