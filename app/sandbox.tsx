@@ -144,7 +144,7 @@ export function Sandbox({ className }: Props) {
         {activeTab === 'preview' && (
           <div className="flex items-center justify-center flex-1 min-w-0">
             <div className="flex items-center rounded-full border border-black/10 bg-background px-2 h-6 gap-1.5 w-full max-w-[340px] mx-3">
-              <LayoutTemplate className="w-3 h-3 text-[#111827]/60" />
+              <LayoutTemplate className="w-3 h-3 text-[#111827]" />
 
               <div
                 className="min-w-0 flex-1 font-mono text-[11px] text-[#111827]/80 truncate select-text"
@@ -168,7 +168,7 @@ export function Sandbox({ className }: Props) {
                   onClick={openInNewTab}
                   type="button"
                   className={cn(
-                    'p-0.5 rounded-full hover:bg-black/5 text-[#111827]/60 hover:text-[#111827]/80 transition-colors',
+                    'p-0.5 rounded-full hover:bg-black/5 text-[#111827] transition-colors',
                     !currentUrl && 'pointer-events-none opacity-50'
                   )}
                   title="Open in new tab"
@@ -179,7 +179,7 @@ export function Sandbox({ className }: Props) {
                   onClick={handleRefresh}
                   type="button"
                   className={cn(
-                    'p-0.5 rounded-full hover:bg-black/5 text-[#111827]/60 hover:text-[#111827]/80 transition-colors',
+                    'p-0.5 rounded-full hover:bg-black/5 text-[#111827] transition-colors',
                     {
                       'animate-spin': isLoading,
                       'pointer-events-none opacity-50': !currentUrl,
