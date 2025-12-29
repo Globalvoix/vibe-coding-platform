@@ -37,22 +37,22 @@ export function Sandbox({ className }: Props) {
     {
       id: 'preview',
       label: 'Preview',
-      icon: <Globe className="w-4 h-4" />,
+      icon: <Globe className="w-3.5 h-3.5" />,
     },
     {
       id: 'cloud',
       label: 'Cloud',
-      icon: <Cloud className="w-4 h-4" />,
+      icon: <Cloud className="w-3.5 h-3.5" />,
     },
     {
       id: 'code',
       label: 'Code',
-      icon: <Code2 className="w-4 h-4" />,
+      icon: <Code2 className="w-3.5 h-3.5" />,
     },
     {
       id: 'console',
       label: 'Console',
-      icon: <LineChart className="w-4 h-4" />,
+      icon: <LineChart className="w-3.5 h-3.5" />,
     },
   ]
 
@@ -67,8 +67,8 @@ export function Sandbox({ className }: Props) {
         className={cn(
           'inline-flex items-center justify-center transition-all duration-200 ease-in-out',
           isActive
-            ? 'h-[34px] px-3.5 bg-[#D2E3FC] border-[1.5px] border-[#3B5A9A] text-[#001D35] rounded-full gap-2 font-medium text-sm shadow-sm'
-            : 'h-[34px] w-[34px] bg-[#F8F9FA] border border-[#E5E7EB] text-[#5F6368] hover:bg-[#F1F3F4] rounded-[10px]'
+            ? 'h-[30px] px-3 bg-[#D2E3FC] border border-[#1A73E8] text-[#0F172A] rounded-md gap-1.5 text-xs font-semibold shadow-sm'
+            : 'h-[30px] w-[30px] bg-[#D2E3FC] border border-[#1A73E8] text-[#0F172A]/70 hover:bg-[#C6DAFC] rounded-md'
         )}
         aria-pressed={isActive}
         aria-label={tab.label}
@@ -104,10 +104,10 @@ export function Sandbox({ className }: Props) {
           {tabs.map(renderTabButton)}
           <button
             type="button"
-            className="h-[34px] w-[34px] flex items-center justify-center bg-[#F8F9FA] border border-[#E5E7EB] text-[#5F6368] hover:bg-[#F1F3F4] rounded-[10px] transition-all duration-200"
+            className="h-[30px] w-[30px] flex items-center justify-center bg-[#D2E3FC] border border-[#1A73E8] text-[#0F172A]/70 hover:bg-[#C6DAFC] rounded-md transition-all duration-200"
             title="Add tab"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-3.5 h-3.5" />
           </button>
         </div>
 
