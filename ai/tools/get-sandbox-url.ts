@@ -40,6 +40,6 @@ export const getSandboxURL = ({ writer }: Params) =>
         data: { url, status: 'done' },
       })
 
-      return { url }
+      return { success: true }
     },
   })
