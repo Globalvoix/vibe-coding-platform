@@ -56,7 +56,7 @@ export const Message = memo(function Message({ message, isLast, isGenerating }: 
           {/* Message Content */}
           <div className={cn(
             "space-y-3 w-fit",
-            message.role === 'user' && "bg-[#F8F7F2] px-4 py-2.5 rounded-[22px] text-foreground/90 shadow-sm border border-border/40"
+            message.role === 'user' && "bg-[#F1F5F9] px-4 py-2.5 rounded-[22px] text-foreground/90 shadow-sm border border-border/40"
           )}>
             {message.parts.map((part, index) => (
               <MessagePart key={index} part={part} partIndex={index} />
@@ -79,7 +79,7 @@ export const Message = memo(function Message({ message, isLast, isGenerating }: 
                 </button>
 
                 {/* Code Button overlapping bottom right */}
-                <button className="absolute -bottom-2 -right-2 flex items-center gap-1 px-2.5 py-1 bg-[#F8F7F2] hover:bg-[#F2F1EA] rounded-md border border-black/5 shadow-sm transition-colors text-[11px] font-semibold text-[#475569] group/code">
+                <button className="absolute -bottom-2 -right-2 flex items-center gap-1 px-2.5 py-1 bg-[#F1F5F9] hover:bg-[#E2E8F0] rounded-md border border-black/5 shadow-sm transition-colors text-[11px] font-semibold text-[#475569] group/code">
                   <Code2Icon className="w-3 h-3 text-[#475569]/70 group-hover/code:text-[#475569]" />
                   <span>Code</span>
                 </button>
