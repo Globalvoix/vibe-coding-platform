@@ -56,7 +56,7 @@ export const Message = memo(function Message({ message, isLast, isGenerating }: 
           {/* Message Content */}
           <div className={cn(
             "space-y-3 w-fit",
-            message.role === 'user' && "bg-[#F7F4ED] px-5 py-3 rounded-[24px] text-foreground/90 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] border border-black/[0.03] transition-all"
+            message.role === 'user' && "bg-[#F7F4ED] px-6 py-3.5 rounded-[28px] text-foreground/90 shadow-[0_4px_16px_-4px_rgba(0,0,0,0.04)] border border-black/[0.02] transition-all hover:shadow-[0_8px_24px_-8px_rgba(0,0,0,0.06)] hover:border-black/[0.04]"
           )}>
             {message.parts.map((part, index) => (
               <MessagePart key={index} part={part} partIndex={index} />
