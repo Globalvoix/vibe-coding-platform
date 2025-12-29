@@ -143,7 +143,7 @@ export function Sandbox({ className }: Props) {
 
         {activeTab === 'preview' && (
           <div className="flex items-center justify-center flex-1 min-w-0">
-            <div className="flex items-center rounded-full border border-black/10 bg-background px-2.5 h-7 gap-2 w-full max-w-[420px] mx-4">
+            <div className="flex items-center rounded-full border border-black/10 bg-background px-2 h-6 gap-1.5 w-full max-w-[340px] mx-3">
               <LayoutTemplate className="w-3.5 h-3.5 text-[#111827]/60" />
 
               <div
