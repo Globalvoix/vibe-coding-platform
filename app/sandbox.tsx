@@ -88,8 +88,8 @@ export function Sandbox({ className }: Props) {
         <TooltipTrigger asChild>{button}</TooltipTrigger>
         <TooltipContent
           side="bottom"
-          sideOffset={10}
-          className="bg-[#111827] text-white border-transparent px-3 py-2 text-[13px] rounded-md"
+          sideOffset={8}
+          className="bg-[#111827] text-white border-transparent px-2.5 py-1.5 text-[12px] rounded-md"
         >
           {tab.label}
         </TooltipContent>
@@ -131,10 +131,10 @@ export function Sandbox({ className }: Props) {
                 </button>
               </TooltipTrigger>
               <TooltipContent
-                side="bottom"
-                sideOffset={10}
-                className="bg-[#111827] text-white border-transparent px-3 py-2 text-[13px] rounded-md"
-              >
+          side="bottom"
+          sideOffset={8}
+          className="bg-[#111827] text-white border-transparent px-2.5 py-1.5 text-[12px] rounded-md"
+        >
                 Add
               </TooltipContent>
             </Tooltip>
@@ -193,34 +193,62 @@ export function Sandbox({ className }: Props) {
         </button>
       </div>
 
-      <div className="flex-1 min-h-0 flex flex-col">
-        {activeTab === 'preview' && (
+      <div className="relative flex-1 min-h-0 overflow-hidden">
+        <div
+          className={cn(
+            'absolute inset-0 transition-all duration-200 ease-out will-change-transform',
+            activeTab === 'preview'
+              ? 'opacity-100 translate-y-0'
+              : 'opacity-0 translate-y-1 pointer-events-none'
+          )}
+        >
           <Preview
-            className="flex-1 overflow-hidden"
+            className="h-full w-full overflow-hidden"
             onUrlChange={setCurrentUrl}
             onInputChange={setInputValue}
             onLoadingChange={setIsLoading}
             onRefreshRef={previewRefreshRef}
             hideControls={true}
           />
-        )}
+        </div>
 
-        {activeTab === 'code' && (
-          <FileExplorer className="flex-1 min-h-0 overflow-hidden" />
-        )}
+        <div
+          className={cn(
+            'absolute inset-0 transition-all duration-200 ease-out will-change-transform',
+            activeTab === 'code'
+              ? 'opacity-100 translate-y-0'
+              : 'opacity-0 translate-y-1 pointer-events-none'
+          )}
+        >
+          <FileExplorer className="h-full w-full min-h-0 overflow-hidden" />
+        </div>
 
-        {activeTab === 'cloud' && (
-          <div className="flex-1 flex items-center justify-center text-muted-foreground">
+        <div
+          className={cn(
+            'absolute inset-0 transition-all duration-200 ease-out will-change-transform',
+            activeTab === 'cloud'
+              ? 'opacity-100 translate-y-0'
+              : 'opacity-0 translate-y-1 pointer-events-none'
+          )}
+        >
+          <div className="h-full w-full flex items-center justify-center text-muted-foreground">
             <div className="text-center">
               <Cloud className="w-12 h-12 mx-auto mb-4 opacity-20" />
               <p className="text-sm font-medium">Cloud features coming soon</p>
             </div>
           </div>
-        )}
+        </div>
 
-        {activeTab === 'console' && (
-          <Logs className="flex-1 min-h-0 overflow-hidden" />
-        )}
+        <div
+          className={cn(
+            'absolute inset-0 transition-all duration-200 ease-out will-change-transform',
+            activeTab === 'console'
+              ? 'opacity-100 translate-y-0'
+              : 'opacity-0 translate-y-1 pointer-events-none'
+          )}
+        >
+          <Logs className="h-full w-full min-h-0 overflow-hidden" />
+        </div>
       </div>
       <ComingSoonModal
         isOpen={showComingSoon}
