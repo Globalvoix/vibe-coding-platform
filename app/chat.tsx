@@ -178,10 +178,7 @@ export function Chat({ className, initialPrompt, projectId }: Props) {
 
       recoveryTimeoutRef.current = window.setTimeout(() => {
         setForceEnableInput(true)
-        toast.error('The AI did not respond. You can try sending your message again.')
-        const abortChat = chat as unknown as { abort?: () => void }
-        abortChat.abort?.()
-      }, 30000)
+      }, 120000)
     }
 
     return () => {
