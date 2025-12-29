@@ -129,7 +129,7 @@ export const MarkdownRenderer = memo(function MarkdownRenderer({
       rehypePlugins={[rehypeRaw]}
       components={components}
     >
-      {content}
+      {safeContent}
     </ReactMarkdown>
   )
 })
