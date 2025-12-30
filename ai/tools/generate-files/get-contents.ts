@@ -192,10 +192,12 @@ Before finalizing, verify ALL:
 - [ ] App type identified (streaming, saas, etc.)
 - [ ] All images use generateImageUrl() and generateAltText()
 - [ ] All images use next/image component
-- [ ] 2+ routes with working navigation
-- [ ] All required animations implemented
+- [ ] 2+ routes with working navigation (or ≥5 premium sections for landings)
+- [ ] All required animations implemented + micro interactions for CTAs/forms
+- [ ] Premium component stack documented per route/section
 - [ ] package.json lists all dependencies
-- [ ] lib/data.ts has 10+ realistic mock items
+- [ ] lib/data.ts has 10+ realistic mock items with loading/empty/error states (use \`lib/data-templates.ts\`)
+- [ ] Blueprint score ≥ 90 recorded from \`evaluateBlueprint()\`
 - [ ] Design system spacing (no hardcoded padding)
 - [ ] Zero alt text is generic ("image", "photo", "picture")
 - [ ] Zero TypeScript errors
