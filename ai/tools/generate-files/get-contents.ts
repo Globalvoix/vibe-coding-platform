@@ -93,19 +93,26 @@ Media rules:
 - Add videos only for demos/marketing where it clearly improves comprehension; keep them short and muted
 - Add 3D icons/mockups only when explicitly requested or clearly essential; otherwise avoid due to weight/performance
 
-Full-product rules (all apps):
-- NO RUSHING: Implement the complete multi-page experience, not a one-page demo.
-- ASSET ACCURACY: Audit every image/icon choice for contextual fit.
-- Implement the correct information architecture: routes/screens, layouts, and working navigation.
+Full-product rules (all apps) - MANDATORY:
+- **NO RUSHING**: Follow all phases methodically. Slow down and audit every detail before finalizing.
+- **Asset Audit First**: Before writing code, decide on exact image types needed (e.g., "movie posters: dark cinematic 500x750px from Unsplash 'cinema' search").
+- **Image Validation**: Every URL must be verified real and contextually appropriate. Examples of FORBIDDEN: shoes in a movie app, pizza in banking, office photos in games.
+- **Spacing Precision**: Use strict 4px/8px grid. Audit final layout for overlaps and consistency.
+- **Multi-Page Architecture**: Implement complete routes (not single-page demos). Data layer in lib/data.ts with realistic mock content.
+- **Quality Checklist**: Verify image URLs work, spacing is consistent, typography matches blueprint, interactive elements have all states (hover/focus/loading).
+- **Implement the correct information architecture: routes/screens, layouts, and working navigation.
 - Implement the core flows end-to-end for the app type (even if mocked).
 - Use realistic mock data models in lib/* (do not hardcode everything inside a component).
 - Include loading/empty/error states.
-- Ensure images render correctly or have high-quality fallbacks.
+- Implement skeleton loaders or branded fallbacks for all images.
 
-Clone rules (high fidelity):
-- Implement proper routes/layouts and working navigation.
-- Implement key flows and interactions (search, tabs, details pages, profile selection).
-- Avoid copyrighted/trademarked logos/assets; recreate the feel with original UI + royalty-free imagery.${envVarsContext}`,
+Clone rules (high fidelity) - MANDATORY:
+- Implement every route defined in the original app (Home, Browse, Details, Search, Profile, etc.).
+- Implement key flows and interactions (search, tabs, details pages, profile selection) with pixel-perfect spacing.
+- Verify all images are cinematic/contextually relevant (NOT shoes, pizza, or generic stock photos).
+- Recreate brand-specific animations (e.g., Netflix row hover, splash intro).
+- Avoid copyrighted/trademarked logos/assets; recreate the feel with original UI + royalty-free imagery.
+- Test responsiveness on mobile (375px), tablet (768px), desktop (1280px).${envVarsContext}`,
     messages: [
       ...params.messages,
       {
