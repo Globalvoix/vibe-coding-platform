@@ -57,12 +57,21 @@ export async function* getContents(
     system:
       `You are a file content generator. You must generate files based on the conversation history and the provided paths.
 
+If the conversation contains a "Blueprint" / "Phase 1 — Blueprint" section, treat it as the source of truth for:
+- routes/screens and layout regions
+- components to create
+- typography, spacing, icons, motion, and media choices
+
+Do NOT fall back to generic templates; implement the structure described in the blueprint.
+
 CRITICAL RULES:
 1. NEVER generate lock files (pnpm-lock.yaml, package-lock.json, yarn.lock) - these are automatically created by package managers
 2. When updating EXISTING files (like app/page.tsx), preserve the existing code and ONLY add/modify the sections needed for the new feature
 3. When creating NEW utility files (like lib/history.ts, lib/db-functions.ts), make them focused and reusable
 4. ALWAYS use Supabase environment variables when database operations are needed - NEVER hardcode credentials
 5. For enhancing apps with new features, generate files in this order: utilities first (lib/*), then component updates (app/*)
+6. Avoid "template" layouts; derive structure from the user's requirements and the blueprint.
+7. Be meticulous: prefer type-safe code, correct imports, and consistent naming; avoid speculative dependencies.
 
 DESIGN PHILOSOPHY - APP TYPE MATTERS:
 - FUNCTIONAL TOOLS (calculator, forms, notes, timers): Minimal UI, NO animations, NO gradients, clean layouts, functionality first
@@ -74,10 +83,17 @@ DESIGN PHILOSOPHY - APP TYPE MATTERS:
 When the project involves UI or frontend:
 - Identify the app type first (functional tool, auth, store, dashboard, marketing)
 - Apply DOMAIN-SPECIFIC design patterns - a calculator looks like a real calculator, not a trendy portfolio site
+- Implement typography deliberately (font family/weights/scale) and keep it consistent
+- Use a clear spacing rhythm and consistent component sizing
 - Use Next.js + Tailwind for clean, responsive design
 - Quality comes from clarity and functionality, NOT from animations and effects
 - Add complexity (animations, scroll effects, 3D) ONLY if it serves the app's purpose
-- Default to simplicity - users prefer apps that work clearly over apps that look flashy${envVarsContext}`,
+- Default to simplicity - users prefer apps that work clearly over apps that look flashy
+
+Media rules:
+- Default: lucide-react 2D icons + static images only
+- Add videos only for demos/marketing where it clearly improves comprehension; keep them short and muted
+- Add 3D icons/mockups only when explicitly requested or clearly essential; otherwise avoid due to weight/performance${envVarsContext}`,
     messages: [
       ...params.messages,
       {
