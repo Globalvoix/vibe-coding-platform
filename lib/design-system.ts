@@ -376,7 +376,7 @@ export const ASPECT_RATIOS = {
  */
 export function validateSpacing(value: string): boolean {
   const spacingValues = Object.values(SPACING)
-  return spacingValues.includes(value as any)
+  return spacingValues.includes(value as typeof SPACING[keyof typeof SPACING])
 }
 
 /**
