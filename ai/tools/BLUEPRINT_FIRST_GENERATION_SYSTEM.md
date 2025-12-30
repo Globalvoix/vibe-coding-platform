@@ -325,4 +325,9 @@ interface Movie {
 2. **VALIDATE ALWAYS**: Check every image URL, alt text, library import
 3. **FAIL FAST**: Use blockers to catch single-page apps, generic alt text, missing libraries
 
+### Companion Tools
+- `lib/premium-component-registry.ts` → Pre-built component stacks inspired by Neon/Hulu/Amazon
+- `lib/data-templates.ts` → Realistic mock data with loading/empty/error states
+- `lib/experience-scorecard.ts` → Score the blueprint before code generation
+
 **Result**: Institutional-grade frontend with perfect images, smooth animations, and working multi-page flows—every time.
