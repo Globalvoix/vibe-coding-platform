@@ -88,6 +88,21 @@ Define mock data structure:
 - How many items minimum? (10+)
 - Where will data.ts live?
 
+### 1.7 Experience Pillars & Brand Study
+- Document references (Neon, Hulu, Amazon, Netflix, Supabase, Stripe) and call out 3-5 differentiators
+- Define palette direction (glow, monochrome, brutalist), typography tone, and density (airy vs. data-heavy)
+- Capture hero narrative + CTA messaging before coding
+
+### 1.8 Interaction & State Matrix
+- List mandatory page transitions, hero reveals, sticky headers, parallax, etc.
+- Define micro-interactions for primary CTAs, cards, inputs, toggles, tab switches, notifications
+- Plan state coverage: loading skeletons, optimistic updates, empty states, error recovery, success confirmations
+
+### 1.9 Performance & Accessibility Targets
+- Target LCP < 2.5s, CLS < 0.1, and ship responsive images with priority only for the hero
+- Ensure all focus states are visible, aria labels exist for icon-only controls, motion respects `prefers-reduced-motion`
+- Enforce minimum contrast ratios (4.5:1 for body text, 3:1 for display) and keep touch targets ≥ 44px
+
 ---
 
 ## Phase 2: VALIDATE (Check Blueprint)
@@ -101,7 +116,10 @@ Before writing code, verify:
 - [ ] Multi-page structure planned (minimum 2 routes)
 - [ ] Navigation plan clear (how pages link)
 - [ ] All dependencies listed
-- [ ] Data model defined
+- [ ] Data model defined (10+ items + loading/empty/error states)
+- [ ] Brand pillars and tone captured
+- [ ] Interaction & state matrix approved
+- [ ] Performance/accessibility targets documented
 - [ ] No generic alt text ("image", "photo", "picture")
 - [ ] No hardcoded image paths
 
@@ -173,7 +191,7 @@ import { SPACING, TYPOGRAPHY, SHADOWS } from '@/lib/design-system'
 
 If ANY of these are true → REGENERATE IMMEDIATELY:
 
-1. **Single Page App** - Less than 2 routes
+1. **Single Page App** - Less than 2 routes (landing/calculator exceptions still need ≥5 rich sections)
 2. **<img> tag used** - Any image uses `<img>` instead of `next/image`
 3. **Generic Alt Text** - Any alt text is "image", "photo", "picture", "screenshot"
 4. **Hardcoded URLs** - Any image URL is hardcoded, not from `generateImageUrl()`
@@ -183,6 +201,9 @@ If ANY of these are true → REGENERATE IMMEDIATELY:
 8. **Lint Errors** - Any ESLint violations
 9. **Missing Imports** - Used library not imported (framer-motion, lucide-react, etc.)
 10. **Missing Dependencies** - package.json doesn't list used libraries
+11. **Missing Interaction States** - No loading/empty/error/success experiences for critical surfaces
+12. **Brand Mismatch** - Imagery, palette, or typography contradict blueprint (e.g., pizza photo in banking app)
+13. **Motion Violations** - Animations ignore `prefers-reduced-motion` or feel jittery
 
 ---
 
@@ -190,18 +211,20 @@ If ANY of these are true → REGENERATE IMMEDIATELY:
 
 Every generated app MUST pass:
 
-- [ ] 2+ routes with working navigation
+- [ ] 2+ routes with working navigation (or ≥5 premium sections for landings)
 - [ ] All images use `next/image` with specific alt text
 - [ ] All images from `generateImageUrl()` (no hardcoded URLs)
-- [ ] Animations present for required app types
+- [ ] Animations present for required app types + micro interactions for CTAs/forms/cards
 - [ ] Design system spacing (no hardcoded `padding: '20px'`)
-- [ ] Typography uses TYPOGRAPHY scale
-- [ ] 10+ realistic mock data items in lib/data.ts
-- [ ] Responsive design (tested at 375px, 768px, 1280px)
+- [ ] Typography uses TYPOGRAPHY scale and matches brand tone
+- [ ] 10+ realistic mock data items in lib/data.ts, each with loading/empty/error states
+- [ ] Responsive design (tested at 375px, 768px, 1024px, 1440px) with fluid typography
+- [ ] Accessibility: focus states, aria labels, keyboard traps avoided, reduced-motion fallbacks
+- [ ] Performance: hero assets optimized, minimal layout shift, avoids unneeded libs
 - [ ] Zero TypeScript errors (pnpm tsc --noEmit)
 - [ ] Zero lint errors (pnpm eslint)
 - [ ] Zero build errors (pnpm build)
-- [ ] Looks like enterprise UI (not template)
+- [ ] Looks like enterprise UI (Neon/Hulu/Amazon-grade polish, no templates)
 
 ---
 
