@@ -55,8 +55,8 @@ export const Message = memo(function Message({ message, isLast, isGenerating }: 
         )}>
           {/* Message Content */}
           <div className={cn(
-            "space-y-5 w-fit",
-            message.role === 'user' && "bg-[#F7F4ED] px-6 py-3.5 rounded-[28px] text-foreground/90 shadow-[0_4px_16px_-4px_rgba(0,0,0,0.04)] border border-black/[0.02] transition-all hover:shadow-[0_8px_24px_-8px_rgba(0,0,0,0.06)] hover:border-black/[0.04]"
+            "space-y-4 w-fit",
+            message.role === 'user' && "bg-[#F7F4ED] px-4 py-2.5 rounded-[22px] text-foreground/90 shadow-sm border border-black/[0.02] transition-all hover:shadow-md hover:border-black/[0.04]"
           )}>
             {message.parts.map((part, index) => (
               <MessagePart key={index} part={part} partIndex={index} />
@@ -69,17 +69,17 @@ export const Message = memo(function Message({ message, isLast, isGenerating }: 
               <div className="relative w-full max-w-[290px]">
                 <button className="flex items-center justify-between w-full px-4 py-3 bg-[#D2E3FC] hover:bg-[#C6DAFC] rounded-xl border border-[#1A73E8] transition-colors group shadow-sm text-left">
                   <div className="flex flex-col gap-1 min-w-0">
-                    <span className="text-[13px] font-bold text-[#0F172A] truncate">
+                    <span className="text-[14px] font-bold text-[#0F172A] truncate">
                       {/* Fallback to a generic title if we can't find a better one */}
                       {message.parts.find(p => p.type === 'text')?.text?.split('\n')[0].replace(/[#*]/g, '').trim().substring(0, 40) || 'Updated version'}
                     </span>
-                    <span className="text-[12px] text-[#475569] font-medium">Previewing latest version</span>
+                    <span className="text-[13px] text-[#475569] font-medium">Previewing latest version</span>
                   </div>
                   <ChevronRightIcon className="w-5 h-5 text-[#0F172A]/30 group-hover:text-[#0F172A] transition-colors shrink-0" />
                 </button>
 
                 {/* Code Button overlapping bottom right */}
-                <button className="absolute -bottom-2 -right-2 flex items-center gap-1 px-2.5 py-1 bg-[#F7F4ED] hover:bg-[#EFECE5] rounded-md border border-black/5 shadow-sm transition-colors text-[11px] font-semibold text-[#475569] group/code">
+                <button className="absolute -bottom-2 -right-2 flex items-center gap-1 px-2.5 py-1 bg-[#F7F4ED] hover:bg-[#EFECE5] rounded-md border border-black/5 shadow-sm transition-colors text-[12px] font-semibold text-[#475569] group/code">
                   <Code2Icon className="w-3 h-3 text-[#475569]/70 group-hover/code:text-[#475569]" />
                   <span>Code</span>
                 </button>
