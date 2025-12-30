@@ -5,10 +5,22 @@ import { useMonitorState } from '@/components/error-monitor/state'
 import { useMemo } from 'react'
 import { create } from 'zustand'
 
+interface ViewingVersion {
+  id: string
+  name: string
+  sandboxState: {
+    sandboxId?: string
+    paths?: string[]
+    url?: string
+    urlUUID?: string
+  } | null
+}
+
 interface SandboxStore {
   addGeneratedFiles: (files: string[]) => void
   addLog: (data: { sandboxId: string; cmdId: string; log: CommandLog }) => void
   addPaths: (paths: string[]) => void
+  applySandboxState: (sandboxState: ViewingVersion['sandboxState']) => void
   chatStatus: ChatStatus
   clearGeneratedFiles: () => void
   commands: Command[]
@@ -19,13 +31,17 @@ interface SandboxStore {
   currentProjectId?: string | null
   setCurrentProjectId: (id: string | null) => void
   setChatStatus: (status: ChatStatus) => void
+  setRevertInChatVersionId: (versionId: string | null) => void
   setSandboxId: (id: string) => void
   setStatus: (status: 'running' | 'stopped') => void
   setUrl: (url: string, uuid: string) => void
+  setViewingVersion: (version: ViewingVersion | null) => void
   status?: 'running' | 'stopped'
   upsertCommand: (command: Omit<Command, 'startedAt'>) => void
   url?: string
   urlUUID?: string
+  viewingVersion: ViewingVersion | null
+  revertInChatVersionId: string | null
 }
 
 function getBackgroundCommandErrorLines(commands: Command[]) {
@@ -68,13 +84,39 @@ export const useSandboxStore = create<SandboxStore>()((set) => ({
   },
   addPaths: (paths) =>
     set((state) => ({ paths: [...new Set([...state.paths, ...paths])] })),
+  applySandboxState: (sandboxState) =>
+    set((state) => {
+      if (!sandboxState) {
+        return state
+      }
+
+      const nextPaths = Array.isArray(sandboxState.paths) ? sandboxState.paths : []
+      const nextUrl = typeof sandboxState.url === 'string' ? sandboxState.url : undefined
+      const nextUrlUUID =
+        typeof sandboxState.urlUUID === 'string'
+          ? sandboxState.urlUUID
+          : nextUrl
+            ? crypto.randomUUID()
+            : undefined
+
+      return {
+        sandboxId: sandboxState.sandboxId ?? state.sandboxId,
+        paths: nextPaths.length > 0 ? nextPaths : state.paths,
+        url: nextUrl,
+        urlUUID: nextUrlUUID ?? state.urlUUID,
+      }
+    }),
   chatStatus: 'ready',
+  viewingVersion: null,
+  revertInChatVersionId: null,
   clearGeneratedFiles: () => set(() => ({ generatedFiles: new Set<string>() })),
   commands: [],
   generatedFiles: new Set<string>(),
   paths: [],
   currentProjectId: null,
   setCurrentProjectId: (id) => set(() => ({ currentProjectId: id })),
+  setViewingVersion: (version) => set(() => ({ viewingVersion: version })),
+  setRevertInChatVersionId: (versionId) => set(() => ({ revertInChatVersionId: versionId })),
   reset: () =>
     set(() => ({
       sandboxId: undefined,
@@ -86,6 +128,8 @@ export const useSandboxStore = create<SandboxStore>()((set) => ({
       generatedFiles: new Set<string>(),
       status: undefined,
       chatStatus: 'ready',
+      viewingVersion: null,
+      revertInChatVersionId: null,
     })),
   setChatStatus: (status) =>
     set((state) =>
