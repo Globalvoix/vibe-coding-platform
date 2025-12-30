@@ -87,22 +87,30 @@ export const Message = memo(function Message({
             if (message.role !== 'assistant' || isGenerating) return null
 
             const parts = message.parts ?? []
-            const sandboxUrlPart = parts
-              .filter((part) => part.type === 'data-get-sandbox-url')
-              .map((part) => (part as any).data)
-              .find((data) => data?.status === 'done' && typeof data?.url === 'string') as
-              | { url?: string; urlUUID?: string; status: 'done' | 'loading' }
-              | undefined
 
-            const sandboxUrl = sandboxUrlPart?.url
-            const sandboxUrlUUID = sandboxUrlPart?.urlUUID
+            type SandboxUrlPart = Extract<(typeof parts)[number], { type: 'data-get-sandbox-url' }>
+            type TextPart = Extract<(typeof parts)[number], { type: 'text' }>
+            type SandboxState = {
+              sandboxId?: string
+              paths?: string[]
+              url?: string
+              urlUUID?: string
+            }
+
+            const sandboxUrlPartData = parts
+              .filter((part): part is SandboxUrlPart => part.type === 'data-get-sandbox-url')
+              .map((part) => part.data)
+              .find((data) => data.status === 'done' && typeof data.url === 'string')
+
+            const sandboxUrl = sandboxUrlPartData?.url
+            const sandboxUrlUUID = sandboxUrlPartData?.urlUUID
 
             const hasPreviewCard = Boolean(sandboxUrl)
 
             if (!hasPreviewCard) return null
 
             const title =
-              (parts.find((p) => p.type === 'text') as any)?.text
+              (parts.find((p): p is TextPart => p.type === 'text')?.text as string | undefined)
                 ?.split('\n')[0]
                 .replace(/[#*]/g, '')
                 .trim()
@@ -138,7 +146,7 @@ export const Message = memo(function Message({
                 try {
                   const res = await fetch(`/api/projects/${projectId}`)
                   if (res.ok) {
-                    const data = (await res.json()) as { sandbox_state?: any }
+                    const data = (await res.json()) as { sandbox_state: SandboxState | null }
                     applySandboxState(data.sandbox_state ?? null)
                   }
                 } catch {
@@ -153,7 +161,7 @@ export const Message = memo(function Message({
                 try {
                   const res = await fetch(`/api/projects/${projectId}`)
                   if (res.ok) {
-                    const data = (await res.json()) as { sandbox_state?: any }
+                    const data = (await res.json()) as { sandbox_state: SandboxState | null }
                     applySandboxState(data.sandbox_state ?? null)
                   }
                 } catch {
@@ -168,11 +176,11 @@ export const Message = memo(function Message({
                 const versions = (await res.json()) as Array<{
                   id: string
                   name: string
-                  sandbox_state: any
+                  sandbox_state: SandboxState | null
                 }>
 
                 const matched = versions.find((v) => {
-                  const state = v.sandbox_state as any
+                  const state = v.sandbox_state
                   if (!state) return false
                   if (sandboxUrlUUID && state.urlUUID && state.urlUUID === sandboxUrlUUID) return true
                   if (sandboxUrl && state.url && state.url === sandboxUrl) return true
