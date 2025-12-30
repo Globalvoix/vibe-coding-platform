@@ -1,11 +1,15 @@
-import { BookmarkIcon, ChevronRightIcon, Code2Icon } from 'lucide-react'
+import { ArrowUpRight, BookmarkIcon, ChevronRightIcon, Code2Icon } from 'lucide-react'
 import type { ChatUIMessage } from './types'
 import { MessagePart } from './message-part'
-import { memo, createContext, useContext, useState, useEffect } from 'react'
+import { memo, createContext, useContext, useState, useEffect, useMemo } from 'react'
 import { cn } from '@/lib/utils'
+import { useSandboxStore } from '@/app/state'
 
 interface Props {
   message: ChatUIMessage
+  projectId?: string | null
+  isLatestVersionCard?: boolean
+  onRevertInChat?: (versionId: string, anchorMessageId: string) => void
   isLast?: boolean
   isGenerating?: boolean
 }
@@ -22,10 +26,25 @@ export const useReasoningContext = () => {
   return context
 }
 
-export const Message = memo(function Message({ message, isLast, isGenerating }: Props) {
+export const Message = memo(function Message({
+  message,
+  projectId,
+  isLatestVersionCard = false,
+  onRevertInChat,
+  isLast,
+  isGenerating,
+}: Props) {
   const [expandedReasoningIndex, setExpandedReasoningIndex] = useState<
     number | null
   >(null)
+
+  const {
+    viewingVersion,
+    revertInChatVersionId,
+    setViewingVersion,
+    setRevertInChatVersionId,
+    applySandboxState,
+  } = useSandboxStore()
 
   const reasoningParts = message.parts
     .map((part, index) => ({ part, index }))
@@ -64,32 +83,203 @@ export const Message = memo(function Message({ message, isLast, isGenerating }: 
           </div>
 
           {/* Assistant Message Actions */}
-          {message.role === 'assistant' && message.parts.some(p => p.type.startsWith('data-')) && !isGenerating && (
-            <div className="flex items-center gap-2.5 pt-2 animate-in fade-in slide-in-from-top-2 duration-500">
-              <div className="relative w-full max-w-[290px]">
-                <button className="flex items-center justify-between w-full px-4 py-3 bg-[#D2E3FC] hover:bg-[#C6DAFC] rounded-xl border border-[#1A73E8] transition-colors group shadow-sm text-left">
-                  <div className="flex flex-col gap-1 min-w-0">
-                    <span className="text-[14px] font-bold text-[#0F172A] truncate">
-                      {/* Fallback to a generic title if we can't find a better one */}
-                      {message.parts.find(p => p.type === 'text')?.text?.split('\n')[0].replace(/[#*]/g, '').trim().substring(0, 40) || 'Updated version'}
-                    </span>
-                    <span className="text-[13px] text-[#475569] font-medium">Previewing latest version</span>
+          {(() => {
+            if (message.role !== 'assistant' || isGenerating) return null
+
+            const parts = message.parts ?? []
+            const sandboxUrlPart = parts
+              .filter((part) => part.type === 'data-get-sandbox-url')
+              .map((part) => (part as any).data)
+              .find((data) => data?.status === 'done' && typeof data?.url === 'string') as
+              | { url?: string; urlUUID?: string; status: 'done' | 'loading' }
+              | undefined
+
+            const sandboxUrl = sandboxUrlPart?.url
+            const sandboxUrlUUID = sandboxUrlPart?.urlUUID
+
+            const hasPreviewCard = Boolean(sandboxUrl)
+
+            if (!hasPreviewCard) return null
+
+            const title =
+              (parts.find((p) => p.type === 'text') as any)?.text
+                ?.split('\n')[0]
+                .replace(/[#*]/g, '')
+                .trim()
+                .substring(0, 40) || 'Updated version'
+
+            const isSelected =
+              Boolean(viewingVersion?.sandboxState?.url && viewingVersion.sandboxState.url === sandboxUrl) ||
+              Boolean(
+                viewingVersion?.sandboxState?.urlUUID &&
+                  sandboxUrlUUID &&
+                  viewingVersion.sandboxState.urlUUID === sandboxUrlUUID
+              )
+
+            const subtitle = isLatestVersionCard ? 'Previewing latest version' : 'Preview this version'
+
+            const cardClasses = cn(
+              'flex items-center justify-between w-full px-4 py-3 rounded-xl border transition-colors group shadow-sm text-left',
+              isLatestVersionCard
+                ? 'bg-[#D2E3FC] hover:bg-[#C6DAFC] border-[#1A73E8]'
+                : 'bg-[#F7F4ED] hover:bg-[#F2EFE8] border-black/[0.06]',
+              isSelected && 'ring-1 ring-black/10'
+            )
+
+            const textPrimary = isLatestVersionCard ? 'text-[#0F172A]' : 'text-foreground'
+            const textSecondary = isLatestVersionCard ? 'text-[#475569]' : 'text-foreground/65'
+
+            const resolveAndSelectVersion = async () => {
+              if (!projectId) return
+
+              if (isLatestVersionCard) {
+                setViewingVersion(null)
+                setRevertInChatVersionId(null)
+                try {
+                  const res = await fetch(`/api/projects/${projectId}`)
+                  if (res.ok) {
+                    const data = (await res.json()) as { sandbox_state?: any }
+                    applySandboxState(data.sandbox_state ?? null)
+                  }
+                } catch {
+                  // ignore
+                }
+                return
+              }
+
+              if (isSelected) {
+                setViewingVersion(null)
+                setRevertInChatVersionId(null)
+                try {
+                  const res = await fetch(`/api/projects/${projectId}`)
+                  if (res.ok) {
+                    const data = (await res.json()) as { sandbox_state?: any }
+                    applySandboxState(data.sandbox_state ?? null)
+                  }
+                } catch {
+                  // ignore
+                }
+                return
+              }
+
+              try {
+                const res = await fetch(`/api/projects/${projectId}/versions`)
+                if (!res.ok) return
+                const versions = (await res.json()) as Array<{
+                  id: string
+                  name: string
+                  sandbox_state: any
+                }>
+
+                const matched = versions.find((v) => {
+                  const state = v.sandbox_state as any
+                  if (!state) return false
+                  if (sandboxUrlUUID && state.urlUUID && state.urlUUID === sandboxUrlUUID) return true
+                  if (sandboxUrl && state.url && state.url === sandboxUrl) return true
+                  return false
+                })
+
+                const sandboxState = matched?.sandbox_state ?? {
+                  url: sandboxUrl,
+                  urlUUID: sandboxUrlUUID,
+                }
+
+                setViewingVersion({
+                  id: matched?.id ?? (sandboxUrlUUID || sandboxUrl || String(message.id)),
+                  name: matched?.name || title,
+                  sandboxState,
+                })
+                setRevertInChatVersionId(null)
+                applySandboxState(sandboxState)
+              } catch {
+                // ignore
+              }
+            }
+
+            const showRevertPanel =
+              isSelected &&
+              Boolean(viewingVersion?.id) &&
+              revertInChatVersionId === viewingVersion?.id &&
+              typeof onRevertInChat === 'function'
+
+            return (
+              <div className="flex flex-col gap-2.5 pt-2 animate-in fade-in slide-in-from-top-2 duration-500">
+                <div className="flex items-center gap-2.5">
+                  <div className="relative w-full max-w-[290px]">
+                    <button onClick={resolveAndSelectVersion} className={cardClasses}>
+                      <div className="flex flex-col gap-1 min-w-0">
+                        <span className={cn('text-[14px] font-bold truncate', textPrimary)}>
+                          {title}
+                        </span>
+                        <span className={cn('text-[13px] font-medium', textSecondary)}>{subtitle}</span>
+                      </div>
+                      <ChevronRightIcon
+                        className={cn(
+                          'w-5 h-5 transition-colors shrink-0',
+                          isLatestVersionCard
+                            ? 'text-[#0F172A]/30 group-hover:text-[#0F172A]'
+                            : 'text-foreground/25 group-hover:text-foreground/60'
+                        )}
+                      />
+                    </button>
+
+                    {/* Code Button overlapping bottom right */}
+                    <button className="absolute -bottom-2 -right-2 flex items-center gap-1 px-2.5 py-1 bg-[#F7F4ED] hover:bg-[#EFECE5] rounded-md border border-black/5 shadow-sm transition-colors text-[12px] font-semibold text-[#475569] group/code">
+                      <Code2Icon className="w-3 h-3 text-[#475569]/70 group-hover/code:text-[#475569]" />
+                      <span>Code</span>
+                    </button>
                   </div>
-                  <ChevronRightIcon className="w-5 h-5 text-[#0F172A]/30 group-hover:text-[#0F172A] transition-colors shrink-0" />
-                </button>
 
-                {/* Code Button overlapping bottom right */}
-                <button className="absolute -bottom-2 -right-2 flex items-center gap-1 px-2.5 py-1 bg-[#F7F4ED] hover:bg-[#EFECE5] rounded-md border border-black/5 shadow-sm transition-colors text-[12px] font-semibold text-[#475569] group/code">
-                  <Code2Icon className="w-3 h-3 text-[#475569]/70 group-hover/code:text-[#475569]" />
-                  <span>Code</span>
-                </button>
+                  <button className="p-2 text-[#0F172A]/30 hover:text-[#0F172A]/60 hover:bg-black/5 rounded-md transition-colors">
+                    <BookmarkIcon className="w-4 h-4" strokeWidth={1.5} />
+                  </button>
+                </div>
+
+                {showRevertPanel && (
+                  <div className="w-full max-w-[520px] rounded-xl border border-black/[0.06] bg-[#F7F4ED] px-4 py-3 shadow-sm">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-[13px] font-semibold text-foreground">
+                          Revert to this version?
+                        </p>
+                        <p className="text-[12px] text-foreground/65 mt-0.5 leading-[1.35]">
+                          This will revert your project to how it looked at that point. Messages after this version will be removed.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (sandboxUrl) window.open(sandboxUrl, '_blank')
+                        }}
+                        className="inline-flex items-center gap-1.5 text-[12px] font-medium text-foreground/70 hover:text-foreground transition-colors shrink-0"
+                        title="Preview version"
+                      >
+                        <span>Preview version</span>
+                        <ArrowUpRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+
+                    <div className="mt-3 flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setRevertInChatVersionId(null)}
+                        className="flex-1 h-9 rounded-lg border border-black/[0.06] bg-white/60 hover:bg-white text-[13px] font-semibold text-foreground/80 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => onRevertInChat?.(viewingVersion!.id, String(message.id))}
+                        className="flex-1 h-9 rounded-lg bg-[#111827] hover:bg-black text-white text-[13px] font-semibold transition-colors"
+                      >
+                        Revert
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
-
-              <button className="p-2 text-[#0F172A]/30 hover:text-[#0F172A]/60 hover:bg-black/5 rounded-md transition-colors">
-                <BookmarkIcon className="w-4 h-4" strokeWidth={1.5} />
-              </button>
-            </div>
-          )}
+            )
+          })()}
         </div>
       </div>
     </ReasoningContext.Provider>
