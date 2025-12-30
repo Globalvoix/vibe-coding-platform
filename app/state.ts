@@ -169,7 +169,7 @@ export function useDataStateMapper() {
         break
       case 'data-get-sandbox-url':
         if (data.data.url) {
-          setUrl(data.data.url, crypto.randomUUID())
+          setUrl(data.data.url, data.data.urlUUID ?? crypto.randomUUID())
         }
         break
       default:

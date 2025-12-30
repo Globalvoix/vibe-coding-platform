@@ -34,6 +34,7 @@ export const dataPartSchema = z.object({
   }),
   'get-sandbox-url': z.object({
     url: z.string().optional(),
+    urlUUID: z.string().optional(),
     status: z.enum(['loading', 'done']),
   }),
   'report-errors': z.object({
