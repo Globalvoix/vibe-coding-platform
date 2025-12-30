@@ -10,7 +10,7 @@ import { generateImageUrl, generateAltText } from './image-helper'
 
 export interface DataRecord {
   id: string
-  [key: string]: string | number | boolean | string[]
+  [key: string]: string | number | boolean | string[] | number[] | Record<string, unknown>
 }
 
 export interface DataTemplate {
