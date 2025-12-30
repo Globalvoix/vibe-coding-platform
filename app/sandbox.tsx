@@ -1,8 +1,8 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import { useState, useRef } from 'react'
-import { Globe, Code2, LineChart, Cloud, Plus, ArrowUpRight, RotateCw, LayoutTemplate } from 'lucide-react'
+import { useEffect, useState, useRef } from 'react'
+import { Globe, Code2, LineChart, Cloud, Plus, ArrowUpRight, RotateCw, LayoutTemplate, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
@@ -11,6 +11,7 @@ import { FileExplorer } from './file-explorer'
 import { Logs } from './logs'
 import { ComingSoonModal } from '@/components/modals/coming-soon-modal'
 import { useSearchParams } from 'next/navigation'
+import { useSandboxStore } from './state'
 
 interface Props {
   className?: string
