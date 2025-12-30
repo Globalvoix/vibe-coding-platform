@@ -1,7 +1,7 @@
 import { ArrowUpRight, BookmarkIcon, ChevronRightIcon, Code2Icon } from 'lucide-react'
 import type { ChatUIMessage } from './types'
 import { MessagePart } from './message-part'
-import { memo, createContext, useContext, useState, useEffect, useMemo } from 'react'
+import { memo, createContext, useContext, useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
 import { useSandboxStore } from '@/app/state'
 
