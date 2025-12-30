@@ -224,6 +224,48 @@ export function Chat({ className, initialPrompt, projectId }: Props) {
     setSelectedVersionId(version.id)
   }
 
+  const handleRevertInChat = useCallback(
+    async (versionId: string, anchorMessageId: string) => {
+      try {
+        if (!projectId) return
+
+        const response = await fetch(`/api/projects/${projectId}/versions`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'revert', versionId }),
+        })
+
+        if (!response.ok) {
+          toast.error('Failed to revert to version')
+          return
+        }
+
+        try {
+          const storageKey = `chat-messages-${projectId}`
+          const stored = localStorage.getItem(storageKey)
+          if (stored) {
+            const parsed = JSON.parse(stored) as ChatUIMessage[]
+            const idx = parsed.findIndex((m) => m.id === anchorMessageId)
+            if (idx >= 0) {
+              localStorage.setItem(storageKey, JSON.stringify(parsed.slice(0, idx + 1)))
+            }
+          }
+        } catch (error) {
+          console.error('Failed to prune chat messages:', error)
+        }
+
+        setViewingVersion(null)
+        setRevertInChatVersionId(null)
+        toast.success('Reverted to selected version')
+        window.location.reload()
+      } catch (error) {
+        console.error('Error reverting version:', error)
+        toast.error('Failed to revert to version')
+      }
+    },
+    [projectId, setRevertInChatVersionId, setViewingVersion]
+  )
+
   const handleVersionRevert = async (version: ProjectVersion) => {
     try {
       if (!projectId) return
