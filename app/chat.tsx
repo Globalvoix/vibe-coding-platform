@@ -69,6 +69,21 @@ export function Chat({ className, initialPrompt, projectId }: Props) {
   // Persist and restore chat messages across page refreshes
   const { allMessages } = useChatPersistence(projectId || null, messages)
 
+  const latestVersionMessageId = useMemo(() => {
+    let lastId: string | null = null
+    for (const msg of allMessages) {
+      if (msg.role !== 'assistant') continue
+      const parts = msg.parts ?? []
+      const hasSandboxUrl = parts.some(
+        (part) => part.type === 'data-get-sandbox-url' && (part as any).data?.status === 'done'
+      )
+      if (hasSandboxUrl && typeof msg.id === 'string') {
+        lastId = msg.id
+      }
+    }
+    return lastId
+  }, [allMessages])
+
   const handleComingSoon = (title: string, description: string) => {
     setComingSoonModal({
       isOpen: true,
