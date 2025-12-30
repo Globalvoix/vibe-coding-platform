@@ -75,7 +75,7 @@ export function Chat({ className, initialPrompt, projectId }: Props) {
       if (msg.role !== 'assistant') continue
       const parts = msg.parts ?? []
       const hasSandboxUrl = parts.some(
-        (part) => part.type === 'data-get-sandbox-url' && (part as any).data?.status === 'done'
+        (part) => part.type === 'data-get-sandbox-url' && part.data.status === 'done'
       )
       if (hasSandboxUrl && typeof msg.id === 'string') {
         lastId = msg.id
