@@ -171,16 +171,18 @@ import { SPACING, TYPOGRAPHY } from '@/lib/design-system'
 ### Enforcement Blockers (Auto-Fail):
 
 ❌ FAIL IF:
-1. Single page app (less than 2 routes)
+1. Single page app (less than 2 routes or < 5 premium sections for landings)
 2. Uses \`<img>\` instead of \`next/image\`
 3. Generic alt text ("image", "photo", "picture", "screenshot")
 4. Hardcoded image URLs (not from generateImageUrl)
 5. Missing animations for required app type
 6. Broken navigation between pages
 7. Missing library imports (framer-motion, lucide-react)
-8. No mock data in lib/data.ts
-9. TypeScript or lint errors
-10. Build errors
+8. No mock data in lib/data.ts (or missing loading/empty/error states)
+9. Premium component stack not defined for each route/section
+10. Blueprint score < 90 (use \`evaluateBlueprint()\`)
+11. TypeScript or lint errors
+12. Build errors
 
 ---
 
