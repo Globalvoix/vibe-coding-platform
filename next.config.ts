@@ -36,6 +36,51 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/api/v1/image/**',
       },
+      // Unsplash - High-quality royalty-free images
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+        port: '',
+      },
+      {
+        protocol: 'https',
+        hostname: 'unsplash.com',
+        port: '',
+      },
+      // Pexels - Free stock photos
+      {
+        protocol: 'https',
+        hostname: 'images.pexels.com',
+        port: '',
+      },
+      {
+        protocol: 'https',
+        hostname: 'pexels.com',
+        port: '',
+      },
+      // Pixabay - Royalty-free images
+      {
+        protocol: 'https',
+        hostname: 'cdn.pixabay.com',
+        port: '',
+      },
+      {
+        protocol: 'https',
+        hostname: 'pixabay.com',
+        port: '',
+      },
+      // Cloudflare Images
+      {
+        protocol: 'https',
+        hostname: 'imagedelivery.net',
+        port: '',
+      },
+      // Lorem Picsum - Placeholder service
+      {
+        protocol: 'https',
+        hostname: 'picsum.photos',
+        port: '',
+      },
     ],
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',
