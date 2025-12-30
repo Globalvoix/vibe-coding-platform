@@ -45,7 +45,7 @@ export function Chat({ className, initialPrompt, projectId }: Props) {
   const { chat } = useSharedChatContext()
   const { modelId, reasoningEffort } = useSettings()
   const { messages, sendMessage, status } = useChat<ChatUIMessage>({ chat })
-  const { setChatStatus } = useSandboxStore()
+  const { setChatStatus, setViewingVersion, setRevertInChatVersionId } = useSandboxStore()
   const { toggleSidebar } = useUIStore()
   const [input, setInput] = useState('')
   const [supabaseConnected, setSupabaseConnected] = useState(false)
