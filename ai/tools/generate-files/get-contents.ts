@@ -68,6 +68,37 @@ CRITICAL RULES:
 6. Avoid "template" layouts; derive structure from the user's requirements.
 7. Be meticulous: prefer type-safe code, correct imports, and consistent naming; avoid speculative dependencies.
 
+INSTITUTIONAL DESIGN SYSTEM ENFORCEMENT:
+8. Import and use the design system: \`import { SPACING, TYPOGRAPHY, GRID, SHADOWS } from '@/lib/design-system'\`
+9. ALWAYS use spacing from the 4px/8px grid system (SPACING.2, SPACING.4, SPACING.6, etc.) - NEVER hardcode random padding/margin values
+10. Typography must use the TYPOGRAPHY scale (displayLg, h1, h2, body, bodySm, labelMd, caption) - NO arbitrary font sizes
+11. All interactive elements must have focus states using FOCUS styles and motion using MOTION constants
+12. Component shadows must use SHADOWS scale (xs, sm, md, lg, xl) - NO custom shadow values
+13. Border radius must use BORDER_RADIUS (sm, md, lg, xl) - NO arbitrary radius values
+
+ASSET VALIDATION & IMAGE QUALITY (MANDATORY):
+14. IMPORT the image helper: \`import { generateImageUrl, generateAltText } from '@/lib/image-helper'\`
+15. IDENTIFY APP TYPE FIRST from user request (streaming, ecommerce, saas, dashboard, auth, calculator, blog, portfolio, landing, social, music, news, banking, real-estate)
+16. For EVERY image in the app:
+    - Use generateImageUrl(appType, 'hero'|'thumbnail'|'card'|'background'|'accent') to get contextually accurate Unsplash URLs
+    - Use generateAltText(appType, context) to generate proper, specific alt text (NOT generic "image", "photo", "screenshot")
+    - VERIFY the image is relevant to the app type (e.g., NOT shoes in streaming, NOT pizza in banking, NOT office photos in gaming)
+    - NEVER use hardcoded image paths from unverified sources
+17. If images need mock data, use lib/data.ts with realistic mock data - structure it for the specific app type
+18. ALWAYS include skeleton loaders or fallback UI for all images using proper aspect ratio containers
+
+QUALITY AUDIT BEFORE COMPLETION:
+19. Before finalizing code, verify:
+    - All images use generateImageUrl() with correct app type and context
+    - All alt text is specific and descriptive (use generateAltText())
+    - Spacing uses only SPACING values from design system
+    - Typography uses only TYPOGRAPHY scale
+    - No hardcoded colors - use COLORS or CSS variables
+    - Interactive elements have proper focus/hover states
+    - Responsive breakpoints use Tailwind md:, lg:, xl: prefixes (or RESPONSIVE constants)
+20. If code has a linting error or type error, EXPLAIN the error and provide corrected code
+21. Do NOT regenerate entire files if only a small section needs fixing
+
 DESIGN PHILOSOPHY - INSTITUTIONAL STANDARDS:
 - NO RUSHING: Deliver complete, high-fidelity products. No MVPs.
 - ASSET AUDIT: Every image must be 100% relevant to the niche. No shoes in a movie app.
