@@ -386,21 +386,21 @@ export function generateDesignSystemCSS(): string {
   const lines: string[] = [':root {']
 
   // Spacing variables
-  for (const [key, value] of Object.entries(SPACING)) {
+  for (const [key, value] of Object.entries(SPACING) as [string, string][]) {
     lines.push(`  --spacing-${key}: ${value};`)
   }
 
   // Color variables
-  for (const [colorName, shades] of Object.entries(COLORS)) {
+  for (const [colorName, shades] of Object.entries(COLORS) as [string, Record<string, string> | string][]) {
     if (typeof shades === 'object') {
-      for (const [shade, color] of Object.entries(shades)) {
+      for (const [shade, color] of Object.entries(shades as Record<string, string>)) {
         lines.push(`  --color-${colorName}-${shade}: ${color};`)
       }
     }
   }
 
   // Motion variables
-  for (const [key, value] of Object.entries(MOTION)) {
+  for (const [key, value] of Object.entries(MOTION) as [string, string][]) {
     lines.push(`  --motion-${key}: ${value};`)
   }
 
