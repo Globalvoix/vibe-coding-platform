@@ -186,7 +186,7 @@ export const Message = memo(function Message({
 
                 setViewingVersion({
                   id: matched?.id ?? (sandboxUrlUUID || sandboxUrl || String(message.id)),
-                  name: matched?.name || title,
+                  name: title,
                   sandboxState,
                 })
                 setRevertInChatVersionId(null)
