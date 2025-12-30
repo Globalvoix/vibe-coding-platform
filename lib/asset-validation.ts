@@ -201,7 +201,7 @@ export function validateAsset(asset: ImageAsset): AssetValidationResult {
   // 4. Check if URL is valid format
   try {
     new URL(asset.url)
-  } catch {
+  } catch (_error: unknown) {
     errors.push(`Invalid image URL format: ${asset.url}`)
   }
 
@@ -243,7 +243,7 @@ export function getValidationSummary(results: Record<string, AssetValidationResu
   const validAssets = Object.values(results).filter((r) => r.isValid).length
   const totalAssets = Object.keys(results).length
   const totalErrors = Object.values(results).reduce(
-    (sum, r) => sum + r.errors.length,
+    (sum: number, r) => sum + r.errors.length,
     0
   )
 
