@@ -336,6 +336,9 @@ export function Chat({ className, initialPrompt, projectId }: Props) {
                   <Message
                     key={message.id}
                     message={message}
+                    projectId={projectId || null}
+                    isLatestVersionCard={latestVersionMessageId === message.id}
+                    onRevertInChat={handleRevertInChat}
                     isLast={index === allMessages.length - 1}
                     isGenerating={index === allMessages.length - 1 && isLoading}
                   />
