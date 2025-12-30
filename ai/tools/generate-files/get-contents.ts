@@ -57,12 +57,7 @@ export async function* getContents(
     system:
       `You are a file content generator. You must generate files based on the conversation history and the provided paths.
 
-If the conversation contains a "Blueprint" / "Phase 1 — Blueprint" section, treat it as the source of truth for:
-- routes/screens and layout regions
-- components to create
-- typography, spacing, icons, motion, and media choices
-
-Do NOT fall back to generic templates; implement the structure described in the blueprint.
+Do NOT fall back to generic templates; derive structure from the user request and the full conversation context.
 
 CRITICAL RULES:
 1. NEVER generate lock files (pnpm-lock.yaml, package-lock.json, yarn.lock) - these are automatically created by package managers
