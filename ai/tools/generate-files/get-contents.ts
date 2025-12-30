@@ -91,11 +91,16 @@ Media rules:
 - Add videos only for demos/marketing where it clearly improves comprehension; keep them short and muted
 - Add 3D icons/mockups only when explicitly requested or clearly essential; otherwise avoid due to weight/performance
 
-Clone rules (high fidelity):
+Full-product rules (all apps):
 - Do NOT build a single-page MVP.
+- Implement the correct information architecture: routes/screens, layouts, and working navigation.
+- Implement the core flows end-to-end for the app type (even if mocked).
+- Use realistic mock data models in lib/* (do not hardcode everything inside a component).
+- Include loading/empty/error states.
+
+Clone rules (high fidelity):
 - Implement proper routes/layouts and working navigation.
 - Implement key flows and interactions (search, tabs, details pages, profile selection).
-- Use realistic mock data models in lib/* (do not hardcode everything inside a component).
 - Avoid copyrighted/trademarked logos/assets; recreate the feel with original UI + royalty-free imagery.${envVarsContext}`,
     messages: [
       ...params.messages,
