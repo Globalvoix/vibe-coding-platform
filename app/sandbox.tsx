@@ -6,6 +6,7 @@ import { Globe, Code2, LineChart, Cloud, Plus, ArrowUpRight, RotateCw, LayoutTem
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Preview } from './preview'
 import { FileExplorer } from './file-explorer'
 import { Logs } from './logs'
@@ -30,11 +31,14 @@ export function Sandbox({ className }: Props) {
   const projectId = searchParams.get('projectId')
 
   const [activeTab, setActiveTab] = useState<SandboxTabId>('preview')
+  const [restorePopoverOpen, setRestorePopoverOpen] = useState(false)
   const [currentUrl, setCurrentUrl] = useState<string>('')
   const [inputValue, setInputValue] = useState<string>('')
   const [isLoading, setIsLoading] = useState(false)
   const [showComingSoon, setShowComingSoon] = useState(false)
   const previewRefreshRef = useRef<(() => void) | null>(null)
+
+  const { viewingVersion, setViewingVersion, setRevertInChatVersionId, applySandboxState } = useSandboxStore()
 
   const tabs: TabConfig[] = [
     {
@@ -127,98 +131,251 @@ export function Sandbox({ className }: Props) {
     setShowComingSoon(true)
   }
 
+  useEffect(() => {
+    if (viewingVersion) {
+      setActiveTab('preview')
+    }
+  }, [viewingVersion])
+
+  const exitViewingMode = async () => {
+    setViewingVersion(null)
+    setRevertInChatVersionId(null)
+
+    if (!projectId) return
+
+    try {
+      const res = await fetch(`/api/projects/${projectId}`)
+      if (!res.ok) return
+      const data = (await res.json()) as { sandbox_state?: any }
+      applySandboxState(data.sandbox_state ?? null)
+    } catch {
+      // ignore
+    }
+  }
+
+  const openViewingInNewTab = () => {
+    const url = viewingVersion?.sandboxState?.url
+    if (url) window.open(url, '_blank')
+  }
+
+  const revertToViewingVersion = async () => {
+    if (!projectId || !viewingVersion?.id) return
+
+    try {
+      const response = await fetch(`/api/projects/${projectId}/versions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'revert', versionId: viewingVersion.id }),
+      })
+
+      if (!response.ok) return
+
+      setRestorePopoverOpen(false)
+      setViewingVersion(null)
+      setRevertInChatVersionId(null)
+
+      const res = await fetch(`/api/projects/${projectId}`)
+      if (res.ok) {
+        const data = (await res.json()) as { sandbox_state?: any }
+        applySandboxState(data.sandbox_state ?? null)
+      }
+    } catch {
+      // ignore
+    }
+  }
+
   return (
     <div className={cn('flex h-full min-h-0 flex-col bg-background', className)}>
       <div className="flex items-center justify-between border-b border-black/5 bg-background px-3 h-[50px]">
-        <TooltipProvider>
-          <div className="flex items-center gap-1.5 min-w-[240px]">
-            {tabs.map(renderTabButton)}
-
-            <Tooltip delayDuration={0}>
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  className="h-[30px] w-[30px] flex items-center justify-center bg-transparent text-[#111827]/70 hover:text-[#111827] hover:bg-[#F3F4F6] rounded-md transition-all duration-200"
-                  aria-label="Add tab"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent
-                side="bottom"
-                sideOffset={6}
-                className="bg-[#111827] text-white border-transparent px-2 py-1 text-[11px] rounded-md"
-              >
-                Add
-              </TooltipContent>
-            </Tooltip>
-          </div>
-        </TooltipProvider>
-
-        {activeTab === 'preview' ? (
-          <div className="flex-1 flex justify-center px-4">
-            <div className="flex items-center rounded-full border border-black/10 bg-background px-3 h-8 gap-2 w-full max-w-[300px] shadow-sm">
-              <LayoutTemplate className="w-3.5 h-3.5 text-[#111827]" />
-
-              <div
-                className="min-w-0 flex-1 font-mono text-[11px] text-[#111827] truncate select-text"
-                title={currentUrl || inputValue}
-                aria-label="Current preview URL"
-              >
-                {(() => {
-                  const raw = inputValue || currentUrl
-                  if (!raw) return '/'
-                  try {
-                    const parsed = new URL(raw)
-                    return parsed.pathname || '/'
-                  } catch {
-                    return raw
-                  }
-                })()}
+        {viewingVersion ? (
+          <div className="flex items-center justify-between w-full gap-3">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="text-[12px] font-medium text-foreground/60">Viewing:</span>
+              <div className="inline-flex items-center gap-2 max-w-[360px] rounded-full bg-black/5 border border-black/10 px-3 h-7">
+                <span className="truncate text-[12px] font-semibold text-foreground">
+                  {viewingVersion.name}
+                </span>
               </div>
+            </div>
 
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={openInNewTab}
-                  type="button"
-                  className={cn(
-                    'p-1 rounded-full hover:bg-black/5 text-[#111827] transition-colors',
-                    !currentUrl && 'pointer-events-none opacity-50'
-                  )}
-                  title="Open in new tab"
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={openViewingInNewTab}
+                className={cn(
+                  'h-7 w-7 inline-flex items-center justify-center rounded-md border border-black/10 bg-background hover:bg-black/5 transition-colors',
+                  !viewingVersion.sandboxState?.url && 'pointer-events-none opacity-50'
+                )}
+                aria-label="Preview version in new tab"
+                title="Preview version"
+              >
+                <ArrowUpRight className="w-3.5 h-3.5 text-[#111827]" />
+              </button>
+
+              <Popover open={restorePopoverOpen} onOpenChange={setRestorePopoverOpen}>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    className="h-7 px-3 bg-[#1A73E8] hover:bg-[#1557B0] text-white text-[12px] font-semibold rounded-md transition-colors"
+                  >
+                    Restore this version
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent
+                  side="bottom"
+                  align="end"
+                  className="w-[440px] p-0 bg-[#F7F4ED] border-black/10 shadow-lg rounded-xl"
                 >
-                  <ArrowUpRight className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  onClick={handleRefresh}
-                  type="button"
-                  className={cn(
-                    'p-1 rounded-full hover:bg-black/5 text-[#111827] transition-colors',
-                    {
-                      'animate-spin': isLoading,
-                      'pointer-events-none opacity-50': !currentUrl,
-                    }
-                  )}
-                  title="Refresh"
-                >
-                  <RotateCw className="w-3.5 h-3.5" />
-                </button>
-              </div>
+                  <div className="p-4">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="min-w-0">
+                        <p className="text-[14px] font-semibold text-foreground">
+                          Revert to this version?
+                        </p>
+                        <p className="text-[13px] text-foreground/65 mt-1 leading-[1.35]">
+                          This will revert your project to how it looked at that point. Recent changes after this version can be reapplied anytime.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={openViewingInNewTab}
+                        className={cn(
+                          'inline-flex items-center gap-1.5 text-[12px] font-medium text-foreground/70 hover:text-foreground transition-colors shrink-0',
+                          !viewingVersion.sandboxState?.url && 'pointer-events-none opacity-50'
+                        )}
+                      >
+                        <span>Preview version</span>
+                        <ArrowUpRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="px-4 pb-4 flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setRestorePopoverOpen(false)
+                        setRevertInChatVersionId(viewingVersion.id)
+                      }}
+                      className="flex-1 h-10 rounded-lg border border-black/[0.06] bg-white/60 hover:bg-white text-[13px] font-semibold text-foreground/80 transition-colors"
+                    >
+                      View in chat
+                    </button>
+                    <button
+                      type="button"
+                      onClick={revertToViewingVersion}
+                      className="flex-1 h-10 rounded-lg bg-[#1A73E8] hover:bg-[#1557B0] text-white text-[13px] font-semibold transition-colors"
+                    >
+                      Revert
+                    </button>
+                  </div>
+                </PopoverContent>
+              </Popover>
+
+              <button
+                type="button"
+                onClick={exitViewingMode}
+                className="h-7 w-7 inline-flex items-center justify-center rounded-md border border-black/10 bg-background hover:bg-black/5 transition-colors"
+                aria-label="Exit version preview"
+                title="Exit"
+              >
+                <X className="w-3.5 h-3.5 text-[#111827]" />
+              </button>
             </div>
           </div>
         ) : (
-          <div className="flex-1" />
-        )}
+          <>
+            <TooltipProvider>
+              <div className="flex items-center gap-1.5 min-w-[240px]">
+                {tabs.map(renderTabButton)}
 
-        <div className="min-w-[240px] flex justify-end">
-          <button
-            onClick={handlePublish}
-            type="button"
-            className="px-4 py-1.5 bg-[#1A73E8] hover:bg-[#1557B0] text-white text-xs font-semibold rounded-md transition-colors"
-          >
-            Publish
-          </button>
-        </div>
+                <Tooltip delayDuration={0}>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      className="h-[30px] w-[30px] flex items-center justify-center bg-transparent text-[#111827]/70 hover:text-[#111827] hover:bg-[#F3F4F6] rounded-md transition-all duration-200"
+                      aria-label="Add tab"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="bottom"
+                    sideOffset={6}
+                    className="bg-[#111827] text-white border-transparent px-2 py-1 text-[11px] rounded-md"
+                  >
+                    Add
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+            </TooltipProvider>
+
+            {activeTab === 'preview' ? (
+              <div className="flex-1 flex justify-center px-4">
+                <div className="flex items-center rounded-full border border-black/10 bg-background px-3 h-8 gap-2 w-full max-w-[300px] shadow-sm">
+                  <LayoutTemplate className="w-3.5 h-3.5 text-[#111827]" />
+
+                  <div
+                    className="min-w-0 flex-1 font-mono text-[11px] text-[#111827] truncate select-text"
+                    title={currentUrl || inputValue}
+                    aria-label="Current preview URL"
+                  >
+                    {(() => {
+                      const raw = inputValue || currentUrl
+                      if (!raw) return '/'
+                      try {
+                        const parsed = new URL(raw)
+                        return parsed.pathname || '/'
+                      } catch {
+                        return raw
+                      }
+                    })()}
+                  </div>
+
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={openInNewTab}
+                      type="button"
+                      className={cn(
+                        'p-1 rounded-full hover:bg-black/5 text-[#111827] transition-colors',
+                        !currentUrl && 'pointer-events-none opacity-50'
+                      )}
+                      title="Open in new tab"
+                    >
+                      <ArrowUpRight className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={handleRefresh}
+                      type="button"
+                      className={cn(
+                        'p-1 rounded-full hover:bg-black/5 text-[#111827] transition-colors',
+                        {
+                          'animate-spin': isLoading,
+                          'pointer-events-none opacity-50': !currentUrl,
+                        }
+                      )}
+                      title="Refresh"
+                    >
+                      <RotateCw className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="flex-1" />
+            )}
+
+            <div className="min-w-[240px] flex justify-end">
+              <button
+                onClick={handlePublish}
+                type="button"
+                className="px-4 py-1.5 bg-[#1A73E8] hover:bg-[#1557B0] text-white text-xs font-semibold rounded-md transition-colors"
+              >
+                Publish
+              </button>
+            </div>
+          </>
+        )}
       </div>
 
       <div className="relative flex-1 min-h-0 overflow-hidden">
