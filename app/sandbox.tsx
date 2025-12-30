@@ -146,7 +146,14 @@ export function Sandbox({ className }: Props) {
     try {
       const res = await fetch(`/api/projects/${projectId}`)
       if (!res.ok) return
-      const data = (await res.json()) as { sandbox_state?: any }
+      const data = (await res.json()) as {
+        sandbox_state: {
+          sandboxId?: string
+          paths?: string[]
+          url?: string
+          urlUUID?: string
+        } | null
+      }
       applySandboxState(data.sandbox_state ?? null)
     } catch {
       // ignore
@@ -176,7 +183,14 @@ export function Sandbox({ className }: Props) {
 
       const res = await fetch(`/api/projects/${projectId}`)
       if (res.ok) {
-        const data = (await res.json()) as { sandbox_state?: any }
+        const data = (await res.json()) as {
+          sandbox_state: {
+            sandboxId?: string
+            paths?: string[]
+            url?: string
+            urlUUID?: string
+          } | null
+        }
         applySandboxState(data.sandbox_state ?? null)
       }
     } catch {
