@@ -143,7 +143,178 @@ Clone rules (high fidelity) - MANDATORY:
 - Verify all images are cinematic/contextually relevant (NOT shoes, pizza, or generic stock photos).
 - Recreate brand-specific animations (e.g., Netflix row hover, splash intro).
 - Avoid copyrighted/trademarked logos/assets; recreate the feel with original UI + royalty-free imagery.
-- Test responsiveness on mobile (375px), tablet (768px), desktop (1280px).${envVarsContext}`,
+- Test responsiveness on mobile (375px), tablet (768px), desktop (1280px).
+
+## STRICT: MULTI-PAGE ARCHITECTURE (NON-NEGOTIABLE)
+
+**BLOCKER RULE:** If app has only 1 page → FAIL and regenerate.
+
+Minimum pages required by app type:
+- Streaming/Media: Home, Browse, Details, Search (4 minimum)
+- E-commerce: Home, Products, Details, Cart, Checkout (5 minimum)
+- SaaS: Home, Dashboard, Settings (3 minimum)
+- Landing/Marketing: Hero, Features, Pricing, FAQ, CTA sections (5+ sections)
+- Auth/Functional: Home, Login, Dashboard (3 minimum)
+- Dashboard: Home, Dashboard, Details, Settings (4 minimum)
+
+**Every page MUST:**
+1. Have unique URL/route (not just different state on one page)
+2. Have consistent navigation (header/footer/menu on all pages)
+3. Have working links between pages (no broken routes)
+4. Have unique content/purpose (not duplicate layouts)
+
+## STRICT: IMAGE RENDERING WITH next/image
+
+**BLOCKER RULE:** If ANY image uses <img> tag instead of next/image → FAIL.
+**BLOCKER RULE:** If ANY image has generic alt text ("image", "photo", "picture") → FAIL.
+**BLOCKER RULE:** If ANY image URL is hardcoded or broken → FAIL.
+
+Implementation MUST:
+\`\`\`typescript
+import Image from 'next/image'
+import { generateImageUrl, generateAltText } from '@/lib/image-helper'
+
+const heroSrc = generateImageUrl(appType, 'hero')
+const heroAlt = generateAltText(appType, 'hero')
+
+<Image
+  src={heroSrc}
+  alt={heroAlt}
+  width={1200}
+  height={400}
+  priority={isHeroImage}
+  style={{ objectFit: 'cover' }}
+/>
+\`\`\`
+
+For every image in app:
+- [ ] Uses next/image component (NOT <img>)
+- [ ] src from generateImageUrl(appType, context)
+- [ ] alt from generateAltText(appType, context) (specific, descriptive)
+- [ ] width/height provided (prevents layout shift)
+- [ ] priority={true} for above-fold heroes ONLY
+- [ ] loading="lazy" for below-fold images
+- [ ] Skeleton or placeholder during load (use aspect ratio container)
+
+## STRICT: ANIMATION & MICRO-INTERACTIONS (MANDATORY BY APP TYPE)
+
+**BLOCKER RULE:** If app requires animations but has none → FAIL.
+
+Animation requirements by app type:
+- **Streaming:** Netflix intro animation + grid stagger + card hover + page transitions
+- **Landing/Marketing:** Scroll reveals + typed text + hero animation + button effects + CTA animation
+- **E-commerce:** Grid stagger + card hover + button press + product transitions
+- **SaaS:** Button hover/press + input focus + tab switch + modal animations
+- **Dashboard:** Card hover + button effects + tab switch + data transitions
+- **Auth:** Button hover + input focus + form validation feedback
+- **Functional:** Minimal - button hover + loading spinner + input focus
+
+**Implementation MUST use motion-library:**
+\`\`\`typescript
+import { motion } from 'framer-motion'
+import { NetflixIntro, StaggeredGrid, CardHover, ScrollReveal } from '@/lib/motion-library'
+
+// Netflix intro example
+<motion.div variants={NetflixIntro.container} initial="initial" animate="animate">
+  <motion.h1 variants={NetflixIntro.letter}>Netflix</motion.h1>
+</motion.div>
+
+// Staggered grid
+<motion.div variants={StaggeredGrid.container} initial="hidden" animate="visible">
+  {items.map(item => (
+    <motion.div key={item.id} variants={StaggeredGrid.item} whileHover={StaggeredGrid.item.hover}>
+      {/* Item */}
+    </motion.div>
+  ))}
+</motion.div>
+
+// Card hover
+<motion.div variants={CardHover} initial="initial" whileHover="hover">
+  {/* Card content */}
+</motion.div>
+\`\`\`
+
+**package.json MUST include:**
+\`\`\`json
+{
+  "dependencies": {
+    "framer-motion": "^10.x"
+  }
+}
+\`\`\`
+
+**app/layout.tsx or root component MUST wrap with AnimatePresence:**
+\`\`\`typescript
+import { AnimatePresence } from 'framer-motion'
+
+export default function RootLayout({ children }) {
+  return (
+    <AnimatePresence mode="wait">
+      {children}
+    </AnimatePresence>
+  )
+}
+\`\`\`
+
+## STRICT: IMAGE RENDERING & LAYOUT
+
+**Images MUST be in lib/image-config.ts:**
+\`\`\`typescript
+// lib/image-config.ts
+import { generateImageUrl, generateAltText } from '@/lib/image-helper'
+
+export const IMAGES = {
+  hero: {
+    src: generateImageUrl(appType, 'hero'),
+    alt: generateAltText(appType, 'hero'),
+    width: 1200,
+    height: 400,
+  },
+  // ... more images
+}
+
+// Usage:
+<Image {...IMAGES.hero} />
+\`\`\`
+
+**Aspect ratio containers MUST prevent layout shift:**
+\`\`\`typescript
+<div style={{ aspectRatio: '1', position: 'relative' }}>
+  <Image
+    src={imageUrl}
+    alt={alt}
+    fill
+    style={{ objectFit: 'cover' }}
+  />
+</div>
+\`\`\`
+
+## DEPLOYMENT BLOCKERS (Auto-Fail if ANY triggered)
+
+If ANY of these are true → REGENERATE IMMEDIATELY:
+1. Single page app (< 2 routes)
+2. Uses <img> instead of next/image
+3. Generic alt text ("image", "photo", "picture", "screenshot")
+4. Hardcoded image URLs (not from generateImageUrl)
+5. Missing animations (for app types that require them)
+6. No navigation between pages
+7. Images don't load (broken URLs)
+8. TypeScript errors (pnpm tsc --noEmit)
+9. Lint errors (pnpm eslint)
+10. Build errors (pnpm build)
+
+## FINAL VALIDATION BEFORE DELIVERY
+
+Every generated app MUST pass:
+- [ ] 2+ routes with working navigation
+- [ ] All images use next/image with specific alt text
+- [ ] Animations present (per app type)
+- [ ] Design system spacing/colors/typography
+- [ ] 10+ realistic mock data items
+- [ ] Responsive (375px, 768px, 1024px)
+- [ ] Keyboard accessible, focus states visible
+- [ ] Zero TypeScript/lint/build errors
+- [ ] Looks like Stripe/Apple/Netflix, not a template${envVarsContext}`,
     messages: [
       ...params.messages,
       {
