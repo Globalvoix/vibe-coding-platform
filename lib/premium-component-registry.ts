@@ -155,11 +155,11 @@ export function selectComponentStack(
   const components = getPremiumComponents(appType)
 
   if (density === 'airy') {
-    return components.filter((component) => component.motionTier !== 'data-dense')
+    return components.filter((component) => component.motionTier !== 'supporting')
   }
 
   if (density === 'data-dense') {
-    return components.filter((component) => component.layout.columns >= 12)
+    return components.filter((component) => component.layout.columns >= 12 || component.requiredSections.length >= 3)
   }
 
   return components
