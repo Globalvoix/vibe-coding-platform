@@ -24,7 +24,7 @@ import { SupabaseOAuthButton } from '@/components/supabase-connect/supabase-oaut
 import { ComingSoonModal } from '@/components/modals/coming-soon-modal'
 import { HistoryPanel } from '@/components/history-panel/history-panel'
 import { useChat } from '@ai-sdk/react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSharedChatContext } from '@/lib/chat-context'
 import { useSettings } from '@/components/settings/use-settings'
 import { useSandboxStore } from './state'
