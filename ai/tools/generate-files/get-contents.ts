@@ -135,6 +135,9 @@ Use \`lib/experience-scorecard.ts\` → \`evaluateBlueprint()\` and ensure score
 
 ### MANDATORY RULES:
 
+- Reference \`lib/data-templates.ts\` to produce mock data with loading/empty/error states
+- Structure each section using the selected premium component blueprints
+
 **All images MUST use next/image:**
 \`\`\`typescript
 import Image from 'next/image'
