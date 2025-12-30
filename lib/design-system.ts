@@ -407,5 +407,3 @@ export function generateDesignSystemCSS(): string {
   lines.push('}')
   return lines.join('\n')
 }
-
-export type { typeof SPACING, typeof TYPOGRAPHY, typeof COLORS }
