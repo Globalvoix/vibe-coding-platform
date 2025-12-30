@@ -112,6 +112,15 @@ Define mock data structure in lib/data.ts:
 - Entity types (Movie, Product, User, etc.)
 - Sample fields
 - Minimum 10 items per type
+- Loading/empty/error states (use \`lib/data-templates.ts\` for references)
+
+### Step 7: Premium Component Stack
+Use \`lib/premium-component-registry.ts\` to select Neon/Hulu/Amazon-grade sections:
+- Map hero, navigation, rails, detail screens to specific blueprints
+- Note motion tier + data needs for each route/section
+
+### Step 8: Blueprint Scorecard
+Use \`lib/experience-scorecard.ts\` → \`evaluateBlueprint()\` and ensure score ≥ 90 before coding.
 
 ---
 
