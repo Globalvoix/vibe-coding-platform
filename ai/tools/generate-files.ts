@@ -8,6 +8,7 @@ import { syncProjectEnvToSandbox } from './project-env'
 import { tool } from 'ai'
 import description from './generate-files.md'
 import z from 'zod/v3'
+import { upsertProjectFiles } from '@/lib/project-files-db'
 
 interface Params {
   modelId: string
@@ -106,6 +107,18 @@ export const generateFiles = ({ writer, modelId, userId, projectId, envVars }: P
         type: 'data-generating-files',
         data: { paths: uploaded.map((file) => file.path), status: 'done' },
       })
+
+      if (userId && projectId && uploaded.length > 0) {
+        try {
+          await upsertProjectFiles({
+            userId,
+            projectId,
+            files: uploaded.map((file) => ({ path: file.path, content: file.content })),
+          })
+        } catch {
+          // best-effort
+        }
+      }
 
       return `Successfully generated and uploaded ${
         uploaded.length

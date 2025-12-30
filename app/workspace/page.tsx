@@ -75,8 +75,8 @@ function WorkspaceContent({
 
           const sandboxState = useSandboxStore.getState()
           const fileExplorerState = useFileExplorerStore.getState()
-          sandboxState.reset()
-          fileExplorerState.reset()
+
+          sandboxState.setCurrentProjectId(projectId)
 
           if (project.sandbox_state) {
             const { sandboxId, paths, url, urlUUID } = project.sandbox_state
@@ -91,6 +91,33 @@ function WorkspaceContent({
                 url,
                 urlUUID || sandboxState.urlUUID || crypto.randomUUID()
               )
+            }
+
+            if (sandboxId) {
+              try {
+                const reviveRes = await fetch(`/api/projects/${projectId}/sandbox/revive`, {
+                  method: 'POST',
+                })
+
+                if (!reviveRes.ok) return
+
+                const revived = (await reviveRes.json()) as {
+                  sandbox_state: {
+                    sandboxId?: string
+                    paths?: string[]
+                    url?: string
+                    urlUUID?: string
+                  } | null
+                }
+
+                if (cancelled) return
+
+                if (revived.sandbox_state) {
+                  sandboxState.applySandboxState(revived.sandbox_state)
+                }
+              } catch {
+                // ignore
+              }
             }
           }
         } catch (error) {
