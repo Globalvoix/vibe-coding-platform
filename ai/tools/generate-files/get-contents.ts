@@ -245,11 +245,13 @@ import { SPACING, TYPOGRAPHY } from '@/lib/design-system'
 1. **NO RUSHING**: Plan blueprint completely before coding
 2. **IMAGES FIRST**: All images have URLs + alt text in blueprint
 3. **ANIMATIONS MAPPED**: All required animations listed per app type
-4. **MULTI-PAGE**: Minimum 2 routes, working navigation
-5. **ZERO GENERICS**: No generic alt text, no hardcoded values
-6. **USE HELPERS**: generateImageUrl(), generateAltText(), motion-library
-7. **DEPENDENCIES**: framer-motion, lucide-react in package.json
-8. **MOCK DATA**: Realistic data in lib/data.ts (10+ items)
+4. **COMPONENT STACK**: Use premium blueprints for each route/section
+5. **MULTI-PAGE**: Minimum 2 routes, working navigation (≥5 sections for landings)
+6. **ZERO GENERICS**: No generic alt text, no hardcoded values
+7. **USE HELPERS**: generateImageUrl(), generateAltText(), motion-library, premium component registry, data templates
+8. **DEPENDENCIES**: framer-motion, lucide-react in package.json
+9. **MOCK DATA**: Realistic data in lib/data.ts (10+ items + loading/empty/error states)
+10. **SCORE ≥ 90**: \`evaluateBlueprint()\` must pass before emitting code
 
 ---
 
