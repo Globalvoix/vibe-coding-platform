@@ -9,9 +9,7 @@ import { Sandbox } from '../sandbox'
 import { TabContent, TabItem } from '@/components/tabs'
 import { AppSidebar } from '@/components/sidebar/app-sidebar'
 import { EnvVarsManager } from '@/components/env-vars/env-vars-manager'
-import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { toast } from 'sonner'
 import { useSandboxStore, useFileExplorerStore } from '../state'
 import { Suspense } from 'react'
 import { WorkspaceProvider } from './workspace-provider'
@@ -35,12 +33,9 @@ function WorkspaceContent({
   projectId: string | null
   promptFromUrl: string | null
 }) {
-  const router = useRouter()
   const [initialPrompt, setInitialPrompt] = useState<string>('')
-  const [horizontalSizes, setHorizontalSizes] = useState<[number, number] | null>(
-    null
-  )
-  const { sandboxId, paths: sandboxPaths, url, urlUUID, currentProjectId, setCurrentProjectId } = useSandboxStore()
+  const [horizontalSizes] = useState<[number, number] | null>(null)
+  const { sandboxId, paths: sandboxPaths, url, urlUUID, currentProjectId } = useSandboxStore()
 
   useEffect(() => {
     const sandboxState = useSandboxStore.getState()
@@ -74,7 +69,6 @@ function WorkspaceContent({
           setInitialPrompt(project.initial_prompt ?? '')
 
           const sandboxState = useSandboxStore.getState()
-          const fileExplorerState = useFileExplorerStore.getState()
 
           sandboxState.setCurrentProjectId(projectId)
 
