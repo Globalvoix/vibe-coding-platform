@@ -7,6 +7,7 @@ import { runCommand } from './run-command'
 import { createRealtimeBackend } from './create-realtime-backend'
 import { createDatabase } from './create-database'
 import { databaseOperations } from './database-operations'
+import { extractDesign } from './extract-design'
 
 export interface SupabaseConnectionInfo {
   accessToken: string
@@ -48,6 +49,7 @@ export function tools({
       supabaseConnection,
     }),
     createDatabase: createDatabase({ writer, supabaseConnection }),
+    extractDesign: extractDesign({ writer, envVars }),
     ...databaseOperations({
       writer,
       supabaseConnection,
