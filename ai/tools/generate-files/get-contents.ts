@@ -76,7 +76,8 @@ When generating files:
     const paths = written.concat(
       items.files
         .slice(generated.length, items.files.length - 1)
-        .flatMap((f: { path?: string }) => (f?.path ? [f.path] : []))
+        .filter((f): f is { path?: string } => f !== undefined)
+        .flatMap((f) => (f?.path ? [f.path] : []))
     )
 
     const files = items.files
