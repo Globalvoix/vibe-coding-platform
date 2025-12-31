@@ -37,6 +37,14 @@ export const dataPartSchema = z.object({
     urlUUID: z.string().optional(),
     status: z.enum(['loading', 'done']),
   }),
+  'extract-design': z.object({
+    status: z.enum(['searching', 'extracting', 'done', 'error']),
+    query: z.string().optional(),
+    purpose: z.string().optional(),
+    sources: z.array(z.string()),
+    note: z.string().optional(),
+    error: errorSchema.optional(),
+  }),
   'report-errors': z.object({
     summary: z.string(),
     paths: z.array(z.string()).optional(),
