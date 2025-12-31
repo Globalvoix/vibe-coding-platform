@@ -6,14 +6,11 @@ import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 
 const SupabaseLogo = ({ className }: { className?: string }) => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="currentColor"
+  <img
+    src="https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F78ab58fa65ca497c8a79a60452a29c7a?format=webp&width=80"
+    alt="Supabase"
     className={className}
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path d="M21.362 9.354H12V.396L2.638 14.646H12v8.958l9.362-14.25z" />
-  </svg>
+  />
 )
 
 interface SupabaseConnectionStatus {
