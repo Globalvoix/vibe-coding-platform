@@ -197,7 +197,6 @@ function WorkspaceContent({
             defaultLayout={horizontalSizes ?? [35, 65]}
             left={
               <Chat
-                key={projectId ?? 'default'}
                 className="flex-1 overflow-hidden"
                 initialPrompt={initialPrompt}
                 projectId={projectId}
@@ -205,7 +204,6 @@ function WorkspaceContent({
             }
             right={
               <Sandbox
-                key={projectId ?? 'default'}
                 className="flex-1 overflow-hidden"
               />
             }
