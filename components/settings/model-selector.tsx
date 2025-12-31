@@ -48,13 +48,13 @@ export function ModelSelector({ className }: { className?: string }) {
     >
       <SelectTrigger
         className={cn(
-          'h-8 rounded-full border-none bg-transparent px-2 text-xs font-mono shadow-none focus-visible:ring-0 focus-visible:ring-offset-0',
+          'h-7 rounded-full border-none bg-transparent px-1.5 text-xs font-mono shadow-none focus-visible:ring-0 focus-visible:ring-offset-0',
           className
         )}
       >
         {isLoading ? (
-          <div className="flex items-center gap-2">
-            <Loader2Icon className="h-4 w-4 animate-spin" />
+          <div className="flex items-center gap-1.5">
+            <Loader2Icon className="h-3.5 w-3.5 animate-spin" />
           </div>
         ) : error ? (
           <span className="text-red-500">Error</span>
