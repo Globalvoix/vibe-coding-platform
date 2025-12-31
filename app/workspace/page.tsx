@@ -173,7 +173,6 @@ function WorkspaceContent({
         <div className="flex flex-1 w-full overflow-hidden md:hidden">
           <TabContent tabId="chat" className="flex-1">
             <Chat
-              key={projectId ?? 'default'}
               className="flex-1 overflow-hidden"
               initialPrompt={initialPrompt}
               projectId={projectId}
