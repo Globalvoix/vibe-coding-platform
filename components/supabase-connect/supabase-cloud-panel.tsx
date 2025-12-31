@@ -17,7 +17,7 @@ import { cn } from '@/lib/utils'
 
 const SupabaseLogo = ({ className }: { className?: string }) => (
   <img
-    src="https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F78ab58fa65ca497c8a79a60452a29c7a?format=webp&width=80"
+    src="https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F76461b5f5e4b4e5281dbefb676a6c1e8?format=webp&width=80"
     alt="Supabase"
     className={className}
   />
