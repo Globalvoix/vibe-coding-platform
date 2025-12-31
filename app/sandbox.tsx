@@ -433,12 +433,7 @@ export function Sandbox({ className }: Props) {
               : 'opacity-0 z-0 pointer-events-none'
           )}
         >
-          <div className="h-full w-full flex items-center justify-center text-muted-foreground">
-            <div className="text-center">
-              <Cloud className="w-12 h-12 mx-auto mb-4 opacity-20" />
-              <p className="text-sm font-medium">Cloud features coming soon</p>
-            </div>
-          </div>
+          <SupabaseCloudPanel projectId={projectId || undefined} />
         </div>
 
         <div
