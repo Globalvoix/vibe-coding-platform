@@ -41,16 +41,14 @@ function WorkspaceContent({
     const sandboxState = useSandboxStore.getState()
     const fileExplorerState = useFileExplorerStore.getState()
 
-    sandboxState.reset()
-    fileExplorerState.reset()
-    sandboxState.setCurrentProjectId(projectId)
-    setInitialPrompt('')
-
-    return () => {
-      useSandboxStore.getState().reset()
-      useFileExplorerStore.getState().reset()
+    // Only reset if switching to a different project
+    if (sandboxState.currentProjectId && sandboxState.currentProjectId !== projectId) {
+      sandboxState.reset()
+      fileExplorerState.reset()
     }
-  }, [projectId, setInitialPrompt])
+
+    sandboxState.setCurrentProjectId(projectId)
+  }, [projectId])
 
   useEffect(() => {
     let cancelled = false
