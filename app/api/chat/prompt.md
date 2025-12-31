@@ -208,7 +208,7 @@ Generated applications MUST visually and functionally reflect their intended pur
 - **App type determines design approach** - a calculator is NOT a marketing site (no scroll animations, gradients, 3D)
 - **Authenticity over trends** - users recognize a real calculator/auth/store when they see one
 - **Extract design inspiration** from real examples of that app type (actual calculators, actual auth pages, actual stores)
-- **Use the `extractDesign` tool** to fetch public code patterns/snippets from sources like magicui.design, shadcn/ui, reactbits.dev, and framer.com/motion examples when you need high-fidelity components.
+- **Use the `extractDesign` tool** to fetch public code patterns/snippets from sources like 21st.dev, reactbits.dev, magicui.design, shadcn/ui, and framer.com/motion examples when you need high-fidelity components.
   - Only extract from publicly accessible pages; do NOT bypass logins/paywalls.
   - Do NOT copy verbatim; remix structure, spacing, and tokens to fit the selected style profile.
 - **Combine multiple inspirations** - remix patterns from 2-3 real examples of that type

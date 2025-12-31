@@ -38,7 +38,7 @@ This tool enables the AI to fetch and extract premium design code, components, a
 
 ## Premium Design Sources to Query
 
-- **Component Libraries**: magicui.design, shadcn/ui, reactbits.dev
+- **Component Libraries**: 21st.dev, reactbits.dev, magicui.design, shadcn/ui
 - **Design Inspiration**: shots.so, Awwwards.com, Dark.design, unicorn.studio
 - **Animation Resources**: LottieLab.com, framer.com/motion examples
 - **3D & Advanced**: 3dicons.co, @react-three/fiber gallery

@@ -25,10 +25,12 @@ Search across the web for premium design examples, components, and patterns spec
 #### E-COMMERCE STORE SEARCHES
 ```
 Primary Searches:
-  1. "magicui.design product card component examples"
-  2. "shadcn/ui ecommerce product grid template"
-  3. "shots.so clothing store hero section design"
-  4. "awwwards.com ecommerce design 2024"
+  1. "21st.dev product card component"
+  2. "reactbits.dev product grid component"
+  3. "magicui.design product card component examples"
+  4. "shadcn/ui ecommerce product grid template"
+  5. "shots.so clothing store hero section design"
+  6. "awwwards.com ecommerce design 2024"
 
 Secondary Searches:
   5. "shopify theme product gallery layout"
