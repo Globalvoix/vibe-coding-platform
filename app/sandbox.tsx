@@ -12,6 +12,7 @@ import { FileExplorer } from './file-explorer'
 import { Logs } from './logs'
 import { ComingSoonModal } from '@/components/modals/coming-soon-modal'
 import { SupabaseOAuthButton } from '@/components/supabase-connect/supabase-oauth-button'
+import { SupabaseCloudPanel } from '@/components/supabase-connect/supabase-cloud-panel'
 import { useSearchParams } from 'next/navigation'
 import { useSandboxStore } from './state'
 
