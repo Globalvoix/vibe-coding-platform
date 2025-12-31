@@ -140,6 +140,62 @@ export function SupabaseOAuthButton({ projectId, onConnectionChange, compact = f
   }
 
   if (connectionStatus.connected) {
+    if (compact) {
+      return (
+        <div className="relative">
+          <Button
+            type="button"
+            size="icon"
+            onClick={() => setShowMenu(!showMenu)}
+            className="w-8 h-8 bg-emerald-500 hover:bg-emerald-600 text-white rounded-md transition-colors"
+            title="Supabase connected"
+          >
+            <CheckCircle2 className="w-4 h-4" />
+          </Button>
+
+          {showMenu && (
+            <div className="absolute right-0 top-full mt-1 w-48 bg-background border border-border rounded-lg shadow-lg z-50">
+              <div className="p-3 border-b border-border">
+                <p className="text-xs font-semibold text-foreground">
+                  {connectionStatus.projectName}
+                </p>
+                <p className="text-[10px] text-muted-foreground mt-1">
+                  Ref: {connectionStatus.projectRef}
+                </p>
+                {connectionStatus.expiresAt && (
+                  <p className="text-[10px] text-muted-foreground mt-1">
+                    Expires: {new Date(connectionStatus.expiresAt).toLocaleDateString()}
+                  </p>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={handleReconnect}
+                disabled={connecting}
+                className="w-full px-3 py-2 text-left text-xs text-foreground hover:bg-secondary transition-colors disabled:opacity-50"
+              >
+                {connecting ? 'Reconnecting...' : 'Reconnect'}
+              </button>
+              <button
+                type="button"
+                onClick={handleDisconnect}
+                disabled={connecting}
+                className="w-full px-3 py-2 text-left text-xs text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-50 border-t border-border"
+              >
+                {connecting ? 'Disconnecting...' : 'Disconnect'}
+              </button>
+            </div>
+          )}
+
+          {showMenu && (
+            <div
+              className="fixed inset-0 z-40"
+              onClick={() => setShowMenu(false)}
+            />
+          )}
+        </div>
+      )
+    }
     return (
       <div className="relative">
         <Button
@@ -197,6 +253,25 @@ export function SupabaseOAuthButton({ projectId, onConnectionChange, compact = f
           />
         )}
       </div>
+    )
+  }
+
+  if (compact) {
+    return (
+      <Button
+        type="button"
+        size="icon"
+        onClick={handleConnect}
+        disabled={!projectId || connecting}
+        className="w-8 h-8 bg-emerald-500 hover:bg-emerald-600 text-white rounded-md transition-colors"
+        title="Connect Supabase project"
+      >
+        {connecting ? (
+          <Loader className="w-4 h-4 animate-spin" />
+        ) : (
+          <Database className="w-4 h-4" />
+        )}
+      </Button>
     )
   }
 
