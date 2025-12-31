@@ -363,7 +363,7 @@ export function Chat({ className, initialPrompt, projectId }: Props) {
               >
                 <PromptInputTextarea
                   placeholder="Type your message..."
-                  className="text-base"
+                  className="text-sm"
                 />
                 <div className="flex items-center justify-between pt-1">
                   <div className="flex items-center gap-1.5">
