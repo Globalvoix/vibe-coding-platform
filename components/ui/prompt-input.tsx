@@ -56,7 +56,7 @@ type PromptInputProps = {
 function PromptInput({
   className,
   isLoading = false,
-  maxHeight = 240,
+  maxHeight = 160,
   value,
   onValueChange,
   onSubmit,
