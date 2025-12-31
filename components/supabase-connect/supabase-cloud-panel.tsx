@@ -171,7 +171,7 @@ export function SupabaseCloudPanel({ projectId }: Props) {
     {
       label: 'Manage Secrets',
       icon: <Key className="w-[14px] h-[14px] text-zinc-500" />,
-      href: `https://supabase.com/dashboard/project/${projectRef}/settings/secrets`,
+      href: `https://supabase.com/dashboard/project/${projectRef}/settings/functions`,
     },
   ]
 
