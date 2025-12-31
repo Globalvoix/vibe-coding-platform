@@ -14,6 +14,7 @@ interface ImageConfig {
   height?: number
   quality?: number
   format?: 'auto' | 'webp' | 'jpg' | 'png'
+  seed?: string | number
 }
 
 interface UnsplashImageResult {
@@ -254,16 +255,16 @@ export function buildUnsplashUrl(
   searchTerm: string,
   config?: ImageConfig
 ): string {
-  const params = new URLSearchParams()
-  params.set('query', searchTerm)
-  params.set('w', String(config?.width || 1200))
-  params.set('h', String(config?.height || 400))
-  params.set('fit', 'crop')
-  params.set('crop', 'entropy') // Focus on interesting areas
-  params.set('q', String(config?.quality || 80))
-  params.set('fm', config?.format || 'auto')
+  const width = config?.width || 1200
+  const height = config?.height || 400
+  const seed = config?.seed ?? `${searchTerm}-${width}x${height}`
 
-  return `https://images.unsplash.com/search/${params.toString()}`
+  const query = encodeURIComponent(searchTerm)
+  const sig = encodeURIComponent(String(seed))
+
+  // Unsplash Source endpoint returns an actual image (302 to a real image asset)
+  // and works without requiring API keys.
+  return `https://source.unsplash.com/random/${width}x${height}?${query}&sig=${sig}`
 }
 
 /**

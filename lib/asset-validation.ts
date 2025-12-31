@@ -96,6 +96,7 @@ const REQUIRED_IMAGE_SOURCES: Record<AppType, string[]> = {
 const APPROVED_DOMAINS = [
   'unsplash.com',
   'images.unsplash.com',
+  'source.unsplash.com',
   'pexels.com',
   'images.pexels.com',
   'pixabay.com',

@@ -47,6 +47,11 @@ const nextConfig: NextConfig = {
         hostname: 'unsplash.com',
         port: '',
       },
+      {
+        protocol: 'https',
+        hostname: 'source.unsplash.com',
+        port: '',
+      },
       // Pexels - Free stock photos
       {
         protocol: 'https',

@@ -28,19 +28,27 @@ export function validateUnsplashUrlFormat(url: string): { isValid: boolean; erro
     const urlObj = new URL(url)
 
     // Check if it's from Unsplash
-    if (!urlObj.hostname.includes('unsplash.com') && !urlObj.hostname.includes('images.unsplash.com')) {
+    if (
+      !urlObj.hostname.includes('unsplash.com') &&
+      !urlObj.hostname.includes('images.unsplash.com') &&
+      !urlObj.hostname.includes('source.unsplash.com')
+    ) {
       return {
         isValid: false,
-        error: 'URL must be from Unsplash (images.unsplash.com)',
+        error: 'URL must be from Unsplash (images.unsplash.com or source.unsplash.com)',
       }
     }
 
-    // Check if it has required parameters
-    const hasValidPath = urlObj.pathname.includes('/photo/') || urlObj.pathname.includes('/search/')
+    // Check if it has a known image path style
+    const hasValidPath =
+      urlObj.hostname.includes('source.unsplash.com') ||
+      urlObj.pathname.includes('/photo/') ||
+      urlObj.pathname.includes('/search/')
+
     if (!hasValidPath) {
       return {
         isValid: false,
-        error: 'URL must contain /photo/ or /search/ path',
+        error: 'URL must be an Unsplash image URL',
       }
     }
 
@@ -151,7 +159,7 @@ export function extractImageUrlsFromCode(code: string): string[] {
   }
 
   // Also extract hardcoded Unsplash URLs
-  const hardcodedPattern = /https?:\/\/images?\.unsplash\.com\/[^\s'"]+/g
+  const hardcodedPattern = /https?:\/\/(?:images?\.unsplash\.com|source\.unsplash\.com)\/[^\s'\"]+/g
   const hardcodedMatches = code.match(hardcodedPattern) || []
   urls.push(...hardcodedMatches)
 
