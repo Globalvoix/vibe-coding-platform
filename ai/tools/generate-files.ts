@@ -4,21 +4,16 @@ import { Sandbox } from '@vercel/sandbox'
 import { getContents, type File } from './generate-files/get-contents'
 import { getRichError } from './get-rich-error'
 import { getWriteFiles } from './generate-files/get-write-files'
-import { syncProjectEnvToSandbox } from './project-env'
 import { tool } from 'ai'
 import description from './generate-files.md'
 import z from 'zod/v3'
-import { upsertProjectFiles } from '@/lib/project-files-db'
 
 interface Params {
   modelId: string
   writer: UIMessageStreamWriter<UIMessage<never, DataPart>>
-  userId?: string
-  projectId?: string
-  envVars?: Record<string, string>
 }
 
-export const generateFiles = ({ writer, modelId, userId, projectId, envVars }: Params) =>
+export const generateFiles = ({ writer, modelId }: Params) =>
   tool({
     description,
     inputSchema: z.object({
@@ -52,14 +47,8 @@ export const generateFiles = ({ writer, modelId, userId, projectId, envVars }: P
         return richError.message
       }
 
-      try {
-        await syncProjectEnvToSandbox({ sandbox, userId, projectId })
-      } catch {
-        // best-effort
-      }
-
       const writeFiles = getWriteFiles({ sandbox, toolCallId, writer })
-      const iterator = getContents({ messages, modelId, paths, envVars })
+      const iterator = getContents({ messages, modelId, paths })
       const uploaded: File[] = []
 
       try {
@@ -107,18 +96,6 @@ export const generateFiles = ({ writer, modelId, userId, projectId, envVars }: P
         type: 'data-generating-files',
         data: { paths: uploaded.map((file) => file.path), status: 'done' },
       })
-
-      if (userId && projectId && uploaded.length > 0) {
-        try {
-          await upsertProjectFiles({
-            userId,
-            projectId,
-            files: uploaded.map((file) => ({ path: file.path, content: file.content })),
-          })
-        } catch {
-          // best-effort
-        }
-      }
 
       return `Successfully generated and uploaded ${
         uploaded.length

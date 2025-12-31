@@ -25,12 +25,10 @@ export const getSandboxURL = ({ writer }: Params) =>
         ),
     }),
     execute: async ({ sandboxId, port }, { toolCallId }) => {
-      const urlUUID = crypto.randomUUID()
-
       writer.write({
         id: toolCallId,
         type: 'data-get-sandbox-url',
-        data: { status: 'loading', urlUUID },
+        data: { status: 'loading' },
       })
 
       const sandbox = await Sandbox.get({ sandboxId })
@@ -39,9 +37,9 @@ export const getSandboxURL = ({ writer }: Params) =>
       writer.write({
         id: toolCallId,
         type: 'data-get-sandbox-url',
-        data: { url, status: 'done', urlUUID },
+        data: { url, status: 'done' },
       })
 
-      return { success: true }
+      return { url }
     },
   })

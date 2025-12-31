@@ -15,14 +15,6 @@ export const dataPartSchema = z.object({
     status: z.enum(['generating', 'uploading', 'uploaded', 'done', 'error']),
     error: errorSchema.optional(),
   }),
-  'creating-database': z.object({
-    status: z.enum(['creating', 'success', 'error']),
-    projectId: z.string(),
-    appName: z.string().optional(),
-    tableName: z.string().optional(),
-    reason: z.string().optional(),
-    error: errorSchema.optional(),
-  }),
   'run-command': z.object({
     sandboxId: z.string(),
     commandId: z.string().optional(),
@@ -34,27 +26,11 @@ export const dataPartSchema = z.object({
   }),
   'get-sandbox-url': z.object({
     url: z.string().optional(),
-    urlUUID: z.string().optional(),
     status: z.enum(['loading', 'done']),
-  }),
-  'extract-design': z.object({
-    status: z.enum(['searching', 'extracting', 'done', 'error']),
-    query: z.string().optional(),
-    purpose: z.string().optional(),
-    sources: z.array(z.string()),
-    note: z.string().optional(),
-    error: errorSchema.optional(),
   }),
   'report-errors': z.object({
     summary: z.string(),
     paths: z.array(z.string()).optional(),
-  }),
-  'create-realtime-backend': z.object({
-    status: z.enum(['loading', 'success', 'error']),
-    action: z.enum(['create_table', 'enable_realtime', 'create_function', 'execute_sql']).optional(),
-    message: z.string().optional(),
-    details: z.string().optional(),
-    result: z.unknown().optional(),
   }),
 })
 
