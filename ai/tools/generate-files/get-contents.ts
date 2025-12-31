@@ -38,8 +38,18 @@ export async function* getContents(
   const result = streamObject({
     ...getModelOptions(params.modelId, { reasoningEffort: 'low' }),
     maxOutputTokens: 64000,
-    system:
-      'You are a file content generator. You must generate files based on the conversation history and the provided paths. NEVER generate lock files (pnpm-lock.yaml, package-lock.json, yarn.lock) - these are automatically created by package managers.',
+    system: `You are a file content generator. You must generate files based on the conversation history and the provided paths. NEVER generate lock files (pnpm-lock.yaml, package-lock.json, yarn.lock) - these are automatically created by package managers.
+
+When generating files:
+- Generate complete, working file contents that will be used directly
+- Use appropriate imports and dependencies based on the project context
+- For Supabase projects:
+  - Use Supabase client libraries (@supabase/supabase-js)
+  - Reference environment variables like NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY
+  - Create database queries and real-time subscriptions when needed
+  - Generate proper TypeScript types for database operations
+- Ensure all generated code is syntactically correct and imports are valid
+- Maintain consistency with the existing project structure and conventions`,
     messages: [
       ...params.messages,
       {
