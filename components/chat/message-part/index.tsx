@@ -11,6 +11,7 @@ import { ReportErrors } from './report-errors'
 import { Reasoning } from './reasoning'
 import { Text } from './text'
 import { CreateRealtimeBackend } from './create-realtime-backend'
+import { ExtractDesign } from './extract-design'
 import { memo } from 'react'
 
 interface Props {
@@ -34,6 +35,8 @@ export const MessagePart = memo(function MessagePart({
     return <CreateDatabase message={part.data} />
   } else if (part.type === 'data-create-realtime-backend') {
     return <CreateRealtimeBackend message={part.data} />
+  } else if (part.type === 'data-extract-design') {
+    return <ExtractDesign message={part.data} />
   } else if (part.type === 'reasoning') {
     return <Reasoning part={part} partIndex={partIndex} />
   } else if (part.type === 'data-report-errors') {
