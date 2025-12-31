@@ -6,11 +6,14 @@ import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 
 const SupabaseLogo = ({ className }: { className?: string }) => (
-  <img
-    src="https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F76461b5f5e4b4e5281dbefb676a6c1e8?format=webp&width=80"
-    alt="Supabase"
-    className={className}
-  />
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={cn("text-[#3ECF8E]", className)}
+  >
+    <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" fill="currentColor" />
+  </svg>
 )
 
 interface SupabaseConnectionStatus {
@@ -155,7 +158,7 @@ export function SupabaseOAuthButton({ projectId, onConnectionChange, compact = f
             type="button"
             size="icon"
             onClick={() => setShowMenu(!showMenu)}
-            className="w-8 h-8 bg-[#F7F4ED] border border-black/[0.06] text-[#3ECF8E] hover:bg-black/[0.02] rounded-md transition-colors shadow-sm"
+            className="w-8 h-8 bg-transparent border border-black/[0.06] hover:bg-black/[0.02] rounded-md transition-colors shadow-sm"
             title="Supabase connected"
           >
             <SupabaseLogo className="w-4 h-4" />
@@ -271,7 +274,7 @@ export function SupabaseOAuthButton({ projectId, onConnectionChange, compact = f
         size="icon"
         onClick={handleConnect}
         disabled={!projectId || connecting}
-        className="w-8 h-8 bg-[#F7F4ED] border border-black/[0.06] text-[#3ECF8E] hover:bg-black/[0.02] rounded-md transition-colors shadow-sm"
+        className="w-8 h-8 bg-transparent border border-black/[0.06] hover:bg-black/[0.02] rounded-md transition-colors shadow-sm"
         title="Connect Supabase project"
       >
         {connecting ? (
