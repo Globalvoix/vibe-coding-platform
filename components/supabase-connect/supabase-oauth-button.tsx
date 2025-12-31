@@ -20,7 +20,7 @@ interface Props {
   compact?: boolean
 }
 
-export function SupabaseOAuthButton({ projectId, onConnectionChange }: Props) {
+export function SupabaseOAuthButton({ projectId, onConnectionChange, compact = false }: Props) {
   const [connecting, setConnecting] = useState(false)
   const [connectionStatus, setConnectionStatus] = useState<SupabaseConnectionStatus>({
     connected: false,
