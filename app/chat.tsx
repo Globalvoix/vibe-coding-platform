@@ -365,17 +365,17 @@ export function Chat({ className, initialPrompt, projectId }: Props) {
                   placeholder="Type your message..."
                   className="text-base"
                 />
-                <div className="flex items-center justify-between pt-1.5">
-                  <div className="flex items-center gap-2">
+                <div className="flex items-center justify-between pt-1">
+                  <div className="flex items-center gap-1.5">
                     <button
                       type="button"
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border/60 text-foreground shadow-xs hover:bg-secondary/60 transition-colors chat-toolbar-action-button"
+                      className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-border/60 text-foreground shadow-xs hover:bg-secondary/60 transition-colors chat-toolbar-action-button"
                       aria-label="More options"
                     >
-                      <Plus className="w-4 h-4" />
+                      <Plus className="w-3.5 h-3.5" />
                     </button>
                     <div
-                      className="flex items-center gap-2 rounded-full px-2 py-1 border border-border/60 shadow-xs chat-toolbar-settings-group"
+                      className="flex items-center gap-1.5 rounded-full px-1.5 py-0.5 border border-border/60 shadow-xs chat-toolbar-settings-group"
                     >
                       <Settings />
                       <ModelSelector />
