@@ -136,7 +136,6 @@ function WorkspaceContent({
           sandboxId,
           paths: sandboxPaths,
           url,
-          urlUUID,
         }
 
         await fetch(`/api/projects/${projectId}`, {
@@ -159,7 +158,7 @@ function WorkspaceContent({
     }, 1000)
 
     return () => window.clearTimeout(timeoutId)
-  }, [projectId, currentProjectId, sandboxId, sandboxPaths, url, urlUUID])
+  }, [projectId, currentProjectId, sandboxId, sandboxPaths, url])
 
   return (
     <>
