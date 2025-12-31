@@ -6,11 +6,9 @@ import { GenerateFiles } from './generate-files'
 import { CreateSandbox } from './create-sandbox'
 import { GetSandboxURL } from './get-sandbox-url'
 import { RunCommand } from './run-command'
-import { CreateDatabase } from './create-database'
 import { ReportErrors } from './report-errors'
 import { Reasoning } from './reasoning'
 import { Text } from './text'
-import { CreateRealtimeBackend } from './create-realtime-backend'
 import { memo } from 'react'
 
 interface Props {
@@ -30,10 +28,6 @@ export const MessagePart = memo(function MessagePart({
     return <GetSandboxURL message={part.data} />
   } else if (part.type === 'data-run-command') {
     return <RunCommand message={part.data} />
-  } else if (part.type === 'data-creating-database') {
-    return <CreateDatabase message={part.data} />
-  } else if (part.type === 'data-create-realtime-backend') {
-    return <CreateRealtimeBackend message={part.data} />
   } else if (part.type === 'reasoning') {
     return <Reasoning part={part} partIndex={partIndex} />
   } else if (part.type === 'data-report-errors') {
