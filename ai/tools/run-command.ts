@@ -2,18 +2,15 @@ import type { UIMessageStreamWriter, UIMessage } from 'ai'
 import type { DataPart } from '../messages/data-parts'
 import { Command, Sandbox } from '@vercel/sandbox'
 import { getRichError } from './get-rich-error'
-import { syncProjectEnvToSandbox } from './project-env'
 import { tool } from 'ai'
 import description from './run-command.md'
 import z from 'zod/v3'
 
 interface Params {
   writer: UIMessageStreamWriter<UIMessage<never, DataPart>>
-  userId?: string
-  projectId?: string
 }
 
-export const runCommand = ({ writer, userId, projectId }: Params) =>
+export const runCommand = ({ writer }: Params) =>
   tool({
     description,
     inputSchema: z.object({
@@ -75,14 +72,6 @@ export const runCommand = ({ writer, userId, projectId }: Params) =>
         })
 
         return richError.message
-      }
-
-      try {
-        if (sandbox) {
-          await syncProjectEnvToSandbox({ sandbox, userId, projectId })
-        }
-      } catch {
-        // best-effort
       }
 
       let cmd: Command | null = null
