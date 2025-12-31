@@ -118,7 +118,6 @@ export const useSandboxStore = create<SandboxStore>()((set) => ({
       commands: [],
       paths: [],
       url: undefined,
-      urlUUID: undefined,
       generatedFiles: new Set<string>(),
       status: undefined,
       chatStatus: 'ready',
@@ -139,7 +138,7 @@ export const useSandboxStore = create<SandboxStore>()((set) => ({
       generatedFiles: new Set<string>(),
     })),
   setStatus: (status) => set(() => ({ status })),
-  setUrl: (url, urlUUID) => set(() => ({ url, urlUUID })),
+  setUrl: (url) => set(() => ({ url })),
   upsertCommand: (cmd) => {
     set((state) => {
       const existingIdx = state.commands.findIndex((c) => c.cmdId === cmd.cmdId)
@@ -207,7 +206,7 @@ export function useDataStateMapper() {
         break
       case 'data-get-sandbox-url':
         if (data.data.url) {
-          setUrl(data.data.url, data.data.urlUUID ?? crypto.randomUUID())
+          setUrl(data.data.url)
         }
         break
       default:
