@@ -103,7 +103,6 @@ export const Message = memo(function Message({
               .find((data) => data.status === 'done' && typeof data.url === 'string')
 
             const sandboxUrl = sandboxUrlPartData?.url
-            const sandboxUrlUUID = sandboxUrlPartData?.urlUUID
 
             const hasPreviewCard = Boolean(sandboxUrl)
 
