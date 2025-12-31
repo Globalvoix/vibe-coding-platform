@@ -232,14 +232,37 @@ export const extractDesign = ({ writer, envVars }: Params) =>
       if (normalizedSourceUrls.length > 0) {
         urls = normalizedSourceUrls
       } else {
-        const results = await withTimeout(
-          (signal) => exaSearch({ query, maxResults: maxSources, exaApiKey, signal }),
-          15000
-        )
-        urls = (results.results ?? [])
-          .map((r) => r.url)
-          .filter((u): u is string => typeof u === 'string' && u.length > 0)
-          .slice(0, maxSources)
+        const preferredSites = ['21st.dev', 'reactbits.dev']
+        const siteQueries = [query, ...preferredSites.map((site) => `${query} site:${site}`)]
+
+        const seen = new Set<string>()
+        const collected: string[] = []
+
+        for (const q of siteQueries) {
+          if (collected.length >= maxSources) break
+
+          const results = await withTimeout(
+            (signal) =>
+              exaSearch({
+                query: q,
+                maxResults: Math.max(5, maxSources * 2),
+                exaApiKey,
+                signal,
+              }),
+            15000
+          )
+
+          for (const r of results.results ?? []) {
+            const u = r.url
+            if (typeof u !== 'string' || !u) continue
+            if (seen.has(u)) continue
+            seen.add(u)
+            collected.push(u)
+            if (collected.length >= maxSources) break
+          }
+        }
+
+        urls = collected
 
         if (urls.length === 0) {
           writer.write({
