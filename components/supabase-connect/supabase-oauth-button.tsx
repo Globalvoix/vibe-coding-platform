@@ -130,7 +130,7 @@ export function SupabaseOAuthButton({ projectId, onConnectionChange, compact = f
           type="button"
           size="icon"
           disabled
-          className="w-8 h-8 bg-emerald-500 hover:bg-emerald-600 text-white rounded-md"
+          className="w-8 h-8 bg-[#F7F4ED] border border-black/[0.06] text-[#3ECF8E] rounded-md shadow-sm"
         >
           <Loader className="w-4 h-4 animate-spin" />
         </Button>
@@ -158,7 +158,7 @@ export function SupabaseOAuthButton({ projectId, onConnectionChange, compact = f
             type="button"
             size="icon"
             onClick={() => setShowMenu(!showMenu)}
-            className="w-8 h-8 bg-[#3ECF8E] hover:bg-[#34b27b] text-[#1c1c1c] rounded-md transition-colors shadow-sm"
+            className="w-8 h-8 bg-[#F7F4ED] border border-black/[0.06] text-[#3ECF8E] hover:bg-black/[0.02] rounded-md transition-colors shadow-sm"
             title="Supabase connected"
           >
             <SupabaseLogo className="w-4 h-4" />
@@ -274,7 +274,7 @@ export function SupabaseOAuthButton({ projectId, onConnectionChange, compact = f
         size="icon"
         onClick={handleConnect}
         disabled={!projectId || connecting}
-        className="w-8 h-8 bg-[#3ECF8E] hover:bg-[#34b27b] text-[#1c1c1c] rounded-md transition-colors shadow-sm"
+        className="w-8 h-8 bg-[#F7F4ED] border border-black/[0.06] text-[#3ECF8E] hover:bg-black/[0.02] rounded-md transition-colors shadow-sm"
         title="Connect Supabase project"
       >
         {connecting ? (
