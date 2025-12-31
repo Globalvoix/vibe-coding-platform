@@ -5,6 +5,9 @@
  * animations, and data models for institutional-grade generation.
  */
 
+import type { StyleProfileId } from './style-profiles'
+import { identifyStyleProfileId } from './style-profiles'
+
 export type AppType =
   | 'streaming'
   | 'ecommerce'
@@ -201,6 +204,7 @@ export function getSuggestedImageContexts(appType: AppType): Array<'hero' | 'thu
  */
 export function analyzeAppRequest(userRequest: string): {
   appType: AppType | null
+  styleProfile: StyleProfileId
   requiredAnimations: string[]
   needsFramerMotion: boolean
   minimumRoutes: number
@@ -210,10 +214,12 @@ export function analyzeAppRequest(userRequest: string): {
   isException: boolean // calculator, landing (can be single page)
 } {
   const appType = identifyAppType(userRequest)
+  const styleProfile = identifyStyleProfileId(userRequest)
 
   if (!appType) {
     return {
       appType: null,
+      styleProfile,
       requiredAnimations: [],
       needsFramerMotion: false,
       minimumRoutes: 2,
@@ -228,6 +234,7 @@ export function analyzeAppRequest(userRequest: string): {
 
   return {
     appType,
+    styleProfile,
     requiredAnimations: getRequiredAnimations(appType),
     needsFramerMotion: requiresFramerMotion(appType),
     minimumRoutes: getMinimumRoutes(appType),

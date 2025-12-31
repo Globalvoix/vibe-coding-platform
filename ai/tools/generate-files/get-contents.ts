@@ -61,16 +61,25 @@ export async function* getContents(
 
 STOP and complete the blueprint BEFORE writing code:
 
+### Step 0: Choose a Style Benchmark Profile (MANDATORY)
+Pick a style profile from \`lib/style-profiles.ts\` using the user request:
+- neon_saas, huly_saas, stripe_saas, netflix_streaming, amazon_ecommerce, google_search, spotify_music
+
+Then state 3-5 composition rules from that profile and apply them consistently across all routes.
+
 ### Step 1: Identify App Type
 Map user request to type: streaming, ecommerce, saas, dashboard, auth, calculator, blog, portfolio, landing, social, music, news, banking, real-estate
 
 ### Step 2: Image Audit (MANDATORY)
 For EVERY image in the app, specify:
 - Context (hero, thumbnail, card, background, accent)
-- Exact search term for Unsplash
-- Exact URL from generateImageUrl(appType, context)
+- Exact search term
+- Exact URL from generateImageUrl(appType, context) (must resolve to a real image)
 - Exact alt text from generateAltText(appType, context)
 - Dimensions in pixels
+
+CRITICAL:
+- Alt text is ONLY for the Image alt attribute (accessibility). NEVER render alt text or image-descriptions as visible UI copy.
 
 Example:
 \`\`\`
@@ -181,8 +190,9 @@ import { SPACING, TYPOGRAPHY } from '@/lib/design-system'
 8. No mock data in lib/data.ts (or missing loading/empty/error states)
 9. Premium component stack not defined for each route/section
 10. Blueprint score < 90 (use \`evaluateBlueprint()\`)
-11. TypeScript or lint errors
-12. Build errors
+11. Visible-alt-text bug: any UI renders strings like "widescreen cinematic background" / "abstract gradient avatar" as visible copy instead of Image alt attributes
+12. TypeScript or lint errors
+13. Build errors
 
 ---
 

@@ -7,6 +7,7 @@
  */
 
 import type { AppType } from './app-intelligence'
+import type { StyleProfileId } from './style-profiles'
 
 export type DensityLevel = 'airy' | 'balanced' | 'data-dense'
 
@@ -150,7 +151,8 @@ export function getPremiumComponents(appType: AppType): PremiumComponentBlueprin
 
 export function selectComponentStack(
   appType: AppType,
-  density: DensityLevel = 'balanced'
+  density: DensityLevel = 'balanced',
+  _styleProfile?: StyleProfileId
 ): PremiumComponentBlueprint[] {
   const components = getPremiumComponents(appType)
 
