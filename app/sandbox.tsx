@@ -380,7 +380,8 @@ export function Sandbox({ className }: Props) {
               <div className="flex-1" />
             )}
 
-            <div className="min-w-[240px] flex justify-end">
+            <div className="min-w-[240px] flex justify-end items-center gap-2">
+              <SupabaseOAuthButton projectId={projectId || undefined} />
               <button
                 onClick={handlePublish}
                 type="button"
