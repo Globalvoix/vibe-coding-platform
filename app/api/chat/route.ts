@@ -23,7 +23,6 @@ interface BodyData {
   modelId?: string
   reasoningEffort?: 'low' | 'medium'
   projectId?: string
-  supabaseConnected?: boolean
 }
 
 function calculatePromptCost(text: string): number {
