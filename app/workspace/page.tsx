@@ -35,7 +35,7 @@ function WorkspaceContent({
 }) {
   const [initialPrompt, setInitialPrompt] = useState<string>('')
   const [horizontalSizes] = useState<[number, number] | null>(null)
-  const { sandboxId, paths: sandboxPaths, url, urlUUID, currentProjectId } = useSandboxStore()
+  const { sandboxId, paths: sandboxPaths, url, currentProjectId } = useSandboxStore()
 
   useEffect(() => {
     const sandboxState = useSandboxStore.getState()
@@ -73,7 +73,7 @@ function WorkspaceContent({
           sandboxState.setCurrentProjectId(projectId)
 
           if (project.sandbox_state) {
-            const { sandboxId, paths, url, urlUUID } = project.sandbox_state
+            const { sandboxId, paths, url } = project.sandbox_state
             if (sandboxId) {
               sandboxState.setSandboxId(sandboxId)
             }
@@ -81,10 +81,7 @@ function WorkspaceContent({
               sandboxState.addPaths(paths)
             }
             if (url) {
-              sandboxState.setUrl(
-                url,
-                urlUUID || sandboxState.urlUUID || crypto.randomUUID()
-              )
+              sandboxState.setUrl(url)
             }
 
             if (sandboxId) {
