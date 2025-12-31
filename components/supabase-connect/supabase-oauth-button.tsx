@@ -113,6 +113,18 @@ export function SupabaseOAuthButton({ projectId, onConnectionChange, compact = f
   }
 
   if (isLoadingStatus) {
+    if (compact) {
+      return (
+        <Button
+          type="button"
+          size="icon"
+          disabled
+          className="w-8 h-8 bg-emerald-500 hover:bg-emerald-600 text-white rounded-md"
+        >
+          <Loader className="w-4 h-4 animate-spin" />
+        </Button>
+      )
+    }
     return (
       <Button
         type="button"
