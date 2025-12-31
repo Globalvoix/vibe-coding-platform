@@ -1,4 +1,4 @@
-import { streamText, Output, type ModelMessage } from 'ai'
+import { streamObject, type ModelMessage } from 'ai'
 import { getModelOptions } from '@/ai/gateway'
 import { Deferred } from '@/lib/deferred'
 import z from 'zod/v3'
@@ -35,7 +35,7 @@ export async function* getContents(
 ): AsyncGenerator<FileContentChunk> {
   const generated: z.infer<typeof fileSchema>[] = []
   const deferred = new Deferred<void>()
-  const result = streamText({
+  const result = streamObject({
     ...getModelOptions(params.modelId, { reasoningEffort: 'low' }),
     maxOutputTokens: 64000,
     system:
@@ -49,7 +49,7 @@ export async function* getContents(
         )}`,
       },
     ],
-    output: Output.object({ schema: z.object({ files: z.array(fileSchema) }) }),
+    schema: z.object({ files: z.array(fileSchema) }),
     onError: (error) => {
       deferred.reject(error)
       console.error('Error communicating with AI')
@@ -57,7 +57,7 @@ export async function* getContents(
     },
   })
 
-  for await (const items of result.partialOutputStream) {
+  for await (const items of result.partialObjectStream) {
     if (!Array.isArray(items?.files)) {
       continue
     }
@@ -66,12 +66,12 @@ export async function* getContents(
     const paths = written.concat(
       items.files
         .slice(generated.length, items.files.length - 1)
-        .flatMap((f) => (f?.path ? [f.path] : []))
+        .flatMap((f: { path?: string }) => (f?.path ? [f.path] : []))
     )
 
     const files = items.files
       .slice(generated.length, items.files.length - 2)
-      .map((file) => fileSchema.parse(file))
+      .map((file: unknown) => fileSchema.parse(file))
 
     if (files.length > 0) {
       yield { files, paths, written }
@@ -81,14 +81,14 @@ export async function* getContents(
     }
   }
 
-  const raceResult = await Promise.race([result.output, deferred.promise])
+  const raceResult = await Promise.race([result.object, deferred.promise])
   if (!raceResult) {
     throw new Error('Unexpected Error: Deferred was resolved before the result')
   }
 
   const written = generated.map((file) => file.path)
   const files = raceResult.files.slice(generated.length)
-  const paths = written.concat(files.map((file) => file.path))
+  const paths = written.concat(files.map((file: { path: string }) => file.path))
   if (files.length > 0) {
     yield { files, written, paths }
     generated.push(...files)
