@@ -145,7 +145,7 @@ export function SupabaseCloudPanel({ projectId }: Props) {
 
   const links = [
     {
-      label: 'Runway',
+      label: projectName,
       icon: (
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-[#3ECF8E]">
           <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" fill="currentColor" />
@@ -171,7 +171,7 @@ export function SupabaseCloudPanel({ projectId }: Props) {
     {
       label: 'Manage Secrets',
       icon: <Key className="w-[14px] h-[14px] text-zinc-500" />,
-      href: `https://supabase.com/dashboard/project/${projectRef}/settings/api`,
+      href: `https://supabase.com/dashboard/project/${projectRef}/settings/secrets`,
     },
   ]
 
