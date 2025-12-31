@@ -17,6 +17,7 @@ interface SupabaseConnectionStatus {
 interface Props {
   projectId?: string
   onConnectionChange?: (connected: boolean, status?: SupabaseConnectionStatus) => void
+  compact?: boolean
 }
 
 export function SupabaseOAuthButton({ projectId, onConnectionChange }: Props) {
