@@ -94,7 +94,6 @@ export const Message = memo(function Message({
               sandboxId?: string
               paths?: string[]
               url?: string
-              urlUUID?: string
             }
 
             const sandboxUrlPartData = parts
@@ -116,12 +115,7 @@ export const Message = memo(function Message({
                 .substring(0, 40) || 'Updated version'
 
             const isSelected =
-              Boolean(viewingVersion?.sandboxState?.url && viewingVersion.sandboxState.url === sandboxUrl) ||
-              Boolean(
-                viewingVersion?.sandboxState?.urlUUID &&
-                  sandboxUrlUUID &&
-                  viewingVersion.sandboxState.urlUUID === sandboxUrlUUID
-              )
+              Boolean(viewingVersion?.sandboxState?.url && viewingVersion.sandboxState.url === sandboxUrl)
 
             const subtitle = isLatestVersionCard ? 'Previewing latest version' : 'Preview this version'
 
@@ -181,18 +175,16 @@ export const Message = memo(function Message({
                 const matched = versions.find((v) => {
                   const state = v.sandbox_state
                   if (!state) return false
-                  if (sandboxUrlUUID && state.urlUUID && state.urlUUID === sandboxUrlUUID) return true
                   if (sandboxUrl && state.url && state.url === sandboxUrl) return true
                   return false
                 })
 
                 const sandboxState = matched?.sandbox_state ?? {
                   url: sandboxUrl,
-                  urlUUID: sandboxUrlUUID,
                 }
 
                 setViewingVersion({
-                  id: matched?.id ?? (sandboxUrlUUID || sandboxUrl || String(message.id)),
+                  id: matched?.id ?? (sandboxUrl || String(message.id)),
                   name: title,
                   sandboxState,
                 })
