@@ -12,7 +12,6 @@ interface ViewingVersion {
     sandboxId?: string
     paths?: string[]
     url?: string
-    urlUUID?: string
   } | null
 }
 
@@ -34,12 +33,11 @@ interface SandboxStore {
   setRevertInChatVersionId: (versionId: string | null) => void
   setSandboxId: (id: string) => void
   setStatus: (status: 'running' | 'stopped') => void
-  setUrl: (url: string, uuid: string) => void
+  setUrl: (url: string) => void
   setViewingVersion: (version: ViewingVersion | null) => void
   status?: 'running' | 'stopped'
   upsertCommand: (command: Omit<Command, 'startedAt'>) => void
   url?: string
-  urlUUID?: string
   viewingVersion: ViewingVersion | null
   revertInChatVersionId: string | null
 }
@@ -92,12 +90,6 @@ export const useSandboxStore = create<SandboxStore>()((set) => ({
 
       const nextPaths = Array.isArray(sandboxState.paths) ? sandboxState.paths : []
       const nextUrl = typeof sandboxState.url === 'string' ? sandboxState.url : undefined
-      const nextUrlUUID =
-        typeof sandboxState.urlUUID === 'string'
-          ? sandboxState.urlUUID
-          : nextUrl
-            ? crypto.randomUUID()
-            : undefined
 
       const nextSandboxId = sandboxState.sandboxId ?? state.sandboxId
 
