@@ -25,20 +25,18 @@ type FirecrawlScrapeResponse = {
   error?: string
 }
 
-function withTimeout<T>(promise: Promise<T>, timeoutMs: number) {
+async function withTimeout<T>(
+  fn: (signal: AbortSignal) => Promise<T>,
+  timeoutMs: number
+): Promise<T> {
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), timeoutMs)
 
-  const wrapped = (async () => {
-    try {
-      // @ts-expect-error - allow passing signal for fetch promises
-      return await promise(controller.signal)
-    } finally {
-      clearTimeout(timeout)
-    }
-  })()
-
-  return { promise: wrapped, signal: controller.signal }
+  try {
+    return await fn(controller.signal)
+  } finally {
+    clearTimeout(timeout)
+  }
 }
 
 async function safeFetchText(url: string, signal: AbortSignal, init?: RequestInit) {
@@ -234,14 +232,10 @@ export const extractDesign = ({ writer, envVars }: Params) =>
       if (normalizedSourceUrls.length > 0) {
         urls = normalizedSourceUrls
       } else {
-        const { promise, signal } = withTimeout(
-          (async (signal: AbortSignal) => {
-            return exaSearch({ query, maxResults: maxSources, exaApiKey, signal })
-          }) as unknown as Promise<ExaSearchResponse>,
+        const results = await withTimeout(
+          (signal) => exaSearch({ query, maxResults: maxSources, exaApiKey, signal }),
           15000
         )
-
-        const results = await promise
         urls = (results.results ?? [])
           .map((r) => r.url)
           .filter((u): u is string => typeof u === 'string' && u.length > 0)
@@ -273,12 +267,10 @@ export const extractDesign = ({ writer, envVars }: Params) =>
 
       for (const url of urls) {
         try {
-          const { promise } = withTimeout(
-            (async (signal: AbortSignal) => firecrawlScrape({ url, firecrawlApiKey, signal })) as unknown as Promise<FirecrawlScrapeResponse>,
+          const scraped = await withTimeout(
+            (signal) => firecrawlScrape({ url, firecrawlApiKey, signal }),
             20000
           )
-
-          const scraped = await promise
           const markdown = scraped.data?.markdown ?? ''
 
           if (!markdown) {
@@ -316,17 +308,10 @@ export const extractDesign = ({ writer, envVars }: Params) =>
 
           // As a fallback, attempt a direct fetch to provide something useful when scraping fails.
           try {
-            const { promise } = withTimeout(
-              (async (signal: AbortSignal) => safeFetchText(url, signal)) as unknown as Promise<{
-                ok: boolean
-                status: number
-                contentType: string
-                text: string
-              }>,
+            const fallback = await withTimeout(
+              (signal) => safeFetchText(url, signal),
               15000
             )
-
-            const fallback = await promise
             extracted.push({
               url,
               codeBlocks: [],
