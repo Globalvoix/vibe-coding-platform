@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Loader, CheckCircle2, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
+import { cn } from '@/lib/utils'
 
 const SupabaseLogo = ({ className }: { className?: string }) => (
   <svg
