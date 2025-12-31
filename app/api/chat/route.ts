@@ -104,7 +104,6 @@ export async function POST(req: Request) {
       modelId = DEFAULT_MODEL,
       reasoningEffort,
       projectId,
-      supabaseConnected,
     } = bodyData
 
     const [models, subscription] = await Promise.all([
