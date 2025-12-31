@@ -1,9 +1,20 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Database, Loader, CheckCircle2, AlertCircle } from 'lucide-react'
+import { Loader, CheckCircle2, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
+
+const SupabaseLogo = ({ className }: { className?: string }) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    className={className}
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M21.362 9.354H12V.396L2.638 14.646H12v8.958l9.362-14.25z" />
+  </svg>
+)
 
 interface SupabaseConnectionStatus {
   connected: boolean
@@ -147,10 +158,10 @@ export function SupabaseOAuthButton({ projectId, onConnectionChange, compact = f
             type="button"
             size="icon"
             onClick={() => setShowMenu(!showMenu)}
-            className="w-8 h-8 bg-emerald-500 hover:bg-emerald-600 text-white rounded-md transition-colors"
+            className="w-8 h-8 bg-[#3ECF8E] hover:bg-[#34b27b] text-[#1c1c1c] rounded-md transition-colors shadow-sm"
             title="Supabase connected"
           >
-            <CheckCircle2 className="w-4 h-4" />
+            <SupabaseLogo className="w-4 h-4" />
           </Button>
 
           {showMenu && (
@@ -203,14 +214,14 @@ export function SupabaseOAuthButton({ projectId, onConnectionChange, compact = f
           size="sm"
           variant="outline"
           onClick={() => setShowMenu(!showMenu)}
-          className="gap-2 text-xs bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/30"
-          title="Supabase connected"
-        >
-          <CheckCircle2 className="w-4 h-4" />
-          <span className="hidden sm:inline truncate max-w-[120px]">
-            {connectionStatus.projectName || 'Connected'}
-          </span>
-        </Button>
+          className="gap-2 text-xs bg-[#3ECF8E]/10 dark:bg-[#3ECF8E]/5 border-[#3ECF8E]/30 text-[#3ECF8E] hover:bg-[#3ECF8E]/20"
+        title="Supabase connected"
+      >
+        <SupabaseLogo className="w-4 h-4" />
+        <span className="hidden sm:inline truncate max-w-[120px]">
+          {connectionStatus.projectName || 'Connected'}
+        </span>
+      </Button>
 
         {showMenu && (
           <div className="absolute right-0 top-full mt-1 w-48 bg-background border border-border rounded-lg shadow-lg z-50">
@@ -263,13 +274,13 @@ export function SupabaseOAuthButton({ projectId, onConnectionChange, compact = f
         size="icon"
         onClick={handleConnect}
         disabled={!projectId || connecting}
-        className="w-8 h-8 bg-emerald-500 hover:bg-emerald-600 text-white rounded-md transition-colors"
+        className="w-8 h-8 bg-[#3ECF8E] hover:bg-[#34b27b] text-[#1c1c1c] rounded-md transition-colors shadow-sm"
         title="Connect Supabase project"
       >
         {connecting ? (
           <Loader className="w-4 h-4 animate-spin" />
         ) : (
-          <Database className="w-4 h-4" />
+          <SupabaseLogo className="w-4 h-4" />
         )}
       </Button>
     )
@@ -282,7 +293,7 @@ export function SupabaseOAuthButton({ projectId, onConnectionChange, compact = f
       variant="outline"
       onClick={handleConnect}
       disabled={!projectId || connecting}
-      className="gap-2 text-xs"
+      className="gap-2 text-xs hover:bg-[#3ECF8E]/10 border-[#3ECF8E]/20"
       title="Connect Supabase project"
     >
       {connecting ? (
@@ -292,7 +303,7 @@ export function SupabaseOAuthButton({ projectId, onConnectionChange, compact = f
         </>
       ) : (
         <>
-          <Database className="w-4 h-4" />
+          <SupabaseLogo className="w-4 h-4" />
           <span className="hidden sm:inline">Supabase</span>
         </>
       )}
