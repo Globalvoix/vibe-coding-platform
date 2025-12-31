@@ -98,7 +98,6 @@ export const useSandboxStore = create<SandboxStore>()((set) => ({
         status: nextSandboxId ? 'running' : state.status,
         paths: nextPaths.length > 0 ? nextPaths : state.paths,
         url: nextUrl,
-        urlUUID: nextUrlUUID ?? state.urlUUID,
       }
     }),
   chatStatus: 'ready',
