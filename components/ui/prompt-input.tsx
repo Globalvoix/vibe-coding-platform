@@ -84,7 +84,7 @@ function PromptInput({
       >
         <div
           className={cn(
-            'border-black/[0.03] rounded-[22px] border px-4 py-3 shadow-sm transition-all focus-within:shadow-md focus-within:border-black/[0.05] bg-[#F7F4ED]',
+            'border-black/[0.03] rounded-lg border px-3 py-2 shadow-sm transition-all focus-within:shadow-md focus-within:border-black/[0.05] bg-[#F7F4ED]',
             className
           )}
         >
@@ -134,7 +134,7 @@ function PromptInputTextarea({
       onChange={(e) => setValue(e.target.value)}
       onKeyDown={handleKeyDown}
       className={cn(
-        'text-primary min-h-[44px] w-full resize-none border-none bg-transparent shadow-none outline-none focus-visible:ring-0 focus-visible:ring-offset-0',
+        'text-sm min-h-[32px] w-full resize-none border-none bg-transparent shadow-none outline-none focus-visible:ring-0 focus-visible:ring-offset-0',
         className
       )}
       rows={1}
