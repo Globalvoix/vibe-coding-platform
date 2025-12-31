@@ -20,10 +20,10 @@ export function Preview({
   onLoadingChange,
   onRefreshRef,
 }: Props) {
-  const { status, url, urlUUID } = useSandboxStore()
+  const { status, url } = useSandboxStore()
   return (
     <PreviewComponent
-      key={urlUUID}
+      key={url}
       className={className}
       disabled={status === 'stopped'}
       url={url}
