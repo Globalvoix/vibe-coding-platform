@@ -15,6 +15,7 @@ interface Props {
   onInputChange?: (value: string) => void
   onLoadingChange?: (loading: boolean) => void
   onRefreshRef?: React.MutableRefObject<(() => void) | null>
+  device?: 'desktop' | 'tablet' | 'mobile'
 }
 
 export function Preview({
@@ -26,6 +27,7 @@ export function Preview({
   onInputChange,
   onLoadingChange,
   onRefreshRef,
+  device = 'desktop',
 }: Props) {
   const [currentUrl, setCurrentUrl] = useState(url)
   const [error, setError] = useState<string | null>(null)
@@ -91,29 +93,51 @@ export function Preview({
 
   return (
     <Panel className={cn('border-t-0', className)}>
-      <div className="flex h-full flex-col relative">
+      <div className={cn(
+        "flex h-full flex-col relative transition-colors duration-300",
+        device !== 'desktop' && "bg-[#F7F4ED] p-8 overflow-auto items-center"
+      )}>
         {currentUrl && !disabled ? (
-          <>
-            <ScrollArea className="w-full flex-1">
-              <iframe
-                ref={iframeRef}
-                src={currentUrl}
-                className="w-full h-full"
-                onLoad={handleIframeLoad}
-                onError={handleIframeError}
-                title="Browser content"
-              />
-            </ScrollArea>
+          <div className={cn(
+            "relative transition-all duration-500 ease-in-out shadow-2xl bg-white",
+            device === 'desktop' && "w-full h-full",
+            device === 'tablet' && "w-[768px] h-[1024px] rounded-[40px] border-[12px] border-[#111827] shrink-0",
+            device === 'mobile' && "w-[375px] h-[667px] rounded-[40px] border-[12px] border-[#111827] shrink-0"
+          )}>
+            {/* Device Speaker for Mobile/Tablet */}
+            {device !== 'desktop' && (
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-6 bg-[#111827] rounded-b-2xl z-20 flex items-center justify-center">
+                <div className="w-8 h-1 rounded-full bg-zinc-800" />
+              </div>
+            )}
+
+            <iframe
+              ref={iframeRef}
+              src={currentUrl}
+              className={cn(
+                "w-full h-full transition-all duration-300",
+                device !== 'desktop' && "rounded-[28px]"
+              )}
+              onLoad={handleIframeLoad}
+              onError={handleIframeError}
+              title="Browser content"
+            />
 
             {isLoading && !error && (
-              <div className="absolute inset-0 bg-white bg-opacity-90 flex items-center justify-center flex-col gap-2">
+              <div className={cn(
+                "absolute inset-0 bg-white bg-opacity-90 flex items-center justify-center flex-col gap-2 z-10",
+                device !== 'desktop' && "rounded-[28px]"
+              )}>
                 <BarLoader color="#666" />
                 <span className="text-gray-500 text-xs">Loading...</span>
               </div>
             )}
 
             {error && (
-              <div className="absolute inset-0 bg-white flex items-center justify-center flex-col gap-2">
+              <div className={cn(
+                "absolute inset-0 bg-white flex items-center justify-center flex-col gap-2 z-10",
+                device !== 'desktop' && "rounded-[28px]"
+              )}>
                 <span className="text-red-500">Failed to load page</span>
                 <button
                   className="text-blue-500 hover:underline text-sm"
@@ -132,7 +156,7 @@ export function Preview({
                 </button>
               </div>
             )}
-          </>
+          </div>
         ) : (
           <div className="flex-1 flex items-center justify-center">
             <div className="flex flex-col items-center gap-3 text-xs text-muted-foreground">
