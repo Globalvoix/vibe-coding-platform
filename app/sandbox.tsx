@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react'
 import { useEffect, useState, useRef } from 'react'
-import { Globe, Code2, LineChart, Cloud, Plus, ArrowUpRight, RotateCw, LayoutTemplate, X } from 'lucide-react'
+import { Globe, Code2, LineChart, Cloud, Plus, ArrowUpRight, RotateCw, LayoutTemplate, X, Laptop, Tablet, Smartphone } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
