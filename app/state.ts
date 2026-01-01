@@ -40,6 +40,8 @@ interface SandboxStore {
   url?: string
   viewingVersion: ViewingVersion | null
   revertInChatVersionId: string | null
+  device: 'desktop' | 'tablet' | 'mobile'
+  setDevice: (device: 'desktop' | 'tablet' | 'mobile') => void
 }
 
 function getBackgroundCommandErrorLines(commands: Command[]) {
