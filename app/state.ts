@@ -105,6 +105,8 @@ export const useSandboxStore = create<SandboxStore>()((set) => ({
   chatStatus: 'ready',
   viewingVersion: null,
   revertInChatVersionId: null,
+  device: 'desktop',
+  setDevice: (device) => set(() => ({ device })),
   clearGeneratedFiles: () => set(() => ({ generatedFiles: new Set<string>() })),
   commands: [],
   generatedFiles: new Set<string>(),
