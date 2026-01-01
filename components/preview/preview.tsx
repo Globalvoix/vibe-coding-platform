@@ -95,28 +95,34 @@ export function Preview({
     <Panel className={cn('border-t-0', className)}>
       <div className={cn(
         "flex h-full flex-col relative transition-colors duration-300",
-        device !== 'desktop' && "bg-[#F7F4ED] p-8 overflow-auto items-center"
+        device !== 'desktop' ? "bg-[#F7F4ED] p-10 overflow-auto items-center" : "bg-white"
       )}>
         {currentUrl && !disabled ? (
           <div className={cn(
             "relative transition-all duration-500 ease-in-out shadow-2xl bg-white",
             device === 'desktop' && "w-full h-full",
-            device === 'tablet' && "w-[768px] h-[1024px] rounded-[40px] border-[12px] border-[#111827] shrink-0",
-            device === 'mobile' && "w-[375px] h-[667px] rounded-[40px] border-[12px] border-[#111827] shrink-0"
+            device === 'tablet' && "w-[768px] h-[1024px] rounded-[48px] border-[16px] border-[#111827] shrink-0",
+            device === 'mobile' && "w-[375px] h-[750px] rounded-[48px] border-[16px] border-[#111827] shrink-0"
           )}>
             {/* Device Speaker for Mobile/Tablet */}
             {device !== 'desktop' && (
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-6 bg-[#111827] rounded-b-2xl z-20 flex items-center justify-center">
-                <div className="w-8 h-1 rounded-full bg-zinc-800" />
-              </div>
+              <>
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-7 bg-[#111827] rounded-b-[24px] z-20 flex items-center justify-center">
+                  <div className="w-10 h-1.5 rounded-full bg-zinc-800" />
+                </div>
+                {/* Side buttons for aesthetics */}
+                <div className="absolute top-24 -left-[18px] w-1 h-12 bg-[#111827] rounded-l-md" />
+                <div className="absolute top-40 -left-[18px] w-1 h-12 bg-[#111827] rounded-l-md" />
+                <div className="absolute top-24 -right-[18px] w-1 h-16 bg-[#111827] rounded-r-md" />
+              </>
             )}
 
             <iframe
               ref={iframeRef}
               src={currentUrl}
               className={cn(
-                "w-full h-full transition-all duration-300",
-                device !== 'desktop' && "rounded-[28px]"
+                "w-full h-full border-none transition-all duration-300",
+                device !== 'desktop' ? "rounded-[32px]" : ""
               )}
               onLoad={handleIframeLoad}
               onError={handleIframeError}
