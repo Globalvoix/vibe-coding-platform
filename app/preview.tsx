@@ -10,6 +10,7 @@ interface Props {
   onInputChange?: (value: string) => void
   onLoadingChange?: (loading: boolean) => void
   onRefreshRef?: React.MutableRefObject<(() => void) | null>
+  device?: 'desktop' | 'tablet' | 'mobile'
 }
 
 export function Preview({
@@ -19,6 +20,7 @@ export function Preview({
   onInputChange,
   onLoadingChange,
   onRefreshRef,
+  device,
 }: Props) {
   const { status, url } = useSandboxStore()
   return (
@@ -32,6 +34,7 @@ export function Preview({
       onInputChange={onInputChange}
       onLoadingChange={onLoadingChange}
       onRefreshRef={onRefreshRef}
+      device={device}
     />
   )
 }
