@@ -40,7 +40,13 @@ export function Sandbox({ className }: Props) {
   const [showComingSoon, setShowComingSoon] = useState(false)
   const previewRefreshRef = useRef<(() => void) | null>(null)
 
-  const { viewingVersion, setViewingVersion, setRevertInChatVersionId, applySandboxState } = useSandboxStore()
+  const { viewingVersion, setViewingVersion, setRevertInChatVersionId, applySandboxState, device, setDevice } = useSandboxStore()
+
+  const toggleDevice = () => {
+    if (device === 'desktop') setDevice('tablet')
+    else if (device === 'tablet') setDevice('mobile')
+    else setDevice('desktop')
+  }
 
   const tabs: TabConfig[] = [
     {
@@ -328,8 +334,16 @@ export function Sandbox({ className }: Props) {
 
             {activeTab === 'preview' ? (
               <div className="flex-1 flex justify-center px-4">
-                <div className="flex items-center rounded-full border border-black/10 bg-background px-3 h-8 gap-2 w-full max-w-[300px] shadow-sm">
-                  <LayoutTemplate className="w-3.5 h-3.5 text-[#111827]" />
+                <div className="flex items-center rounded-full border border-black/10 bg-background px-3 h-8 gap-2 w-full max-w-[300px] shadow-sm overflow-hidden">
+                  <button
+                    onClick={toggleDevice}
+                    className="flex items-center justify-center shrink-0 hover:bg-black/5 p-1 -ml-1 rounded-md transition-colors"
+                    title={`Switch to ${device === 'desktop' ? 'tablet' : device === 'tablet' ? 'mobile' : 'desktop'} view`}
+                  >
+                    {device === 'desktop' && <Laptop className="w-3.5 h-3.5 text-[#111827]" />}
+                    {device === 'tablet' && <Tablet className="w-3.5 h-3.5 text-[#111827]" />}
+                    {device === 'mobile' && <Smartphone className="w-3.5 h-3.5 text-[#111827]" />}
+                  </button>
 
                   <div
                     className="min-w-0 flex-1 font-mono text-[11px] text-[#111827] truncate select-text"
@@ -411,6 +425,7 @@ export function Sandbox({ className }: Props) {
             onLoadingChange={setIsLoading}
             onRefreshRef={previewRefreshRef}
             hideControls={true}
+            device={device}
           />
         </div>
 
