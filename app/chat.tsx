@@ -369,13 +369,13 @@ export function Chat({ className, initialPrompt, projectId }: Props) {
                   <div className="flex items-center gap-1.5">
                     <button
                       type="button"
-                      className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-border/60 text-foreground shadow-xs hover:bg-secondary/60 transition-colors chat-toolbar-action-button"
+                      className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-border/60 text-foreground shadow-xs hover:bg-secondary/60 transition-colors chat-toolbar-action-button"
                       aria-label="More options"
                     >
-                      <Plus className="w-3.5 h-3.5" />
+                      <Plus className="w-3 h-3" />
                     </button>
                     <div
-                      className="flex items-center gap-1.5 rounded-full px-1.5 py-0.5 border border-border/60 shadow-xs chat-toolbar-settings-group"
+                      className="flex items-center gap-1 rounded-full px-1 py-0.5 border border-border/60 shadow-xs chat-toolbar-settings-group"
                     >
                       <Settings />
                       <ModelSelector />
