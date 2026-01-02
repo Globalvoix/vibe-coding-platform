@@ -13,12 +13,12 @@ export function Settings() {
     <Popover>
       <PopoverTrigger asChild>
         <Button
-          className="cursor-pointer h-7 w-7 rounded-full border border-border/60 shadow-xs"
+          className="cursor-pointer h-6 w-6 rounded-full border border-border/60 shadow-xs"
           style={{ backgroundColor: '#F7F4ED' }}
           variant="ghost"
           size="icon"
         >
-          <SlidersVerticalIcon className="w-3.5 h-3.5" />
+          <SlidersVerticalIcon className="w-3 h-3" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="p-0 w-96">
