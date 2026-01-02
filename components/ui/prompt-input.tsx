@@ -152,7 +152,7 @@ function PromptInputActions({
   ...props
 }: PromptInputActionsProps) {
   return (
-    <div className={cn('flex items-center gap-2', className)} {...props}>
+    <div className={cn('flex items-center gap-1.5', className)} {...props}>
       {children}
     </div>
   )
