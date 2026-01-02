@@ -389,13 +389,13 @@ export function Chat({ className, initialPrompt, projectId }: Props) {
                         type="submit"
                         variant="default"
                         size="icon"
-                        className="h-8 w-8 rounded-full"
+                        className="h-7 w-7 rounded-full"
                         disabled={isInputDisabled || !input.trim()}
                       >
                         {isLoading ? (
-                          <Square className="size-5 fill-current" />
+                          <Square className="size-4 fill-current" />
                         ) : (
-                          <ArrowUp className="size-5" />
+                          <ArrowUp className="size-4" />
                         )}
                       </Button>
                     </PromptInputAction>
