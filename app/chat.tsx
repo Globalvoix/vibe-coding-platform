@@ -368,6 +368,7 @@ export function Chat({ className, initialPrompt, projectId }: Props) {
                 <div className="flex items-center justify-between pt-1">
                   <div className="flex items-center gap-1.5">
                     <button
+                      onClick={() => handleComingSoon('Add file', 'File upload support is coming soon!')}
                       type="button"
                       className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-border/60 text-foreground shadow-xs hover:bg-secondary/60 transition-colors chat-toolbar-action-button"
                       aria-label="More options"
