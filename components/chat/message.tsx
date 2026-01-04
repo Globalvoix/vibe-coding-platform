@@ -235,13 +235,13 @@ export const Message = memo(function Message({
                 </div>
 
                 {showRevertPanel && (
-                  <div className="w-full max-w-[520px] rounded-xl border border-black/[0.06] bg-[#F7F4ED] px-4 py-3 shadow-sm">
+                  <div className="w-full max-w-[520px] rounded-lg border border-black/[0.06] bg-[#F7F4ED] px-4 py-3 shadow-xs">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <p className="text-[13px] font-semibold text-foreground">
+                        <p className="text-[13px] font-semibold text-foreground/90">
                           Revert to this version?
                         </p>
-                        <p className="text-[12px] text-foreground/65 mt-0.5 leading-[1.35]">
+                        <p className="text-[12px] text-foreground/70 mt-1 leading-[1.4]">
                           This will revert your project to how it looked at that point. Messages after this version will be removed.
                         </p>
                       </div>
