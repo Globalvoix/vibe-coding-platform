@@ -223,8 +223,8 @@ export const Message = memo(function Message({
                     </button>
 
                     {/* Code Button overlapping bottom right */}
-                    <button className="absolute -bottom-2.5 -right-2.5 flex items-center gap-1 px-2.5 py-1.5 bg-[#F7F4ED] hover:bg-[#F0EDE5] rounded-md border border-black/[0.08] shadow-xs transition-colors text-[11px] font-semibold text-[#475569] group/code">
-                      <Code2Icon className="w-3 h-3 text-[#475569]/65 group-hover/code:text-[#475569]" />
+                    <button className="absolute -bottom-2 -right-2 flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-[#F9F8F6] rounded-md border border-black/[0.08] shadow-sm transition-colors text-[11px] font-semibold text-[#475569] group/code">
+                      <Code2Icon className="w-3 h-3 text-[#475569]/60 group-hover/code:text-[#475569]" />
                       <span>Code</span>
                     </button>
                   </div>
