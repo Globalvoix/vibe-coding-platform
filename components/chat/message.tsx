@@ -64,17 +64,17 @@ export const Message = memo(function Message({
     >
       <div
         className={cn(
-          'flex gap-3 px-4 py-3',
+          'flex gap-3 px-4 py-2',
           message.role === 'assistant' ? 'justify-start' : 'justify-end'
         )}
       >
         <div className={cn(
-          "max-w-[min(800px,95%)] w-full space-y-2",
+          "max-w-[min(800px,95%)] w-full space-y-1.5",
           message.role === 'user' && "flex flex-col items-end"
         )}>
           {/* Message Content */}
           <div className={cn(
-            "space-y-4 w-fit",
+            "space-y-3 w-fit",
             message.role === 'user' && "bg-[#F7F4ED] px-4 py-2.5 rounded-[22px] text-foreground/90 shadow-sm border border-black/[0.02] transition-all hover:shadow-md hover:border-black/[0.04]"
           )}>
             {message.parts.map((part, index) => (
