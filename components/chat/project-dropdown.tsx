@@ -4,16 +4,14 @@ import * as React from 'react'
 import {
   ChevronDown,
   Settings as SettingsIcon,
-  Copy,
   Pencil,
   Star,
   Palette,
-  HelpCircle,
   ArrowUpRight,
   Gift,
   ChevronRight,
   ChevronLeft,
-  Circle,
+  Check,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
@@ -24,6 +22,7 @@ import {
 } from '@/components/ui/popover'
 import { useAuth } from '@clerk/nextjs'
 import { CREDITS_UPDATED_EVENT } from '@/lib/credits-events'
+import { useTheme } from 'next-themes'
 
 import { RenameProjectModal } from './rename-project-modal'
 
@@ -31,6 +30,8 @@ interface ProjectDropdownProps {
   projectName: string
   projectId?: string | null
 }
+
+type DropdownView = 'main' | 'appearance'
 
 const HeartIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -47,11 +48,21 @@ const HeartIcon = () => (
 
 export function ProjectDropdown({ projectName, projectId }: ProjectDropdownProps) {
   const [open, setOpen] = React.useState(false)
+  const [view, setView] = React.useState<DropdownView>('main')
   const [renameModalOpen, setRenameModalOpen] = React.useState(false)
   const [creditBalance, setCreditBalance] = React.useState<number | null>(null)
   const [isCreditsLoading, setIsCreditsLoading] = React.useState(false)
   const router = useRouter()
   const { isSignedIn } = useAuth()
+  const { theme, setTheme } = useTheme()
+
+  React.useEffect(() => {
+    if (!open) {
+      // Reset view to main when popover closes with a small delay to avoid flicker
+      const timeout = setTimeout(() => setView('main'), 200)
+      return () => clearTimeout(timeout)
+    }
+  }, [open])
 
   const loadCredits = React.useCallback(async () => {
     if (!isSignedIn) return
@@ -89,93 +100,127 @@ export function ProjectDropdown({ projectName, projectId }: ProjectDropdownProps
           <ChevronDown className={cn("w-3.5 h-3.5 text-foreground/30 transition-transform duration-200", open && "rotate-180")} />
         </button>
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-[260px] p-1 rounded-xl shadow-xl border border-black/[0.06] bg-[#F7F4ED] mt-1.5 animate-in fade-in zoom-in-95 duration-200">
-        <div className="flex flex-col">
-          <button
-            onClick={() => router.push('/')}
-            className="flex items-center gap-2 w-full px-3 py-2.5 text-[13px] text-foreground/70 hover:text-foreground hover:bg-black/[0.04] rounded-lg transition-colors group"
-          >
-            <ChevronLeft className="w-3.5 h-3.5 opacity-60" />
-            <span className="font-medium">Go to Dashboard</span>
-          </button>
+      <PopoverContent align="start" className={cn(
+        "p-1 rounded-xl shadow-xl border border-black/[0.06] bg-[#F7F4ED] mt-1.5 animate-in fade-in zoom-in-95 duration-200 transition-all",
+        view === 'main' ? "w-[260px]" : "w-[200px]"
+      )}>
+        {view === 'main' ? (
+          <div className="flex flex-col">
+            <button
+              onClick={() => router.push('/')}
+              className="flex items-center gap-2 w-full px-3 py-2.5 text-[13px] text-foreground/70 hover:text-foreground hover:bg-black/[0.04] rounded-lg transition-colors group"
+            >
+              <ChevronLeft className="w-3.5 h-3.5 opacity-60" />
+              <span className="font-medium">Go to Dashboard</span>
+            </button>
 
-          <div className="mt-2 mb-1 px-3">
-            <span className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest">My workspace</span>
-          </div>
+            <div className="mt-2 mb-1 px-3">
+              <span className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest">My workspace</span>
+            </div>
 
-          <div className="px-3.5 py-3 bg-[#EFECE0] rounded-sm border border-black/[0.03] mx-1 mb-2">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[12px] font-bold text-foreground/80">Credits</span>
-              <div className="flex items-center gap-1 text-[12px] font-medium text-foreground/45">
-                <span>{isCreditsLoading ? '...' : (creditBalance ?? 0).toLocaleString()} left</span>
-                <ChevronRight className="w-3.5 h-3.5 opacity-40" />
+            <div className="px-3.5 py-3 bg-[#EFECE0] rounded-sm border border-black/[0.03] mx-1 mb-2">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[12px] font-bold text-foreground/80">Credits</span>
+                <div className="flex items-center gap-1 text-[12px] font-medium text-foreground/45">
+                  <span>{isCreditsLoading ? '...' : (creditBalance ?? 0).toLocaleString()} left</span>
+                  <ChevronRight className="w-3.5 h-3.5 opacity-40" />
+                </div>
+              </div>
+              <div className="h-1.5 w-full bg-black/[0.08] rounded-full overflow-hidden mb-2.5">
+                <div
+                  className="h-full bg-[#1A73E8] transition-all duration-700 rounded-full"
+                  style={{ width: `${creditPercentage}%` }}
+                />
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-2 h-2 rounded-full bg-[#1A73E8]" />
+                <span className="text-[11px] text-foreground/45 font-medium">Daily credits used first</span>
               </div>
             </div>
-            <div className="h-1.5 w-full bg-black/[0.08] rounded-full overflow-hidden mb-2.5">
-              <div
-                className="h-full bg-[#1A73E8] transition-all duration-700 rounded-full"
-                style={{ width: `${creditPercentage}%` }}
-              />
+
+            <button className="flex items-center gap-2.5 w-full px-3 py-2 text-[13px] text-foreground/70 hover:text-foreground hover:bg-black/[0.04] rounded-lg transition-colors mb-0.5">
+              <Gift className="w-4 h-4 opacity-70" />
+              <span className="font-medium">Get free credits</span>
+            </button>
+
+            <div className="h-px bg-black/[0.05] my-1 mx-1" />
+
+            <div className="flex flex-col py-0.5">
+              <button className="flex items-center justify-between w-full px-3 py-2 text-[13px] text-foreground/70 hover:text-foreground hover:bg-black/[0.04] rounded-lg transition-colors group">
+                <div className="flex items-center gap-2.5">
+                  <SettingsIcon className="w-4 h-4 opacity-70" />
+                  <span className="font-medium">Settings</span>
+                </div>
+                <span className="text-[10px] text-foreground/30 font-semibold group-hover:text-foreground/40 transition-colors">Ctrl .</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setOpen(false)
+                  setRenameModalOpen(true)
+                }}
+                className="flex items-center gap-2.5 w-full px-3 py-2 text-[13px] text-foreground/70 hover:text-foreground hover:bg-black/[0.04] rounded-lg transition-colors"
+              >
+                <Pencil className="w-4 h-4 opacity-70" />
+                <span className="font-medium">Rename project</span>
+              </button>
+
+              <button className="flex items-center gap-2.5 w-full px-3 py-2 text-[13px] text-foreground/70 hover:text-foreground hover:bg-black/[0.04] rounded-lg transition-colors">
+                <Star className="w-4 h-4 opacity-70" />
+                <span className="font-medium">Star project</span>
+              </button>
             </div>
-            <div className="flex items-center gap-1.5">
-              <div className="w-2 h-2 rounded-full bg-[#1A73E8]" />
-              <span className="text-[11px] text-foreground/45 font-medium">Daily credits used first</span>
+
+            <div className="h-px bg-black/[0.05] my-1 mx-1" />
+
+            <div className="flex flex-col py-0.5 mb-1">
+              <button
+                onClick={() => setView('appearance')}
+                className="flex items-center justify-between w-full px-3 py-2 text-[13px] text-foreground/70 hover:text-foreground hover:bg-black/[0.04] rounded-lg transition-colors"
+              >
+                <div className="flex items-center gap-2.5">
+                  <Palette className="w-4 h-4 opacity-70" />
+                  <span className="font-medium">Appearance</span>
+                </div>
+                <ChevronRight className="w-3.5 h-3.5 opacity-30" />
+              </button>
             </div>
           </div>
-
-          <button className="flex items-center gap-2.5 w-full px-3 py-2 text-[13px] text-foreground/70 hover:text-foreground hover:bg-black/[0.04] rounded-lg transition-colors mb-0.5">
-            <Gift className="w-4 h-4 opacity-70" />
-            <span className="font-medium">Get free credits</span>
-          </button>
-
-          <div className="h-px bg-black/[0.05] my-1 mx-1" />
-
-          <div className="flex flex-col py-0.5">
-            <button className="flex items-center justify-between w-full px-3 py-2 text-[13px] text-foreground/70 hover:text-foreground hover:bg-black/[0.04] rounded-lg transition-colors group">
-              <div className="flex items-center gap-2.5">
-                <SettingsIcon className="w-4 h-4 opacity-70" />
-                <span className="font-medium">Settings</span>
-              </div>
-              <span className="text-[10px] text-foreground/30 font-semibold group-hover:text-foreground/40 transition-colors">Ctrl .</span>
+        ) : (
+          <div className="flex flex-col animate-in slide-in-from-right-2 duration-200">
+            <button
+              onClick={() => setView('main')}
+              className="flex items-center gap-2 w-full px-3 py-2 text-[13px] text-foreground/70 hover:text-foreground hover:bg-black/[0.04] rounded-lg transition-colors group mb-1"
+            >
+              <ChevronLeft className="w-3.5 h-3.5 opacity-60" />
+              <span className="font-medium">Appearance</span>
             </button>
 
             <button
-              onClick={() => {
-                setOpen(false)
-                setRenameModalOpen(true)
-              }}
-              className="flex items-center gap-2.5 w-full px-3 py-2 text-[13px] text-foreground/70 hover:text-foreground hover:bg-black/[0.04] rounded-lg transition-colors"
+              onClick={() => setTheme('light')}
+              className="flex items-center justify-between w-full px-3 py-2 text-[13px] text-foreground/70 hover:text-foreground hover:bg-black/[0.04] rounded-lg transition-colors"
             >
-              <Pencil className="w-4 h-4 opacity-70" />
-              <span className="font-medium">Rename project</span>
+              <span className="font-medium">Light</span>
+              {theme === 'light' && <Check className="w-3.5 h-3.5 opacity-60" />}
             </button>
 
-            <button className="flex items-center gap-2.5 w-full px-3 py-2 text-[13px] text-foreground/70 hover:text-foreground hover:bg-black/[0.04] rounded-lg transition-colors">
-              <Star className="w-4 h-4 opacity-70" />
-              <span className="font-medium">Star project</span>
-            </button>
-          </div>
-
-          <div className="h-px bg-black/[0.05] my-1 mx-1" />
-
-          <div className="flex flex-col py-0.5 mb-1">
-            <button className="flex items-center justify-between w-full px-3 py-2 text-[13px] text-foreground/70 hover:text-foreground hover:bg-black/[0.04] rounded-lg transition-colors">
-              <div className="flex items-center gap-2.5">
-                <Palette className="w-4 h-4 opacity-70" />
-                <span className="font-medium">Appearance</span>
-              </div>
-              <ChevronRight className="w-3.5 h-3.5 opacity-30" />
+            <button
+              onClick={() => setTheme('dark')}
+              className="flex items-center justify-between w-full px-3 py-2 text-[13px] text-foreground/70 hover:text-foreground hover:bg-black/[0.04] rounded-lg transition-colors"
+            >
+              <span className="font-medium">Dark</span>
+              {theme === 'dark' && <Check className="w-3.5 h-3.5 opacity-60" />}
             </button>
 
-            <button className="flex items-center justify-between w-full px-3 py-2 text-[13px] text-foreground/70 hover:text-foreground hover:bg-black/[0.04] rounded-lg transition-colors">
-              <div className="flex items-center gap-2.5">
-                <HelpCircle className="w-4 h-4 opacity-70" />
-                <span className="font-medium">Help</span>
-              </div>
-              <ArrowUpRight className="w-3.5 h-3.5 opacity-30" />
+            <button
+              onClick={() => setTheme('system')}
+              className="flex items-center justify-between w-full px-3 py-2 text-[13px] text-foreground/70 hover:text-foreground hover:bg-black/[0.04] rounded-lg transition-colors"
+            >
+              <span className="font-medium">System</span>
+              {theme === 'system' && <Check className="w-3.5 h-3.5 opacity-60" />}
             </button>
           </div>
-        </div>
+        )}
       </PopoverContent>
 
       {projectId && (
