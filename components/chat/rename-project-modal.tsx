@@ -106,7 +106,7 @@ export function RenameProjectModal({
           <Button
             variant="ghost"
             onClick={onClose}
-            className="h-10 px-6 text-[14px] font-bold text-[#475569] hover:bg-[#F1F5F9] rounded-lg transition-colors"
+            className="h-10 px-6 text-[14px] font-bold text-[#475569] bg-[#F1F5F9]/50 hover:bg-[#F1F5F9] rounded-lg transition-colors border border-[#E2E8F0]/50"
           >
             Cancel
           </Button>
