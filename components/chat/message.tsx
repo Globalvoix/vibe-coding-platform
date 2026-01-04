@@ -206,11 +206,11 @@ export const Message = memo(function Message({
                 <div className="flex items-center gap-2.5">
                   <div className="relative w-full max-w-[290px]">
                     <button onClick={resolveAndSelectVersion} className={cardClasses}>
-                      <div className="flex flex-col gap-1 min-w-0">
-                        <span className={cn('text-[14px] font-bold truncate', textPrimary)}>
+                      <div className="flex flex-col gap-0.5 min-w-0">
+                        <span className={cn('text-[13px] font-semibold truncate', textPrimary)}>
                           {title}
                         </span>
-                        <span className={cn('text-[13px] font-medium', textSecondary)}>{subtitle}</span>
+                        <span className={cn('text-[12px] font-medium', textSecondary)}>{subtitle}</span>
                       </div>
                       <ChevronRightIcon
                         className={cn(
