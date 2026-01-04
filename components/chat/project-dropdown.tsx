@@ -13,7 +13,7 @@ import {
   ArrowUpRight,
   Gift,
   ChevronRight,
-  ArrowLeft,
+  ChevronLeft,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
@@ -92,7 +92,7 @@ export function ProjectDropdown({ projectName, projectId }: ProjectDropdownProps
             onClick={() => router.push('/')}
             className="flex items-center gap-2.5 w-full px-3 py-2 text-[14px] text-foreground/70 hover:text-foreground hover:bg-black/[0.04] rounded-lg transition-colors group"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ChevronLeft className="w-4 h-4" />
             <span>Go to Dashboard</span>
           </button>
 
