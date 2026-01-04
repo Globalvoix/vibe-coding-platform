@@ -33,14 +33,17 @@ import { emitCreditsUpdated } from '@/lib/credits-events'
 import { useChatPersistence } from '@/lib/use-chat-persistence'
 import type { ProjectVersion } from '@/lib/projects-db'
 
+import { ProjectDropdown } from '@/components/chat/project-dropdown'
+
 interface Props {
   className: string
   modelId?: string
   initialPrompt?: string
   projectId?: string | null
+  projectName?: string
 }
 
-export function Chat({ className, initialPrompt, projectId }: Props) {
+export function Chat({ className, initialPrompt, projectId, projectName }: Props) {
   const { chat } = useSharedChatContext()
   const { modelId, reasoningEffort } = useSettings()
   const { messages, sendMessage, status } = useChat<ChatUIMessage>({ chat })
@@ -294,14 +297,9 @@ export function Chat({ className, initialPrompt, projectId }: Props) {
     <>
       <Panel className={className}>
         <PanelHeader className="flex items-center justify-between">
-          <button
-            onClick={toggleSidebar}
-            className="p-1.5 hover:bg-secondary rounded-lg transition-colors"
-            title="Toggle app menu"
-            aria-label="Toggle app menu"
-          >
-            <Menu className="w-5 h-5 text-foreground" />
-          </button>
+          <div className="flex items-center">
+            <ProjectDropdown projectName={projectName || ''} projectId={projectId} />
+          </div>
           <div className="flex items-center gap-1">
             <button
               onClick={() => setShowHistoryPanel(!showHistoryPanel)}
