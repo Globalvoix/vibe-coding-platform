@@ -28,7 +28,7 @@ export function RunCommand({ message }: { message: DataPart['run-command'] }) {
           </span>
         </div>
         <div className="flex items-center gap-2">
-          {(message.output || message.error) && (
+          {message.error && (
             <button
               onClick={() => setIsExpanded(!isExpanded)}
               className="text-[12px] font-medium px-2.5 py-1 rounded hover:bg-black/[0.04] text-foreground/50 hover:text-foreground/75 transition-all"
@@ -46,22 +46,13 @@ export function RunCommand({ message }: { message: DataPart['run-command'] }) {
         </div>
       </div>
 
-      {isExpanded && (message.output || message.error) && (
+      {isExpanded && message.error && (
         <div className="mt-2.5 space-y-2 animate-in fade-in slide-in-from-top-1 duration-200">
-          {message.output && (
-            <div className="text-[12px] text-foreground/60 px-1">
-              <span className="font-mono text-[11px] bg-black/[0.03] px-2 py-1.5 rounded border border-black/[0.05] break-all whitespace-pre-wrap inline-block">
-                {message.output}
-              </span>
-            </div>
-          )}
-          {message.error && (
-            <div className="text-[12px] text-red-600/70 px-1">
-              <span className="font-mono text-[11px] bg-red-50 px-2 py-1.5 rounded border border-red-200/50 break-all whitespace-pre-wrap inline-block">
-                {message.error}
-              </span>
-            </div>
-          )}
+          <div className="text-[12px] text-red-600/70 px-1">
+            <span className="font-mono text-[11px] bg-red-50 px-2 py-1.5 rounded border border-red-200/50 break-all whitespace-pre-wrap inline-block">
+              {message.error.message}
+            </span>
+          </div>
         </div>
       )}
     </ToolMessage>
