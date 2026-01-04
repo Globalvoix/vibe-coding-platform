@@ -1,6 +1,7 @@
 import { ClerkProvider as ClerkRootProvider } from '@clerk/nextjs'
 import { NuqsAdapter } from 'nuqs/adapters/next/app'
 import { ChatScopeProvider } from '@/components/providers/chat-scope-provider'
+import { ThemeProvider } from '@/components/providers/theme-provider'
 import { CommandLogsStream } from '@/components/commands-logs/commands-logs-stream'
 import { ErrorMonitor } from '@/components/error-monitor/error-monitor'
 import { SandboxState } from '@/components/modals/sandbox-state'
@@ -51,11 +52,18 @@ export default function RootLayout({
       <html lang="en" suppressHydrationWarning>
         <body className={`${inter.variable} antialiased`}>
           <Suspense fallback={null}>
-            <NuqsAdapter>
-              <ChatScopeProvider>
-                <ErrorMonitor>{children}</ErrorMonitor>
-              </ChatScopeProvider>
-            </NuqsAdapter>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <NuqsAdapter>
+                <ChatScopeProvider>
+                  <ErrorMonitor>{children}</ErrorMonitor>
+                </ChatScopeProvider>
+              </NuqsAdapter>
+            </ThemeProvider>
           </Suspense>
           <Toaster />
           <CommandLogsStream />
