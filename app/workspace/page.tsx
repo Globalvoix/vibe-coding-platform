@@ -34,6 +34,7 @@ function WorkspaceContent({
   promptFromUrl: string | null
 }) {
   const [initialPrompt, setInitialPrompt] = useState<string>('')
+  const [projectName, setProjectName] = useState<string>('')
   const [horizontalSizes] = useState<[number, number] | null>(null)
   const { sandboxId, paths: sandboxPaths, url, currentProjectId } = useSandboxStore()
 
@@ -65,6 +66,7 @@ function WorkspaceContent({
           if (cancelled) return
 
           setInitialPrompt(project.initial_prompt ?? '')
+          setProjectName(project.name)
 
           const sandboxState = useSandboxStore.getState()
 
