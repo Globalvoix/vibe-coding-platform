@@ -262,14 +262,14 @@ export const Message = memo(function Message({
                       <button
                         type="button"
                         onClick={() => setRevertInChatVersionId(null)}
-                        className="flex-1 h-9 rounded-lg border border-black/[0.06] bg-white/60 hover:bg-white text-[13px] font-semibold text-foreground/80 transition-colors"
+                        className="flex-1 h-8 rounded-md border border-black/[0.08] bg-white hover:bg-[#F9F8F6] text-[12px] font-semibold text-foreground/75 transition-colors"
                       >
                         Cancel
                       </button>
                       <button
                         type="button"
                         onClick={() => onRevertInChat?.(viewingVersion!.id, String(message.id))}
-                        className="flex-1 h-9 rounded-lg bg-[#111827] hover:bg-black text-white text-[13px] font-semibold transition-colors"
+                        className="flex-1 h-8 rounded-md bg-[#0F172A] hover:bg-[#1A202C] text-white text-[12px] font-semibold transition-colors"
                       >
                         Revert
                       </button>
