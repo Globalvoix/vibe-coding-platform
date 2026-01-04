@@ -120,7 +120,7 @@ export function ProjectDropdown({ projectName, projectId }: ProjectDropdownProps
             </div>
           </div>
 
-          <button className="flex items-center gap-2.5 w-full px-3 py-2 text-[13px] text-foreground/70 hover:text-foreground hover:bg-black/[0.03] rounded-lg transition-colors mb-0.5">
+          <button className="flex items-center gap-2.5 w-full px-3 py-2 text-[13px] text-foreground/70 hover:text-foreground hover:bg-black/[0.04] rounded-lg transition-colors mb-0.5">
             <Gift className="w-4 h-4 opacity-70" />
             <span className="font-medium">Get free credits</span>
           </button>
@@ -128,7 +128,7 @@ export function ProjectDropdown({ projectName, projectId }: ProjectDropdownProps
           <div className="h-px bg-black/[0.05] my-1 mx-1" />
 
           <div className="flex flex-col py-0.5">
-            <button className="flex items-center justify-between w-full px-3 py-2 text-[13px] text-foreground/70 hover:text-foreground hover:bg-black/[0.03] rounded-lg transition-colors group">
+            <button className="flex items-center justify-between w-full px-3 py-2 text-[13px] text-foreground/70 hover:text-foreground hover:bg-black/[0.04] rounded-lg transition-colors group">
               <div className="flex items-center gap-2.5">
                 <SettingsIcon className="w-4 h-4 opacity-70" />
                 <span className="font-medium">Settings</span>
@@ -136,17 +136,17 @@ export function ProjectDropdown({ projectName, projectId }: ProjectDropdownProps
               <span className="text-[10px] text-foreground/30 font-semibold group-hover:text-foreground/40 transition-colors">Ctrl .</span>
             </button>
 
-            <button className="flex items-center gap-2.5 w-full px-3 py-2 text-[13px] text-foreground/70 hover:text-foreground hover:bg-black/[0.03] rounded-lg transition-colors">
+            <button className="flex items-center gap-2.5 w-full px-3 py-2 text-[13px] text-foreground/70 hover:text-foreground hover:bg-black/[0.04] rounded-lg transition-colors">
               <Copy className="w-4 h-4 opacity-70" />
               <span className="font-medium">Remix this project</span>
             </button>
 
-            <button className="flex items-center gap-2.5 w-full px-3 py-2 text-[13px] text-foreground/70 hover:text-foreground hover:bg-black/[0.03] rounded-lg transition-colors">
+            <button className="flex items-center gap-2.5 w-full px-3 py-2 text-[13px] text-foreground/70 hover:text-foreground hover:bg-black/[0.04] rounded-lg transition-colors">
               <Pencil className="w-4 h-4 opacity-70" />
               <span className="font-medium">Rename project</span>
             </button>
 
-            <button className="flex items-center gap-2.5 w-full px-3 py-2 text-[13px] text-foreground/70 hover:text-foreground hover:bg-black/[0.03] rounded-lg transition-colors">
+            <button className="flex items-center gap-2.5 w-full px-3 py-2 text-[13px] text-foreground/70 hover:text-foreground hover:bg-black/[0.04] rounded-lg transition-colors">
               <Star className="w-4 h-4 opacity-70" />
               <span className="font-medium">Star project</span>
             </button>
@@ -155,7 +155,7 @@ export function ProjectDropdown({ projectName, projectId }: ProjectDropdownProps
           <div className="h-px bg-black/[0.05] my-1 mx-1" />
 
           <div className="flex flex-col py-0.5 mb-1">
-            <button className="flex items-center justify-between w-full px-3 py-2 text-[13px] text-foreground/70 hover:text-foreground hover:bg-black/[0.03] rounded-lg transition-colors">
+            <button className="flex items-center justify-between w-full px-3 py-2 text-[13px] text-foreground/70 hover:text-foreground hover:bg-black/[0.04] rounded-lg transition-colors">
               <div className="flex items-center gap-2.5">
                 <Palette className="w-4 h-4 opacity-70" />
                 <span className="font-medium">Appearance</span>
@@ -163,7 +163,7 @@ export function ProjectDropdown({ projectName, projectId }: ProjectDropdownProps
               <ChevronRight className="w-3.5 h-3.5 opacity-30" />
             </button>
 
-            <button className="flex items-center justify-between w-full px-3 py-2 text-[13px] text-foreground/70 hover:text-foreground hover:bg-black/[0.03] rounded-lg transition-colors">
+            <button className="flex items-center justify-between w-full px-3 py-2 text-[13px] text-foreground/70 hover:text-foreground hover:bg-black/[0.04] rounded-lg transition-colors">
               <div className="flex items-center gap-2.5">
                 <HelpCircle className="w-4 h-4 opacity-70" />
                 <span className="font-medium">Help</span>
