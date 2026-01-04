@@ -118,7 +118,7 @@ export const MarkdownRenderer = memo(function MarkdownRenderer({
       ),
       p: ({ children, ...props }) => (
         <p
-          className="mb-5 last:mb-0 leading-[1.75] text-foreground/85 font-sans text-[15px]"
+          className="mb-4 last:mb-0 leading-[1.65] text-foreground/80 font-sans text-[14px]"
           {...props}
         >
           {children}
@@ -126,7 +126,7 @@ export const MarkdownRenderer = memo(function MarkdownRenderer({
       ),
       ul: ({ children, ...props }) => (
         <ul
-          className="list-disc pl-6 mb-5 space-y-2.5 text-foreground/85 font-sans text-[15px]"
+          className="list-disc pl-6 mb-4 space-y-1.5 text-foreground/80 font-sans text-[14px]"
           {...props}
         >
           {children}
@@ -134,14 +134,14 @@ export const MarkdownRenderer = memo(function MarkdownRenderer({
       ),
       ol: ({ children, ...props }) => (
         <ol
-          className="list-decimal pl-6 mb-5 space-y-2.5 text-foreground/85 font-sans text-[15px]"
+          className="list-decimal pl-6 mb-4 space-y-1.5 text-foreground/80 font-sans text-[14px]"
           {...props}
         >
           {children}
         </ol>
       ),
       li: ({ children, ...props }) => (
-        <li className="marker:text-foreground/30 leading-[1.7]" {...props}>
+        <li className="marker:text-foreground/25 leading-[1.65]" {...props}>
           {children}
         </li>
       ),
