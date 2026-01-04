@@ -100,7 +100,7 @@ export function ProjectDropdown({ projectName, projectId }: ProjectDropdownProps
             <span className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest">My workspace</span>
           </div>
 
-          <div className="px-3.5 py-3 bg-white/50 rounded-xl border border-black/[0.01] mx-1 mb-2">
+          <div className="px-3.5 py-3 bg-[#EFECE0] rounded-sm border border-black/[0.03] mx-1 mb-2">
             <div className="flex items-center justify-between mb-2">
               <span className="text-[12px] font-bold text-foreground/80">Credits</span>
               <div className="flex items-center gap-1 text-[12px] font-medium text-foreground/45">
@@ -108,7 +108,7 @@ export function ProjectDropdown({ projectName, projectId }: ProjectDropdownProps
                 <ChevronRight className="w-3.5 h-3.5 opacity-40" />
               </div>
             </div>
-            <div className="h-1.5 w-full bg-black/[0.05] rounded-full overflow-hidden mb-2.5">
+            <div className="h-1.5 w-full bg-black/[0.08] rounded-full overflow-hidden mb-2.5">
               <div
                 className="h-full bg-[#1A73E8] transition-all duration-700 rounded-full"
                 style={{ width: `${creditPercentage}%` }}
