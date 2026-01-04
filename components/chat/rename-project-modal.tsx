@@ -87,7 +87,7 @@ export function RenameProjectModal({
           <Input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="h-11 px-4 text-[15px] bg-[#F8FAFC] border-[#E2E8F0] focus-visible:ring-[#1A73E8] focus-visible:border-[#1A73E8] transition-all rounded-lg"
+            className="h-11 px-4 text-[15px] bg-[#F8FAFC] border-[#E2E8F0] focus-visible:ring-[#1A73E8]/10 focus-visible:border-[#1A73E8] focus-visible:bg-[#EFF6FF] transition-all rounded-lg"
             placeholder="My Project"
             maxLength={100}
             autoFocus
