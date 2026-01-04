@@ -1,7 +1,6 @@
 import type { DataPart } from '@/ai/messages/data-parts'
-import { CheckIcon, FileCodeIcon, XIcon, ChevronRightIcon, ChevronDownIcon } from 'lucide-react'
+import { CheckIcon, FileCodeIcon, XIcon } from 'lucide-react'
 import { Spinner } from './spinner'
-import { ToolHeader } from '../tool-header'
 import { ToolMessage } from '../tool-message'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
@@ -29,48 +28,46 @@ export function GenerateFiles(props: {
 
   return (
     <ToolMessage className={cn("transition-all duration-300", props.className)}>
-      <div className="flex items-center justify-between group py-0.5">
-        <ToolHeader className="mb-0">
-          <div className="flex items-center gap-2">
-            <FileCodeIcon className="w-3.5 h-3.5 text-foreground/40" />
-            <span className="text-[13px] font-medium text-foreground/70">
-              {isDone
-                ? `${totalFiles} edit${totalFiles !== 1 ? 's' : ''} made`
-                : `Generating ${totalFiles} file${totalFiles !== 1 ? 's' : ''}...`}
-            </span>
-          </div>
-        </ToolHeader>
+      <div className="flex items-center justify-between group py-1">
+        <div className="flex items-center gap-2">
+          <FileCodeIcon className="w-3.5 h-3.5 text-foreground/40" />
+          <span className="text-[13px] font-medium text-foreground/65">
+            {isDone
+              ? `${totalFiles} edit${totalFiles !== 1 ? 's' : ''} made`
+              : `Editing ${totalFiles} file${totalFiles !== 1 ? 's' : ''}...`}
+          </span>
+        </div>
         {totalFiles > 0 && (
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="text-[12px] font-medium px-2 py-0.5 rounded hover:bg-black/5 text-foreground/40 hover:text-foreground/70 transition-all flex items-center gap-1.5"
+            className="text-[12px] font-medium px-2.5 py-1 rounded text-foreground/50 hover:text-foreground/75 hover:bg-black/[0.04] transition-all"
           >
-            {isExpanded ? 'Hide all' : 'Show all'}
+            {isExpanded ? 'Hide' : 'Show all'}
           </button>
         )}
       </div>
 
       {isExpanded && (
-        <div className="mt-3 pl-2.5 space-y-1.5 border-l border-border/40 ml-1.5 py-1 animate-in fade-in slide-in-from-top-1 duration-200">
+        <div className="mt-2.5 space-y-1.5 animate-in fade-in slide-in-from-top-1 duration-200">
           {generated.map((path) => (
-            <div className="flex items-center text-[13px] text-foreground/50 hover:text-foreground/80 transition-colors" key={'gen' + path}>
-              <CheckIcon className="w-3.5 h-3.5 mr-2.5 text-green-500/50" strokeWidth={3} />
-              <span className="truncate font-mono text-[12px] bg-black/[0.03] px-1.5 py-0.5 rounded border border-black/[0.05]">{path}</span>
+            <div className="flex items-center gap-2 text-[12px] text-foreground/60 px-1" key={'gen' + path}>
+              <CheckIcon className="w-3 h-3 flex-shrink-0 text-green-500/60" strokeWidth={3} />
+              <span className="truncate font-mono text-[11px]">{path}</span>
             </div>
           ))}
           {typeof generating === 'string' && (
-            <div className="flex items-center text-[13px] text-foreground/50">
-              <div className="mr-2.5 flex items-center justify-center w-3.5 h-3.5">
+            <div className="flex items-center gap-2 text-[12px] text-foreground/50 px-1">
+              <div className="flex items-center justify-center w-3 h-3 flex-shrink-0">
                 {props.message.status === 'error' ? (
-                  <XIcon className="w-3.5 h-3.5 text-red-500/70" />
+                  <XIcon className="w-3 h-3 text-red-500/60" />
                 ) : (
                   <Spinner
-                    className="w-3 h-3"
+                    className="w-2 h-2"
                     loading={true}
                   />
                 )}
               </div>
-              <span className="truncate font-mono text-[12px] italic opacity-70">{generating}</span>
+              <span className="truncate font-mono text-[11px] italic opacity-70">{generating}</span>
             </div>
           )}
         </div>
