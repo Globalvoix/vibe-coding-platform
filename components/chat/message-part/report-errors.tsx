@@ -10,12 +10,12 @@ export function ReportErrors({
   message: DataPart['report-errors']
 }) {
   return (
-    <ToolMessage className="bg-red-500/[0.02] border-red-500/10 rounded-xl px-4 py-3">
-      <ToolHeader className="text-red-600/80">
-        <BugIcon className="w-3.5 h-3.5" />
-        <span>Auto-detected errors</span>
-      </ToolHeader>
-      <div className="text-[13px] text-foreground/80 leading-relaxed font-sans">
+    <ToolMessage className="bg-red-500/[0.03] border-red-500/10 rounded-lg px-3 py-2.5">
+      <div className="flex items-center gap-2 mb-1">
+        <BugIcon className="w-3.5 h-3.5 text-red-600/70" />
+        <span className="text-[13px] font-medium text-red-600/75">Auto-detected errors</span>
+      </div>
+      <div className="text-[13px] text-foreground/75 leading-[1.6] font-sans pl-5">
         <MarkdownRenderer content={message.summary} />
       </div>
     </ToolMessage>
