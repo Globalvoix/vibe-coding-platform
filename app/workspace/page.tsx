@@ -178,6 +178,7 @@ function WorkspaceContent({
               className="flex-1 overflow-hidden"
               initialPrompt={initialPrompt}
               projectId={projectId}
+              projectName={projectName}
             />
           </TabContent>
           <TabContent tabId="preview" className="flex-1">
@@ -202,6 +203,7 @@ function WorkspaceContent({
                 className="flex-1 overflow-hidden"
                 initialPrompt={initialPrompt}
                 projectId={projectId}
+                projectName={projectName}
               />
             }
             right={
