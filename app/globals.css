@@ -178,15 +178,36 @@ body {
   background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #e5e7eb;
-  border-radius: 10px;
+  background: #d5d3ce;
+  border-radius: 3px;
 }
 .dark .custom-scrollbar::-webkit-scrollbar-thumb {
   background: #4b5563;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #d1d5db;
+  background: #c9c5be;
 }
 .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+/* Chat scrollbar styling */
+.conversation-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+.conversation-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.conversation-scroll::-webkit-scrollbar-thumb {
+  background: #d5d3ce;
+  border-radius: 2.5px;
+}
+.dark .conversation-scroll::-webkit-scrollbar-thumb {
+  background: #4b5563;
+}
+.conversation-scroll::-webkit-scrollbar-thumb:hover {
+  background: #bfbbb2;
+}
+.dark .conversation-scroll::-webkit-scrollbar-thumb:hover {
   background: #6b7280;
 }
