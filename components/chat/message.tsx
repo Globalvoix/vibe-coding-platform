@@ -202,7 +202,7 @@ export const Message = memo(function Message({
               typeof onRevertInChat === 'function'
 
             return (
-              <div className="flex flex-col gap-2.5 pt-2 animate-in fade-in slide-in-from-top-2 duration-500">
+              <div className="flex flex-col gap-2 pt-1.5 animate-in fade-in slide-in-from-top-2 duration-500">
                 <div className="flex items-center gap-2.5">
                   <div className="relative w-full max-w-[290px]">
                     <button onClick={resolveAndSelectVersion} className={cardClasses}>
