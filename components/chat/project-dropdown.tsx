@@ -97,7 +97,7 @@ export function ProjectDropdown({ projectName, projectId }: ProjectDropdownProps
           </button>
 
           <div className="mt-2 mb-1 px-3">
-            <span className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest">My Lovable</span>
+            <span className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest">My workspace</span>
           </div>
 
           <div className="px-3.5 py-3 bg-white/50 rounded-xl border border-black/[0.01] mx-1 mb-2">
