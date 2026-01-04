@@ -120,10 +120,10 @@ export const Message = memo(function Message({
             const subtitle = isLatestVersionCard ? 'Previewing latest version' : 'Preview this version'
 
             const cardClasses = cn(
-              'flex items-center justify-between w-full px-4 py-3 rounded-xl border transition-colors group shadow-sm text-left',
+              'flex items-center justify-between w-full px-4 py-3 rounded-lg border transition-colors group shadow-xs text-left',
               isLatestVersionCard
                 ? 'bg-[#D2E3FC] hover:bg-[#C6DAFC] border-[#1A73E8]'
-                : 'bg-[#F7F4ED] hover:bg-[#F2EFE8] border-black/[0.06]',
+                : 'bg-[#F7F4ED] hover:bg-[#F0EDE5] border-black/[0.06]',
               isSelected && 'ring-1 ring-black/10'
             )
 
