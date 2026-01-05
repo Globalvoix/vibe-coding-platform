@@ -186,7 +186,7 @@ export async function POST(
     }
 
     // Generate fixes
-    const fixes = await generateSecurityFixes(issues)
+    const fixes = await generateSecurityFixes(sandboxId, issues)
 
     // Apply fixes to sandbox
     const applied = await applyFixesToSandbox(sandboxId, fixes)
