@@ -126,18 +126,34 @@ export function SecurityScan() {
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
             <h2 className="text-lg font-semibold text-foreground">Security scan</h2>
-            <Badge variant="secondary" className="bg-[#E8F0FE] text-[#1A73E8] border-transparent font-medium px-2 py-0.5 rounded-sm">
-              Up-to-date
+            <Badge
+              variant="secondary"
+              className={cn(
+                'border-transparent font-medium px-2 py-0.5 rounded-sm',
+                isScanning ? 'bg-yellow-100 text-yellow-700' : 'bg-[#E8F0FE] text-[#1A73E8]'
+              )}
+            >
+              {isScanning ? 'Scanning...' : 'Up-to-date'}
             </Badge>
           </div>
-          <p className="text-sm text-muted-foreground">Last scan: less than a minute ago</p>
+          <p className="text-sm text-muted-foreground">
+            {isScanning ? 'Running security scan...' : lastScannedAt ? `Last scan: ${new Date(lastScannedAt).toLocaleTimeString()}` : 'No scans yet'}
+          </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" className="bg-white border-black/10 text-xs h-8 px-3 rounded-md font-medium">
+          <Button
+            variant="outline"
+            className="bg-white border-black/10 text-xs h-8 px-3 rounded-md font-medium"
+            disabled={isScanning || isFixing}
+          >
             Add context
           </Button>
-          <Button className="bg-[#1A73E8] hover:bg-[#1557B0] text-white border-transparent text-xs h-8 px-3 rounded-md font-medium">
-            Update (Free)
+          <Button
+            onClick={handleScan}
+            disabled={isScanning || isFixing}
+            className="bg-[#1A73E8] hover:bg-[#1557B0] text-white border-transparent text-xs h-8 px-3 rounded-md font-medium disabled:opacity-50"
+          >
+            {isScanning ? <Spinner size="sm" /> : 'Update (Free)'}
           </Button>
           <button className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors ml-4">
             <HelpCircle className="w-4 h-4" />
