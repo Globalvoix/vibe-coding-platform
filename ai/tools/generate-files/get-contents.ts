@@ -36,20 +36,37 @@ export async function* getContents(
   const generated: z.infer<typeof fileSchema>[] = []
   const deferred = new Deferred<void>()
   const result = streamObject({
-    ...getModelOptions(params.modelId, { reasoningEffort: 'low' }),
+    ...getModelOptions(params.modelId, { reasoningEffort: 'medium' }),
     maxOutputTokens: 64000,
-    system: `You are a file content generator. You must generate files based on the conversation history and the provided paths. NEVER generate lock files (pnpm-lock.yaml, package-lock.json, yarn.lock) - these are automatically created by package managers.
+    system: `You are a file content generator. You must generate files based on the conversation history and the provided paths.
+
+Hard rules:
+- NEVER generate lock files (pnpm-lock.yaml, package-lock.json, yarn.lock).
+- Every file you output must be COMPLETE (no placeholders, no TODOs, no "rest of" comments).
+- Do not reference local images/assets unless you also create them in the output.
+
+Quality bar (especially for frontend/UI):
+- Produce production-grade, realistic UI: thoughtful layout, spacing, typography hierarchy, and micro-interactions (hover/focus/disabled states).
+- Avoid "single empty page" scaffolds. Include real structure: header/nav, main content with multiple sections, and footer; meaningful empty/loading/error states.
+- Use realistic example data and copy (no lorem ipsum, no "Item 1" lists).
+
+Images (prevent broken images):
+- Use only stable, publicly accessible image URLs from approved sources (prefer https://images.unsplash.com/ or https://images.pexels.com/).
+- Always include explicit dimensions (width/height attributes or equivalent) to avoid layout shift.
+- Prefer plain <img> tags for maximum compatibility across stacks.
+- If you use Next.js <Image>, you MUST also update next.config.* to allow the exact remote domains/patterns you used; otherwise use <img>.
+- Add a runtime fallback for failed images (e.g., onError -> swap to https://picsum.photos/... or https://placehold.co/...).
 
 When generating files:
-- Generate complete, working file contents that will be used directly
-- Use appropriate imports and dependencies based on the project context
+- Generate complete, working file contents that will be used directly.
+- Use appropriate imports and dependencies based on the project context.
 - For Supabase projects:
   - Use Supabase client libraries (@supabase/supabase-js)
   - Reference environment variables like NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY
   - Create database queries and real-time subscriptions when needed
   - Generate proper TypeScript types for database operations
-- Ensure all generated code is syntactically correct and imports are valid
-- Maintain consistency with the existing project structure and conventions`,
+- Ensure all generated code is syntactically correct and imports are valid.
+- Maintain consistency with the existing project structure and conventions.`,
     messages: [
       ...params.messages,
       {
