@@ -23,11 +23,11 @@ export const MessagePart = memo(function MessagePart({
   if (part.type === 'data-generating-files') {
     return <GenerateFiles message={part.data} />
   } else if (part.type === 'data-create-sandbox') {
-    return <CreateSandbox message={part.data} />
+    return null
   } else if (part.type === 'data-get-sandbox-url') {
     return <GetSandboxURL message={part.data} />
   } else if (part.type === 'data-run-command') {
-    return <RunCommand message={part.data} />
+    return null
   } else if (part.type === 'reasoning') {
     return <Reasoning part={part} partIndex={partIndex} />
   } else if (part.type === 'data-report-errors') {
