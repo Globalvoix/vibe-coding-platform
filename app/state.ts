@@ -139,6 +139,7 @@ export const useSandboxStore = create<SandboxStore>()((set) => ({
       revertInChatVersionId: null,
       device: 'desktop',
       activeTab: 'preview',
+      isRestoringEnvironment: false,
     })),
   setChatStatus: (status) =>
     set((state) =>
