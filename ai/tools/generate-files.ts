@@ -54,12 +54,11 @@ export const generateFiles = ({ writer, modelId, userId, projectId }: Params) =>
 
       const normalizePath = (p: string) => p.trim().replace(/^\.{1,2}\//, '').replace(/^\//, '')
 
-      const withTimeout = async <T,>(promise: Promise<T>, timeoutMs: number) => {
+      const withTimeout = async <T,>(fn: (signal: AbortSignal) => Promise<T>, timeoutMs: number) => {
         const controller = new AbortController()
         const timeout = setTimeout(() => controller.abort(), timeoutMs)
         try {
-          // @ts-expect-error - callers may pass signal-aware promises (fetch)
-          return await promise(controller.signal)
+          return await fn(controller.signal)
         } finally {
           clearTimeout(timeout)
         }
