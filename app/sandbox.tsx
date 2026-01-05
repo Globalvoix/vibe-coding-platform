@@ -455,9 +455,7 @@ export function Sandbox({ className }: Props) {
               : 'opacity-0 z-0 pointer-events-none'
           )}
         >
-          <div className="h-full w-full flex items-center justify-center text-foreground/40 text-sm italic">
-            Security settings are coming soon
-          </div>
+          <SecurityScan />
         </div>
       </div>
       <ComingSoonModal
