@@ -14,13 +14,28 @@ interface SecurityIssue {
 async function getSandboxFiles(sandboxId: string): Promise<Array<{ path: string; content: string }>> {
   try {
     const sandbox = await Sandbox.get({ sandboxId })
-    const fileList = ['package.json', 'app/page.tsx', 'app/layout.tsx', 'components/**/*.tsx', 'lib/**/*.ts']
+    const fileList = [
+      'package.json',
+      'app/page.tsx',
+      'app/layout.tsx',
+      'app/api/subscriptions/route.ts',
+      'lib/auth.ts',
+      'lib/database.ts',
+      'middleware.ts',
+    ]
     const files: Array<{ path: string; content: string }> = []
 
-    for (const pattern of fileList) {
+    for (const filePath of fileList) {
       try {
-        // Simple file reading - in a real implementation, would use sandbox.readFile
-        // This is a placeholder for the actual file reading logic
+        const stream = await sandbox.readFile({ path: filePath })
+        if (!stream) continue
+
+        const chunks: Buffer[] = []
+        for await (const chunk of stream) {
+          chunks.push(chunk as Buffer)
+        }
+        const content = Buffer.concat(chunks).toString('utf-8')
+        files.push({ path: filePath, content })
       } catch {
         // Skip if file doesn't exist
       }
