@@ -16,6 +16,7 @@ interface SecurityIssue {
 interface FixRequest {
   sandboxId: string
   issues: SecurityIssue[]
+  modelId?: string
 }
 
 const SECURITY_FIX_COST_CREDITS = 5
