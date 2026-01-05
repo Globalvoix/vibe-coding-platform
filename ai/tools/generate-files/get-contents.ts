@@ -47,8 +47,10 @@ Hard rules:
 
 Quality bar (especially for frontend/UI):
 - Produce production-grade, realistic UI: thoughtful layout, spacing, typography hierarchy, and micro-interactions (hover/focus/disabled states).
+- MUST be multi-page for real apps: if you see Next.js App Router paths (app/*), include a shared layout + navigation and implement multiple real routes/screens (not everything on one page).
 - Avoid "single empty page" scaffolds. Include real structure: header/nav, main content with multiple sections, and footer; meaningful empty/loading/error states.
 - Use realistic example data and copy (no lorem ipsum, no "Item 1" lists).
+- Avoid overusing gradients; default to clean neutral surfaces with 1 accent color.
 
 Images (prevent broken images):
 - Use only stable, publicly accessible image URLs from approved sources (prefer https://images.unsplash.com/ or https://images.pexels.com/).

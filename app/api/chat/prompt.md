@@ -76,7 +76,15 @@ Include internally:
 ### B. Multi-Page Architecture (MANDATORY)
 - Define every route: Home, Browse, Details, Search, Profile, etc.
 - NO single-page demos. Each route must be fully implemented with proper navigation.
-- Data layer: Mock data in `lib/data.ts` structured for real-world patterns (e.g., 50+ movie objects with all required fields).
+- Data layer: Mock data in `lib/data.ts` structured for real-world patterns (e.g., 50+ objects with all required fields).
+
+**Minimum routes by app type (MANDATORY):**
+- **E-commerce / Amazon-like:** `/` (home), `/products` (listing), `/products/[id]` (details), `/search`, `/cart`, `/account`.
+- **Streaming / Netflix-like:** `/profiles`, `/browse`, `/title/[id]`, `/search`, `/my-list`.
+- **SaaS / Huly/Supabase-like:** `/dashboard`, `/projects` (listing), `/projects/[id]` (details), `/settings`, `/billing`.
+- **Marketing / Neon/Cluely-like:** `/` (landing), `/pricing`, `/docs` or `/features`, `/company` or `/about`, `/contact`.
+
+If the user requests a full app/site and you generate fewer routes than above, you have failed the task — expand the information architecture before writing code.
 
 ### C. Pixel-Perfect Spacing Blueprint
 - Define exact grid: 4px base unit, 8px/16px/24px/32px spacing increments.
