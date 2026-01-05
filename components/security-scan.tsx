@@ -88,7 +88,7 @@ export function SecurityScan() {
       const response = await fetch(`/api/projects/${projectId}/security/fix`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sandboxId, issues }),
+        body: JSON.stringify({ sandboxId, issues, modelId }),
       })
 
       if (response.status === 402) {
