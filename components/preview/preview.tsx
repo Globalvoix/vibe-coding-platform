@@ -170,7 +170,9 @@ export function Preview({
             <div className="flex flex-col items-center gap-3 text-xs text-muted-foreground">
               <div className="h-10 w-10 rounded-full border-2 border-dashed border-border animate-spin" />
               <p className="text-center max-w-[220px]">
-                Preview will appear here once your app is generated or the sandbox is running.
+                {isRestoringEnvironment
+                  ? 'Restoring your environment...'
+                  : 'Preview will appear here once your app is generated or the sandbox is running.'}
               </p>
             </div>
           </div>
