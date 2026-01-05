@@ -116,7 +116,7 @@ export function SecurityScan() {
     } finally {
       setIsFixing(false)
     }
-  }, [projectId, issues])
+  }, [projectId, sandboxId, issues])
 
   return (
     <div className="flex flex-col h-full bg-[#FAF9F6] overflow-auto">
