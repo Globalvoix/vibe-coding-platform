@@ -32,7 +32,6 @@ export function Sandbox({ className }: Props) {
   const searchParams = useSearchParams()
   const projectId = searchParams.get('projectId')
 
-  const [activeTab, setActiveTab] = useState<SandboxTabId>('preview')
   const [restorePopoverOpen, setRestorePopoverOpen] = useState(false)
   const [currentUrl, setCurrentUrl] = useState<string>('')
   const [inputValue, setInputValue] = useState<string>('')
@@ -40,7 +39,7 @@ export function Sandbox({ className }: Props) {
   const [showComingSoon, setShowComingSoon] = useState(false)
   const previewRefreshRef = useRef<(() => void) | null>(null)
 
-  const { viewingVersion, setViewingVersion, setRevertInChatVersionId, applySandboxState, device, setDevice } = useSandboxStore()
+  const { viewingVersion, setViewingVersion, setRevertInChatVersionId, applySandboxState, device, setDevice, activeTab, setActiveTab } = useSandboxStore()
 
   const toggleDevice = () => {
     if (device === 'desktop') setDevice('tablet')
