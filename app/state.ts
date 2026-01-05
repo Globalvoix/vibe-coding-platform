@@ -36,6 +36,7 @@ interface SandboxStore {
   setSandboxId: (id: string) => void
   setStatus: (status: 'running' | 'stopped') => void
   setUrl: (url: string) => void
+  clearUrl: () => void
   setViewingVersion: (version: ViewingVersion | null) => void
   status?: 'running' | 'stopped'
   upsertCommand: (command: Omit<Command, 'startedAt'>) => void
@@ -161,6 +162,7 @@ export const useSandboxStore = create<SandboxStore>()((set) => ({
     })),
   setStatus: (status) => set(() => ({ status })),
   setUrl: (url) => set(() => ({ url })),
+  clearUrl: () => set(() => ({ url: undefined })),
   upsertCommand: (cmd) => {
     set((state) => {
       const existingIdx = state.commands.findIndex((c) => c.cmdId === cmd.cmdId)

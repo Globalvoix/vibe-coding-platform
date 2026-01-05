@@ -75,12 +75,22 @@ function WorkspaceContent({
           sandboxState.setRestoreError(null)
 
           const cached = project.sandbox_state
+          const hasAnySandboxState =
+            !!cached &&
+            (typeof cached.sandboxId === 'string' ||
+              typeof cached.url === 'string' ||
+              (Array.isArray(cached.paths) && cached.paths.length > 0))
 
-          // If we have a sandboxId, don't show the cached URL (it may be a stopped sandbox that returns 410).
+          // If the project has any prior sandbox state, don't show the cached URL (it may be a stopped sandbox that returns 410).
           // Instead, show the restoring UI while we try to revive / rebuild.
-          if (cached?.sandboxId) {
-            sandboxState.setSandboxId(cached.sandboxId)
-            if (Array.isArray(cached.paths) && cached.paths.length > 0) {
+          if (hasAnySandboxState) {
+            if (cached?.sandboxId) {
+              sandboxState.setSandboxId(cached.sandboxId)
+            } else {
+              sandboxState.clearUrl()
+            }
+
+            if (Array.isArray(cached?.paths) && cached.paths.length > 0) {
               sandboxState.addPaths(cached.paths)
             }
 
@@ -118,7 +128,6 @@ function WorkspaceContent({
               }
             }
           } else if (cached) {
-            // No sandbox to revive, safe to apply cached state (e.g. already running URL-only state)
             sandboxState.applySandboxState(cached)
           }
         } catch (error) {
