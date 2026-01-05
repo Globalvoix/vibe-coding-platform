@@ -20,6 +20,7 @@ interface Issue {
 export function SecurityScan() {
   const searchParams = useSearchParams()
   const projectId = searchParams.get('projectId')
+  const modelId = searchParams.get('modelId')
   const { sandboxId } = useSandboxStore()
 
   const [issues, setIssues] = React.useState<Issue[]>([])
