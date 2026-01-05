@@ -26,21 +26,28 @@ export function GenerateFiles(props: {
   const totalFiles = props.message.paths.length
   const isDone = props.message.status === 'done'
 
+  const currentFile = generating || (props.message.paths[props.message.paths.length - 1] ?? '')
+
   return (
-    <ToolMessage className={cn("transition-all duration-300", props.className)}>
-      <div className="flex items-center justify-between group py-1">
+    <ToolMessage className={cn("transition-all duration-300 border-none bg-transparent p-0", props.className)}>
+      <div className="flex items-center justify-between group py-1.5">
         <div className="flex items-center gap-2">
-          <FileCodeIcon className="w-3.5 h-3.5 text-foreground/40" />
-          <span className="text-[13px] font-medium text-foreground/65">
+          <div className="relative w-4 h-4 flex items-center justify-center">
+            {!isDone && (
+              <div className="absolute w-full h-full rounded-full bg-black/[0.05] animate-pulse"></div>
+            )}
+            <FileCodeIcon className="w-3.5 h-3.5 text-foreground/40" />
+          </div>
+          <span className="text-[14px] font-medium text-[#8A8A85]">
             {isDone
               ? `${totalFiles} edit${totalFiles !== 1 ? 's' : ''} made`
-              : `Editing ${totalFiles} file${totalFiles !== 1 ? 's' : ''}...`}
+              : `Editing ${currentFile}`}
           </span>
         </div>
         {totalFiles > 0 && (
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="text-[12px] font-medium px-2.5 py-1 rounded text-foreground/50 hover:text-foreground/75 hover:bg-black/[0.04] transition-all"
+            className="text-[13px] font-medium px-2 py-0.5 rounded text-foreground/40 hover:text-foreground/70 hover:bg-black/[0.03] transition-all border border-black/[0.05]"
           >
             {isExpanded ? 'Hide' : 'Show all'}
           </button>
@@ -48,26 +55,26 @@ export function GenerateFiles(props: {
       </div>
 
       {isExpanded && (
-        <div className="mt-2.5 space-y-1.5 animate-in fade-in slide-in-from-top-1 duration-200">
+        <div className="mt-1 space-y-1 animate-in fade-in slide-in-from-top-1 duration-200 pl-6">
           {generated.map((path) => (
-            <div className="flex items-center gap-2 text-[12px] text-foreground/60 px-1" key={'gen' + path}>
-              <CheckIcon className="w-3 h-3 flex-shrink-0 text-green-500/60" strokeWidth={3} />
-              <span className="truncate font-mono text-[11px]">{path}</span>
+            <div className="flex items-center gap-2 text-[13px] text-[#8A8A85] py-0.5" key={'gen' + path}>
+              <div className="flex items-center gap-1.5">
+                <FileCodeIcon className="w-3 h-3 opacity-40" />
+                <span className="font-medium opacity-60">Edited</span>
+              </div>
+              <span className="truncate font-sans text-[13px] opacity-80">{path}</span>
             </div>
           ))}
           {typeof generating === 'string' && (
-            <div className="flex items-center gap-2 text-[12px] text-foreground/50 px-1">
-              <div className="flex items-center justify-center w-3 h-3 flex-shrink-0">
-                {props.message.status === 'error' ? (
-                  <XIcon className="w-3 h-3 text-red-500/60" />
-                ) : (
-                  <Spinner
-                    className="w-2 h-2"
-                    loading={true}
-                  />
-                )}
+            <div className="flex items-center gap-2 text-[13px] text-[#8A8A85] py-0.5">
+              <div className="flex items-center gap-1.5">
+                <div className="relative w-3 h-3 flex items-center justify-center">
+                  <div className="absolute w-full h-full rounded-full bg-black/[0.05] animate-pulse"></div>
+                  <FileCodeIcon className="w-3 h-3 opacity-40" />
+                </div>
+                <span className="font-medium opacity-60">Editing</span>
               </div>
-              <span className="truncate font-mono text-[11px] italic opacity-70">{generating}</span>
+              <span className="truncate font-sans text-[13px] opacity-80">{generating}</span>
             </div>
           )}
         </div>
