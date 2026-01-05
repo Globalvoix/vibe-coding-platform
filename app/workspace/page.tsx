@@ -83,14 +83,18 @@ function WorkspaceContent({
             if (url) {
               sandboxState.setUrl(url)
             }
+          }
 
-            try {
-              const reviveRes = await fetch(`/api/projects/${projectId}/sandbox/revive`, {
-                method: 'POST',
-              })
+          // Always attempt to revive the sandbox, whether or not there was previous state
+          sandboxState.setIsRestoringEnvironment(true)
+          try {
+            const reviveRes = await fetch(`/api/projects/${projectId}/sandbox/revive`, {
+              method: 'POST',
+            })
 
-              if (!reviveRes.ok) return
+            if (cancelled) return
 
+            if (reviveRes.ok) {
               const revived = (await reviveRes.json()) as {
                 sandbox_state: {
                   sandboxId?: string
@@ -100,13 +104,21 @@ function WorkspaceContent({
                 } | null
               }
 
-              if (cancelled) return
-
               if (revived.sandbox_state) {
                 sandboxState.applySandboxState(revived.sandbox_state)
               }
-            } catch {
-              // ignore
+            } else {
+              const errorData = await reviveRes.json() as { status?: string }
+              // 409 means no persisted files yet, which is expected for new projects
+              if (reviveRes.status !== 409) {
+                console.error('Failed to revive sandbox:', reviveRes.status, errorData)
+              }
+            }
+          } catch (error) {
+            console.error('Error reviving sandbox:', error)
+          } finally {
+            if (!cancelled) {
+              sandboxState.setIsRestoringEnvironment(false)
             }
           }
         } catch (error) {
