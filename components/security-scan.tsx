@@ -68,7 +68,7 @@ export function SecurityScan() {
     } finally {
       setIsScanning(false)
     }
-  }, [projectId])
+  }, [projectId, sandboxId])
 
   const handleFixAll = React.useCallback(async () => {
     if (!projectId || issues.length === 0) return
