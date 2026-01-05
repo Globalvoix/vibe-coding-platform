@@ -36,19 +36,16 @@ export function SecurityScan() {
   })
 
   const handleScan = React.useCallback(async () => {
-    if (!projectId) return
+    if (!projectId || !sandboxId) {
+      setError('Sandbox not initialized. Please generate code first.')
+      setIsScanning(false)
+      return
+    }
 
     setIsScanning(true)
     setError(null)
 
     try {
-      // Get sandbox ID from URL or storage
-      const sandboxId = sessionStorage.getItem('sandboxId') || ''
-      if (!sandboxId) {
-        setError('Sandbox not initialized. Please generate code first.')
-        setIsScanning(false)
-        return
-      }
 
       const response = await fetch(`/api/projects/${projectId}/security/scan`, {
         method: 'POST',
