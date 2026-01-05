@@ -15,7 +15,7 @@ interface ViewingVersion {
   } | null
 }
 
-type SandboxTabId = 'preview' | 'code' | 'console' | 'cloud' | 'security'
+export type SandboxTabId = 'preview' | 'code' | 'console' | 'cloud' | 'security'
 
 interface SandboxStore {
   addGeneratedFiles: (files: string[]) => void
