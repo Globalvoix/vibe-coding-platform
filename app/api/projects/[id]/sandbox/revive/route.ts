@@ -44,19 +44,42 @@ function selectPackageManager(filePaths: string[]) {
   return 'npm'
 }
 
-function buildBootstrapCommand(pm: 'npm' | 'pnpm' | 'yarn', port: number) {
+function buildInstallCommand(pm: 'npm' | 'pnpm' | 'yarn') {
+  return pm === 'npm' ? 'npm install' : pm === 'pnpm' ? 'pnpm install' : 'yarn install'
+}
+
+function buildDevCommand(pm: 'npm' | 'pnpm' | 'yarn', port: number) {
   const host = '0.0.0.0'
 
-  const install = pm === 'npm' ? 'npm install' : pm === 'pnpm' ? 'pnpm install' : 'yarn install'
+  return pm === 'npm'
+    ? `npm run dev -- --host ${host} --port ${port}`
+    : pm === 'pnpm'
+      ? `pnpm dev -- --host ${host} --port ${port}`
+      : `yarn dev --host ${host} --port ${port}`
+}
 
-  const dev =
-    pm === 'npm'
-      ? `npm run dev -- --host ${host} --port ${port}`
-      : pm === 'pnpm'
-        ? `pnpm dev -- --host ${host} --port ${port}`
-        : `yarn dev --host ${host} --port ${port}`
+function buildWaitForPortCommand(port: number, timeoutMs: number) {
+  const script = `
+const http = require('http');
+const start = Date.now();
+const timeoutMs = ${timeoutMs};
 
-  return `HOST=${host} PORT=${port} ${install} && HOST=${host} PORT=${port} ${dev}`
+function attempt() {
+  const req = http.get({ host: '127.0.0.1', port: ${port}, path: '/' }, (res) => {
+    res.resume();
+    process.exit(0);
+  });
+
+  req.on('error', () => {
+    if (Date.now() - start > timeoutMs) process.exit(1);
+    setTimeout(attempt, 500);
+  });
+}
+
+attempt();
+`.trim();
+
+  return `node -e ${JSON.stringify(script)}`
 }
 
 export async function POST(
@@ -134,8 +157,20 @@ export async function POST(
     files.map((f) => ({ path: f.path, content: Buffer.from(f.content, 'utf8') }))
   )
 
-  const bootstrap = buildBootstrapCommand(pm, port)
-  await sandbox.runCommand({ cmd: 'bash', args: ['-lc', bootstrap], detached: true })
+  const host = '0.0.0.0'
+
+  const install = buildInstallCommand(pm)
+  await sandbox.runCommand({ cmd: 'bash', args: ['-lc', `HOST=${host} PORT=${port} ${install}`] })
+
+  const dev = buildDevCommand(pm, port)
+  await sandbox.runCommand({ cmd: 'bash', args: ['-lc', `HOST=${host} PORT=${port} ${dev}`], detached: true })
+
+  try {
+    const wait = buildWaitForPortCommand(port, 120_000)
+    await sandbox.runCommand({ cmd: 'bash', args: ['-lc', wait] })
+  } catch {
+    // best-effort
+  }
 
   const url = sandbox.domain(port)
   const urlUUID = crypto.randomUUID()
