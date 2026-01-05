@@ -134,7 +134,7 @@ export async function POST(
     const semgrepIssues = await runSemgrepScan(files)
 
     // Check if Supabase is connected
-    let allIssues = [...semgrepIssues]
+    const allIssues = [...semgrepIssues]
 
     const supabaseProject = await getSupabaseProject(userId, projectId)
     if (supabaseProject && supabaseProject.access_token) {
