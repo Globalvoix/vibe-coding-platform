@@ -22,7 +22,7 @@ export function Preview({
   onRefreshRef,
   device,
 }: Props) {
-  const { status, url, isRestoringEnvironment } = useSandboxStore()
+  const { status, url, isRestoringEnvironment, restoreError } = useSandboxStore()
   return (
     <PreviewComponent
       key={url}
@@ -30,6 +30,7 @@ export function Preview({
       disabled={status === 'stopped'}
       url={url}
       isRestoringEnvironment={isRestoringEnvironment}
+      restoreError={restoreError}
       hideControls={hideControls}
       onUrlChange={onUrlChange}
       onInputChange={onInputChange}

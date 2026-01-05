@@ -72,15 +72,18 @@ function WorkspaceContent({
 
           sandboxState.setCurrentProjectId(projectId)
 
-          // Immediately restore cached sandbox state (URL, sandboxId, paths)
-          // This shows the preview right away if we have a URL
-          if (project.sandbox_state) {
-            sandboxState.applySandboxState(project.sandbox_state)
-          }
+          sandboxState.setRestoreError(null)
 
-          // Attempt to revive the sandbox asynchronously in the background
-          // Don't block the preview from showing the cached URL
-          if (project.sandbox_state?.sandboxId) {
+          const cached = project.sandbox_state
+
+          // If we have a sandboxId, don't show the cached URL (it may be a stopped sandbox that returns 410).
+          // Instead, show the restoring UI while we try to revive / rebuild.
+          if (cached?.sandboxId) {
+            sandboxState.setSandboxId(cached.sandboxId)
+            if (Array.isArray(cached.paths) && cached.paths.length > 0) {
+              sandboxState.addPaths(cached.paths)
+            }
+
             sandboxState.setIsRestoringEnvironment(true)
             try {
               const reviveRes = await fetch(`/api/projects/${projectId}/sandbox/revive`, {
@@ -90,30 +93,33 @@ function WorkspaceContent({
               if (cancelled) return
 
               if (reviveRes.ok) {
-                try {
-                  const revived = (await reviveRes.json()) as {
-                    sandbox_state: {
-                      sandboxId?: string
-                      paths?: string[]
-                      url?: string
-                      urlUUID?: string
-                    } | null
-                  }
-
-                  if (revived.sandbox_state && !cancelled) {
-                    sandboxState.applySandboxState(revived.sandbox_state)
-                  }
-                } catch (parseError) {
-                  console.error('Failed to parse revive response:', parseError)
+                const revived = (await reviveRes.json()) as {
+                  sandbox_state: {
+                    sandboxId?: string
+                    paths?: string[]
+                    url?: string
+                    urlUUID?: string
+                  } | null
                 }
+
+                if (revived.sandbox_state) {
+                  sandboxState.applySandboxState(revived.sandbox_state)
+                }
+              } else if (reviveRes.status === 409) {
+                sandboxState.setRestoreError('missing_files')
+              } else {
+                sandboxState.setRestoreError('unknown')
               }
-            } catch (error) {
-              console.error('Error reviving sandbox:', error)
+            } catch {
+              sandboxState.setRestoreError('unknown')
             } finally {
               if (!cancelled) {
                 sandboxState.setIsRestoringEnvironment(false)
               }
             }
+          } else if (cached) {
+            // No sandbox to revive, safe to apply cached state (e.g. already running URL-only state)
+            sandboxState.applySandboxState(cached)
           }
         } catch (error) {
           console.error('Error loading project', error)

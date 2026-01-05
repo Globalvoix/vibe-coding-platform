@@ -11,6 +11,7 @@ interface Props {
   disabled?: boolean
   url?: string
   isRestoringEnvironment?: boolean
+  restoreError?: 'missing_files' | 'unknown' | null
   hideControls?: boolean
   onUrlChange?: (url: string) => void
   onInputChange?: (value: string) => void
@@ -24,6 +25,7 @@ export function Preview({
   disabled,
   url,
   isRestoringEnvironment = false,
+  restoreError = null,
   hideControls,
   onUrlChange,
   onInputChange,
@@ -170,9 +172,13 @@ export function Preview({
             <div className="flex flex-col items-center gap-3 text-xs text-muted-foreground">
               <div className="h-10 w-10 rounded-full border-2 border-dashed border-border animate-spin" />
               <p className="text-center max-w-[220px]">
-                {isRestoringEnvironment
-                  ? 'Restoring your environment...'
-                  : 'Preview will appear here once your app is generated or the sandbox is running.'}
+                {restoreError === 'missing_files'
+                  ? 'Preview can’t be restored yet for this project. Generate the app again to start a new preview.'
+                  : restoreError === 'unknown'
+                    ? 'Preview couldn’t be restored. Please try again.'
+                    : isRestoringEnvironment
+                      ? 'Restoring your environment...'
+                      : 'Preview will appear here once your app is generated or the sandbox is running.'}
               </p>
             </div>
           </div>

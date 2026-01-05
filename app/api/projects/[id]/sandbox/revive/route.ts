@@ -107,16 +107,6 @@ export async function POST(
   // Sandbox is stopped or doesn't exist, try to rebuild from persisted files
   const files = await listProjectFiles({ userId, projectId })
   if (files.length === 0) {
-    // No files to rebuild from, return existing state if available
-    if (existingState?.url) {
-      const urlUUID = crypto.randomUUID()
-      const nextState = {
-        ...existingState,
-        urlUUID,
-      }
-      return NextResponse.json({ sandbox_state: nextState })
-    }
-
     return NextResponse.json(
       {
         error: 'No persisted files for this project yet',

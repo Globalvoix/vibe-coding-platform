@@ -48,6 +48,8 @@ interface SandboxStore {
   setActiveTab: (tab: SandboxTabId) => void
   isRestoringEnvironment: boolean
   setIsRestoringEnvironment: (restoring: boolean) => void
+  restoreError: 'missing_files' | 'unknown' | null
+  setRestoreError: (error: 'missing_files' | 'unknown' | null) => void
 }
 
 function getBackgroundCommandErrorLines(commands: Command[]) {
@@ -117,6 +119,8 @@ export const useSandboxStore = create<SandboxStore>()((set) => ({
   setActiveTab: (tab) => set(() => ({ activeTab: tab })),
   isRestoringEnvironment: false,
   setIsRestoringEnvironment: (restoring) => set(() => ({ isRestoringEnvironment: restoring })),
+  restoreError: null,
+  setRestoreError: (error) => set(() => ({ restoreError: error })),
   clearGeneratedFiles: () => set(() => ({ generatedFiles: new Set<string>() })),
   commands: [],
   generatedFiles: new Set<string>(),
@@ -140,6 +144,7 @@ export const useSandboxStore = create<SandboxStore>()((set) => ({
       device: 'desktop',
       activeTab: 'preview',
       isRestoringEnvironment: false,
+      restoreError: null,
     })),
   setChatStatus: (status) =>
     set((state) =>
