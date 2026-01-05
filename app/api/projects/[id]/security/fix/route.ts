@@ -2,11 +2,15 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { Sandbox } from '@vercel/sandbox'
 import { recordUsageAndDeductCredits, getUserCredits } from '@/lib/credits'
+import { generateText } from 'ai'
+import { getModelOptions } from '@/ai/gateway'
 
 interface SecurityIssue {
   id: string
   level: 'Error' | 'Warning'
   title: string
+  filePath?: string
+  lineNumber?: number
 }
 
 interface FixRequest {
@@ -16,56 +20,126 @@ interface FixRequest {
 
 const SECURITY_FIX_COST_CREDITS = 5
 
-async function generateSecurityFixes(issues: SecurityIssue[]): Promise<Map<string, string>> {
+async function readFileFromSandbox(sandbox: Awaited<ReturnType<typeof Sandbox.get>>, filePath: string): Promise<string | null> {
+  try {
+    const stream = await sandbox.readFile({ path: filePath })
+    if (!stream) return null
+
+    const chunks: Buffer[] = []
+    for await (const chunk of stream) {
+      chunks.push(chunk as Buffer)
+    }
+    return Buffer.concat(chunks).toString('utf-8')
+  } catch {
+    return null
+  }
+}
+
+async function generateSecurityFixes(
+  sandboxId: string,
+  issues: SecurityIssue[]
+): Promise<Map<string, string>> {
   const fixes = new Map<string, string>()
 
-  // In a real implementation, this would call the AI to generate fixes
-  // For now, returning mock fixes
-  for (const issue of issues) {
-    if (issue.title === 'Subscription Data Could Be Modified by Unauthorized Users') {
-      fixes.set('subscriptions-rls', `
--- Enable RLS on subscriptions table
-ALTER TABLE subscriptions ENABLE ROW LEVEL SECURITY;
+  try {
+    const sandbox = await Sandbox.get({ sandboxId })
 
--- Create policy to prevent unauthorized modifications
-CREATE POLICY "Users can only access their own subscription data"
-ON subscriptions FOR ALL
-USING (auth.uid() = user_id)
-WITH CHECK (auth.uid() = user_id);
-      `)
-    } else if (issue.title === 'Leaked Password Protection Disabled') {
-      fixes.set('password-hashing', `
--- Ensure passwords are properly hashed
--- Update your authentication logic to use bcrypt or similar
-import bcrypt from 'bcrypt';
+    // Read relevant files from sandbox
+    const fileContents: Map<string, string> = new Map()
+    const filePaths = new Set<string>()
 
-export async function hashPassword(password: string): Promise<string> {
-  const saltRounds = 10;
-  return bcrypt.hash(password, saltRounds);
-}
-
-export async function verifyPassword(password: string, hash: string): Promise<boolean> {
-  return bcrypt.compare(password, hash);
-}
-      `)
+    // Collect unique file paths from issues
+    for (const issue of issues) {
+      if (issue.filePath) {
+        filePaths.add(issue.filePath)
+      }
     }
+
+    // Read each file
+    for (const filePath of filePaths) {
+      const content = await readFileFromSandbox(sandbox, filePath)
+      if (content) {
+        fileContents.set(filePath, content)
+      }
+    }
+
+    // Prepare issue descriptions
+    const issueDescriptions = issues
+      .map(
+        (issue) =>
+          `- [${issue.level}] ${issue.title}${issue.filePath ? ` in ${issue.filePath}${issue.lineNumber ? `:${issue.lineNumber}` : ''}` : ''}`
+      )
+      .join('\n')
+
+    // Prepare file contents for AI analysis
+    const fileContexts = Array.from(fileContents.entries())
+      .map(([path, content]) => `File: ${path}\n\`\`\`\n${content}\n\`\`\``)
+      .join('\n\n')
+
+    // Call AI to generate fixes
+    const { modelId } = getModelOptions('default')
+    const { text } = await generateText({
+      model: getModelOptions(modelId).model,
+      system: `You are a security expert AI assistant. Your task is to fix security vulnerabilities in code.
+For each security issue, provide the complete fixed file content.
+Format your response as JSON with this structure:
+{
+  "fixes": [
+    {
+      "filePath": "path/to/file",
+      "fixedContent": "complete fixed file content here"
+    }
+  ]
+}
+
+Be precise and only provide actual working code fixes. Include all necessary imports and dependencies.`,
+      prompt: `Please fix the following security issues:
+
+${issueDescriptions}
+
+Here are the affected files:
+
+${fileContexts}
+
+Generate the fixed versions of these files. Return complete, working code.`,
+      temperature: 0.2,
+      maxTokens: 4000,
+    })
+
+    // Parse AI response
+    try {
+      const jsonMatch = text.match(/\{[\s\S]*\}/)
+      if (jsonMatch) {
+        const result = JSON.parse(jsonMatch[0]) as { fixes: Array<{ filePath: string; fixedContent: string }> }
+        for (const fix of result.fixes) {
+          fixes.set(fix.filePath, fix.fixedContent)
+        }
+      }
+    } catch (parseError) {
+      console.error('Failed to parse AI response:', parseError)
+      // If parsing fails, return empty fixes to avoid applying invalid code
+      return fixes
+    }
+  } catch (error) {
+    console.error('Failed to generate security fixes:', error)
   }
 
   return fixes
 }
 
-async function applyFixesToSandbox(sandboxId: string, fixes: Map<string, string>): Promise<boolean> {
+async function applyFixesToSandbox(
+  sandboxId: string,
+  fixes: Map<string, string>
+): Promise<boolean> {
   try {
     const sandbox = await Sandbox.get({ sandboxId })
 
-    // Create files for each fix
     const filesToWrite: Array<{ path: string; content: Buffer }> = []
 
-    let fileIndex = 0
-    for (const [_, content] of fixes) {
+    for (const [filePath, content] of fixes) {
       filesToWrite.push({
-        path: `docs/security-fixes-${fileIndex++}.md`,
-        content: Buffer.from(content, 'utf8'),
+        path: filePath,
+        content: Buffer.from(content, 'utf-8'),
       })
     }
 
