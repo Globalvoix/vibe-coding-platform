@@ -15,12 +15,11 @@ import { SupabaseOAuthButton } from '@/components/supabase-connect/supabase-oaut
 import { SupabaseCloudPanel } from '@/components/supabase-connect/supabase-cloud-panel'
 import { useSearchParams } from 'next/navigation'
 import { useSandboxStore } from './state'
+import type { SandboxTabId } from './state'
 
 interface Props {
   className?: string
 }
-
-type SandboxTabId = 'preview' | 'code' | 'console' | 'cloud' | 'security'
 
 interface TabConfig {
   id: SandboxTabId
