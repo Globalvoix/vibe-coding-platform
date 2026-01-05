@@ -80,9 +80,9 @@ async function generateSecurityFixes(
 
     // Call AI to generate fixes
     const selectedModelId = modelId || 'anthropic/claude-3-5-sonnet-20241022'
-    const { model } = getModelOptions(selectedModelId)
+    const modelOptions = getModelOptions(selectedModelId)
     const { text } = await generateText({
-      model,
+      ...modelOptions,
       system: `You are a security expert AI assistant. Your task is to fix security vulnerabilities in code.
 For each security issue, provide the complete fixed file content.
 Format your response as JSON with this structure:
@@ -105,8 +105,6 @@ Here are the affected files:
 ${fileContexts}
 
 Generate the fixed versions of these files. Return complete, working code.`,
-      temperature: 0.2,
-      maxTokens: 4000,
     })
 
     // Parse AI response
