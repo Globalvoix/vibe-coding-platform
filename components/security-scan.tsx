@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { HelpCircle, ChevronRight, AlertCircle, AlertTriangle, CheckCircle2 } from 'lucide-react'
+import { HelpCircle, ChevronRight, AlertCircle, AlertTriangle, CheckCircle2, ArrowUpRight } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -40,17 +40,17 @@ export function SecurityScan() {
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
             <h2 className="text-lg font-semibold text-foreground">Security scan</h2>
-            <Badge variant="secondary" className="bg-[#E8F0FE] text-[#1A73E8] border-transparent font-medium">
+            <Badge variant="secondary" className="bg-[#E8F0FE] text-[#1A73E8] border-transparent font-medium px-2 py-0.5 rounded-sm">
               Up-to-date
             </Badge>
           </div>
           <p className="text-sm text-muted-foreground">Last scan: less than a minute ago</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" className="bg-white border-black/10 text-sm h-9 px-4">
+          <Button variant="outline" className="bg-white border-black/10 text-xs h-8 px-3 rounded-md font-medium">
             Add context
           </Button>
-          <Button className="bg-[#1A73E8] hover:bg-[#1557B0] text-white border-transparent text-sm h-9 px-4">
+          <Button className="bg-[#1A73E8] hover:bg-[#1557B0] text-white border-transparent text-xs h-8 px-3 rounded-md font-medium">
             Update (Free)
           </Button>
           <button className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors ml-4">
