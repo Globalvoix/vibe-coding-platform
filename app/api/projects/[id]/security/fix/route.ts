@@ -38,7 +38,8 @@ async function readFileFromSandbox(sandbox: Awaited<ReturnType<typeof Sandbox.ge
 
 async function generateSecurityFixes(
   sandboxId: string,
-  issues: SecurityIssue[]
+  issues: SecurityIssue[],
+  modelId?: string
 ): Promise<Map<string, string>> {
   const fixes = new Map<string, string>()
 
