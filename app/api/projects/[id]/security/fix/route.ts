@@ -169,7 +169,7 @@ export async function POST(
 
     const params = await context.params
     const body = (await req.json()) as FixRequest
-    const { sandboxId, issues } = body
+    const { sandboxId, issues, modelId } = body
 
     if (!sandboxId || !issues || issues.length === 0) {
       return NextResponse.json({ error: 'Missing required parameters' }, { status: 400 })
