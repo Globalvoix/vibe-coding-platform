@@ -69,25 +69,27 @@ export function SecurityScan() {
           <button
             onClick={() => setFilter('Error')}
             className={cn(
-              "px-3 py-1.5 text-xs font-medium rounded-md transition-all",
-              filter === 'Error' ? "bg-white shadow-sm ring-1 ring-black/5 text-foreground" : "text-muted-foreground hover:bg-black/5"
+              "px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-2",
+              filter === 'Error' ? "bg-[#FEE2E2] text-[#B91C1C] ring-1 ring-[#FECACA]" : "bg-[#FEE2E2]/50 text-[#B91C1C] hover:bg-[#FEE2E2]"
             )}
           >
+            <span className="w-2 h-2 rounded-full bg-[#B91C1C]" />
             1 Error
           </button>
           <button
             onClick={() => setFilter('Warning')}
             className={cn(
-              "px-3 py-1.5 text-xs font-medium rounded-md transition-all",
-              filter === 'Warning' ? "bg-white shadow-sm ring-1 ring-black/5 text-foreground" : "text-muted-foreground hover:bg-black/5"
+              "px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-2",
+              filter === 'Warning' ? "bg-[#FEF3C7] text-[#D97706] ring-1 ring-[#FDE68A]" : "bg-[#FEF3C7]/50 text-[#D97706] hover:bg-[#FEF3C7]"
             )}
           >
+            <span className="w-2 h-2 rounded-full bg-[#D97706]" />
             1 Warning
           </button>
           <button
             onClick={() => setFilter('All')}
             className={cn(
-              "px-3 py-1.5 text-xs font-medium rounded-md transition-all",
+              "px-4 py-1.5 text-xs font-medium rounded-md transition-all",
               filter === 'All' ? "bg-white shadow-sm ring-1 ring-black/5 text-foreground" : "text-muted-foreground hover:bg-black/5"
             )}
           >
