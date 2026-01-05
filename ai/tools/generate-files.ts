@@ -172,7 +172,7 @@ export const generateFiles = ({ writer, modelId, userId, projectId }: Params) =>
 
       const sandboxFileExists = async (path: string) => {
         try {
-          const stream = await sandbox.readFile({ sandboxId, path })
+          const stream = await sandbox.readFile({ path })
           if (!stream) return false
           return true
         } catch {
