@@ -96,17 +96,21 @@ function WorkspaceContent({
               if (cancelled) return
 
               if (reviveRes.ok) {
-                const revived = (await reviveRes.json()) as {
-                  sandbox_state: {
-                    sandboxId?: string
-                    paths?: string[]
-                    url?: string
-                    urlUUID?: string
-                  } | null
-                }
+                try {
+                  const revived = (await reviveRes.json()) as {
+                    sandbox_state: {
+                      sandboxId?: string
+                      paths?: string[]
+                      url?: string
+                      urlUUID?: string
+                    } | null
+                  }
 
-                if (revived.sandbox_state) {
-                  sandboxState.applySandboxState(revived.sandbox_state)
+                  if (revived.sandbox_state) {
+                    sandboxState.applySandboxState(revived.sandbox_state)
+                  }
+                } catch (parseError) {
+                  console.error('Failed to parse revive response:', parseError)
                 }
               } else if (reviveRes.status === 409) {
                 // 409 means no persisted files yet; keep the existing URL if available
@@ -115,10 +119,16 @@ function WorkspaceContent({
                 if (currentUrl) {
                   // URL is already set, just mark restoration as complete
                   sandboxState.setStatus('running')
+                } else {
+                  console.warn('No files persisted and no cached URL available')
                 }
               } else {
-                const errorData = await reviveRes.json() as { status?: string }
-                console.error('Failed to revive sandbox:', reviveRes.status, errorData)
+                try {
+                  const errorData = await reviveRes.json() as { status?: string }
+                  console.error('Failed to revive sandbox:', reviveRes.status, errorData)
+                } catch {
+                  console.error('Failed to revive sandbox:', reviveRes.status)
+                }
               }
             } catch (error) {
               console.error('Error reviving sandbox:', error)
