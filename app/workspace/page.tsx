@@ -72,20 +72,14 @@ function WorkspaceContent({
 
           sandboxState.setCurrentProjectId(projectId)
 
+          // Immediately restore cached sandbox state (URL, sandboxId, paths)
+          // This shows the preview right away if we have a URL
           if (project.sandbox_state) {
-            const { sandboxId, paths, url } = project.sandbox_state
-            if (sandboxId) {
-              sandboxState.setSandboxId(sandboxId)
-            }
-            if (Array.isArray(paths) && paths.length > 0) {
-              sandboxState.addPaths(paths)
-            }
-            if (url) {
-              sandboxState.setUrl(url)
-            }
+            sandboxState.applySandboxState(project.sandbox_state)
           }
 
-          // Only attempt to revive if we have a sandboxId (meaning we had a previous sandbox)
+          // Attempt to revive the sandbox asynchronously in the background
+          // Don't block the preview from showing the cached URL
           if (project.sandbox_state?.sandboxId) {
             sandboxState.setIsRestoringEnvironment(true)
             try {
@@ -106,28 +100,11 @@ function WorkspaceContent({
                     } | null
                   }
 
-                  if (revived.sandbox_state) {
+                  if (revived.sandbox_state && !cancelled) {
                     sandboxState.applySandboxState(revived.sandbox_state)
                   }
                 } catch (parseError) {
                   console.error('Failed to parse revive response:', parseError)
-                }
-              } else if (reviveRes.status === 409) {
-                // 409 means no persisted files yet; keep the existing URL if available
-                // The sandbox may have stopped, but we'll use the stored URL for now
-                const currentUrl = sandboxState.url
-                if (currentUrl) {
-                  // URL is already set, just mark restoration as complete
-                  sandboxState.setStatus('running')
-                } else {
-                  console.warn('No files persisted and no cached URL available')
-                }
-              } else {
-                try {
-                  const errorData = await reviveRes.json() as { status?: string }
-                  console.error('Failed to revive sandbox:', reviveRes.status, errorData)
-                } catch {
-                  console.error('Failed to revive sandbox:', reviveRes.status)
                 }
               }
             } catch (error) {
