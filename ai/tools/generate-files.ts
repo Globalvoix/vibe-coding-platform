@@ -76,11 +76,11 @@ export const generateFiles = ({ writer, modelId, userId, projectId }: Params) =>
         }
 
         try {
-          return await withTimeout((signal: AbortSignal) => attempt(signal, 'HEAD') as unknown as Promise<boolean>, timeoutMs)
+          return await withTimeout((signal) => attempt(signal, 'HEAD'), timeoutMs)
         } catch {
           // Some CDNs reject HEAD; retry with a tiny GET.
           try {
-            return await withTimeout((signal: AbortSignal) => attempt(signal, 'GET') as unknown as Promise<boolean>, timeoutMs)
+            return await withTimeout((signal) => attempt(signal, 'GET'), timeoutMs)
           } catch {
             return false
           }
