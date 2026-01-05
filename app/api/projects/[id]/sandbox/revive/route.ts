@@ -78,29 +78,36 @@ export async function POST(
   const existingState = coerceSandboxState(project.sandbox_state)
   const port = existingState?.port ?? 3000
 
+  // Try to check if the existing sandbox is still running
   if (existingState?.sandboxId) {
-    const stopped = await isSandboxStopped(existingState.sandboxId)
+    try {
+      const stopped = await isSandboxStopped(existingState.sandboxId)
 
-    if (!stopped) {
-      const sandbox = await Sandbox.get({ sandboxId: existingState.sandboxId })
-      const url = sandbox.domain(port)
-      const urlUUID = crypto.randomUUID()
-      const nextState = {
-        ...existingState,
-        url,
-        urlUUID,
-        port,
+      if (!stopped) {
+        // Sandbox is still running, just update the URL UUID and return it
+        const sandbox = await Sandbox.get({ sandboxId: existingState.sandboxId })
+        const url = sandbox.domain(port)
+        const urlUUID = crypto.randomUUID()
+        const nextState = {
+          ...existingState,
+          url,
+          urlUUID,
+          port,
+        }
+
+        await updateProjectSandboxState(userId, projectId, nextState)
+        return NextResponse.json({ sandbox_state: nextState })
       }
-
-      await updateProjectSandboxState(userId, projectId, nextState)
-      return NextResponse.json({ sandbox_state: nextState })
+    } catch (error) {
+      // If we can't check the sandbox status, log but continue to try rebuilding
+      console.error('Failed to check sandbox status:', error)
     }
   }
 
+  // Sandbox is stopped or doesn't exist, try to rebuild from persisted files
   const files = await listProjectFiles({ userId, projectId })
   if (files.length === 0) {
-    // If we don't have persisted files but we have a URL in the existing state,
-    // return it anyway - the sandbox may still be running
+    // No files to rebuild from, return existing state if available
     if (existingState?.url) {
       const urlUUID = crypto.randomUUID()
       const nextState = {
