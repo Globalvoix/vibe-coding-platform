@@ -115,6 +115,8 @@ export const useSandboxStore = create<SandboxStore>()((set) => ({
   setDevice: (device) => set(() => ({ device })),
   activeTab: 'preview',
   setActiveTab: (tab) => set(() => ({ activeTab: tab })),
+  isRestoringEnvironment: false,
+  setIsRestoringEnvironment: (restoring) => set(() => ({ isRestoringEnvironment: restoring })),
   clearGeneratedFiles: () => set(() => ({ generatedFiles: new Set<string>() })),
   commands: [],
   generatedFiles: new Set<string>(),
