@@ -98,36 +98,36 @@ export function SecurityScan() {
         </div>
 
         {/* Issues List/Table */}
-        <div className="border border-black/5 rounded-lg bg-white overflow-hidden shadow-sm">
-          <div className="grid grid-cols-[100px_1fr_40px] px-4 py-3 border-b border-black/5 bg-[#F9FAFB] text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+        <div className="border border-black/[0.08] rounded-xl bg-white overflow-hidden shadow-sm">
+          <div className="grid grid-cols-[120px_1fr_40px] px-6 py-3 border-b border-black/[0.05] bg-[#F9FAFB] text-[10px] font-bold text-muted-foreground/70 uppercase tracking-widest">
             <div>Level</div>
             <div>Issue</div>
             <div></div>
           </div>
-          <div className="divide-y divide-black/5">
+          <div className="divide-y divide-black/[0.05]">
             {filteredIssues.map((issue) => (
               <div
                 key={issue.id}
-                className="grid grid-cols-[100px_1fr_40px] items-center px-4 py-4 hover:bg-black/[0.02] transition-colors cursor-pointer group"
+                className="grid grid-cols-[120px_1fr_40px] items-center px-6 py-4 hover:bg-black/[0.01] transition-colors cursor-pointer group"
               >
-                <div className="flex items-center gap-2">
-                  <ChevronRight className="w-4 h-4 text-muted-foreground/40 group-hover:text-muted-foreground transition-colors" />
+                <div className="flex items-center gap-3">
+                  <ChevronRight className="w-4 h-4 text-muted-foreground/30 group-hover:text-muted-foreground transition-colors" />
                   <Badge
                     className={cn(
-                      "text-[10px] py-0 px-2 font-bold uppercase",
+                      "text-[9px] py-0.5 px-2 font-bold uppercase rounded-md tracking-wider border-0",
                       issue.level === 'Error'
-                        ? "bg-[#FEE2E2] text-[#B91C1C] border-transparent"
-                        : "bg-[#FEF3C7] text-[#D97706] border-transparent"
+                        ? "bg-[#FFE4E6] text-[#E11D48]"
+                        : "bg-[#FEF3C7] text-[#D97706]"
                     )}
                   >
                     {issue.level}
                   </Badge>
                 </div>
-                <div className="text-[14px] font-medium text-foreground">
+                <div className="text-[14px] font-medium text-[#111827]">
                   {issue.title}
                 </div>
                 <div className="flex justify-end">
-                  <ArrowUpRight className="w-4 h-4 text-muted-foreground/30 group-hover:text-muted-foreground transition-colors" />
+                  <ArrowUpRight className="w-4 h-4 text-muted-foreground/20 group-hover:text-muted-foreground transition-colors" />
                 </div>
               </div>
             ))}
