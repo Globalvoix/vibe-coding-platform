@@ -10,6 +10,7 @@ interface Props {
   className?: string
   disabled?: boolean
   url?: string
+  isRestoringEnvironment?: boolean
   hideControls?: boolean
   onUrlChange?: (url: string) => void
   onInputChange?: (value: string) => void
@@ -22,6 +23,7 @@ export function Preview({
   className,
   disabled,
   url,
+  isRestoringEnvironment = false,
   hideControls,
   onUrlChange,
   onInputChange,
