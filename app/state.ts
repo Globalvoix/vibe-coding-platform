@@ -15,6 +15,8 @@ interface ViewingVersion {
   } | null
 }
 
+type SandboxTabId = 'preview' | 'code' | 'console' | 'cloud' | 'security'
+
 interface SandboxStore {
   addGeneratedFiles: (files: string[]) => void
   addLog: (data: { sandboxId: string; cmdId: string; log: CommandLog }) => void
@@ -42,6 +44,8 @@ interface SandboxStore {
   revertInChatVersionId: string | null
   device: 'desktop' | 'tablet' | 'mobile'
   setDevice: (device: 'desktop' | 'tablet' | 'mobile') => void
+  activeTab: SandboxTabId
+  setActiveTab: (tab: SandboxTabId) => void
 }
 
 function getBackgroundCommandErrorLines(commands: Command[]) {
