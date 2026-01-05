@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextResponse, type NextRequest } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { Sandbox } from '@vercel/sandbox'
 import { recordUsageAndDeductCredits, getUserCredits } from '@/lib/credits'
