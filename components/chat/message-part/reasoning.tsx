@@ -4,6 +4,7 @@ import { MarkdownRenderer } from '@/components/markdown-renderer/markdown-render
 import { MessageSpinner } from '../message-spinner'
 import { useReasoningContext } from '../message'
 import { useState, useEffect } from 'react'
+import { cn } from '@/lib/utils'
 
 export function Reasoning({
   part,
