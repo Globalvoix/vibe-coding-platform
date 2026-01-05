@@ -1,8 +1,7 @@
-import { NextResponse } from 'next/server'
+import { NextResponse, type NextRequest } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { Sandbox } from '@vercel/sandbox'
 import { getSupabaseProject } from '@/lib/supabase-projects-db'
-import { mcp__semgrep__semgrep_scan_local } from '@/lib/mcp-clients'
 
 interface SecurityIssue {
   id: string
