@@ -80,13 +80,17 @@ async function applyFixesToSandbox(sandboxId: string, fixes: Map<string, string>
   }
 }
 
-export async function POST(req: Request, { params }: { params: { id: string } }) {
+export async function POST(
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
     const { userId } = await auth()
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const params = await context.params
     const body = (await req.json()) as FixRequest
     const { sandboxId, issues } = body
 
