@@ -6,6 +6,7 @@ import { Horizontal } from '@/components/layout/panels'
 import { Logs } from '../logs'
 import { Preview } from '../preview'
 import { Sandbox } from '../sandbox'
+import { SecurityScan } from '@/components/security-scan'
 import { TabContent, TabItem } from '@/components/tabs'
 import { AppSidebar } from '@/components/sidebar/app-sidebar'
 import { EnvVarsManager } from '@/components/env-vars/env-vars-manager'
@@ -187,6 +188,7 @@ function WorkspaceContent({
           <TabItem tabId="chat">Chat</TabItem>
           <TabItem tabId="preview">Preview</TabItem>
           <TabItem tabId="file-explorer">Files</TabItem>
+          <TabItem tabId="security">Security</TabItem>
           <TabItem tabId="env-vars">Env Vars</TabItem>
           <TabItem tabId="logs">Logs</TabItem>
         </ul>
@@ -205,6 +207,9 @@ function WorkspaceContent({
           </TabContent>
           <TabContent tabId="file-explorer" className="flex-1">
             <FileExplorer className="flex-1 overflow-hidden" />
+          </TabContent>
+          <TabContent tabId="security" className="flex-1">
+            <SecurityScan />
           </TabContent>
           <TabContent tabId="env-vars" className="flex-1">
             <EnvVarsManager projectId={projectId || undefined} />
