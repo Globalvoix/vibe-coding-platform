@@ -1,37 +1,123 @@
 'use client'
 
 import * as React from 'react'
+import { useSearchParams } from 'next/navigation'
 import { HelpCircle, ChevronRight, AlertCircle, AlertTriangle, CheckCircle2, ArrowUpRight } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { Spinner } from '@/components/ui/spinner'
 
 interface Issue {
   id: string
   level: 'Error' | 'Warning'
   title: string
+  filePath?: string
+  lineNumber?: number
 }
 
-const issues: Issue[] = [
-  {
-    id: '1',
-    level: 'Error',
-    title: 'Subscription Data Could Be Modified by Unauthorized Users',
-  },
-  {
-    id: '2',
-    level: 'Warning',
-    title: 'Leaked Password Protection Disabled',
-  },
-]
-
 export function SecurityScan() {
+  const searchParams = useSearchParams()
+  const projectId = searchParams.get('projectId')
+
+  const [issues, setIssues] = React.useState<Issue[]>([])
   const [filter, setFilter] = React.useState<'All' | 'Error' | 'Warning'>('All')
+  const [isScanning, setIsScanning] = React.useState(false)
+  const [isFixing, setIsFixing] = React.useState(false)
+  const [lastScannedAt, setLastScannedAt] = React.useState<string | null>(null)
+  const [error, setError] = React.useState<string | null>(null)
+  const [creditsRemaining, setCreditsRemaining] = React.useState<number | null>(null)
 
   const filteredIssues = issues.filter((issue) => {
     if (filter === 'All') return true
     return issue.level === filter
   })
+
+  const handleScan = React.useCallback(async () => {
+    if (!projectId) return
+
+    setIsScanning(true)
+    setError(null)
+
+    try {
+      // Get sandbox ID from URL or storage
+      const sandboxId = sessionStorage.getItem('sandboxId') || ''
+      if (!sandboxId) {
+        setError('Sandbox not initialized. Please generate code first.')
+        setIsScanning(false)
+        return
+      }
+
+      const response = await fetch(`/api/projects/${projectId}/security/scan`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sandboxId }),
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        setError(data.error || 'Scan failed')
+        setIsScanning(false)
+        return
+      }
+
+      const data = await response.json()
+      setIssues(data.issues || [])
+      setLastScannedAt(data.scannedAt)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Scan failed')
+    } finally {
+      setIsScanning(false)
+    }
+  }, [projectId])
+
+  const handleFixAll = React.useCallback(async () => {
+    if (!projectId || issues.length === 0) return
+
+    setIsFixing(true)
+    setError(null)
+
+    try {
+      const sandboxId = sessionStorage.getItem('sandboxId') || ''
+      if (!sandboxId) {
+        setError('Sandbox not initialized.')
+        setIsFixing(false)
+        return
+      }
+
+      const response = await fetch(`/api/projects/${projectId}/security/fix`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sandboxId, issues }),
+      })
+
+      if (response.status === 402) {
+        const data = await response.json()
+        setError(`Insufficient credits. Need ${data.required}, have ${data.available}`)
+        setIsFixing(false)
+        return
+      }
+
+      if (!response.ok) {
+        const data = await response.json()
+        setError(data.error || 'Fix failed')
+        setIsFixing(false)
+        return
+      }
+
+      const data = await response.json()
+      if (data.success) {
+        setCreditsRemaining(data.creditsRemaining)
+        // Clear issues after successful fix
+        setIssues([])
+        setLastScannedAt(new Date().toISOString())
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Fix failed')
+    } finally {
+      setIsFixing(false)
+    }
+  }, [projectId, issues])
 
   return (
     <div className="flex flex-col h-full bg-[#FAF9F6] overflow-auto">
