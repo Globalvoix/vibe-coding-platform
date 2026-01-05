@@ -99,6 +99,17 @@ export async function POST(
 
   const files = await listProjectFiles({ userId, projectId })
   if (files.length === 0) {
+    // If we don't have persisted files but we have a URL in the existing state,
+    // return it anyway - the sandbox may still be running
+    if (existingState?.url) {
+      const urlUUID = crypto.randomUUID()
+      const nextState = {
+        ...existingState,
+        urlUUID,
+      }
+      return NextResponse.json({ sandbox_state: nextState })
+    }
+
     return NextResponse.json(
       {
         error: 'No persisted files for this project yet',
