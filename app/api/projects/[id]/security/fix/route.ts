@@ -77,9 +77,9 @@ async function generateSecurityFixes(
       .join('\n\n')
 
     // Call AI to generate fixes
-    const { modelId } = getModelOptions('default')
+    const { model } = getModelOptions('anthropic/claude-3-5-sonnet-20241022')
     const { text } = await generateText({
-      model: getModelOptions(modelId).model,
+      model,
       system: `You are a security expert AI assistant. Your task is to fix security vulnerabilities in code.
 For each security issue, provide the complete fixed file content.
 Format your response as JSON with this structure:
