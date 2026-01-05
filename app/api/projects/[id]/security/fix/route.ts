@@ -189,7 +189,7 @@ export async function POST(
     }
 
     // Generate fixes
-    const fixes = await generateSecurityFixes(sandboxId, issues)
+    const fixes = await generateSecurityFixes(sandboxId, issues, modelId)
 
     // Only apply if we have fixes to apply
     if (fixes.size > 0) {
