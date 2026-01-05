@@ -46,18 +46,6 @@ export const Message = memo(function Message({
     applySandboxState,
   } = useSandboxStore()
 
-  const reasoningParts = message.parts
-    .map((part, index) => ({ part, index }))
-    .filter(({ part }) => part.type === 'reasoning')
-
-  useEffect(() => {
-    if (reasoningParts.length > 0) {
-      const latestReasoningIndex =
-        reasoningParts[reasoningParts.length - 1].index
-      setExpandedReasoningIndex(latestReasoningIndex)
-    }
-  }, [reasoningParts])
-
   return (
     <ReasoningContext.Provider
       value={{ expandedReasoningIndex, setExpandedReasoningIndex }}
