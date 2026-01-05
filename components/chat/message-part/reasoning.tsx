@@ -48,32 +48,33 @@ export function Reasoning({
   }
 
   return (
-    <div className="flex flex-col gap-2 my-2">
+    <div className="flex flex-col gap-2 my-1">
       <button
         onClick={handleClick}
         className="flex items-center gap-2 text-[#8A8A85] hover:text-foreground/70 transition-colors group w-fit"
       >
-        <div className="flex items-center gap-1.5 text-[13px] font-medium">
-          {isStreaming && (
-            <div className="relative w-3.5 h-3.5 flex items-center justify-center">
-              <div className="absolute w-full h-full rounded-full bg-gradient-to-r from-blue-400/80 to-blue-400/20 animate-pulse"></div>
-              <LightbulbIcon className="w-2.5 h-2.5 relative z-10 text-blue-500" />
-            </div>
-          )}
-          {!isStreaming && <LightbulbIcon className="w-3.5 h-3.5" />}
-          <span>
-            {isStreaming ? `Thinking for ${formatDuration(duration)}` : 'Thought'}
+        <div className="flex items-center gap-1.5 text-[14px] font-medium">
+          <div className="relative w-4 h-4 flex items-center justify-center">
+            {isStreaming ? (
+              <div className="absolute w-full h-full rounded-full bg-black/[0.05] animate-pulse"></div>
+            ) : null}
+            <LightbulbIcon className={cn("w-3.5 h-3.5", isStreaming ? "text-foreground/40" : "text-[#8A8A85]")} />
+          </div>
+          <span className="text-[#8A8A85]">
+            {isStreaming ? 'Thinking' : `Thought for ${formatDuration(duration)}`}
           </span>
-          {isExpanded ? (
-            <ChevronUpIcon className="w-3.5 h-3.5 opacity-50 group-hover:opacity-100" />
-          ) : (
-            <ChevronDownIcon className="w-3.5 h-3.5 opacity-50 group-hover:opacity-100" />
+          {!isStreaming && (
+            isExpanded ? (
+              <ChevronUpIcon className="w-3.5 h-3.5 opacity-40 group-hover:opacity-100" />
+            ) : (
+              <ChevronDownIcon className="w-3.5 h-3.5 opacity-40 group-hover:opacity-100" />
+            )
           )}
         </div>
       </button>
 
       {isExpanded && (
-        <div className="text-[13px] leading-[1.6] text-foreground/75 font-sans pl-5 border-l border-border/30 ml-1.5 py-2">
+        <div className="text-[14px] leading-[1.6] text-foreground/80 font-sans py-1">
           <MarkdownRenderer content={text} />
           {isStreaming && <MessageSpinner />}
         </div>
