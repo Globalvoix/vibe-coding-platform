@@ -51,57 +51,70 @@ async function runSemgrepScan(files: Array<{ path: string; content: string }>): 
   const issues: SecurityIssue[] = []
 
   try {
-    // Convert files to the format expected by Semgrep
-    const codeFiles = files.map((f) => ({
-      filename: f.path,
-      content: f.content,
-    }))
-
-    if (codeFiles.length === 0) {
+    if (files.length === 0) {
       return issues
     }
 
-    // Call Semgrep security check via MCP
-    // This uses the security scanning rules to detect vulnerabilities
-    try {
-      // Import here to avoid issues at module load time
-      const { mcp__semgrep__security_check } = await import('@/tools/semgrep-mcp')
-      const result = await mcp__semgrep__security_check({
-        code_files: codeFiles,
-      })
+    // Analyze files for common security issues
+    for (const file of files) {
+      const { path, content } = file
 
-      // Parse Semgrep results into SecurityIssue format
-      if (result && Array.isArray(result)) {
-        for (const finding of result) {
-          const issue: SecurityIssue = {
-            id: `semgrep-${finding.rule_id || 'unknown'}`,
-            level: finding.severity === 'ERROR' ? 'Error' : 'Warning',
-            title: finding.message || finding.rule_id || 'Security Issue',
-            filePath: finding.path,
-            lineNumber: finding.start?.line,
-          }
-          issues.push(issue)
+      // Check for authentication issues in API routes
+      if (path.includes('/api/') && !content.includes('auth()') && !content.includes('authenticate')) {
+        issues.push({
+          id: `auth-${path}`,
+          level: 'Error',
+          title: 'API Endpoint Missing Authentication',
+          filePath: path,
+          lineNumber: 1,
+        })
+      }
+
+      // Check for SQL injection patterns
+      if (content.includes('query(') || content.includes('execute(')) {
+        if (!content.includes('$') || !content.includes('?')) {
+          issues.push({
+            id: `sql-injection-${path}`,
+            level: 'Error',
+            title: 'Potential SQL Injection Vulnerability',
+            filePath: path,
+            lineNumber: content.split('\n').findIndex((line) => line.includes('query(') || line.includes('execute(')),
+          })
         }
       }
-    } catch {
-      // If MCP call fails, return generic security recommendations
-      const genericIssues = [
-        {
-          id: 'generic-1',
-          level: 'Warning' as const,
-          title: 'Database Access Control Not Configured',
-          filePath: 'lib/auth.ts',
-          lineNumber: 1,
-        },
-        {
-          id: 'generic-2',
-          level: 'Warning' as const,
-          title: 'API Endpoint Missing Authentication',
-          filePath: 'app/api/subscriptions/route.ts',
-          lineNumber: 1,
-        },
-      ]
-      issues.push(...genericIssues)
+
+      // Check for hardcoded secrets
+      if (
+        content.includes('password') &&
+        (content.includes('=') && content.match(/['"]([^'"]{8,})['"]/) ||
+          content.includes('SECRET') ||
+          content.includes('API_KEY'))
+      ) {
+        issues.push({
+          id: `hardcoded-secret-${path}`,
+          level: 'Warning',
+          title: 'Potential Hardcoded Secret or Credential',
+          filePath: path,
+          lineNumber: content
+            .split('\n')
+            .findIndex((line) => line.includes('password') || line.includes('SECRET') || line.includes('API_KEY')),
+        })
+      }
+
+      // Check for missing HTTPS
+      if (
+        (path.includes('fetch') || path.includes('request')) &&
+        content.includes('http://') &&
+        !content.includes('localhost')
+      ) {
+        issues.push({
+          id: `insecure-transport-${path}`,
+          level: 'Warning',
+          title: 'Insecure Transport (HTTP instead of HTTPS)',
+          filePath: path,
+          lineNumber: content.split('\n').findIndex((line) => line.includes('http://')),
+        })
+      }
     }
   } catch (error) {
     console.error('Semgrep scan failed:', error)
