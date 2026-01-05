@@ -188,14 +188,16 @@ export async function POST(
     // Generate fixes
     const fixes = await generateSecurityFixes(sandboxId, issues)
 
-    // Apply fixes to sandbox
-    const applied = await applyFixesToSandbox(sandboxId, fixes)
+    // Only apply if we have fixes to apply
+    if (fixes.size > 0) {
+      const applied = await applyFixesToSandbox(sandboxId, fixes)
 
-    if (!applied) {
-      return NextResponse.json(
-        { error: 'Failed to apply security fixes to sandbox' },
-        { status: 500 }
-      )
+      if (!applied) {
+        return NextResponse.json(
+          { error: 'Failed to apply security fixes to sandbox' },
+          { status: 500 }
+        )
+      }
     }
 
     // Deduct credits
