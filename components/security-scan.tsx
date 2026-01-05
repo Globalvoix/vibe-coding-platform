@@ -71,18 +71,18 @@ export function SecurityScan() {
   }, [projectId, sandboxId])
 
   const handleFixAll = React.useCallback(async () => {
-    if (!projectId || issues.length === 0) return
+    if (!projectId || !sandboxId || issues.length === 0) {
+      if (!sandboxId) {
+        setError('Sandbox not initialized.')
+      }
+      setIsFixing(false)
+      return
+    }
 
     setIsFixing(true)
     setError(null)
 
     try {
-      const sandboxId = sessionStorage.getItem('sandboxId') || ''
-      if (!sandboxId) {
-        setError('Sandbox not initialized.')
-        setIsFixing(false)
-        return
-      }
 
       const response = await fetch(`/api/projects/${projectId}/security/fix`, {
         method: 'POST',
