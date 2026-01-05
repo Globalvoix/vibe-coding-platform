@@ -49,13 +49,13 @@ function buildInstallCommand(pm: 'npm' | 'pnpm' | 'yarn') {
 }
 
 function buildDevCommand(pm: 'npm' | 'pnpm' | 'yarn', port: number) {
-  const host = '0.0.0.0'
-
+  // Keep this broadly compatible across frameworks (Next, Vite, etc.).
+  // Many CLIs support --port, while --host/--hostname differs and can crash some frameworks.
   return pm === 'npm'
-    ? `npm run dev -- --host ${host} --port ${port}`
+    ? `npm run dev -- --port ${port}`
     : pm === 'pnpm'
-      ? `pnpm dev -- --host ${host} --port ${port}`
-      : `yarn dev --host ${host} --port ${port}`
+      ? `pnpm dev -- --port ${port}`
+      : `yarn dev -- --port ${port}`
 }
 
 function buildWaitForPortCommand(port: number, timeoutMs: number) {
