@@ -157,13 +157,11 @@ export async function POST(
     files.map((f) => ({ path: f.path, content: Buffer.from(f.content, 'utf8') }))
   )
 
-  const host = '0.0.0.0'
-
   const install = buildInstallCommand(pm)
-  await sandbox.runCommand({ cmd: 'bash', args: ['-lc', `HOST=${host} PORT=${port} ${install}`] })
+  await sandbox.runCommand({ cmd: 'bash', args: ['-lc', `PORT=${port} ${install}`] })
 
   const dev = buildDevCommand(pm, port)
-  await sandbox.runCommand({ cmd: 'bash', args: ['-lc', `HOST=${host} PORT=${port} ${dev}`], detached: true })
+  await sandbox.runCommand({ cmd: 'bash', args: ['-lc', `PORT=${port} ${dev}`], detached: true })
 
   try {
     const wait = buildWaitForPortCommand(port, 120_000)
