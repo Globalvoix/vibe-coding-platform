@@ -84,31 +84,29 @@ function WorkspaceContent({
               sandboxState.setUrl(url)
             }
 
-            if (sandboxId) {
-              try {
-                const reviveRes = await fetch(`/api/projects/${projectId}/sandbox/revive`, {
-                  method: 'POST',
-                })
+            try {
+              const reviveRes = await fetch(`/api/projects/${projectId}/sandbox/revive`, {
+                method: 'POST',
+              })
 
-                if (!reviveRes.ok) return
+              if (!reviveRes.ok) return
 
-                const revived = (await reviveRes.json()) as {
-                  sandbox_state: {
-                    sandboxId?: string
-                    paths?: string[]
-                    url?: string
-                    urlUUID?: string
-                  } | null
-                }
-
-                if (cancelled) return
-
-                if (revived.sandbox_state) {
-                  sandboxState.applySandboxState(revived.sandbox_state)
-                }
-              } catch {
-                // ignore
+              const revived = (await reviveRes.json()) as {
+                sandbox_state: {
+                  sandboxId?: string
+                  paths?: string[]
+                  url?: string
+                  urlUUID?: string
+                } | null
               }
+
+              if (cancelled) return
+
+              if (revived.sandbox_state) {
+                sandboxState.applySandboxState(revived.sandbox_state)
+              }
+            } catch {
+              // ignore
             }
           }
         } catch (error) {
