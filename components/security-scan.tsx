@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Spinner } from '@/components/ui/spinner'
+import { useSandboxStore } from '@/app/state'
 
 interface Issue {
   id: string
@@ -19,6 +20,7 @@ interface Issue {
 export function SecurityScan() {
   const searchParams = useSearchParams()
   const projectId = searchParams.get('projectId')
+  const { sandboxId } = useSandboxStore()
 
   const [issues, setIssues] = React.useState<Issue[]>([])
   const [filter, setFilter] = React.useState<'All' | 'Error' | 'Warning'>('All')
