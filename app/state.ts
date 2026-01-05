@@ -46,6 +46,8 @@ interface SandboxStore {
   setDevice: (device: 'desktop' | 'tablet' | 'mobile') => void
   activeTab: SandboxTabId
   setActiveTab: (tab: SandboxTabId) => void
+  isRestoringEnvironment: boolean
+  setIsRestoringEnvironment: (restoring: boolean) => void
 }
 
 function getBackgroundCommandErrorLines(commands: Command[]) {
