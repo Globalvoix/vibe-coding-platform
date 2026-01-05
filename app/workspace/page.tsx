@@ -85,40 +85,47 @@ function WorkspaceContent({
             }
           }
 
-          // Always attempt to revive the sandbox, whether or not there was previous state
-          sandboxState.setIsRestoringEnvironment(true)
-          try {
-            const reviveRes = await fetch(`/api/projects/${projectId}/sandbox/revive`, {
-              method: 'POST',
-            })
+          // Only attempt to revive if we have a sandboxId (meaning we had a previous sandbox)
+          if (project.sandbox_state?.sandboxId) {
+            sandboxState.setIsRestoringEnvironment(true)
+            try {
+              const reviveRes = await fetch(`/api/projects/${projectId}/sandbox/revive`, {
+                method: 'POST',
+              })
 
-            if (cancelled) return
+              if (cancelled) return
 
-            if (reviveRes.ok) {
-              const revived = (await reviveRes.json()) as {
-                sandbox_state: {
-                  sandboxId?: string
-                  paths?: string[]
-                  url?: string
-                  urlUUID?: string
-                } | null
-              }
+              if (reviveRes.ok) {
+                const revived = (await reviveRes.json()) as {
+                  sandbox_state: {
+                    sandboxId?: string
+                    paths?: string[]
+                    url?: string
+                    urlUUID?: string
+                  } | null
+                }
 
-              if (revived.sandbox_state) {
-                sandboxState.applySandboxState(revived.sandbox_state)
-              }
-            } else {
-              const errorData = await reviveRes.json() as { status?: string }
-              // 409 means no persisted files yet, which is expected for new projects
-              if (reviveRes.status !== 409) {
+                if (revived.sandbox_state) {
+                  sandboxState.applySandboxState(revived.sandbox_state)
+                }
+              } else if (reviveRes.status === 409) {
+                // 409 means no persisted files yet; keep the existing URL if available
+                // The sandbox may have stopped, but we'll use the stored URL for now
+                const currentUrl = sandboxState.url
+                if (currentUrl) {
+                  // URL is already set, just mark restoration as complete
+                  sandboxState.setStatus('running')
+                }
+              } else {
+                const errorData = await reviveRes.json() as { status?: string }
                 console.error('Failed to revive sandbox:', reviveRes.status, errorData)
               }
-            }
-          } catch (error) {
-            console.error('Error reviving sandbox:', error)
-          } finally {
-            if (!cancelled) {
-              sandboxState.setIsRestoringEnvironment(false)
+            } catch (error) {
+              console.error('Error reviving sandbox:', error)
+            } finally {
+              if (!cancelled) {
+                sandboxState.setIsRestoringEnvironment(false)
+              }
             }
           }
         } catch (error) {
