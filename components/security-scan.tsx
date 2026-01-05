@@ -127,7 +127,7 @@ export function SecurityScan() {
                   {issue.title}
                 </div>
                 <div className="flex justify-end">
-                  <ArrowRightIcon className="w-4 h-4 text-muted-foreground/30" />
+                  <ArrowUpRight className="w-4 h-4 text-muted-foreground/30 group-hover:text-muted-foreground transition-colors" />
                 </div>
               </div>
             ))}
@@ -136,35 +136,17 @@ export function SecurityScan() {
       </div>
 
       {/* Footer */}
-      <div className="px-6 py-6 border-t border-black/5 flex items-center justify-between">
+      <div className="px-6 py-6 mt-auto flex items-center justify-between bg-white border-t border-black/5">
         <p className="text-sm text-muted-foreground">
           Requires a current scan — update scan first
         </p>
         <Button
           disabled
-          className="bg-black/40 text-white border-transparent h-10 px-6 rounded-lg font-semibold"
+          className="bg-[#A0A0A0] text-white border-transparent h-9 px-4 rounded-md font-semibold opacity-100 disabled:opacity-100"
         >
           Try to fix all (Free)
         </Button>
       </div>
     </div>
-  )
-}
-
-function ArrowRightIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
-      <path d="M7 7l9 9" />
-      <path d="M16 7v9h-9" />
-    </svg>
   )
 }
