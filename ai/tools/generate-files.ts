@@ -54,6 +54,217 @@ export const generateFiles = ({ writer, modelId, userId, projectId }: Params) =>
 
       const normalizePath = (p: string) => p.trim().replace(/^\.{1,2}\//, '').replace(/^\//, '')
 
+      const withTimeout = async <T,>(promise: Promise<T>, timeoutMs: number) => {
+        const controller = new AbortController()
+        const timeout = setTimeout(() => controller.abort(), timeoutMs)
+        try {
+          // @ts-expect-error - callers may pass signal-aware promises (fetch)
+          return await promise(controller.signal)
+        } finally {
+          clearTimeout(timeout)
+        }
+      }
+
+      const fetchOk = async (url: string, timeoutMs = 5000) => {
+        const attempt = async (signal: AbortSignal, method: 'HEAD' | 'GET') => {
+          const res = await fetch(url, {
+            method,
+            redirect: 'follow',
+            headers: method === 'GET' ? { Range: 'bytes=0-0' } : undefined,
+            signal,
+          })
+          return res.ok
+        }
+
+        try {
+          return await withTimeout((signal: AbortSignal) => attempt(signal, 'HEAD') as unknown as Promise<boolean>, timeoutMs)
+        } catch {
+          // Some CDNs reject HEAD; retry with a tiny GET.
+          try {
+            return await withTimeout((signal: AbortSignal) => attempt(signal, 'GET') as unknown as Promise<boolean>, timeoutMs)
+          } catch {
+            return false
+          }
+        }
+      }
+
+      const extractQuotedHttpsUrls = (content: string) => {
+        const urls = new Set<string>()
+        const re = /(src|poster)\s*=\s*(["'])(https?:\/\/[^"']+)\2/g
+        let match: RegExpExecArray | null
+        while ((match = re.exec(content))) {
+          const url = match[3]
+          if (url && /^https?:\/\//.test(url)) urls.add(url)
+        }
+        return [...urls]
+      }
+
+      const isMediaUrl = (url: string) => {
+        if (!/^https?:\/\//.test(url)) return false
+        if (url.startsWith('http://localhost') || url.startsWith('http://127.0.0.1')) return false
+        return true
+      }
+
+      const fallbackForUrl = (url: string) => {
+        const lower = url.toLowerCase()
+        const isVideo = /\.(mp4|webm|ogg)(\?|#|$)/.test(lower) || /videos\.pexels\.com\//.test(lower)
+        if (isVideo) {
+          return 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4'
+        }
+
+        const seed =
+          Array.from(url)
+            .reduce((acc, ch) => (acc * 31 + ch.charCodeAt(0)) >>> 0, 7)
+            .toString(16) || '0'
+        return `https://picsum.photos/seed/${seed}/1200/800`
+      }
+
+      const repairMediaUrlsInFiles = async (files: File[]) => {
+        const urlSet = new Set<string>()
+        for (const f of files) {
+          for (const url of extractQuotedHttpsUrls(f.content)) {
+            if (isMediaUrl(url)) urlSet.add(url)
+          }
+        }
+
+        const urls = [...urlSet].slice(0, 25)
+        if (urls.length === 0) return files
+
+        const checks = await Promise.all(
+          urls.map(async (url) => {
+            const ok = await fetchOk(url)
+            return { url, ok }
+          })
+        )
+
+        const replacements = new Map<string, string>()
+        for (const { url, ok } of checks) {
+          if (!ok) replacements.set(url, fallbackForUrl(url))
+        }
+        if (replacements.size === 0) return files
+
+        return files.map((file) => {
+          let content = file.content
+          for (const [bad, good] of replacements.entries()) {
+            if (content.includes(bad)) content = content.split(bad).join(good)
+          }
+          return content === file.content ? file : { ...file, content }
+        })
+      }
+
+      const readSandboxTextFile = async (path: string) => {
+        const stream = await sandbox!.readFile({ path })
+        if (!stream) return null
+
+        const anyStream = stream as unknown as any
+        if (anyStream && typeof anyStream.getReader === 'function') {
+          // Web ReadableStream
+          return await new Response(anyStream).text()
+        }
+
+        // Node stream
+        return await new Promise<string>((resolve, reject) => {
+          let data = ''
+          anyStream.setEncoding?.('utf8')
+          anyStream.on?.('data', (chunk: string) => {
+            data += chunk
+          })
+          anyStream.on?.('end', () => resolve(data))
+          anyStream.on?.('error', reject)
+        })
+      }
+
+      const getPackageName = (specifier: string) => {
+        if (specifier.startsWith('node:')) return null
+        if (specifier.startsWith('.') || specifier.startsWith('/')) return null
+        if (specifier.startsWith('next/')) return 'next'
+        if (specifier.startsWith('react/')) return 'react'
+
+        const parts = specifier.split('/')
+        if (specifier.startsWith('@')) return parts.length >= 2 ? `${parts[0]}/${parts[1]}` : specifier
+        return parts[0]
+      }
+
+      const ensurePackageJsonDeps = async (files: File[], forceNextMinimum: boolean) => {
+        const importSpecifiers = new Set<string>()
+        const importRe = /(?:from\s+['"]([^'\"]+)['"]|require\(\s*['"]([^'\"]+)['"]\s*\)|import\(\s*['"]([^'\"]+)['"]\s*\))/g
+
+        for (const f of files) {
+          const content = f.content
+          let match: RegExpExecArray | null
+          while ((match = importRe.exec(content))) {
+            const spec = match[1] || match[2] || match[3]
+            if (spec) importSpecifiers.add(spec)
+          }
+        }
+
+        const builtins = new Set([
+          'assert',
+          'buffer',
+          'child_process',
+          'crypto',
+          'dns',
+          'events',
+          'fs',
+          'http',
+          'https',
+          'net',
+          'os',
+          'path',
+          'querystring',
+          'stream',
+          'timers',
+          'tls',
+          'tty',
+          'url',
+          'util',
+          'zlib',
+        ])
+
+        const packages = new Set<string>()
+        for (const spec of importSpecifiers) {
+          const pkg = getPackageName(spec)
+          if (!pkg) continue
+          if (builtins.has(pkg)) continue
+          packages.add(pkg)
+        }
+
+        if (forceNextMinimum) {
+          packages.add('next')
+          packages.add('react')
+          packages.add('react-dom')
+        }
+
+        // These are Next built-ins and should not be added as separate deps.
+        packages.delete('next/image')
+        packages.delete('next/link')
+
+        if (packages.size === 0) return
+
+        const pkgPath = 'package.json'
+        const existingPkgText = await readSandboxTextFile(pkgPath)
+        let pkg: any
+        try {
+          pkg = existingPkgText ? JSON.parse(existingPkgText) : { name: 'app', private: true }
+        } catch {
+          pkg = { name: 'app', private: true }
+        }
+
+        pkg.dependencies = pkg.dependencies && typeof pkg.dependencies === 'object' ? pkg.dependencies : {}
+
+        let changed = false
+        for (const dep of packages) {
+          if (pkg.dependencies[dep]) continue
+          pkg.dependencies[dep] = 'latest'
+          changed = true
+        }
+
+        if (!changed) return
+
+        const updated = JSON.stringify(pkg, null, 2) + '\n'
+        await sandbox!.writeFiles([{ path: pkgPath, content: Buffer.from(updated, 'utf8') }])
+      }
+
       const getLatestUserText = (msgs: unknown[]) => {
         for (let i = msgs.length - 1; i >= 0; i--) {
           const msg = msgs[i] as { role?: unknown; content?: unknown } | null
@@ -213,13 +424,14 @@ export const generateFiles = ({ writer, modelId, userId, projectId }: Params) =>
       try {
         for await (const chunk of iterator) {
           if (chunk.files.length > 0) {
-            const error = await writeFiles(chunk)
+            const repairedFiles = await repairMediaUrlsInFiles(chunk.files)
+            const error = await writeFiles({ ...chunk, files: repairedFiles })
             if (error) {
               return error
             }
 
-            uploaded.push(...chunk.files)
-            await persistFiles(chunk.files)
+            uploaded.push(...repairedFiles)
+            await persistFiles(repairedFiles)
           } else {
             writer.write({
               id: toolCallId,
@@ -249,6 +461,14 @@ export const generateFiles = ({ writer, modelId, userId, projectId }: Params) =>
         })
 
         return richError.message
+      }
+
+      // Best-effort dependency enforcement to prevent runtime "module not found" errors.
+      // Only triggers after generation to avoid interfering with streaming writes.
+      try {
+        await ensurePackageJsonDeps(uploaded, looksLikeNextAppRouter)
+      } catch {
+        // best-effort
       }
 
       writer.write({
