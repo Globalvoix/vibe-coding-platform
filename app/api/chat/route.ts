@@ -231,6 +231,8 @@ export async function POST(req: Request) {
             tools: tools({
               modelId,
               writer,
+              userId,
+              projectId,
             }),
             onError: (error) => {
               console.error('Error communicating with AI')

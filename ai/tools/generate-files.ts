@@ -7,13 +7,16 @@ import { getWriteFiles } from './generate-files/get-write-files'
 import { tool } from 'ai'
 import description from './generate-files.md'
 import z from 'zod/v3'
+import { upsertProjectFiles } from '@/lib/project-files-db'
 
 interface Params {
   modelId: string
   writer: UIMessageStreamWriter<UIMessage<never, DataPart>>
+  userId: string
+  projectId?: string
 }
 
-export const generateFiles = ({ writer, modelId }: Params) =>
+export const generateFiles = ({ writer, modelId, userId, projectId }: Params) =>
   tool({
     description,
     inputSchema: z.object({
@@ -51,15 +54,30 @@ export const generateFiles = ({ writer, modelId }: Params) =>
       const iterator = getContents({ messages, modelId, paths })
       const uploaded: File[] = []
 
+      const persistFiles = async (files: File[]) => {
+        if (!projectId) return
+        if (files.length === 0) return
+        try {
+          await upsertProjectFiles({
+            userId,
+            projectId,
+            files: files.map((file) => ({ path: file.path, content: file.content })),
+          })
+        } catch {
+          // best-effort
+        }
+      }
+
       try {
         for await (const chunk of iterator) {
           if (chunk.files.length > 0) {
             const error = await writeFiles(chunk)
             if (error) {
               return error
-            } else {
-              uploaded.push(...chunk.files)
             }
+
+            uploaded.push(...chunk.files)
+            await persistFiles(chunk.files)
           } else {
             writer.write({
               id: toolCallId,
