@@ -63,9 +63,12 @@ export async function GET(req: NextRequest) {
     console.log('[GitHub Setup] Saved installation to DB')
 
     if (setupAction === 'install') {
+      console.log('[GitHub Setup] Creating installation token...')
       const installationToken = await createInstallationToken(installationId)
+      console.log('[GitHub Setup] Installation token created')
 
       const repoName = sanitizeRepoName(`thinksoft-${verified.projectId}`)
+      console.log('[GitHub Setup] Creating repository:', { repoName, owner: account.login, type: account.type })
 
       const createBody = {
         name: repoName,
