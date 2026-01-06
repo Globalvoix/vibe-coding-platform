@@ -1,5 +1,5 @@
-import { SignJWT, importPKCS8 } from 'jose'
-import { createPrivateKey } from 'node:crypto'
+import { SignJWT, importSPKI } from 'jose'
+import { createPrivateKey, createPublicKey } from 'node:crypto'
 
 const GITHUB_API_BASE = 'https://api.github.com'
 
@@ -22,14 +22,20 @@ function getRequiredEnv(name: string): string {
   return value
 }
 
-async function getAppPrivateKey(): Promise<ReturnType<typeof importPKCS8>> {
+async function getAppPrivateKey() {
   const rawPem = getRequiredEnv('GITHUB_PRIVATE_KEY').replace(/\\n/g, '\n')
 
-  const pkcs8Pem = createPrivateKey({ key: rawPem, format: 'pem' })
-    .export({ format: 'pem', type: 'pkcs8' })
-    .toString()
+  const key = createPrivateKey({
+    key: rawPem,
+    format: 'pem',
+  })
 
-  return importPKCS8(pkcs8Pem, 'RS256')
+  const publicKeyPem = createPublicKey(key).export({ format: 'pem', type: 'spki' })
+
+  return importSPKI(publicKeyPem, 'RS256').then((publicKey) => ({
+    privateKey: key,
+    publicKey,
+  }))
 }
 
 export async function createGithubAppJwt(): Promise<string> {
