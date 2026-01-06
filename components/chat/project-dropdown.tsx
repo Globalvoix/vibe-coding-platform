@@ -21,6 +21,7 @@ import { useAuth } from '@clerk/nextjs'
 import { CREDITS_UPDATED_EVENT } from '@/lib/credits-events'
 
 import { RenameProjectModal } from './rename-project-modal'
+import { useUIStore } from '@/lib/ui-store'
 
 interface ProjectDropdownProps {
   projectName: string
