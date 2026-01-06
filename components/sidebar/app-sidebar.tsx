@@ -35,9 +35,15 @@ export function AppSidebar() {
     setSettingsTab(tab)
     setSettingsModalOpen(true)
 
+    const installError = searchParams.get('githubInstall')
+    if (installError === 'error') {
+      toast.error('Failed to connect GitHub')
+    }
+
     const url = new URL(window.location.href)
     url.searchParams.delete('openSettings')
     url.searchParams.delete('settingsTab')
+    url.searchParams.delete('githubInstall')
 
     const next = url.searchParams.toString()
     router.replace(next ? `${url.pathname}?${next}` : url.pathname)
