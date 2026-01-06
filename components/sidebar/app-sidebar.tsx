@@ -174,6 +174,20 @@ export function AppSidebar() {
             </button>
           </div>
 
+          <div className="p-4 border-b border-border space-y-1">
+            <h4 className="px-3 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+              Connectors
+            </h4>
+            <button
+              onClick={() => handleOpenSettings('github')}
+              className="inline-flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-secondary transition-colors"
+              type="button"
+            >
+              <GithubIcon className="w-4 h-4" />
+              <span>GitHub</span>
+            </button>
+          </div>
+
           {isSignedIn && (
             <div className="mt-auto px-4 py-3 border-t border-border/70 text-xs text-muted-foreground flex flex-col gap-1">
               <div className="flex items-center justify-between">
