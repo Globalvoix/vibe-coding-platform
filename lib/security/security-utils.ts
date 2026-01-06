@@ -52,7 +52,14 @@ function findLineNumber(content: string, predicate: (line: string) => boolean): 
 }
 
 function hasApiAuth(content: string): boolean {
-  return /\bauth\s*\(/.test(content) || /from\s+['\"]@clerk\/.+['\"]/.test(content)
+  const authPatterns = [
+    /\bauth\s*\(/,
+    /from\s+['\"]@clerk\/.+['\"]/,
+    /from\s+['\"]next-auth['\"]/,
+    /verifyToken|validateToken|authenticate|checkAuth|requireAuth/i,
+    /middleware.*auth|auth.*middleware/i,
+  ]
+  return authPatterns.some((re) => re.test(content))
 }
 
 function hasInsecureHttpUrl(content: string): boolean {
@@ -60,22 +67,28 @@ function hasInsecureHttpUrl(content: string): boolean {
   if (httpIdx === -1) return false
 
   const snippet = content.slice(Math.max(0, httpIdx - 40), httpIdx + 80)
-  return !snippet.includes('localhost') && !snippet.includes('127.0.0.1')
+  return !snippet.includes('localhost') && !snippet.includes('127.0.0.1') && !snippet.includes('example.com')
 }
 
 function hasPotentialSqlInjection(content: string): boolean {
-  const queryCall = /\b(query|execute)\s*\(/.test(content)
+  const queryCall = /\b(query|execute|exec)\s*\(/.test(content)
   if (!queryCall) return false
 
-  const concatenation = /\+\s*[^\n]*\b(query|execute)\s*\(|\b(query|execute)\s*\([^\)]*\+/.test(content)
-  const templateLiteral = /\b(query|execute)\s*\(\s*`[\s\S]*\$\{/.test(content)
-  return concatenation || templateLiteral
+  const unsafePatterns = [
+    /\+\s*[^\n]*\b(query|execute|exec)\s*\(/,
+    /\b(query|execute|exec)\s*\([^\)]*\+/,
+    /\b(query|execute|exec)\s*\(\s*`[\s\S]*\$\{/,
+    /(\bSELECT\b|\bUPDATE\b|\bDELETE\b)\s+[\s\S]*\+|\+[\s\S]*(\bSELECT\b|\bUPDATE\b|\bDELETE\b)/i,
+  ]
+  return unsafePatterns.some((re) => re.test(content))
 }
 
 function hasPotentialHardcodedSecret(content: string): boolean {
   const patterns = [
-    /\b(API_KEY|SECRET|TOKEN|PASSWORD)\b\s*[:=]\s*['\"][^'\"]{8,}['\"]/i,
-    /\b(API_KEY|SECRET|TOKEN|PASSWORD)\b\s*[:=]\s*`[^`]{8,}`/i,
+    /\b(API_KEY|SECRET_KEY|SECRET|TOKEN|PASSWORD|PRIVATE_KEY|ACCESS_TOKEN)\b\s*[:=]\s*['\"][^'\"]{8,}['\"]/i,
+    /\b(API_KEY|SECRET_KEY|SECRET|TOKEN|PASSWORD|PRIVATE_KEY|ACCESS_TOKEN)\b\s*[:=]\s*`[^`]{8,}`/i,
+    /\bprocess\.env\b.*SECRET|process\.env\b.*PASSWORD/i,
+    /export\s+const\s+(API_KEY|SECRET|TOKEN|PASSWORD)[^=]*=\s*['\"][^'\"]{8,}['\"]/i,
   ]
 
   return patterns.some((re) => re.test(content))
