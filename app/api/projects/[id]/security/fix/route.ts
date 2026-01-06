@@ -5,7 +5,7 @@ import { generateObject } from 'ai'
 import { z } from 'zod'
 import { getModelOptions } from '@/ai/gateway'
 import { getSupabaseProject } from '@/lib/supabase-projects-db'
-import { dedupeIssues, getSandboxFiles, scanFilesForIssues, tryFixSupabaseIssue, type SecurityIssue } from '@/lib/security/security-utils'
+import { dedupeIssues, getSandboxFiles, getSupabaseSecurityIssues, scanFilesForIssues, tryFixSupabaseIssue, type SecurityIssue } from '@/lib/security/security-utils'
 
 interface FixRequest {
   sandboxId: string
@@ -222,9 +222,24 @@ export async function POST(
     const files = await getSandboxFiles(sandboxId, DEFAULT_SANDBOX_SCAN_PATHS)
     const rescannedCodeIssues = scanFilesForIssues(files)
 
-    const remainingIssues = dedupeIssues([...rescannedCodeIssues]).sort((a, b) =>
-      issueSortKey(a).localeCompare(issueSortKey(b))
-    )
+    const rescannedSupabaseIssues: SecurityIssue[] = []
+    if (supabaseProject?.access_token && supabaseProject.supabase_project_ref) {
+      try {
+        rescannedSupabaseIssues.push(
+          ...(await getSupabaseSecurityIssues({
+            projectRef: supabaseProject.supabase_project_ref,
+            accessToken: supabaseProject.access_token,
+          }))
+        )
+      } catch {
+        // ignore
+      }
+    }
+
+    const remainingIssues = dedupeIssues([
+      ...rescannedCodeIssues,
+      ...rescannedSupabaseIssues,
+    ]).sort((a, b) => issueSortKey(a).localeCompare(issueSortKey(b)))
 
     return NextResponse.json({
       success: remainingIssues.length === 0,
