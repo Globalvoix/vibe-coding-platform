@@ -383,6 +383,7 @@ export function Sandbox({ className }: Props) {
 
             <div className="min-w-[240px] flex justify-end items-center gap-2">
               <SupabaseOAuthButton projectId={projectId || undefined} compact={true} />
+              <GithubOAuthButton projectId={projectId || undefined} compact={true} />
               <button
                 onClick={handlePublish}
                 type="button"
