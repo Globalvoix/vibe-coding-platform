@@ -1,4 +1,4 @@
-import { SignJWT } from 'jose'
+import { SignJWT, importPKCS8 } from 'jose'
 
 const GITHUB_API_BASE = 'https://api.github.com'
 
