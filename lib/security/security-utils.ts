@@ -116,7 +116,7 @@ export function scanFilesForIssues(files: Array<{ path: string; content: string 
         level: 'Error',
         title: 'Potential SQL Injection Vulnerability',
         filePath: path,
-        lineNumber: findLineNumber(content, (line) => /\b(query|execute)\s*\(/.test(line)),
+        lineNumber: findLineNumber(content, (line) => /\b(query|execute|exec)\s*\(/.test(line)),
       })
     }
 
@@ -137,6 +137,17 @@ export function scanFilesForIssues(files: Array<{ path: string; content: string 
         title: 'Insecure Transport (HTTP instead of HTTPS)',
         filePath: path,
         lineNumber: findLineNumber(content, (line) => line.includes('http://')),
+      })
+    }
+
+    // Check for missing input validation
+    if ((path.includes('/api/') || path.includes('routes')) && content.includes('req.body') && !content.includes('validate') && !content.includes('zod')) {
+      issues.push({
+        id: `missing-validation:${path}`,
+        level: 'Warning',
+        title: 'Missing Input Validation',
+        filePath: path,
+        lineNumber: findLineNumber(content, (line) => line.includes('req.body')),
       })
     }
   }
