@@ -155,23 +155,12 @@ export function SecurityScan() {
         </div>
         <div className="flex items-center gap-2">
           <Button
-            variant="outline"
-            className="bg-white border-black/10 text-xs h-8 px-3 rounded-md font-medium"
-            disabled={isScanning || isFixing}
-          >
-            Add context
-          </Button>
-          <Button
             onClick={handleScan}
             disabled={isScanning || isFixing}
             className="bg-[#1A73E8] hover:bg-[#1557B0] text-white border-transparent text-xs h-8 px-3 rounded-md font-medium disabled:opacity-50"
           >
             {isScanning ? <Spinner size="sm" /> : 'Update (Free)'}
           </Button>
-          <button className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors ml-4">
-            <HelpCircle className="w-4 h-4" />
-            <span>Docs</span>
-          </button>
         </div>
       </div>
 
