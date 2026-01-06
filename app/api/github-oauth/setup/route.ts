@@ -126,9 +126,13 @@ export async function GET(req: NextRequest) {
     console.log('[GitHub Setup] Redirecting to:', `${appUrl}/workspace?projectId=${verified.projectId}`)
     return NextResponse.redirect(`${appUrl}/workspace?projectId=${verified.projectId}`)
   } catch (error) {
-    console.error('Error in GitHub App setup callback', error)
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    console.error('[GitHub Setup] Error in GitHub App setup callback:', errorMessage)
+    if (error instanceof Error) {
+      console.error('[GitHub Setup] Stack:', error.stack)
+    }
     return NextResponse.json(
-      { error: 'Failed to complete GitHub App installation' },
+      { error: 'Failed to complete GitHub App installation', details: errorMessage },
       { status: 500 }
     )
   }
