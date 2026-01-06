@@ -1,6 +1,4 @@
 import { SignJWT } from 'jose'
-import { createPrivateKey } from 'node:crypto'
-import { promisify } from 'node:util'
 
 const GITHUB_API_BASE = 'https://api.github.com'
 
