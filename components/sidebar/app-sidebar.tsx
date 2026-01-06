@@ -27,6 +27,22 @@ export function AppSidebar() {
   }
 
   useEffect(() => {
+    const shouldOpen = searchParams.get('openSettings')
+    if (shouldOpen !== '1') return
+
+    const tab = searchParams.get('settingsTab') ?? 'settings'
+    setSettingsTab(tab)
+    setSettingsModalOpen(true)
+
+    const url = new URL(window.location.href)
+    url.searchParams.delete('openSettings')
+    url.searchParams.delete('settingsTab')
+
+    const next = url.searchParams.toString()
+    router.replace(next ? `${url.pathname}?${next}` : url.pathname)
+  }, [router, searchParams, setSettingsModalOpen, setSettingsTab])
+
+  useEffect(() => {
     if (!isSignedIn) {
       setCreditBalance(null)
       setIsCreditsLoading(false)
