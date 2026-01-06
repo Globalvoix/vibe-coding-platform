@@ -1,4 +1,5 @@
-import { SignJWT, importPKCS8 } from 'jose'
+import { SignJWT } from 'jose'
+import { createPrivateKey, KeyObject } from 'node:crypto'
 
 const GITHUB_API_BASE = 'https://api.github.com'
 
