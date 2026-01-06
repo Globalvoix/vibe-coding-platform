@@ -22,16 +22,36 @@ function getRequiredEnv(name: string): string {
   return value
 }
 
+function normalizePem(pem: string): string {
+  const normalized = pem.replace(/\\n/g, '\n').replace(/\r\n?/g, '\n').trim()
+  return normalized.endsWith('\n') ? normalized : `${normalized}\n`
+}
+
+function parseGithubPrivateKey(pem: string): KeyObject {
+  const base = { key: pem, format: 'pem' as const }
+
+  try {
+    return createPrivateKey({ ...base, type: 'pkcs1' })
+  } catch {
+    // continue
+  }
+
+  try {
+    return createPrivateKey({ ...base, type: 'pkcs8' })
+  } catch {
+    // continue
+  }
+
+  return createPrivateKey(base)
+}
+
 export async function createGithubAppJwt(): Promise<string> {
   const appId = getRequiredEnv('GITHUB_APP_ID')
-  const rawPem = getRequiredEnv('GITHUB_PRIVATE_KEY').replace(/\\n/g, '\n')
+  const rawPem = normalizePem(getRequiredEnv('GITHUB_PRIVATE_KEY'))
 
   const now = Math.floor(Date.now() / 1000)
 
-  const key: KeyObject = createPrivateKey({
-    key: rawPem,
-    format: 'pem',
-  })
+  const key = parseGithubPrivateKey(rawPem)
 
   return new SignJWT({})
     .setProtectedHeader({ alg: 'RS256' })

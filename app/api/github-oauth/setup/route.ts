@@ -123,17 +123,27 @@ export async function GET(req: NextRequest) {
     }
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-    console.log('[GitHub Setup] Redirecting to:', `${appUrl}/workspace?projectId=${verified.projectId}`)
-    return NextResponse.redirect(`${appUrl}/workspace?projectId=${verified.projectId}`)
+    const redirectUrl = new URL(`${appUrl}/workspace`)
+    redirectUrl.searchParams.set('projectId', verified.projectId)
+    redirectUrl.searchParams.set('openSettings', '1')
+    redirectUrl.searchParams.set('settingsTab', 'github')
+
+    console.log('[GitHub Setup] Redirecting to:', redirectUrl.toString())
+    return NextResponse.redirect(redirectUrl.toString())
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error)
     console.error('[GitHub Setup] Error in GitHub App setup callback:', errorMessage)
     if (error instanceof Error) {
       console.error('[GitHub Setup] Stack:', error.stack)
     }
-    return NextResponse.json(
-      { error: 'Failed to complete GitHub App installation', details: errorMessage },
-      { status: 500 }
-    )
+
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    const redirectUrl = new URL(`${appUrl}/workspace`)
+    redirectUrl.searchParams.set('projectId', verified.projectId)
+    redirectUrl.searchParams.set('openSettings', '1')
+    redirectUrl.searchParams.set('settingsTab', 'github')
+    redirectUrl.searchParams.set('githubInstall', 'error')
+
+    return NextResponse.redirect(redirectUrl.toString())
   }
 }

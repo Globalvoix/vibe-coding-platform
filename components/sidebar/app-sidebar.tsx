@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth, useClerk } from '@clerk/nextjs'
 import { useUIStore } from '@/lib/ui-store'
 import { CREDITS_UPDATED_EVENT } from '@/lib/credits-events'
