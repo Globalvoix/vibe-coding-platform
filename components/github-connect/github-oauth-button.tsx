@@ -7,6 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { GithubIcon } from '@/components/icons/github'
+import { useUIStore } from '@/lib/ui-store'
 
 interface GithubConnectionStatus {
   connected: boolean
