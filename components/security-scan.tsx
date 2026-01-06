@@ -37,7 +37,13 @@ export function SecurityScan() {
   })
 
   const handleScan = React.useCallback(async () => {
-    if (!projectId || !sandboxId) {
+    if (!projectId) {
+      setError('Project ID not available')
+      setIsScanning(false)
+      return
+    }
+
+    if (!sandboxId) {
       setError('Sandbox not initialized. Please generate code first.')
       setIsScanning(false)
       return
@@ -47,7 +53,6 @@ export function SecurityScan() {
     setError(null)
 
     try {
-
       const response = await fetch(`/api/projects/${projectId}/security/scan`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -55,17 +60,23 @@ export function SecurityScan() {
       })
 
       if (!response.ok) {
-        const data = await response.json()
-        setError(data.error || 'Scan failed')
+        try {
+          const errorData = await response.json()
+          setError(errorData.error || `Scan failed with status ${response.status}`)
+        } catch {
+          setError(`Scan failed with status ${response.status}`)
+        }
         setIsScanning(false)
         return
       }
 
       const data = await response.json()
-      setIssues(data.issues || [])
-      setLastScannedAt(data.scannedAt)
+      const scannedIssues = Array.isArray(data.issues) ? data.issues : []
+      setIssues(scannedIssues)
+      setLastScannedAt(data.scannedAt || new Date().toISOString())
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Scan failed')
+      console.error('Scan error:', err)
+      setError(err instanceof Error ? err.message : 'Scan failed - network or server error')
     } finally {
       setIsScanning(false)
     }
