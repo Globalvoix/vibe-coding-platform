@@ -1,91 +1,122 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
-import { saveGithubProject } from '@/lib/github-projects-db'
+import { verifyGithubInstallState } from '@/lib/github-install-state'
+import { getInstallation, createInstallationToken, githubInstallationRequest } from '@/lib/github-app'
+import { upsertGithubInstallation, upsertGithubProject } from '@/lib/github-projects-db'
+
+function sanitizeRepoName(input: string) {
+  return input
+    .toLowerCase()
+    .replace(/[^a-z0-9-_]/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 90)
+}
+
+async function createRepoForInstallation(params: {
+  installationId: number
+  projectId: string
+  defaultRepoName: string
+}) {
+  const installation = await getInstallation(params.installationId)
+  const account = installation.account
+
+  const installationToken = await createInstallationToken(params.installationId)
+
+  const repoName = sanitizeRepoName(params.defaultRepoName)
+
+  const createBody = {
+    name: repoName,
+    private: true,
+    auto_init: true,
+    description: `Thinksoft project ${params.projectId}`,
+  }
+
+  if (account.type === 'Organization') {
+    return githubInstallationRequest<{
+      id: number
+      name: string
+      owner: { login: string }
+      default_branch: string
+      html_url: string
+    }>({
+      method: 'POST',
+      path: `/orgs/${encodeURIComponent(account.login)}/repos`,
+      installationToken,
+      body: createBody,
+    })
+  }
+
+  return githubInstallationRequest<{
+    id: number
+    name: string
+    owner: { login: string }
+    default_branch: string
+    html_url: string
+  }>({
+    method: 'POST',
+    path: `/user/repos`,
+    installationToken,
+    body: createBody,
+  })
+}
 
 export async function GET(req: NextRequest) {
-  const code = req.nextUrl.searchParams.get('code')
+  const installationIdRaw = req.nextUrl.searchParams.get('installation_id')
   const state = req.nextUrl.searchParams.get('state')
 
-  if (!code || !state) {
-    return NextResponse.json({ error: 'Missing code or state' }, { status: 400 })
-  }
-
-  let stateData
-  try {
-    stateData = JSON.parse(state)
-  } catch {
-    return NextResponse.json({ error: 'Invalid state' }, { status: 400 })
-  }
-
-  const { userId, projectId } = stateData
-
-  const clientId = process.env.GITHUB_OAUTH_CLIENT_ID
-  const clientSecret = process.env.GITHUB_OAUTH_CLIENT_SECRET
-
-  if (!clientId || !clientSecret) {
+  if (!installationIdRaw || !state) {
     return NextResponse.json(
-      { error: 'GitHub OAuth configuration missing' },
-      { status: 500 }
+      { error: 'Missing installation_id or state' },
+      { status: 400 }
     )
   }
 
+  const installationId = Number(installationIdRaw)
+  if (!Number.isFinite(installationId) || installationId <= 0) {
+    return NextResponse.json({ error: 'Invalid installation_id' }, { status: 400 })
+  }
+
+  const verified = verifyGithubInstallState(state)
+  if (!verified) {
+    return NextResponse.json({ error: 'Invalid state' }, { status: 400 })
+  }
+
   try {
-    // Exchange code for token
-    const tokenResponse = await fetch('https://github.com/login/oauth/access_token', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      },
-      body: JSON.stringify({
-        client_id: clientId,
-        client_secret: clientSecret,
-        code,
-      }),
+    const installation = await getInstallation(installationId)
+    const account = installation.account
+
+    await upsertGithubInstallation({
+      userId: verified.userId,
+      projectId: verified.projectId,
+      installationId,
+      accountLogin: account.login,
+      accountType: account.type,
+      accountAvatarUrl: account.avatar_url ?? null,
     })
 
-    if (!tokenResponse.ok) {
-      throw new Error('Failed to exchange code for token')
-    }
-
-    const tokenData = await tokenResponse.json()
-    const accessToken = tokenData.access_token
-
-    if (!accessToken) {
-      return NextResponse.json({ error: 'No access token received' }, { status: 400 })
-    }
-
-    // Get user info
-    const userResponse = await fetch('https://api.github.com/user', {
-      headers: {
-        Authorization: `token ${accessToken}`,
-        Accept: 'application/json',
-      },
+    const repo = await createRepoForInstallation({
+      installationId,
+      projectId: verified.projectId,
+      defaultRepoName: `thinksoft-${verified.projectId}`,
     })
 
-    if (!userResponse.ok) {
-      throw new Error('Failed to get GitHub user info')
-    }
-
-    const userData = await userResponse.json()
-
-    // Save to DB
-    await saveGithubProject({
-      userId,
-      projectId,
-      githubUserId: userData.id.toString(),
-      githubUsername: userData.login,
-      githubAvatarUrl: userData.avatar_url,
-      accessToken,
+    await upsertGithubProject({
+      userId: verified.userId,
+      projectId: verified.projectId,
+      activeInstallationId: installationId,
+      repoOwner: repo.owner.login,
+      repoName: repo.name,
+      repoId: repo.id,
+      defaultBranch: repo.default_branch,
     })
 
-    // Redirect back to project workspace
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-    return NextResponse.redirect(`${appUrl}/workspace?projectId=${projectId}`)
+    return NextResponse.redirect(`${appUrl}/workspace?projectId=${verified.projectId}`)
   } catch (error) {
-    console.error('Error in GitHub OAuth callback', error)
+    console.error('Error in GitHub App callback', error)
     return NextResponse.json(
-      { error: 'Failed to complete GitHub OAuth' },
+      { error: 'Failed to complete GitHub App installation' },
       { status: 500 }
     )
   }

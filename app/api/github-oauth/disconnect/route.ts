@@ -10,15 +10,12 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { projectId } = await req.json()
+    const { projectId } = (await req.json()) as { projectId?: string }
     if (!projectId) {
-      return NextResponse.json(
-        { error: 'Missing projectId' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Missing projectId' }, { status: 400 })
     }
 
-    await deleteGithubProject(userId, projectId)
+    await deleteGithubProject({ userId, projectId })
 
     return NextResponse.json({ success: true })
   } catch (error) {

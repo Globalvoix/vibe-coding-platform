@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
-import { getGithubProject } from '@/lib/github-projects-db'
+import { getGithubProject, listGithubInstallations } from '@/lib/github-projects-db'
 
 export async function GET(req: NextRequest) {
   const { userId } = await auth()
@@ -18,21 +18,42 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const connection = await getGithubProject(userId, projectId)
+    const [project, installations] = await Promise.all([
+      getGithubProject({ userId, projectId }),
+      listGithubInstallations({ userId, projectId }),
+    ])
 
-    if (!connection) {
-      return NextResponse.json({
-        connected: false,
-        projectId,
-      })
-    }
+    const activeInstallationId = project?.active_installation_id ?? null
+
+    const orgs = installations.map((i) => ({
+      installationId: i.installation_id,
+      login: i.account_login,
+      type: i.account_type,
+      avatarUrl: i.account_avatar_url,
+      active: activeInstallationId === i.installation_id,
+    }))
+
+    const activeOrg = orgs.find((o) => o.active) ?? null
+
+    const repo =
+      project?.repo_owner && project?.repo_name
+        ? {
+            owner: project.repo_owner,
+            name: project.repo_name,
+            url: `https://github.com/${project.repo_owner}/${project.repo_name}`,
+            defaultBranch: project.default_branch ?? 'main',
+          }
+        : null
 
     return NextResponse.json({
-      connected: true,
+      connected: orgs.length > 0,
       projectId,
-      username: connection.github_username,
-      avatarUrl: connection.github_avatar_url,
-      connectedAt: connection.created_at,
+      username: activeOrg?.login,
+      avatarUrl: activeOrg?.avatarUrl,
+      installationId: activeInstallationId ?? undefined,
+      organizations: orgs,
+      repository: repo,
+      canUpdatePr: Boolean(repo && activeInstallationId),
     })
   } catch (error) {
     console.error('Error checking GitHub connection status', error)

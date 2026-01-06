@@ -1,6 +1,8 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
+import { createGithubInstallState } from '@/lib/github-install-state'
+import { getGithubAppSlug } from '@/lib/github-app'
 
 export async function GET(req: NextRequest) {
   const { userId } = await auth()
@@ -16,25 +18,25 @@ export async function GET(req: NextRequest) {
     )
   }
 
-  const clientId = process.env.GITHUB_OAUTH_CLIENT_ID
-  const redirectUri = process.env.GITHUB_OAUTH_REDIRECT_URL
-
-  if (!clientId || !redirectUri) {
+  let slug: string
+  try {
+    slug = getGithubAppSlug()
+  } catch (error) {
     return NextResponse.json(
-      { error: 'GitHub OAuth configuration missing' },
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : 'GitHub App configuration missing',
+      },
       { status: 500 }
     )
   }
 
-  // Scope: repo, user
-  const scope = 'repo user'
-  const state = JSON.stringify({ userId, projectId })
-  
-  const githubAuthUrl = new URL('https://github.com/login/oauth/authorize')
-  githubAuthUrl.searchParams.set('client_id', clientId)
-  githubAuthUrl.searchParams.set('redirect_uri', redirectUri)
-  githubAuthUrl.searchParams.set('scope', scope)
-  githubAuthUrl.searchParams.set('state', state)
+  const state = createGithubInstallState({ userId, projectId })
 
-  return NextResponse.redirect(githubAuthUrl.toString())
+  const url = new URL(`https://github.com/apps/${slug}/installations/new`)
+  url.searchParams.set('state', state)
+
+  return NextResponse.redirect(url.toString())
 }

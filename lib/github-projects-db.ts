@@ -1,6 +1,5 @@
 import { Pool } from 'pg'
 import crypto from 'node:crypto'
-import { decryptEnvVar, encryptEnvVar } from '@/lib/env-encryption'
 
 const connectionString = process.env.DATABASE_URL
 
@@ -12,7 +11,7 @@ const pool = new Pool({ connectionString })
 
 let initialized = false
 
-async function ensureGithubProjectsTable() {
+async function ensureGithubTables() {
   if (initialized) return
 
   await pool.query(`
@@ -20,18 +19,34 @@ async function ensureGithubProjectsTable() {
       id TEXT PRIMARY KEY,
       user_id TEXT NOT NULL,
       project_id TEXT NOT NULL,
-      github_user_id TEXT,
-      github_username TEXT,
-      github_avatar_url TEXT,
-      access_token TEXT NOT NULL,
-      refresh_token TEXT,
-      expires_at TIMESTAMPTZ,
+      active_installation_id BIGINT,
+      repo_owner TEXT,
+      repo_name TEXT,
+      repo_id BIGINT,
+      default_branch TEXT,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       UNIQUE(user_id, project_id)
     );
+
+    CREATE TABLE IF NOT EXISTS github_project_installations (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      project_id TEXT NOT NULL,
+      installation_id BIGINT NOT NULL,
+      account_login TEXT NOT NULL,
+      account_type TEXT NOT NULL,
+      account_avatar_url TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      UNIQUE(user_id, project_id, installation_id)
+    );
+
     CREATE INDEX IF NOT EXISTS github_projects_user_project_idx
       ON github_projects(user_id, project_id);
+
+    CREATE INDEX IF NOT EXISTS github_project_installations_user_project_idx
+      ON github_project_installations(user_id, project_id);
   `)
 
   initialized = true
@@ -41,107 +56,153 @@ export interface GithubProjectRecord {
   id: string
   user_id: string
   project_id: string
-  github_user_id: string | null
-  github_username: string | null
-  github_avatar_url: string | null
-  access_token: string
-  refresh_token: string | null
-  expires_at: string | null
+  active_installation_id: number | null
+  repo_owner: string | null
+  repo_name: string | null
+  repo_id: number | null
+  default_branch: string | null
   created_at: string
   updated_at: string
 }
 
-function decryptIfNeeded(value: string) {
-  try {
-    return decryptEnvVar(value)
-  } catch {
-    return value
-  }
+export interface GithubInstallationRecord {
+  id: string
+  user_id: string
+  project_id: string
+  installation_id: number
+  account_login: string
+  account_type: 'User' | 'Organization'
+  account_avatar_url: string | null
+  created_at: string
+  updated_at: string
 }
 
-function normalizeRecord(record: GithubProjectRecord): GithubProjectRecord {
-  return {
-    ...record,
-    access_token: decryptIfNeeded(record.access_token),
-    refresh_token: record.refresh_token ? decryptIfNeeded(record.refresh_token) : null,
-  }
-}
-
-export async function saveGithubProject(params: {
+export async function upsertGithubInstallation(params: {
   userId: string
   projectId: string
-  githubUserId?: string | null
-  githubUsername?: string | null
-  githubAvatarUrl?: string | null
-  accessToken: string
-  refreshToken?: string | null
-  expiresAt?: Date | null
-}): Promise<GithubProjectRecord> {
-  await ensureGithubProjectsTable()
+  installationId: number
+  accountLogin: string
+  accountType: 'User' | 'Organization'
+  accountAvatarUrl?: string | null
+}): Promise<GithubInstallationRecord> {
+  await ensureGithubTables()
 
   const id = crypto.randomUUID()
 
-  const encryptedAccessToken = encryptEnvVar(params.accessToken)
-  const encryptedRefreshToken = params.refreshToken
-    ? encryptEnvVar(params.refreshToken)
-    : null
-
-  const result = await pool.query<GithubProjectRecord>(
-    `INSERT INTO github_projects
-      (id, user_id, project_id, github_user_id, github_username,
-       github_avatar_url, access_token, refresh_token, expires_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-     ON CONFLICT (user_id, project_id)
+  const result = await pool.query<GithubInstallationRecord>(
+    `INSERT INTO github_project_installations
+      (id, user_id, project_id, installation_id, account_login, account_type, account_avatar_url)
+     VALUES ($1, $2, $3, $4, $5, $6, $7)
+     ON CONFLICT (user_id, project_id, installation_id)
      DO UPDATE SET
-       github_user_id = COALESCE(EXCLUDED.github_user_id, github_projects.github_user_id),
-       github_username = COALESCE(EXCLUDED.github_username, github_projects.github_username),
-       github_avatar_url = COALESCE(EXCLUDED.github_avatar_url, github_projects.github_avatar_url),
-       access_token = EXCLUDED.access_token,
-       refresh_token = COALESCE(EXCLUDED.refresh_token, github_projects.refresh_token),
-       expires_at = EXCLUDED.expires_at,
+       account_login = EXCLUDED.account_login,
+       account_type = EXCLUDED.account_type,
+       account_avatar_url = EXCLUDED.account_avatar_url,
        updated_at = NOW()
      RETURNING *`,
     [
       id,
       params.userId,
       params.projectId,
-      params.githubUserId ?? null,
-      params.githubUsername ?? null,
-      params.githubAvatarUrl ?? null,
-      encryptedAccessToken,
-      encryptedRefreshToken,
-      params.expiresAt ? params.expiresAt.toISOString() : null,
+      params.installationId,
+      params.accountLogin,
+      params.accountType,
+      params.accountAvatarUrl ?? null,
     ]
   )
 
-  return normalizeRecord(result.rows[0])
+  return result.rows[0]
 }
 
-export async function getGithubProject(
-  userId: string,
+export async function listGithubInstallations(params: {
+  userId: string
   projectId: string
-): Promise<GithubProjectRecord | null> {
-  await ensureGithubProjectsTable()
+}): Promise<GithubInstallationRecord[]> {
+  await ensureGithubTables()
 
-  const result = await pool.query<GithubProjectRecord>(
-    `SELECT * FROM github_projects 
-     WHERE user_id = $1 AND project_id = $2`,
-    [userId, projectId]
+  const result = await pool.query<GithubInstallationRecord>(
+    `SELECT *
+     FROM github_project_installations
+     WHERE user_id = $1 AND project_id = $2
+     ORDER BY updated_at DESC`,
+    [params.userId, params.projectId]
   )
 
-  const record = result.rows[0]
-  return record ? normalizeRecord(record) : null
+  return result.rows
 }
 
-export async function deleteGithubProject(
-  userId: string,
+export async function upsertGithubProject(params: {
+  userId: string
   projectId: string
-): Promise<void> {
-  await ensureGithubProjectsTable()
+  activeInstallationId?: number | null
+  repoOwner?: string | null
+  repoName?: string | null
+  repoId?: number | null
+  defaultBranch?: string | null
+}): Promise<GithubProjectRecord> {
+  await ensureGithubTables()
+
+  const id = crypto.randomUUID()
+
+  const result = await pool.query<GithubProjectRecord>(
+    `INSERT INTO github_projects
+      (id, user_id, project_id, active_installation_id, repo_owner, repo_name, repo_id, default_branch)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+     ON CONFLICT (user_id, project_id)
+     DO UPDATE SET
+       active_installation_id = COALESCE(EXCLUDED.active_installation_id, github_projects.active_installation_id),
+       repo_owner = EXCLUDED.repo_owner,
+       repo_name = EXCLUDED.repo_name,
+       repo_id = EXCLUDED.repo_id,
+       default_branch = EXCLUDED.default_branch,
+       updated_at = NOW()
+     RETURNING *`,
+    [
+      id,
+      params.userId,
+      params.projectId,
+      params.activeInstallationId ?? null,
+      params.repoOwner ?? null,
+      params.repoName ?? null,
+      params.repoId ?? null,
+      params.defaultBranch ?? null,
+    ]
+  )
+
+  return result.rows[0]
+}
+
+export async function getGithubProject(params: {
+  userId: string
+  projectId: string
+}): Promise<GithubProjectRecord | null> {
+  await ensureGithubTables()
+
+  const result = await pool.query<GithubProjectRecord>(
+    `SELECT *
+     FROM github_projects
+     WHERE user_id = $1 AND project_id = $2`,
+    [params.userId, params.projectId]
+  )
+
+  return result.rows[0] ?? null
+}
+
+export async function deleteGithubProject(params: {
+  userId: string
+  projectId: string
+}): Promise<void> {
+  await ensureGithubTables()
+
+  await pool.query(
+    `DELETE FROM github_project_installations
+     WHERE user_id = $1 AND project_id = $2`,
+    [params.userId, params.projectId]
+  )
 
   await pool.query(
     `DELETE FROM github_projects
      WHERE user_id = $1 AND project_id = $2`,
-    [userId, projectId]
+    [params.userId, params.projectId]
   )
 }
