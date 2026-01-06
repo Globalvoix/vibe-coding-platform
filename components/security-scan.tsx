@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import { useSearchParams } from 'next/navigation'
-import { ChevronRight, AlertCircle, AlertTriangle, CheckCircle2, ArrowUpRight } from 'lucide-react'
+import { ChevronRight, CheckCircle2, ArrowUpRight } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
