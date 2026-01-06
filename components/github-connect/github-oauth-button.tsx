@@ -178,36 +178,36 @@ export function GithubOAuthButton({ projectId, onConnectionChange, compact = fal
           title="Connect GitHub"
         >
           {connecting ? (
-            <Loader className="w-4 h-4 animate-spin" />
+            <Loader className="w-4 h-4 animate-spin text-[#111827]" />
           ) : (
-            <GithubIcon className="w-4 h-4" />
+            <GithubIcon className="w-4 h-4 text-[#111827]" />
           )}
         </Button>
       </PopoverTrigger>
       <PopoverContent
         align="end"
-        className="w-[340px] p-6 bg-white border border-black/[0.08] shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-2xl"
+        className="w-[300px] p-5 bg-white border border-black/[0.08] shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-xl"
         sideOffset={8}
       >
         <div className="space-y-4">
-          <div className="space-y-2">
-            <h3 className="text-[20px] font-bold text-[#111827] tracking-tight">GitHub</h3>
-            <p className="text-[15px] text-[#111827]/60 leading-[1.45]">
+          <div className="space-y-1.5">
+            <h3 className="text-[18px] font-bold text-[#111827] tracking-tight">GitHub</h3>
+            <p className="text-[14px] text-[#111827]/60 leading-[1.4]">
               Sync your project 2-way with GitHub to collaborate at source.
             </p>
           </div>
 
-          <div className="flex items-center justify-between pt-2">
+          <div className="flex items-center justify-between pt-1">
             <button className="text-[#111827]/40 hover:text-[#111827]/70 transition-colors">
-              <HelpCircle className="w-5 h-5" strokeWidth={1.5} />
+              <HelpCircle className="w-4.5 h-4.5" strokeWidth={1.5} />
             </button>
 
             <Button
               onClick={handleConnect}
               disabled={connecting}
-              className="bg-[#111827] hover:bg-[#111827]/90 text-white px-5 py-2.5 rounded-xl flex items-center gap-2.5 h-11 text-[14px] font-bold shadow-sm transition-all active:scale-[0.98]"
+              className="bg-[#111827] hover:bg-[#111827]/90 text-white px-4 py-2 rounded-md flex items-center gap-2 h-9 text-[13px] font-semibold shadow-sm transition-all active:scale-[0.98]"
             >
-              <GithubIcon className="w-4 h-4 text-white" />
+              <GithubIcon className="w-3.5 h-3.5 text-white" />
               {connecting ? 'Connecting...' : 'Connect GitHub'}
             </Button>
           </div>
