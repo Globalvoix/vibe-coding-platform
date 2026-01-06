@@ -138,7 +138,7 @@ export function GithubOAuthButton({ projectId, onConnectionChange, compact = fal
                 className="w-4 h-4 rounded-full"
               />
             ) : (
-              <GithubIcon className="w-4 h-4" />
+              <GithubIcon className="w-4 h-4 text-[#111827]" />
             )}
           </Button>
         </PopoverTrigger>
