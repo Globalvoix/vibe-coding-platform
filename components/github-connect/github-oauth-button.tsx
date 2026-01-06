@@ -29,6 +29,7 @@ export function GithubOAuthButton({ projectId, onConnectionChange, compact = fal
   })
   const [isLoadingStatus, setIsLoadingStatus] = useState(true)
   const [showMenu, setShowMenu] = useState(false)
+  const { setSettingsModalOpen, setSettingsTab } = useUIStore()
 
   useEffect(() => {
     let cancelled = false
