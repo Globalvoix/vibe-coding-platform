@@ -42,6 +42,12 @@ async function ensureGithubTables() {
       UNIQUE(user_id, project_id, installation_id)
     );
 
+    ALTER TABLE github_projects ADD COLUMN IF NOT EXISTS active_installation_id BIGINT;
+    ALTER TABLE github_projects ADD COLUMN IF NOT EXISTS repo_owner TEXT;
+    ALTER TABLE github_projects ADD COLUMN IF NOT EXISTS repo_name TEXT;
+    ALTER TABLE github_projects ADD COLUMN IF NOT EXISTS repo_id BIGINT;
+    ALTER TABLE github_projects ADD COLUMN IF NOT EXISTS default_branch TEXT;
+
     CREATE INDEX IF NOT EXISTS github_projects_user_project_idx
       ON github_projects(user_id, project_id);
 
