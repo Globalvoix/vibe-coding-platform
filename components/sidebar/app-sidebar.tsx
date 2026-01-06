@@ -6,7 +6,8 @@ import { useAuth, useClerk } from '@clerk/nextjs'
 import { useUIStore } from '@/lib/ui-store'
 import { CREDITS_UPDATED_EVENT } from '@/lib/credits-events'
 import { cn } from '@/lib/utils'
-import { X, Home, LayoutGrid, Users } from 'lucide-react'
+import { X, Home, LayoutGrid, Users, Settings, Github } from 'lucide-react'
+import { GithubIcon } from '@/components/icons/github'
 
 export function AppSidebar() {
   const [isAnimating, setIsAnimating] = useState(false)
