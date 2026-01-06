@@ -49,6 +49,8 @@ export function ProjectDropdown({ projectName, projectId }: ProjectDropdownProps
   const router = useRouter()
   const { isSignedIn } = useAuth()
 
+  const { setSettingsModalOpen, setSettingsTab } = useUIStore()
+
   const loadCredits = React.useCallback(async () => {
     if (!isSignedIn) return
     try {
