@@ -1,5 +1,6 @@
-import { SignJWT, importSPKI } from 'jose'
-import { createPrivateKey, createPublicKey } from 'node:crypto'
+import { SignJWT } from 'jose'
+import { createPrivateKey } from 'node:crypto'
+import { promisify } from 'node:util'
 
 const GITHUB_API_BASE = 'https://api.github.com'
 
@@ -22,34 +23,23 @@ function getRequiredEnv(name: string): string {
   return value
 }
 
-async function getAppPrivateKey() {
+export async function createGithubAppJwt(): Promise<string> {
+  const appId = getRequiredEnv('GITHUB_APP_ID')
   const rawPem = getRequiredEnv('GITHUB_PRIVATE_KEY').replace(/\\n/g, '\n')
+
+  const now = Math.floor(Date.now() / 1000)
 
   const key = createPrivateKey({
     key: rawPem,
     format: 'pem',
   })
 
-  const publicKeyPem = createPublicKey(key).export({ format: 'pem', type: 'spki' })
-
-  return importSPKI(publicKeyPem, 'RS256').then((publicKey) => ({
-    privateKey: key,
-    publicKey,
-  }))
-}
-
-export async function createGithubAppJwt(): Promise<string> {
-  const appId = getRequiredEnv('GITHUB_APP_ID')
-  const key = await getAppPrivateKey()
-
-  const now = Math.floor(Date.now() / 1000)
-
   return new SignJWT({})
     .setProtectedHeader({ alg: 'RS256' })
     .setIssuedAt(now)
     .setExpirationTime(now + 9 * 60)
     .setIssuer(appId)
-    .sign(key)
+    .sign(key as any)
 }
 
 export async function githubAppRequest<T>(params: {
