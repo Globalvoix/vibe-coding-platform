@@ -1,7 +1,7 @@
 export function GithubIcon({ className }: { className?: string } = {}) {
   return (
     <svg
-      className={`size-5 p-0.5 ${className}`}
+      className={className}
       viewBox="0 0 15 15"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
