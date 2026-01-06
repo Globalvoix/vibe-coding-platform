@@ -104,6 +104,11 @@ export async function GET(req: NextRequest) {
               body: createBody,
             })
 
+      console.log('[GitHub Setup] Repository created:', {
+        name: repo.name,
+        owner: repo.owner.login,
+      })
+
       await upsertGithubProject({
         userId: verified.userId,
         projectId: verified.projectId,
@@ -113,9 +118,12 @@ export async function GET(req: NextRequest) {
         repoId: repo.id,
         defaultBranch: repo.default_branch,
       })
+
+      console.log('[GitHub Setup] Saved project to DB')
     }
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    console.log('[GitHub Setup] Redirecting to:', `${appUrl}/workspace?projectId=${verified.projectId}`)
     return NextResponse.redirect(`${appUrl}/workspace?projectId=${verified.projectId}`)
   } catch (error) {
     console.error('Error in GitHub App setup callback', error)
