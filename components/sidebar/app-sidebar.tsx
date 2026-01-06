@@ -172,6 +172,14 @@ export function AppSidebar() {
               <Users className="w-4 h-4" />
               <span>Shared with me</span>
             </button>
+            <button
+              onClick={() => handleOpenSettings('settings')}
+              className="inline-flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-secondary transition-colors"
+              type="button"
+            >
+              <Settings className="w-4 h-4" />
+              <span>Settings</span>
+            </button>
           </div>
 
           <div className="p-4 border-b border-border space-y-1">
