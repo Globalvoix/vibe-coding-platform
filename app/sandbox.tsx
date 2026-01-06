@@ -467,6 +467,7 @@ export function Sandbox({ className }: Props) {
         title="Publish"
         description="Publishing and deploying your projects is coming soon!"
       />
+      <LargeSettingsModal />
     </div>
   )
 }
