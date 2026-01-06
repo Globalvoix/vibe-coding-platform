@@ -113,7 +113,7 @@ export function GithubOAuthButton({ projectId, onConnectionChange, compact = fal
           compact ? "w-8 h-8" : "h-9 w-9"
         )}
       >
-        <Loader className="w-4 h-4 animate-spin" />
+        <Loader className="w-4 h-4 animate-spin text-[#111827]" />
       </Button>
     )
   }
