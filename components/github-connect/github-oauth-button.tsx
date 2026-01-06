@@ -70,11 +70,10 @@ export function GithubOAuthButton({ projectId, onConnectionChange, compact = fal
   }, [projectId, onConnectionChange])
 
   const handleConnect = () => {
-    if (!projectId || connecting) return
-
-    setConnecting(true)
-    const startUrl = `/api/github-oauth/start?projectId=${encodeURIComponent(projectId)}`
-    window.location.href = startUrl
+    if (!projectId) return
+    setSettingsTab('github')
+    setSettingsModalOpen(true)
+    setShowMenu(false)
   }
 
   const handleDisconnect = async () => {
