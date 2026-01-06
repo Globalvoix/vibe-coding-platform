@@ -102,7 +102,7 @@ export function LargeSettingsModal() {
           className="fixed left-[50%] top-[50%] z-[101] flex h-[85vh] w-[92vw] max-w-[1280px] translate-x-[-50%] translate-y-[-50%] overflow-hidden rounded-[20px] bg-white shadow-[0_20px_50px_rgba(0,0,0,0.3)] outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95"
         >
           <DialogPrimitive.Title className="sr-only">Settings</DialogPrimitive.Title>
-          <DialogPrimitive.Description className="sr-only">Configure your project and account settings</DialogDescription>
+          <DialogPrimitive.Description className="sr-only">Configure your project and account settings</DialogPrimitive.Description>
 
           {/* Sidebar */}
           <div className="flex w-[260px] flex-col border-r border-gray-100 bg-[#FAFAFA] py-6 overflow-y-auto shrink-0">
