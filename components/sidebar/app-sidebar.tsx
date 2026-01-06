@@ -8,6 +8,7 @@ import { CREDITS_UPDATED_EVENT } from '@/lib/credits-events'
 import { cn } from '@/lib/utils'
 import { X, Home, LayoutGrid, Users, Settings, Github } from 'lucide-react'
 import { GithubIcon } from '@/components/icons/github'
+import { toast } from 'sonner'
 
 export function AppSidebar() {
   const [isAnimating, setIsAnimating] = useState(false)
