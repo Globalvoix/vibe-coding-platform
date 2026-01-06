@@ -36,7 +36,19 @@ export async function GET(req: NextRequest) {
   }
 
   try {
+    console.log('[GitHub Setup] Starting installation flow', {
+      installationId,
+      userId: verified.userId,
+      projectId: verified.projectId,
+    })
+
     const installation = await getInstallation(installationId)
+    console.log('[GitHub Setup] Got installation:', {
+      id: installation.id,
+      accountLogin: installation.account.login,
+      accountType: installation.account.type,
+    })
+
     const account = installation.account
 
     await upsertGithubInstallation({
@@ -47,6 +59,8 @@ export async function GET(req: NextRequest) {
       accountType: account.type,
       accountAvatarUrl: account.avatar_url ?? null,
     })
+
+    console.log('[GitHub Setup] Saved installation to DB')
 
     if (setupAction === 'install') {
       const installationToken = await createInstallationToken(installationId)
