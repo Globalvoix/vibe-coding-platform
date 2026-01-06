@@ -22,7 +22,7 @@ import { cn } from '@/lib/utils'
 import { useUIStore } from '@/lib/ui-store'
 import { Button } from '@/components/ui/button'
 import { GithubIcon } from '@/components/icons/github'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 
 interface GithubOrganization {
@@ -67,13 +67,7 @@ export function LargeSettingsModal() {
     [organizations]
   )
 
-  useEffect(() => {
-    if (settingsModalOpen && settingsTab === 'github' && projectId) {
-      checkGithubStatus()
-    }
-  }, [settingsModalOpen, settingsTab, projectId])
-
-  const checkGithubStatus = async () => {
+  const checkGithubStatus = useCallback(async () => {
     try {
       const res = await fetch(`/api/github-oauth/status?projectId=${projectId}`)
       if (res.ok) {
@@ -83,7 +77,25 @@ export function LargeSettingsModal() {
     } catch (error) {
       console.error('Error checking GitHub status:', error)
     }
-  }
+  }, [projectId])
+
+  useEffect(() => {
+    if (settingsModalOpen && settingsTab === 'github' && projectId) {
+      checkGithubStatus()
+    }
+  }, [settingsModalOpen, settingsTab, projectId, checkGithubStatus])
+
+  useEffect(() => {
+    if (!settingsModalOpen || settingsTab !== 'github' || !projectId) return
+
+    const intervalId = window.setInterval(() => {
+      void checkGithubStatus()
+    }, 2500)
+
+    return () => {
+      window.clearInterval(intervalId)
+    }
+  }, [settingsModalOpen, settingsTab, projectId, checkGithubStatus])
 
   const handleConnectGithub = () => {
     if (!projectId) return
