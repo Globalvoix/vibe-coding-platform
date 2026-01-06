@@ -1,161 +1,20 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
-import { Sandbox } from '@vercel/sandbox'
 import { getSupabaseProject } from '@/lib/supabase-projects-db'
+import { dedupeIssues, getSandboxFiles, getSupabaseSecurityIssues, scanFilesForIssues, type SecurityIssue } from '@/lib/security/security-utils'
 
-interface SecurityIssue {
-  id: string
-  level: 'Error' | 'Warning'
-  title: string
-  filePath?: string
-  lineNumber?: number
-}
+const DEFAULT_SANDBOX_SCAN_PATHS = [
+  'package.json',
+  'app/page.tsx',
+  'app/layout.tsx',
+  'middleware.ts',
+  'app/api/subscriptions/route.ts',
+  'lib/auth.ts',
+  'lib/database.ts',
+]
 
-async function getSandboxFiles(sandboxId: string): Promise<Array<{ path: string; content: string }>> {
-  try {
-    const sandbox = await Sandbox.get({ sandboxId })
-    const fileList = [
-      'package.json',
-      'app/page.tsx',
-      'app/layout.tsx',
-      'app/api/subscriptions/route.ts',
-      'lib/auth.ts',
-      'lib/database.ts',
-      'middleware.ts',
-    ]
-    const files: Array<{ path: string; content: string }> = []
-
-    for (const filePath of fileList) {
-      try {
-        const stream = await sandbox.readFile({ path: filePath })
-        if (!stream) continue
-
-        const chunks: Buffer[] = []
-        for await (const chunk of stream) {
-          chunks.push(chunk as Buffer)
-        }
-        const content = Buffer.concat(chunks).toString('utf-8')
-        files.push({ path: filePath, content })
-      } catch {
-        // Skip if file doesn't exist
-      }
-    }
-
-    return files
-  } catch {
-    return []
-  }
-}
-
-async function runSemgrepScan(files: Array<{ path: string; content: string }>): Promise<SecurityIssue[]> {
-  const issues: SecurityIssue[] = []
-
-  try {
-    if (files.length === 0) {
-      return issues
-    }
-
-    // Analyze files for common security issues
-    for (const file of files) {
-      const { path, content } = file
-
-      // Check for authentication issues in API routes
-      if (path.includes('/api/') && !content.includes('auth()') && !content.includes('authenticate')) {
-        issues.push({
-          id: `auth-${path}`,
-          level: 'Error',
-          title: 'API Endpoint Missing Authentication',
-          filePath: path,
-          lineNumber: 1,
-        })
-      }
-
-      // Check for SQL injection patterns
-      if (content.includes('query(') || content.includes('execute(')) {
-        if (!content.includes('$') || !content.includes('?')) {
-          issues.push({
-            id: `sql-injection-${path}`,
-            level: 'Error',
-            title: 'Potential SQL Injection Vulnerability',
-            filePath: path,
-            lineNumber: content.split('\n').findIndex((line) => line.includes('query(') || line.includes('execute(')),
-          })
-        }
-      }
-
-      // Check for hardcoded secrets
-      if (
-        content.includes('password') &&
-        (content.includes('=') && content.match(/['"]([^'"]{8,})['"]/) ||
-          content.includes('SECRET') ||
-          content.includes('API_KEY'))
-      ) {
-        issues.push({
-          id: `hardcoded-secret-${path}`,
-          level: 'Warning',
-          title: 'Potential Hardcoded Secret or Credential',
-          filePath: path,
-          lineNumber: content
-            .split('\n')
-            .findIndex((line) => line.includes('password') || line.includes('SECRET') || line.includes('API_KEY')),
-        })
-      }
-
-      // Check for missing HTTPS
-      if (
-        (path.includes('fetch') || path.includes('request')) &&
-        content.includes('http://') &&
-        !content.includes('localhost')
-      ) {
-        issues.push({
-          id: `insecure-transport-${path}`,
-          level: 'Warning',
-          title: 'Insecure Transport (HTTP instead of HTTPS)',
-          filePath: path,
-          lineNumber: content.split('\n').findIndex((line) => line.includes('http://')),
-        })
-      }
-    }
-  } catch (error) {
-    console.error('Semgrep scan failed:', error)
-  }
-
-  return issues
-}
-
-async function getSupabaseSecurityIssues(
-  userId: string,
-  projectId: string,
-  supabaseProjectRef: string,
-  accessToken: string
-): Promise<SecurityIssue[]> {
-  const issues: SecurityIssue[] = []
-
-  try {
-    // Check RLS policies on tables
-    // This would use the Supabase API with the accessToken
-    // For now, returning demo results
-
-    const supabaseIssues = [
-      {
-        id: 'supabase-1',
-        level: 'Error' as const,
-        title: 'Subscription Data Could Be Modified by Unauthorized Users',
-        filePath: 'supabase_tables:subscriptions',
-      },
-    ]
-
-    // Deduplicate by title
-    for (const issue of supabaseIssues) {
-      if (!issues.some((i) => i.title === issue.title)) {
-        issues.push(issue)
-      }
-    }
-  } catch (error) {
-    console.error('Supabase security check failed:', error)
-  }
-
-  return issues
+function issueSortKey(issue: SecurityIssue) {
+  return `${issue.level}:${issue.title}:${issue.filePath ?? ''}`
 }
 
 export async function POST(
@@ -178,34 +37,28 @@ export async function POST(
       return NextResponse.json({ error: 'Missing sandboxId' }, { status: 400 })
     }
 
-    // Get files from sandbox
-    const files = await getSandboxFiles(sandboxId)
+    const files = await getSandboxFiles(sandboxId, DEFAULT_SANDBOX_SCAN_PATHS)
+    const codeIssues = scanFilesForIssues(files)
 
-    // Run Semgrep scan
-    const semgrepIssues = await runSemgrepScan(files)
-
-    // Check if Supabase is connected
-    const allIssues = [...semgrepIssues]
+    const allIssues: SecurityIssue[] = [...codeIssues]
 
     const supabaseProject = await getSupabaseProject(userId, projectId)
-    if (supabaseProject && supabaseProject.access_token) {
-      const supabaseIssues = await getSupabaseSecurityIssues(
-        userId,
-        projectId,
-        supabaseProject.supabase_project_ref,
-        supabaseProject.access_token
-      )
-
-      // Merge and deduplicate
-      for (const issue of supabaseIssues) {
-        if (!allIssues.some((i) => i.title === issue.title)) {
-          allIssues.push(issue)
-        }
+    if (supabaseProject?.access_token && supabaseProject.supabase_project_ref) {
+      try {
+        const supabaseIssues = await getSupabaseSecurityIssues({
+          projectRef: supabaseProject.supabase_project_ref,
+          accessToken: supabaseProject.access_token,
+        })
+        allIssues.push(...supabaseIssues)
+      } catch {
+        // If the Supabase query fails, we still return code scan results.
       }
     }
 
+    const issues = dedupeIssues(allIssues).sort((a, b) => issueSortKey(a).localeCompare(issueSortKey(b)))
+
     return NextResponse.json({
-      issues: allIssues,
+      issues,
       scannedAt: new Date().toISOString(),
     })
   } catch (error) {

@@ -106,11 +106,24 @@ export function SecurityScan() {
       }
 
       const data = await response.json()
-      if (data.success) {
+      if (typeof data.creditsRemaining === 'number') {
         setCreditsRemaining(data.creditsRemaining)
-        // Clear issues after successful fix
+      }
+
+      if (Array.isArray(data.remainingIssues)) {
+        setIssues(data.remainingIssues)
+      } else if (data.success) {
         setIssues([])
+      }
+
+      if (typeof data.scannedAt === 'string') {
+        setLastScannedAt(data.scannedAt)
+      } else {
         setLastScannedAt(new Date().toISOString())
+      }
+
+      if (Array.isArray(data.remainingIssues) && data.remainingIssues.length > 0) {
+        setError('Some issues could not be fixed automatically. Review the remaining issues and try again.')
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Fix failed')
