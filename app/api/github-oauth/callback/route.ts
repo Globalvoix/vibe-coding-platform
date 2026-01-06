@@ -112,12 +112,22 @@ export async function GET(req: NextRequest) {
     })
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-    return NextResponse.redirect(`${appUrl}/workspace?projectId=${verified.projectId}`)
+    const redirectUrl = new URL(`${appUrl}/workspace`)
+    redirectUrl.searchParams.set('projectId', verified.projectId)
+    redirectUrl.searchParams.set('openSettings', '1')
+    redirectUrl.searchParams.set('settingsTab', 'github')
+
+    return NextResponse.redirect(redirectUrl.toString())
   } catch (error) {
     console.error('Error in GitHub App callback', error)
-    return NextResponse.json(
-      { error: 'Failed to complete GitHub App installation' },
-      { status: 500 }
-    )
+
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    const redirectUrl = new URL(`${appUrl}/workspace`)
+    redirectUrl.searchParams.set('projectId', verified.projectId)
+    redirectUrl.searchParams.set('openSettings', '1')
+    redirectUrl.searchParams.set('settingsTab', 'github')
+    redirectUrl.searchParams.set('githubInstall', 'error')
+
+    return NextResponse.redirect(redirectUrl.toString())
   }
 }
