@@ -15,9 +15,15 @@ export function AppSidebar() {
   const [isCreditsLoading, setIsCreditsLoading] = useState(false)
   const [resetText, setResetText] = useState<string | null>(null)
   const router = useRouter()
-  const { sidebarOpen, setSidebarOpen } = useUIStore()
+  const { sidebarOpen, setSidebarOpen, setSettingsModalOpen, setSettingsTab } = useUIStore()
   const { isSignedIn } = useAuth()
   const { openSignIn } = useClerk()
+
+  const handleOpenSettings = (tab: string = 'settings') => {
+    setSettingsTab(tab)
+    setSettingsModalOpen(true)
+    setSidebarOpen(false)
+  }
 
   useEffect(() => {
     if (!isSignedIn) {
