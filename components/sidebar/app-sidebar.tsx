@@ -15,6 +15,7 @@ export function AppSidebar() {
   const [isCreditsLoading, setIsCreditsLoading] = useState(false)
   const [resetText, setResetText] = useState<string | null>(null)
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { sidebarOpen, setSidebarOpen, setSettingsModalOpen, setSettingsTab } = useUIStore()
   const { isSignedIn } = useAuth()
   const { openSignIn } = useClerk()
