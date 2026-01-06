@@ -27,17 +27,12 @@ export async function createGithubAppJwt(): Promise<string> {
 
   const now = Math.floor(Date.now() / 1000)
 
-  const key = createPrivateKey({
-    key: rawPem,
-    format: 'pem',
-  })
-
   return new SignJWT({})
     .setProtectedHeader({ alg: 'RS256' })
     .setIssuedAt(now)
     .setExpirationTime(now + 9 * 60)
     .setIssuer(appId)
-    .sign(key as any)
+    .sign(rawPem)
 }
 
 export async function githubAppRequest<T>(params: {
