@@ -24,7 +24,7 @@ function getRequiredEnv(name: string): string {
 
 function normalizePem(pem: string): string {
   // Handle both literal \n escape sequences and actual newlines
-  let normalized = pem.replace(/\\n/g, '\n').trim()
+  const normalized = pem.replace(/\\n/g, '\n').trim()
 
   // Split into lines and remove empty lines
   const lines = normalized
