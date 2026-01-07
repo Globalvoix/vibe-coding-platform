@@ -35,6 +35,14 @@ export const dataPartSchema = z.object({
   'connect-supabase': z.object({
     projectId: z.string().optional(),
   }),
+  'request-env-vars': z.object({
+    projectId: z.string().optional(),
+    requiredVars: z.array(z.object({
+      key: z.string(),
+      description: z.string(),
+    })).optional(),
+    reason: z.string().optional(),
+  }),
 })
 
 export type DataPart = z.infer<typeof dataPartSchema>
