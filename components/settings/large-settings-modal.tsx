@@ -61,6 +61,9 @@ export function LargeSettingsModal() {
   const [loading, setLoading] = useState(false)
   const [orgSwitchingId, setOrgSwitchingId] = useState<number | null>(null)
   const [updatingRepo, setUpdatingRepo] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [requestId, setRequestId] = useState<string | null>(null)
+  const [showDiagnostics, setShowDiagnostics] = useState(false)
 
   const organizations = githubStatus.organizations ?? []
 
@@ -68,6 +71,21 @@ export function LargeSettingsModal() {
     () => organizations.find((o) => o.active) ?? null,
     [organizations]
   )
+
+  // Check URL for error parameters on mount
+  useEffect(() => {
+    const githubInstall = searchParams.get('githubInstall')
+    const githubError = searchParams.get('githubError')
+    const reqId = searchParams.get('requestId')
+
+    if (githubInstall === 'error' && githubError) {
+      setErrorMessage(decodeURIComponent(githubError))
+      if (reqId) setRequestId(reqId)
+    } else if (githubInstall === 'success') {
+      setErrorMessage(null)
+      setRequestId(null)
+    }
+  }, [searchParams])
 
   const checkGithubStatus = useCallback(async () => {
     try {
