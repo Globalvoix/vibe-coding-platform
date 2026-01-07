@@ -32,6 +32,9 @@ export const dataPartSchema = z.object({
     summary: z.string(),
     paths: z.array(z.string()).optional(),
   }),
+  'connect-supabase': z.object({
+    projectId: z.string().optional(),
+  }),
 })
 
 export type DataPart = z.infer<typeof dataPartSchema>
