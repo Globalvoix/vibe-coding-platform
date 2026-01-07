@@ -81,33 +81,33 @@ export async function GET(req: NextRequest) {
     // Always try to create/get the repo on any installation, regardless of setupAction
     // setupAction can be 'install', 'update', or even null
     console.log('[GitHub Setup] Creating installation token...')
-      let installationToken: string | null = null
-      try {
-        installationToken = await createInstallationToken(installationId)
-        console.log('[GitHub Setup] Installation token created successfully')
-      } catch (tokenError) {
-        console.error('[GitHub Setup] Failed to create installation token:', {
-          error: tokenError instanceof Error ? tokenError.message : String(tokenError),
-          installationId,
-        })
-        throw tokenError
-      }
+    let installationToken: string | null = null
+    try {
+      installationToken = await createInstallationToken(installationId)
+      console.log('[GitHub Setup] Installation token created successfully')
+    } catch (tokenError) {
+      console.error('[GitHub Setup] Failed to create installation token:', {
+        error: tokenError instanceof Error ? tokenError.message : String(tokenError),
+        installationId,
+      })
+      throw tokenError
+    }
 
-      if (!installationToken) {
-        throw new Error('Installation token is null')
-      }
+    if (!installationToken) {
+      throw new Error('Installation token is null')
+    }
 
-      const repoName = sanitizeRepoName(`thinksoft-${verified.projectId}`)
-      console.log('[GitHub Setup] Creating repository:', { repoName, owner: account.login, type: account.type })
+    const repoName = sanitizeRepoName(`thinksoft-${verified.projectId}`)
+    console.log('[GitHub Setup] Creating repository:', { repoName, owner: account.login, type: account.type })
 
-      const createBody = {
-        name: repoName,
-        private: true,
-        auto_init: true,
-        description: `Thinksoft project ${verified.projectId}`,
-      }
+    const createBody = {
+      name: repoName,
+      private: true,
+      auto_init: true,
+      description: `Thinksoft project ${verified.projectId}`,
+    }
 
-      let repo
+    let repo
       try {
         repo =
           account.type === 'Organization'
