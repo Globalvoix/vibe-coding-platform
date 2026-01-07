@@ -62,10 +62,15 @@ async function createRepoForInstallation(params: {
 }
 
 export async function GET(req: NextRequest) {
+  console.log('[GitHub Callback] Received callback:', {
+    searchParams: Object.fromEntries(req.nextUrl.searchParams),
+  })
+
   const installationIdRaw = req.nextUrl.searchParams.get('installation_id')
   const state = req.nextUrl.searchParams.get('state')
 
   if (!installationIdRaw || !state) {
+    console.error('[GitHub Callback] Missing params:', { installationIdRaw, state: state ? 'present' : 'missing' })
     return NextResponse.json(
       { error: 'Missing installation_id or state' },
       { status: 400 }
@@ -74,13 +79,17 @@ export async function GET(req: NextRequest) {
 
   const installationId = Number(installationIdRaw)
   if (!Number.isFinite(installationId) || installationId <= 0) {
+    console.error('[GitHub Callback] Invalid installation_id:', installationIdRaw)
     return NextResponse.json({ error: 'Invalid installation_id' }, { status: 400 })
   }
 
   const verified = verifyGithubInstallState(state)
   if (!verified) {
+    console.error('[GitHub Callback] Failed to verify state')
     return NextResponse.json({ error: 'Invalid state' }, { status: 400 })
   }
+
+  console.log('[GitHub Callback] State verified:', { userId: verified.userId, projectId: verified.projectId })
 
   try {
     const installation = await getInstallation(installationId)
