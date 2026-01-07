@@ -95,7 +95,12 @@ export class GithubAppClient {
         method: 'POST',
         path: `/app/installations/${installationId}/access_tokens`,
         jwt,
-        body: {},
+        body: {
+          permissions: {
+            contents: 'write',
+            metadata: 'read',
+          },
+        },
       })
 
       this.log('createInstallationToken.success', { installationId, tokenLength: result.token.length })
