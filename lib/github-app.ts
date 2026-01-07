@@ -23,21 +23,34 @@ function getRequiredEnv(name: string): string {
 }
 
 function normalizePem(pem: string): string {
-  // First, try to handle literal \n escape sequences (two characters: backslash and 'n')
-  let normalized = pem.split('\\n').join('\n')
+  // Remove all newlines and whitespace first
+  let cleaned = pem.replace(/\\n/g, '').replace(/\n/g, '').replace(/\r/g, '').trim()
 
-  // Also handle case where it might be a different escape format
-  normalized = normalized.replace(/\\r\\n/g, '\n').replace(/\\r/g, '\n')
+  // Extract the PEM header, body, and footer
+  const beginMatch = cleaned.match(/-----BEGIN [^-]+-----/)
+  const endMatch = cleaned.match(/-----END [^-]+-----/)
 
-  // Trim whitespace from start and end, but preserve internal formatting
-  normalized = normalized.trim()
-
-  // Ensure proper PEM format by validating headers
-  if (!normalized.includes('-----BEGIN')) {
-    console.warn('[GitHub App] PEM key does not contain BEGIN marker')
+  if (!beginMatch || !endMatch) {
+    console.error('[GitHub App] Invalid PEM format - missing headers')
+    return pem // Return original if we can't parse it
   }
 
-  return normalized
+  const header = beginMatch[0]
+  const footer = endMatch[0]
+
+  // Extract the base64 content between header and footer
+  const startIdx = cleaned.indexOf(header) + header.length
+  const endIdx = cleaned.indexOf(footer)
+  const base64Content = cleaned.substring(startIdx, endIdx)
+
+  // Split base64 into 64-character lines (standard PEM format)
+  const lines = [header]
+  for (let i = 0; i < base64Content.length; i += 64) {
+    lines.push(base64Content.substring(i, i + 64))
+  }
+  lines.push(footer)
+
+  return lines.join('\n')
 }
 
 function parseGithubPrivateKey(pem: string): KeyObject {
