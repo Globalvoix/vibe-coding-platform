@@ -494,25 +494,37 @@ export function LargeSettingsModal() {
                           Your repository is created automatically after connecting and selecting an
                           organization.
                         </p>
+                        {githubStatus.installationId && (
+                          <p className="text-[12px] font-mono text-[#111827]/40">
+                            Installation ID: {githubStatus.installationId}
+                          </p>
+                        )}
                       </div>
                       {githubStatus.repository ? (
                         <a
                           href={githubStatus.repository.url}
                           target="_blank"
                           rel="noreferrer"
-                          className="flex items-center gap-3 rounded-xl border border-black/[0.04] bg-[#F7F4ED] px-5 py-2.5 text-[14px] font-bold text-[#111827]/60 transition-all hover:text-[#111827] hover:bg-white hover:shadow-md cursor-pointer shrink-0 mt-1"
+                          className="flex items-center gap-3 rounded-xl border border-emerald-200/50 bg-emerald-50 px-5 py-2.5 text-[14px] font-bold text-emerald-700 transition-all hover:text-emerald-900 hover:bg-emerald-100 cursor-pointer shrink-0 mt-1"
                         >
-                          <GithubIcon className="h-5 w-5" />
+                          <Check className="h-5 w-5" />
                           <span className="tracking-tight">
                             {githubStatus.repository.owner}/{githubStatus.repository.name}
                           </span>
                         </a>
                       ) : (
                         <div className="flex items-center gap-3 rounded-xl border border-black/[0.04] bg-[#F7F4ED] px-5 py-2.5 text-[14px] font-bold text-[#111827]/40 shrink-0 mt-1">
-                          <GithubIcon className="h-5 w-5" />
-                          <span className="tracking-tight">
-                            {activeOrg ? 'Creating repo…' : 'Select an org'}
-                          </span>
+                          {activeOrg ? (
+                            <>
+                              <Loader2 className="h-5 w-5 animate-spin" />
+                              <span className="tracking-tight">Creating repo…</span>
+                            </>
+                          ) : (
+                            <>
+                              <GithubIcon className="h-5 w-5" />
+                              <span className="tracking-tight">Select an org</span>
+                            </>
+                          )}
                         </div>
                       )}
                     </div>
