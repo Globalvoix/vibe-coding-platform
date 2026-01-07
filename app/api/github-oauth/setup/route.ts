@@ -77,9 +77,10 @@ export async function GET(req: NextRequest) {
     }
 
     console.log('[GitHub Setup] setupAction value:', setupAction)
-    console.log('[GitHub Setup] Will create repo?', setupAction === 'install')
 
-    if (setupAction === 'install') {
+    // Always try to create/get the repo on any installation, regardless of setupAction
+    // setupAction can be 'install', 'update', or even null
+    {
       console.log('[GitHub Setup] Creating installation token...')
       let installationToken: string | null = null
       try {
