@@ -76,10 +76,26 @@ export async function GET(req: NextRequest) {
       throw dbError
     }
 
+    console.log('[GitHub Setup] setupAction value:', setupAction)
+    console.log('[GitHub Setup] Will create repo?', setupAction === 'install')
+
     if (setupAction === 'install') {
       console.log('[GitHub Setup] Creating installation token...')
-      const installationToken = await createInstallationToken(installationId)
-      console.log('[GitHub Setup] Installation token created')
+      let installationToken: string | null = null
+      try {
+        installationToken = await createInstallationToken(installationId)
+        console.log('[GitHub Setup] Installation token created successfully')
+      } catch (tokenError) {
+        console.error('[GitHub Setup] Failed to create installation token:', {
+          error: tokenError instanceof Error ? tokenError.message : String(tokenError),
+          installationId,
+        })
+        throw tokenError
+      }
+
+      if (!installationToken) {
+        throw new Error('Installation token is null')
+      }
 
       const repoName = sanitizeRepoName(`thinksoft-${verified.projectId}`)
       console.log('[GitHub Setup] Creating repository:', { repoName, owner: account.login, type: account.type })
