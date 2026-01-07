@@ -24,7 +24,7 @@ function getRequiredEnv(name: string): string {
 
 function normalizePem(pem: string): string {
   // Remove all newlines and whitespace first
-  let cleaned = pem.replace(/\\n/g, '').replace(/\n/g, '').replace(/\r/g, '').trim()
+  const cleaned = pem.replace(/\\n/g, '').replace(/\n/g, '').replace(/\r/g, '').trim()
 
   // Extract the PEM header, body, and footer
   const beginMatch = cleaned.match(/-----BEGIN [^-]+-----/)
