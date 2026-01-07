@@ -55,7 +55,9 @@ Deliver a high-fidelity functional recreation of the UX patterns (not a low-effo
 
 ### Backend/auth policy
 - If Supabase is connected: implement real auth + persistence as requested.
-- If Supabase is NOT connected: implement the full UI/UX using local mocked state and clear extension points, and do not block on backend.
+- If Supabase is NOT connected:
+  - If the user asks for ANY integration that requires an API key, database, or environment variable (e.g., auth, Stripe, SendGrid, database persistence), you MUST FIRST call the `requestSupabaseConnection` tool to prompt the user to connect to the unified cloud backend.
+  - While waiting for the connection, or if the user chooses not to connect, implement the full UI/UX using local mocked state and clear extension points, and do not block on backend.
 
 ### Engineering expectations
 - Prefer clean module boundaries: data layer (lib/*), UI components (components/*), routes (app/*).
