@@ -9,6 +9,7 @@ import { RunCommand } from './run-command'
 import { ReportErrors } from './report-errors'
 import { Reasoning } from './reasoning'
 import { Text } from './text'
+import { ConnectSupabase } from './connect-supabase'
 import { memo } from 'react'
 
 interface Props {
