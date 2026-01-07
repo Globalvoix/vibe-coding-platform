@@ -60,19 +60,25 @@ function parseGithubPrivateKey(pem: string): KeyObject {
 }
 
 export async function createGithubAppJwt(): Promise<string> {
-  const appId = getRequiredEnv('GITHUB_APP_ID')
-  const rawPem = normalizePem(getRequiredEnv('GITHUB_PRIVATE_KEY'))
+  try {
+    const appId = getRequiredEnv('GITHUB_APP_ID')
+    const rawPem = getRequiredEnv('GITHUB_PRIVATE_KEY')
 
-  const now = Math.floor(Date.now() / 1000)
+    const now = Math.floor(Date.now() / 1000)
 
-  const key = parseGithubPrivateKey(rawPem)
+    const key = parseGithubPrivateKey(rawPem)
 
-  return new SignJWT({})
-    .setProtectedHeader({ alg: 'RS256' })
-    .setIssuedAt(now)
-    .setExpirationTime(now + 9 * 60)
-    .setIssuer(appId)
-    .sign(key)
+    return new SignJWT({})
+      .setProtectedHeader({ alg: 'RS256' })
+      .setIssuedAt(now)
+      .setExpirationTime(now + 9 * 60)
+      .setIssuer(appId)
+      .sign(key)
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error)
+    console.error('[GitHub App] JWT creation failed:', errorMsg)
+    throw error
+  }
 }
 
 export async function githubAppRequest<T>(params: {
