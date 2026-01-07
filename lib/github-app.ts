@@ -44,7 +44,6 @@ function parseGithubPrivateKey(pem: string): KeyObject {
     return createPrivateKey({
       key: normalizedPem,
       format: 'pem',
-      encoding: 'utf8' as any,
     })
   } catch (error) {
     // Provide more detailed error information
