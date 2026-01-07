@@ -55,13 +55,15 @@ export function AppSidebar() {
       })
     }
 
-    const url = new URL(window.location.href)
-    url.searchParams.delete('openSettings')
-    url.searchParams.delete('settingsTab')
-    url.searchParams.delete('githubInstall')
+    setTimeout(() => {
+      const url = new URL(window.location.href)
+      url.searchParams.delete('openSettings')
+      url.searchParams.delete('settingsTab')
+      url.searchParams.delete('githubInstall')
 
-    const next = url.searchParams.toString()
-    router.replace(next ? `${url.pathname}?${next}` : url.pathname)
+      const next = url.searchParams.toString()
+      router.replace(next ? `${url.pathname}?${next}` : url.pathname)
+    }, 100)
   }, [router, searchParams, setSettingsModalOpen, setSettingsTab])
 
   useEffect(() => {
