@@ -127,7 +127,18 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.redirect(redirectUrl.toString())
   } catch (error) {
-    console.error('Error in GitHub App callback', error)
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    const errorStack = error instanceof Error ? error.stack : ''
+    const errorCode = (error as any)?.code || 'UNKNOWN'
+    const errorDetails = (error as any)?.detail || ''
+    console.error('[GitHub Callback] EXCEPTION in GitHub App callback:', {
+      message: errorMessage,
+      code: errorCode,
+      detail: errorDetails,
+      stack: errorStack,
+      installationId: installationIdRaw,
+      verified: verified ? { userId: verified.userId, projectId: verified.projectId } : null,
+    })
 
     const redirectUrl = new URL('/workspace', req.nextUrl.origin)
     redirectUrl.searchParams.set('projectId', verified.projectId)
