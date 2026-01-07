@@ -23,11 +23,40 @@ function getRequiredEnv(name: string): string {
 }
 
 function normalizePem(pem: string): string {
-  return pem.replace(/\\n/g, '\n').trim()
+  // Handle both literal \n escape sequences and actual newlines
+  let normalized = pem.replace(/\\n/g, '\n').trim()
+
+  // Split into lines and remove empty lines
+  const lines = normalized
+    .split('\n')
+    .map(line => line.trim())
+    .filter(line => line.length > 0)
+
+  // Reconstruct with proper line endings
+  return lines.join('\n')
 }
 
 function parseGithubPrivateKey(pem: string): KeyObject {
-  return createPrivateKey({ key: pem, format: 'pem' })
+  const normalizedPem = normalizePem(pem)
+
+  try {
+    // Try creating the private key with the normalized PEM
+    return createPrivateKey({
+      key: normalizedPem,
+      format: 'pem',
+      encoding: 'utf8' as any,
+    })
+  } catch (error) {
+    // Provide more detailed error information
+    const errorMsg = error instanceof Error ? error.message : String(error)
+    console.error('[GitHub App] Private key parsing failed:', {
+      error: errorMsg,
+      keyLength: normalizedPem.length,
+      keyStart: normalizedPem.substring(0, 50),
+      keyEnd: normalizedPem.substring(Math.max(0, normalizedPem.length - 50)),
+    })
+    throw new Error(`Failed to parse GitHub App private key: ${errorMsg}`)
+  }
 }
 
 export async function createGithubAppJwt(): Promise<string> {
