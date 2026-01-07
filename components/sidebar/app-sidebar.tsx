@@ -37,7 +37,22 @@ export function AppSidebar() {
 
     const installError = searchParams.get('githubInstall')
     if (installError === 'error') {
-      toast.error('Failed to connect GitHub')
+      toast.error('Failed to connect GitHub', {
+        description: 'There was an error during GitHub App installation. Please try again.',
+        action: {
+          label: 'Retry',
+          onClick: () => {
+            const projectId = searchParams.get('projectId')
+            if (projectId) {
+              window.location.href = `/api/github-oauth/start?projectId=${projectId}`
+            }
+          },
+        },
+      })
+    } else if (installError === 'success') {
+      toast.success('GitHub connected successfully!', {
+        description: 'Your repository has been created and is ready to sync.',
+      })
     }
 
     const url = new URL(window.location.href)
