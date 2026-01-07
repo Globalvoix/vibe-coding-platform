@@ -229,6 +229,13 @@ export function LargeSettingsModal() {
         Connected
       </span>
     </div>
+  ) : errorMessage ? (
+    <div className="flex items-center gap-2 rounded-full border border-red-200/50 bg-red-50 px-3 py-1">
+      <AlertCircle className="h-3.5 w-3.5 text-red-700" />
+      <span className="text-[10px] font-black text-red-700 uppercase tracking-widest">
+        Failed
+      </span>
+    </div>
   ) : (
     <div className="flex items-center gap-2 rounded-full border border-orange-200/50 bg-[#FFF7ED] px-3 py-1">
       <div className="h-1.5 w-1.5 rounded-full bg-orange-500 animate-pulse" />
