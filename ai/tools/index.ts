@@ -4,6 +4,7 @@ import { createSandbox } from './create-sandbox'
 import { generateFiles } from './generate-files'
 import { getSandboxURL } from './get-sandbox-url'
 import { runCommand } from './run-command'
+import { requestSupabaseConnection } from './request-supabase-connection'
 
 interface Params {
   modelId: string
