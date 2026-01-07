@@ -129,8 +129,10 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error)
     const errorStack = error instanceof Error ? error.stack : ''
-    const errorCode = (error as any)?.code || 'UNKNOWN'
-    const errorDetails = (error as any)?.detail || ''
+    const errorCode =
+      error instanceof Error && 'code' in error ? (error.code as string) : 'UNKNOWN'
+    const errorDetails =
+      error instanceof Error && 'detail' in error ? (error.detail as string) : ''
     console.error('[GitHub Callback] EXCEPTION in GitHub App callback:', {
       message: errorMessage,
       code: errorCode,
