@@ -26,12 +26,19 @@ function normalizePem(pem: string): string {
   // Remove all newlines and whitespace first
   const cleaned = pem.replace(/\\n/g, '').replace(/\n/g, '').replace(/\r/g, '').trim()
 
+  console.log('[GitHub App] PEM input length:', pem.length)
+  console.log('[GitHub App] PEM cleaned length:', cleaned.length)
+
   // Extract the PEM header, body, and footer
   const beginMatch = cleaned.match(/-----BEGIN [^-]+-----/)
   const endMatch = cleaned.match(/-----END [^-]+-----/)
 
   if (!beginMatch || !endMatch) {
-    console.error('[GitHub App] Invalid PEM format - missing headers')
+    console.error('[GitHub App] Invalid PEM format - missing headers', {
+      hasBegin: !!beginMatch,
+      hasEnd: !!endMatch,
+      cleanedStart: cleaned.substring(0, 100),
+    })
     return pem // Return original if we can't parse it
   }
 
@@ -43,6 +50,8 @@ function normalizePem(pem: string): string {
   const endIdx = cleaned.indexOf(footer)
   const base64Content = cleaned.substring(startIdx, endIdx)
 
+  console.log('[GitHub App] Base64 content length:', base64Content.length)
+
   // Split base64 into 64-character lines (standard PEM format)
   const lines = [header]
   for (let i = 0; i < base64Content.length; i += 64) {
@@ -50,7 +59,10 @@ function normalizePem(pem: string): string {
   }
   lines.push(footer)
 
-  return lines.join('\n')
+  const result = lines.join('\n')
+  console.log('[GitHub App] Normalized PEM lines:', lines.length)
+
+  return result
 }
 
 function parseGithubPrivateKey(pem: string): KeyObject {
