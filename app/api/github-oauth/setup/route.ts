@@ -80,8 +80,7 @@ export async function GET(req: NextRequest) {
 
     // Always try to create/get the repo on any installation, regardless of setupAction
     // setupAction can be 'install', 'update', or even null
-    {
-      console.log('[GitHub Setup] Creating installation token...')
+    console.log('[GitHub Setup] Creating installation token...')
       let installationToken: string | null = null
       try {
         installationToken = await createInstallationToken(installationId)
@@ -183,7 +182,6 @@ export async function GET(req: NextRequest) {
         console.error('[GitHub Setup] Failed to save project to DB:', dbError)
         throw dbError
       }
-    }
 
     const redirectUrl = new URL('/workspace', req.nextUrl.origin)
     redirectUrl.searchParams.set('projectId', verified.projectId)
