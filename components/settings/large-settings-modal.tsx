@@ -136,6 +136,7 @@ export function LargeSettingsModal() {
 
     try {
       setOrgSwitchingId(installationId)
+      setErrorMessage(null)
 
       const res = await fetch('/api/github-oauth/connect-org', {
         method: 'POST',
@@ -144,12 +145,15 @@ export function LargeSettingsModal() {
       })
 
       if (!res.ok) {
-        throw new Error('Failed to switch organization')
+        const errorData = await res.json().catch(() => ({ error: 'Unknown error' }))
+        throw new Error(errorData.error || 'Failed to switch organization')
       }
 
       await checkGithubStatus()
     } catch (error) {
+      const msg = error instanceof Error ? error.message : 'Failed to switch organization'
       console.error('Error switching organization:', error)
+      setErrorMessage(msg)
     } finally {
       setOrgSwitchingId(null)
     }
