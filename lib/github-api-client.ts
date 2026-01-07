@@ -40,13 +40,13 @@ export class GithubAppClient {
     console.log(`[GithubAppClient:${context}]`, data)
   }
 
-  private logError(context: string, error: unknown, additionalData?: unknown) {
+  private logError(context: string, error: unknown, additionalData?: Record<string, unknown>) {
     const errorMsg = error instanceof Error ? error.message : String(error)
     const errorStack = error instanceof Error ? error.stack : undefined
     console.error(`[GithubAppClient:${context}]`, {
       error: errorMsg,
       stack: errorStack,
-      ...additionalData,
+      ...(additionalData ?? {}),
     })
   }
 
