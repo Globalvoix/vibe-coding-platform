@@ -33,6 +33,8 @@ export const MessagePart = memo(function MessagePart({
     return <Reasoning part={part} partIndex={partIndex} />
   } else if (part.type === 'data-report-errors') {
     return <ReportErrors message={part.data} />
+  } else if (part.type === 'data-connect-supabase') {
+    return <ConnectSupabase message={part.data} />
   } else if (part.type === 'text') {
     return <Text part={part} />
   }
