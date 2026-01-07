@@ -122,8 +122,7 @@ export async function GET(req: NextRequest) {
       console.log('[GitHub Setup] Saved project to DB')
     }
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-    const redirectUrl = new URL(`${appUrl}/workspace`)
+    const redirectUrl = new URL('/workspace', req.nextUrl.origin)
     redirectUrl.searchParams.set('projectId', verified.projectId)
     redirectUrl.searchParams.set('openSettings', '1')
     redirectUrl.searchParams.set('settingsTab', 'github')
@@ -137,8 +136,7 @@ export async function GET(req: NextRequest) {
       console.error('[GitHub Setup] Stack:', error.stack)
     }
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-    const redirectUrl = new URL(`${appUrl}/workspace`)
+    const redirectUrl = new URL('/workspace', req.nextUrl.origin)
     redirectUrl.searchParams.set('projectId', verified.projectId)
     redirectUrl.searchParams.set('openSettings', '1')
     redirectUrl.searchParams.set('settingsTab', 'github')
