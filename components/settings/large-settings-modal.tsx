@@ -372,14 +372,25 @@ export function LargeSettingsModal() {
                         repository automatically for this project.
                       </p>
                     </div>
-                    <Button
-                      onClick={handleConnectGithub}
-                      disabled={loading}
-                      className="h-11 rounded-xl bg-[#111827] px-6 text-[14px] font-bold text-white transition-all hover:bg-black hover:shadow-lg active:scale-[0.97] flex items-center gap-3 shrink-0"
-                    >
-                      <GithubIcon className="h-5 w-5 text-white" />
-                      {loading ? 'Connecting...' : 'Connect project'}
-                    </Button>
+                    {errorMessage ? (
+                      <Button
+                        onClick={handleRetryConnection}
+                        disabled={loading}
+                        className="h-11 rounded-xl bg-orange-600 px-6 text-[14px] font-bold text-white transition-all hover:bg-orange-700 hover:shadow-lg active:scale-[0.97] flex items-center gap-3 shrink-0"
+                      >
+                        <RefreshCw className="h-5 w-5 text-white" />
+                        {loading ? 'Retrying...' : 'Retry'}
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={handleConnectGithub}
+                        disabled={loading}
+                        className="h-11 rounded-xl bg-[#111827] px-6 text-[14px] font-bold text-white transition-all hover:bg-black hover:shadow-lg active:scale-[0.97] flex items-center gap-3 shrink-0"
+                      >
+                        <GithubIcon className="h-5 w-5 text-white" />
+                        {loading ? 'Connecting...' : 'Connect project'}
+                      </Button>
+                    )}
                   </div>
 
                   <div className="h-px w-full bg-black/[0.04]" />
