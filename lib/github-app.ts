@@ -56,6 +56,14 @@ function normalizePem(pem: string): string {
 function parseGithubPrivateKey(pem: string): KeyObject {
   const normalizedPem = normalizePem(pem)
 
+  // Log the normalized format for debugging
+  console.log('[GitHub App] Normalized PEM format:', {
+    totalLength: normalizedPem.length,
+    lineCount: normalizedPem.split('\n').length,
+    firstLine: normalizedPem.split('\n')[0],
+    lastLine: normalizedPem.split('\n').slice(-1)[0],
+  })
+
   try {
     // Try creating the private key with the normalized PEM
     return createPrivateKey({
@@ -68,8 +76,9 @@ function parseGithubPrivateKey(pem: string): KeyObject {
     console.error('[GitHub App] Private key parsing failed:', {
       error: errorMsg,
       keyLength: normalizedPem.length,
-      keyStart: normalizedPem.substring(0, 50),
-      keyEnd: normalizedPem.substring(Math.max(0, normalizedPem.length - 50)),
+      keyStart: normalizedPem.substring(0, 80),
+      keyEnd: normalizedPem.substring(Math.max(0, normalizedPem.length - 80)),
+      lines: normalizedPem.split('\n').slice(0, 3),
     })
     throw new Error(`Failed to parse GitHub App private key: ${errorMsg}`)
   }
