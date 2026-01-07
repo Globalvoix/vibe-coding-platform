@@ -5,6 +5,7 @@ import { generateFiles } from './generate-files'
 import { getSandboxURL } from './get-sandbox-url'
 import { runCommand } from './run-command'
 import { requestSupabaseConnection } from './request-supabase-connection'
+import { requestEnvVars } from './request-env-vars'
 
 interface Params {
   modelId: string
@@ -20,6 +21,7 @@ export function tools({ modelId, writer, userId, projectId }: Params) {
     getSandboxURL: getSandboxURL({ writer }),
     runCommand: runCommand({ writer }),
     requestSupabaseConnection: requestSupabaseConnection({ writer, projectId }),
+    requestEnvVars: requestEnvVars({ writer, projectId }),
   }
 }
 
