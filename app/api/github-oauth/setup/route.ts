@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { verifyGithubInstallState } from '@/lib/github-install-state'
-import { getInstallation, createInstallationToken, githubInstallationRequest } from '@/lib/github-app'
+import { githubAppClient } from '@/lib/github-api-client'
 import { upsertGithubInstallation, upsertGithubProject } from '@/lib/github-projects-db'
 
 function sanitizeRepoName(input: string) {
@@ -14,7 +14,9 @@ function sanitizeRepoName(input: string) {
 }
 
 export async function GET(req: NextRequest) {
-  console.log('[GitHub Setup] Received callback:', {
+  const requestId = Math.random().toString(36).substring(7)
+  
+  console.log(`[GitHub Setup:${requestId}] Received installation callback`, {
     searchParams: Object.fromEntries(req.nextUrl.searchParams),
   })
 
@@ -22,154 +24,159 @@ export async function GET(req: NextRequest) {
   const setupAction = req.nextUrl.searchParams.get('setup_action')
   const state = req.nextUrl.searchParams.get('state')
 
+  // Validate required parameters
   if (!installationIdRaw || !state) {
-    console.error('[GitHub Setup] Missing params:', { installationIdRaw, state: state ? 'present' : 'missing' })
+    console.error(`[GitHub Setup:${requestId}] Missing required parameters`, {
+      hasInstallationId: !!installationIdRaw,
+      hasState: !!state,
+    })
     return NextResponse.json(
-      { error: 'Missing installation_id or state' },
+      {
+        error: 'Missing installation_id or state parameter',
+        requestId,
+      },
       { status: 400 }
     )
   }
 
   const installationId = Number(installationIdRaw)
   if (!Number.isFinite(installationId) || installationId <= 0) {
-    console.error('[GitHub Setup] Invalid installation_id:', installationIdRaw)
-    return NextResponse.json({ error: 'Invalid installation_id' }, { status: 400 })
+    console.error(`[GitHub Setup:${requestId}] Invalid installation ID format`, {
+      provided: installationIdRaw,
+    })
+    return NextResponse.json(
+      {
+        error: 'Invalid installation_id format',
+        requestId,
+      },
+      { status: 400 }
+    )
   }
 
+  // Verify and decode state
   const verified = verifyGithubInstallState(state)
   if (!verified) {
-    console.error('[GitHub Setup] Failed to verify state')
-    return NextResponse.json({ error: 'Invalid or expired state' }, { status: 400 })
+    console.error(`[GitHub Setup:${requestId}] State verification failed`)
+    return NextResponse.json(
+      {
+        error: 'Invalid or expired state token',
+        requestId,
+      },
+      { status: 400 }
+    )
   }
 
-  console.log('[GitHub Setup] State verified:', { userId: verified.userId, projectId: verified.projectId })
+  const { userId, projectId } = verified
+
+  console.log(`[GitHub Setup:${requestId}] State verified successfully`, {
+    userId,
+    projectId,
+    installationId,
+    setupAction,
+  })
+
+  // ====================================================================
+  // MAIN INSTALLATION FLOW
+  // ====================================================================
 
   try {
-    console.log('[GitHub Setup] Starting installation flow', {
-      installationId,
-      userId: verified.userId,
-      projectId: verified.projectId,
-    })
+    // STEP 1: Fetch installation details from GitHub
+    // ================================================
+    console.log(`[GitHub Setup:${requestId}] STEP 1: Fetching installation details`)
 
-    console.log('[GitHub Setup] Fetching installation details...')
-    const installation = await getInstallation(installationId)
-    console.log('[GitHub Setup] Got installation:', {
-      id: installation.id,
-      accountLogin: installation.account.login,
-      accountType: installation.account.type,
-    })
+    let installation
+    try {
+      installation = await githubAppClient.getInstallation(installationId)
+      console.log(`[GitHub Setup:${requestId}] STEP 1 SUCCESS: Installation fetched`, {
+        accountLogin: installation.account.login,
+        accountType: installation.account.type,
+        accountAvatar: installation.account.avatar_url?.substring(0, 50),
+      })
+    } catch (stepError) {
+      console.error(`[GitHub Setup:${requestId}] STEP 1 FAILED: Could not fetch installation`, {
+        error: stepError instanceof Error ? stepError.message : String(stepError),
+        installationId,
+      })
+      throw new Error(
+        `Failed to fetch installation details: ${stepError instanceof Error ? stepError.message : String(stepError)}`
+      )
+    }
 
     const account = installation.account
 
+    // STEP 2: Save installation to database
+    // =====================================
+    console.log(`[GitHub Setup:${requestId}] STEP 2: Saving installation to database`)
+
     try {
       await upsertGithubInstallation({
-        userId: verified.userId,
-        projectId: verified.projectId,
+        userId,
+        projectId,
         installationId,
         accountLogin: account.login,
         accountType: account.type,
         accountAvatarUrl: account.avatar_url ?? null,
       })
-      console.log('[GitHub Setup] Saved installation to DB')
-    } catch (dbError) {
-      console.error('[GitHub Setup] Failed to save installation to DB:', dbError)
-      throw dbError
-    }
-
-    console.log('[GitHub Setup] setupAction value:', setupAction)
-
-    // Always try to create/get the repo on any installation, regardless of setupAction
-    // setupAction can be 'install', 'update', or even null
-    console.log('[GitHub Setup] Creating installation token...')
-    let installationToken: string | null = null
-    try {
-      installationToken = await createInstallationToken(installationId)
-      console.log('[GitHub Setup] Installation token created successfully')
-    } catch (tokenError) {
-      console.error('[GitHub Setup] Failed to create installation token:', {
-        error: tokenError instanceof Error ? tokenError.message : String(tokenError),
-        installationId,
+      console.log(`[GitHub Setup:${requestId}] STEP 2 SUCCESS: Installation saved to database`)
+    } catch (stepError) {
+      console.error(`[GitHub Setup:${requestId}] STEP 2 FAILED: Could not save installation to database`, {
+        error: stepError instanceof Error ? stepError.message : String(stepError),
       })
-      throw tokenError
+      throw new Error(
+        `Failed to save installation to database: ${stepError instanceof Error ? stepError.message : String(stepError)}`
+      )
     }
 
-    if (!installationToken) {
-      throw new Error('Installation token is null')
-    }
+    // STEP 3: Create repository
+    // ==========================
+    console.log(`[GitHub Setup:${requestId}] STEP 3: Creating repository`)
 
-    const repoName = sanitizeRepoName(`thinksoft-${verified.projectId}`)
-    console.log('[GitHub Setup] Creating repository:', { repoName, owner: account.login, type: account.type })
+    const repoName = sanitizeRepoName(`thinksoft-${projectId}`)
 
-    const createBody = {
-      name: repoName,
-      private: true,
-      auto_init: true,
-      description: `Thinksoft project ${verified.projectId}`,
-    }
+    console.log(`[GitHub Setup:${requestId}] STEP 3: Repository details`, {
+      repoName,
+      owner: account.login,
+      ownerType: account.type,
+    })
 
     let repo
     try {
-      repo =
-        account.type === 'Organization'
-          ? await githubInstallationRequest<{
-              id: number
-              name: string
-              owner: { login: string }
-              default_branch: string
-              html_url: string
-            }>({
-              method: 'POST',
-              path: `/orgs/${encodeURIComponent(account.login)}/repos`,
-              installationToken,
-              body: createBody,
-            })
-          : await githubInstallationRequest<{
-              id: number
-              name: string
-              owner: { login: string }
-              default_branch: string
-              html_url: string
-            }>({
-              method: 'POST',
-              path: `/user/repos`,
-              installationToken,
-              body: createBody,
-            })
-
-      console.log('[GitHub Setup] Repository created:', {
-        name: repo.name,
-        owner: repo.owner.login,
+      repo = await githubAppClient.createOrGetRepository({
+        installationId,
+        owner: account.login,
+        ownerType: account.type,
+        repoName,
+        isPrivate: true,
+        autoInit: true,
+        description: `Thinksoft project ${projectId}`,
       })
-    } catch (repoError) {
-      console.log('[GitHub Setup] Repository creation failed, checking if it exists:', repoError)
 
-      // Try to get the existing repository
-      try {
-        repo = await githubInstallationRequest<{
-          id: number
-          name: string
-          owner: { login: string }
-          default_branch: string
-          html_url: string
-        }>({
-          method: 'GET',
-          path: `/repos/${encodeURIComponent(account.login)}/${encodeURIComponent(repoName)}`,
-          installationToken,
-        })
-        console.log('[GitHub Setup] Using existing repository:', {
-          name: repo.name,
-          owner: repo.owner.login,
-        })
-      } catch (getError) {
-        console.error('[GitHub Setup] Failed to create or get repository:', getError)
-        throw repoError
-      }
+      console.log(`[GitHub Setup:${requestId}] STEP 3 SUCCESS: Repository created or fetched`, {
+        repoId: repo.id,
+        repoName: repo.name,
+        repoOwner: repo.owner.login,
+        defaultBranch: repo.default_branch,
+        htmlUrl: repo.html_url,
+      })
+    } catch (stepError) {
+      console.error(`[GitHub Setup:${requestId}] STEP 3 FAILED: Could not create or fetch repository`, {
+        error: stepError instanceof Error ? stepError.message : String(stepError),
+        repoName,
+        owner: account.login,
+      })
+      throw new Error(
+        `Failed to create repository: ${stepError instanceof Error ? stepError.message : String(stepError)}`
+      )
     }
+
+    // STEP 4: Save project to database
+    // =================================
+    console.log(`[GitHub Setup:${requestId}] STEP 4: Saving project to database`)
 
     try {
       await upsertGithubProject({
-        userId: verified.userId,
-        projectId: verified.projectId,
+        userId,
+        projectId,
         activeInstallationId: installationId,
         repoOwner: repo.owner.login,
         repoName: repo.name,
@@ -177,49 +184,60 @@ export async function GET(req: NextRequest) {
         defaultBranch: repo.default_branch,
       })
 
-      console.log('[GitHub Setup] Saved project to DB')
-    } catch (dbError) {
-      console.error('[GitHub Setup] Failed to save project to DB:', dbError)
-      throw dbError
+      console.log(`[GitHub Setup:${requestId}] STEP 4 SUCCESS: Project saved to database`, {
+        projectId,
+        repoName: repo.name,
+        activeInstallationId: installationId,
+      })
+    } catch (stepError) {
+      console.error(`[GitHub Setup:${requestId}] STEP 4 FAILED: Could not save project to database`, {
+        error: stepError instanceof Error ? stepError.message : String(stepError),
+      })
+      throw new Error(
+        `Failed to save project to database: ${stepError instanceof Error ? stepError.message : String(stepError)}`
+      )
     }
 
+    // STEP 5: Redirect to workspace with success
+    // ============================================
+    console.log(`[GitHub Setup:${requestId}] STEP 5: All steps completed successfully, redirecting to workspace`)
+
     const redirectUrl = new URL('/workspace', req.nextUrl.origin)
-    redirectUrl.searchParams.set('projectId', verified.projectId)
+    redirectUrl.searchParams.set('projectId', projectId)
     redirectUrl.searchParams.set('openSettings', '1')
     redirectUrl.searchParams.set('settingsTab', 'github')
     redirectUrl.searchParams.set('githubInstall', 'success')
 
-    console.log('[GitHub Setup] Setup successful, redirecting to:', redirectUrl.toString())
+    console.log(`[GitHub Setup:${requestId}] SUCCESS: Redirecting to`, {
+      redirectPath: redirectUrl.pathname + redirectUrl.search,
+    })
+
     return NextResponse.redirect(redirectUrl.toString())
   } catch (error) {
+    // Error handling
     const errorMessage = error instanceof Error ? error.message : String(error)
     const errorStack = error instanceof Error ? error.stack : ''
-    const errorCode =
-      error instanceof Error && 'code' in error ? (error.code as string) : 'UNKNOWN'
-    const errorDetails =
-      error instanceof Error && 'detail' in error ? (error.detail as string) : ''
-    console.error('[GitHub Setup] EXCEPTION in GitHub App setup:', {
+
+    console.error(`[GitHub Setup:${requestId}] INSTALLATION FAILED: Exception caught`, {
       message: errorMessage,
-      code: errorCode,
-      detail: errorDetails,
       stack: errorStack,
-      installationId: installationIdRaw,
-      verified: verified ? { userId: verified.userId, projectId: verified.projectId } : null,
+      userId,
+      projectId,
+      installationId,
     })
 
     const redirectUrl = new URL('/workspace', req.nextUrl.origin)
-    if (verified) {
-      redirectUrl.searchParams.set('projectId', verified.projectId)
-      redirectUrl.searchParams.set('openSettings', '1')
-      redirectUrl.searchParams.set('settingsTab', 'github')
-      redirectUrl.searchParams.set('githubInstall', 'error')
-      console.log('[GitHub Setup] Redirecting with error to:', redirectUrl.toString())
-      return NextResponse.redirect(redirectUrl.toString())
-    }
+    redirectUrl.searchParams.set('projectId', projectId)
+    redirectUrl.searchParams.set('openSettings', '1')
+    redirectUrl.searchParams.set('settingsTab', 'github')
+    redirectUrl.searchParams.set('githubInstall', 'error')
+    redirectUrl.searchParams.set('githubError', encodeURIComponent(errorMessage))
+    redirectUrl.searchParams.set('requestId', requestId)
 
-    return NextResponse.json(
-      { error: 'Failed to complete GitHub App installation', details: errorMessage },
-      { status: 500 }
-    )
+    console.log(`[GitHub Setup:${requestId}] Redirecting with error`, {
+      redirectPath: redirectUrl.pathname + redirectUrl.search,
+    })
+
+    return NextResponse.redirect(redirectUrl.toString())
   }
 }
