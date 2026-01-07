@@ -10,6 +10,7 @@ import { ReportErrors } from './report-errors'
 import { Reasoning } from './reasoning'
 import { Text } from './text'
 import { ConnectSupabase } from './connect-supabase'
+import { RequestEnvVars } from './request-env-vars'
 import { memo } from 'react'
 
 interface Props {
@@ -35,6 +36,8 @@ export const MessagePart = memo(function MessagePart({
     return <ReportErrors message={part.data} />
   } else if (part.type === 'data-connect-supabase') {
     return <ConnectSupabase message={part.data} />
+  } else if (part.type === 'data-request-env-vars') {
+    return <RequestEnvVars message={part.data} />
   } else if (part.type === 'text') {
     return <Text part={part} />
   }
