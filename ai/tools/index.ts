@@ -19,6 +19,7 @@ export function tools({ modelId, writer, userId, projectId }: Params) {
     generateFiles: generateFiles({ writer, modelId, userId, projectId }),
     getSandboxURL: getSandboxURL({ writer }),
     runCommand: runCommand({ writer }),
+    requestSupabaseConnection: requestSupabaseConnection({ writer, projectId }),
   }
 }
 
