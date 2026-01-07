@@ -108,80 +108,80 @@ export async function GET(req: NextRequest) {
     }
 
     let repo
-      try {
-        repo =
-          account.type === 'Organization'
-            ? await githubInstallationRequest<{
-                id: number
-                name: string
-                owner: { login: string }
-                default_branch: string
-                html_url: string
-              }>({
-                method: 'POST',
-                path: `/orgs/${encodeURIComponent(account.login)}/repos`,
-                installationToken,
-                body: createBody,
-              })
-            : await githubInstallationRequest<{
-                id: number
-                name: string
-                owner: { login: string }
-                default_branch: string
-                html_url: string
-              }>({
-                method: 'POST',
-                path: `/user/repos`,
-                installationToken,
-                body: createBody,
-              })
+    try {
+      repo =
+        account.type === 'Organization'
+          ? await githubInstallationRequest<{
+              id: number
+              name: string
+              owner: { login: string }
+              default_branch: string
+              html_url: string
+            }>({
+              method: 'POST',
+              path: `/orgs/${encodeURIComponent(account.login)}/repos`,
+              installationToken,
+              body: createBody,
+            })
+          : await githubInstallationRequest<{
+              id: number
+              name: string
+              owner: { login: string }
+              default_branch: string
+              html_url: string
+            }>({
+              method: 'POST',
+              path: `/user/repos`,
+              installationToken,
+              body: createBody,
+            })
 
-        console.log('[GitHub Setup] Repository created:', {
+      console.log('[GitHub Setup] Repository created:', {
+        name: repo.name,
+        owner: repo.owner.login,
+      })
+    } catch (repoError) {
+      console.log('[GitHub Setup] Repository creation failed, checking if it exists:', repoError)
+
+      // Try to get the existing repository
+      try {
+        repo = await githubInstallationRequest<{
+          id: number
+          name: string
+          owner: { login: string }
+          default_branch: string
+          html_url: string
+        }>({
+          method: 'GET',
+          path: `/repos/${encodeURIComponent(account.login)}/${encodeURIComponent(repoName)}`,
+          installationToken,
+        })
+        console.log('[GitHub Setup] Using existing repository:', {
           name: repo.name,
           owner: repo.owner.login,
         })
-      } catch (repoError) {
-        console.log('[GitHub Setup] Repository creation failed, checking if it exists:', repoError)
-
-        // Try to get the existing repository
-        try {
-          repo = await githubInstallationRequest<{
-            id: number
-            name: string
-            owner: { login: string }
-            default_branch: string
-            html_url: string
-          }>({
-            method: 'GET',
-            path: `/repos/${encodeURIComponent(account.login)}/${encodeURIComponent(repoName)}`,
-            installationToken,
-          })
-          console.log('[GitHub Setup] Using existing repository:', {
-            name: repo.name,
-            owner: repo.owner.login,
-          })
-        } catch (getError) {
-          console.error('[GitHub Setup] Failed to create or get repository:', getError)
-          throw repoError
-        }
+      } catch (getError) {
+        console.error('[GitHub Setup] Failed to create or get repository:', getError)
+        throw repoError
       }
+    }
 
-      try {
-        await upsertGithubProject({
-          userId: verified.userId,
-          projectId: verified.projectId,
-          activeInstallationId: installationId,
-          repoOwner: repo.owner.login,
-          repoName: repo.name,
-          repoId: repo.id,
-          defaultBranch: repo.default_branch,
-        })
+    try {
+      await upsertGithubProject({
+        userId: verified.userId,
+        projectId: verified.projectId,
+        activeInstallationId: installationId,
+        repoOwner: repo.owner.login,
+        repoName: repo.name,
+        repoId: repo.id,
+        defaultBranch: repo.default_branch,
+      })
 
-        console.log('[GitHub Setup] Saved project to DB')
-      } catch (dbError) {
-        console.error('[GitHub Setup] Failed to save project to DB:', dbError)
-        throw dbError
-      }
+      console.log('[GitHub Setup] Saved project to DB')
+    } catch (dbError) {
+      console.error('[GitHub Setup] Failed to save project to DB:', dbError)
+      throw dbError
+    }
 
     const redirectUrl = new URL('/workspace', req.nextUrl.origin)
     redirectUrl.searchParams.set('projectId', verified.projectId)
