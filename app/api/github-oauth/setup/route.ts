@@ -51,6 +51,7 @@ export async function GET(req: NextRequest) {
       projectId: verified.projectId,
     })
 
+    console.log('[GitHub Setup] Fetching installation details...')
     const installation = await getInstallation(installationId)
     console.log('[GitHub Setup] Got installation:', {
       id: installation.id,
