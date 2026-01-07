@@ -132,7 +132,7 @@ export function ConnectSupabase({ message }: Props) {
         </div>
 
         <p className="text-[13px] text-black/40 font-bold italic">
-          Note: This can't be undone once enabled.
+          Note: This can&#39;t be undone once enabled.
         </p>
       </div>
 
