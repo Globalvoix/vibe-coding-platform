@@ -145,6 +145,7 @@ export async function GET(req: NextRequest) {
     redirectUrl.searchParams.set('projectId', verified.projectId)
     redirectUrl.searchParams.set('openSettings', '1')
     redirectUrl.searchParams.set('settingsTab', 'github')
+    redirectUrl.searchParams.set('githubInstall', 'success')
 
     console.log('[GitHub Setup] Setup successful, redirecting to:', redirectUrl.toString())
     return NextResponse.redirect(redirectUrl.toString())
