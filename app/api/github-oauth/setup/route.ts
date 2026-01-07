@@ -131,10 +131,13 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(redirectUrl.toString())
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error)
-    console.error('[GitHub Setup] Error in GitHub App setup callback:', errorMessage)
-    if (error instanceof Error) {
-      console.error('[GitHub Setup] Stack:', error.stack)
-    }
+    const errorStack = error instanceof Error ? error.stack : ''
+    console.error('[GitHub Setup] Error in GitHub App setup callback:', {
+      message: errorMessage,
+      stack: errorStack,
+      installationId: installationIdRaw,
+      verified: verified ? { userId: verified.userId, projectId: verified.projectId } : null,
+    })
 
     const redirectUrl = new URL('/workspace', req.nextUrl.origin)
     redirectUrl.searchParams.set('projectId', verified.projectId)
