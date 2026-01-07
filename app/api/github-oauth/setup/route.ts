@@ -91,8 +91,9 @@ export async function GET(req: NextRequest) {
         description: `Thinksoft project ${verified.projectId}`,
       }
 
+      let repo
       try {
-        const repo =
+        repo =
           account.type === 'Organization'
             ? await githubInstallationRequest<{
                 id: number
@@ -123,7 +124,33 @@ export async function GET(req: NextRequest) {
           name: repo.name,
           owner: repo.owner.login,
         })
+      } catch (repoError) {
+        console.log('[GitHub Setup] Repository creation failed, checking if it exists:', repoError)
 
+        // Try to get the existing repository
+        try {
+          repo = await githubInstallationRequest<{
+            id: number
+            name: string
+            owner: { login: string }
+            default_branch: string
+            html_url: string
+          }>({
+            method: 'GET',
+            path: `/repos/${encodeURIComponent(account.login)}/${encodeURIComponent(repoName)}`,
+            installationToken,
+          })
+          console.log('[GitHub Setup] Using existing repository:', {
+            name: repo.name,
+            owner: repo.owner.login,
+          })
+        } catch (getError) {
+          console.error('[GitHub Setup] Failed to create or get repository:', getError)
+          throw repoError
+        }
+      }
+
+      try {
         await upsertGithubProject({
           userId: verified.userId,
           projectId: verified.projectId,
@@ -135,9 +162,9 @@ export async function GET(req: NextRequest) {
         })
 
         console.log('[GitHub Setup] Saved project to DB')
-      } catch (repoError) {
-        console.error('[GitHub Setup] Failed to create repository:', repoError)
-        throw repoError
+      } catch (dbError) {
+        console.error('[GitHub Setup] Failed to save project to DB:', dbError)
+        throw dbError
       }
     }
 
