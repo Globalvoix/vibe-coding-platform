@@ -184,7 +184,12 @@ export async function createInstallationToken(installationId: number): Promise<s
     method: 'POST',
     path: `/app/installations/${installationId}/access_tokens`,
     jwt,
-    body: {},
+    body: {
+      permissions: {
+        contents: 'write',
+        metadata: 'read',
+      },
+    },
   })
 
   return result.token
