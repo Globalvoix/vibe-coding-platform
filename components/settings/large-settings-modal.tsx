@@ -120,7 +120,15 @@ export function LargeSettingsModal() {
   const handleConnectGithub = () => {
     if (!projectId) return
     setLoading(true)
+    setErrorMessage(null)
+    setRequestId(null)
     window.location.href = `/api/github-oauth/start?projectId=${projectId}`
+  }
+
+  const handleRetryConnection = () => {
+    setErrorMessage(null)
+    setRequestId(null)
+    checkGithubStatus()
   }
 
   const handleSelectOrganization = async (installationId: number) => {
