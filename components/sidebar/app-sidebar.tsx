@@ -35,8 +35,13 @@ export function AppSidebar() {
     setSettingsTab(tab)
     setSettingsModalOpen(true)
 
-    const installError = searchParams.get('githubInstall')
-    if (installError === 'error') {
+    const installStatus = searchParams.get('githubInstall')
+    if (installStatus === 'success') {
+      toast.dismiss() // Clear any previous error toasts
+      toast.success('GitHub connected successfully!', {
+        description: 'Your repository has been created and is ready to sync.',
+      })
+    } else if (installStatus === 'error') {
       toast.error('Failed to connect GitHub', {
         description: 'There was an error during GitHub App installation. Please try again.',
         action: {
@@ -48,10 +53,6 @@ export function AppSidebar() {
             }
           },
         },
-      })
-    } else if (installError === 'success') {
-      toast.success('GitHub connected successfully!', {
-        description: 'Your repository has been created and is ready to sync.',
       })
     }
 
