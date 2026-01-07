@@ -23,8 +23,7 @@ function getRequiredEnv(name: string): string {
 }
 
 function normalizePem(pem: string): string {
-  const normalized = pem.replace(/\\n/g, '\n').replace(/\r\n?/g, '\n').trim()
-  return normalized.endsWith('\n') ? normalized : `${normalized}\n`
+  return pem.replace(/\\n/g, '\n').trim()
 }
 
 function parseGithubPrivateKey(pem: string): KeyObject {
