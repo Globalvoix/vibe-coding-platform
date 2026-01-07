@@ -168,12 +168,15 @@ export function LargeSettingsModal() {
       })
 
       if (!res.ok) {
-        throw new Error('Failed to update repository')
+        const errorData = await res.json().catch(() => ({ error: 'Unknown error' }))
+        throw new Error(errorData.error || 'Failed to update repository')
       }
 
       await checkGithubStatus()
     } catch (error) {
+      const msg = error instanceof Error ? error.message : 'Failed to update repository'
       console.error('Error updating repository:', error)
+      setErrorMessage(msg)
     } finally {
       setUpdatingRepo(false)
     }
