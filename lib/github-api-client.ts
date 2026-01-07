@@ -171,6 +171,7 @@ export class GithubAppClient {
 
       return result
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error)
       this.logError('createRepository.failed', error, {
         installationId,
         owner,
@@ -180,8 +181,17 @@ export class GithubAppClient {
           ? `/orgs/${owner}/repos`
           : '/user/repos',
       })
+
+      // Provide more helpful error messages based on the error
+      if (errorMsg.includes('403')) {
+        throw new Error(
+          `Permission denied: The GitHub App may not have repository creation permissions. ` +
+          `Verify that the GitHub App has "Contents: Read & write" permission configured at https://github.com/settings/apps/${process.env.GITHUB_APP_SLUG}/permissions`
+        )
+      }
+
       throw new Error(
-        `Failed to create repository "${repoName}" for ${owner}: ${error instanceof Error ? error.message : String(error)}`
+        `Failed to create repository "${repoName}" for ${owner}: ${errorMsg}`
       )
     }
   }
