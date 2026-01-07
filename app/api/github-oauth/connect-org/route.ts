@@ -60,32 +60,56 @@ export async function POST(req: NextRequest) {
       description: `Thinksoft project ${body.projectId}`,
     }
 
-    const repo =
-      account.type === 'Organization'
-        ? await githubInstallationRequest<{
-            id: number
-            name: string
-            owner: { login: string }
-            default_branch: string
-            html_url: string
-          }>({
-            method: 'POST',
-            path: `/orgs/${encodeURIComponent(account.login)}/repos`,
-            installationToken,
-            body: createBody,
-          })
-        : await githubInstallationRequest<{
-            id: number
-            name: string
-            owner: { login: string }
-            default_branch: string
-            html_url: string
-          }>({
-            method: 'POST',
-            path: `/user/repos`,
-            installationToken,
-            body: createBody,
-          })
+    let repo
+    try {
+      repo =
+        account.type === 'Organization'
+          ? await githubInstallationRequest<{
+              id: number
+              name: string
+              owner: { login: string }
+              default_branch: string
+              html_url: string
+            }>({
+              method: 'POST',
+              path: `/orgs/${encodeURIComponent(account.login)}/repos`,
+              installationToken,
+              body: createBody,
+            })
+          : await githubInstallationRequest<{
+              id: number
+              name: string
+              owner: { login: string }
+              default_branch: string
+              html_url: string
+            }>({
+              method: 'POST',
+              path: `/user/repos`,
+              installationToken,
+              body: createBody,
+            })
+    } catch (repoError) {
+      console.log('[Connect Org] Repository creation failed, checking if it exists:', repoError)
+
+      // Try to get the existing repository
+      try {
+        repo = await githubInstallationRequest<{
+          id: number
+          name: string
+          owner: { login: string }
+          default_branch: string
+          html_url: string
+        }>({
+          method: 'GET',
+          path: `/repos/${encodeURIComponent(account.login)}/${encodeURIComponent(repoName)}`,
+          installationToken,
+        })
+        console.log('[Connect Org] Using existing repository')
+      } catch (getError) {
+        console.error('[Connect Org] Failed to create or get repository:', getError)
+        throw repoError
+      }
+    }
 
     await upsertGithubProject({
       userId,
