@@ -23,17 +23,21 @@ function getRequiredEnv(name: string): string {
 }
 
 function normalizePem(pem: string): string {
-  // Handle both literal \n escape sequences and actual newlines
-  const normalized = pem.replace(/\\n/g, '\n').trim()
+  // First, try to handle literal \n escape sequences (two characters: backslash and 'n')
+  let normalized = pem.split('\\n').join('\n')
 
-  // Split into lines and remove empty lines
-  const lines = normalized
-    .split('\n')
-    .map(line => line.trim())
-    .filter(line => line.length > 0)
+  // Also handle case where it might be a different escape format
+  normalized = normalized.replace(/\\r\\n/g, '\n').replace(/\\r/g, '\n')
 
-  // Reconstruct with proper line endings
-  return lines.join('\n')
+  // Trim whitespace from start and end, but preserve internal formatting
+  normalized = normalized.trim()
+
+  // Ensure proper PEM format by validating headers
+  if (!normalized.includes('-----BEGIN')) {
+    console.warn('[GitHub App] PEM key does not contain BEGIN marker')
+  }
+
+  return normalized
 }
 
 function parseGithubPrivateKey(pem: string): KeyObject {
