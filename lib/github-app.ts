@@ -28,21 +28,7 @@ function normalizePem(pem: string): string {
 }
 
 function parseGithubPrivateKey(pem: string): KeyObject {
-  const base = { key: pem, format: 'pem' as const }
-
-  try {
-    return createPrivateKey({ ...base, type: 'pkcs1' })
-  } catch {
-    // continue
-  }
-
-  try {
-    return createPrivateKey({ ...base, type: 'pkcs8' })
-  } catch {
-    // continue
-  }
-
-  return createPrivateKey(base)
+  return createPrivateKey({ key: pem, format: 'pem' })
 }
 
 export async function createGithubAppJwt(): Promise<string> {
