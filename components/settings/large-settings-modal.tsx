@@ -305,6 +305,36 @@ export function LargeSettingsModal() {
             <div className="flex-1 overflow-y-auto px-16 py-12 custom-scrollbar">
               {settingsTab === 'github' ? (
                 <div className="max-w-[840px] space-y-14">
+                  {/* Error message display */}
+                  {errorMessage && (
+                    <div className="rounded-[16px] border border-red-200/50 bg-red-50 p-6">
+                      <div className="flex gap-4">
+                        <AlertCircle className="h-5 w-5 text-red-700 shrink-0 mt-0.5" />
+                        <div className="min-w-0">
+                          <h4 className="text-[14px] font-bold text-red-900 tracking-tight mb-1">
+                            Connection Failed
+                          </h4>
+                          <p className="text-[13px] leading-relaxed text-red-800 font-medium mb-3">
+                            {errorMessage}
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => setShowDiagnostics(!showDiagnostics)}
+                            className="flex items-center gap-1.5 text-[12px] font-bold text-red-700 hover:text-red-900 transition-colors"
+                          >
+                            <Eye className="h-3.5 w-3.5" />
+                            <span>{showDiagnostics ? 'Hide' : 'Show'} diagnostics</span>
+                          </button>
+                          {showDiagnostics && requestId && (
+                            <div className="mt-2 text-[11px] text-red-700 font-mono bg-white rounded border border-red-200 p-2">
+                              Request ID: {requestId}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="flex items-start justify-between gap-8">
                     <p className="text-[16px] leading-[1.6] text-[#111827]/60 font-medium">
                       Sync your project 2-way with GitHub to collaborate at source. High-fidelity
