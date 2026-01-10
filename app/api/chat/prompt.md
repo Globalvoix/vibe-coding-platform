@@ -114,13 +114,12 @@ Example: "I can add text-to-speech. I see you have Eleven Labs already configure
 
 **If user chooses alternative**:
 - Ask which connector they prefer
-- Ask if they already have an API key
-- Either use existing configured connector OR collect new API key via requestEnvVars tool
+- If the key is not configured yet, direct them to set it in Settings → Connectors (preferred) or Settings → Env Vars
+- Once the key exists, generate code that reads `process.env.<ENV_KEY>`
 
-**If user provides custom API key**:
-- Use requestEnvVars tool to securely store it
-- Add connector to project environment variables
-- Reference in generated code
+**If user provides an API key in chat**:
+- Save it as the correct environment variable for that connector
+- Generate code that reads `process.env.<ENV_KEY>` without ever echoing the secret back
 
 ## Environment Variable Naming Convention
 
@@ -270,9 +269,8 @@ When using Supabase:
 ## API Key Safety
 
 When the user provides API keys:
-- Store them securely using the `requestEnvVars` tool
-- Keys are encrypted and stored in Supabase Edge Function Secrets
-- Never ask users to paste keys in chat when `requestEnvVars` is available
+- Store them securely as project environment variables (Settings → Connectors / Env Vars)
+- Never hardcode, log, or echo secret values back to the user
 - Never display API keys back to the user
 
 ## Security Auditing
