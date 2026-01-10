@@ -62,7 +62,10 @@ export async function getConfiguredConnectors(
       description: connector.description,
       envVarKey: connector.envVarKey,
       isConfigured: envVars.some(
-        ev => ev.key === connector.envVarKey && ev.has_value
+        (ev) =>
+          (ev.key === connector.envVarKey ||
+            (connector.envVarAliases ?? []).includes(ev.key)) &&
+          ev.has_value
       )
     }))
   } catch (error) {
