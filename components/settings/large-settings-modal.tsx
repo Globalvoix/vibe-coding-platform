@@ -715,7 +715,7 @@ export function LargeSettingsModal() {
                    <div className="space-y-1">
                       <h1 className="text-[28px] font-semibold text-[#111827] tracking-tight">Memory</h1>
                       <p className="text-[13px] text-[#111827]/40 font-medium">
-                        Manage your AI's long-term memory and context.
+                        Manage your AI&apos;s long-term memory and context.
                       </p>
                    </div>
                    <div className="flex h-[400px] flex-col items-center justify-center space-y-6 text-[#111827]/20 border border-dashed border-black/[0.05] rounded-[24px]">
