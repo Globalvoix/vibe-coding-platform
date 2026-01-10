@@ -408,12 +408,11 @@ export function LargeSettingsModal() {
                         {setupConnector === 'OpenAI' && <OpenAILogo size={32} />}
                         {setupConnector === 'Google Gemini' && <GoogleGeminiLogo size={32} />}
                         {setupConnector === 'Deepseek' && <DeepseekLogo size={32} />}
-                        {setupConnector === 'Open Router' && <OpenRouterLogo size={32} />}
                         {setupConnector === 'Together AI' && <TogetherAILogo size={32} />}
                         {setupConnector === 'Perplexity' && <PerplexityLogo size={32} />}
                         {setupConnector === 'Firecrawl' && <FirecrawlLogo size={32} />}
                         {setupConnector === 'Eleven Labs' && <ElevenLabsLogo size={32} />}
-                        {!['OpenAI', 'Google Gemini', 'Deepseek', 'Open Router', 'Together AI', 'Perplexity', 'Firecrawl', 'Eleven Labs'].includes(setupConnector) && (
+                        {!['OpenAI', 'Google Gemini', 'Deepseek', 'Together AI', 'Perplexity', 'Firecrawl', 'Eleven Labs'].includes(setupConnector) && (
                           <Layers className="w-8 h-8 text-[#111827]" />
                         )}
                      </div>
