@@ -632,6 +632,23 @@ export function LargeSettingsModal() {
                             >Set up</Button>
                          </div>
 
+                         {/* Together AI */}
+                         <div className="flex items-center justify-between p-4 rounded-[12px] border border-black/[0.03] bg-[#F9F9F7] hover:bg-white hover:shadow-sm transition-all group">
+                            <div className="flex items-center gap-4">
+                               <div className="w-10 h-10 rounded-[8px] bg-white border border-black/[0.05] flex items-center justify-center overflow-hidden">
+                                  <TogetherAILogo size={24} />
+                               </div>
+                               <div>
+                                  <span className="text-[14px] font-semibold text-[#111827]">Together AI</span>
+                                  <p className="text-[11px] text-[#111827]/40 font-medium">Fast inference for Llama 3 and more.</p>
+                               </div>
+                            </div>
+                            <Button
+                              onClick={() => handleStartSetup('Together AI')}
+                              className="h-8 rounded-[6px] bg-white border border-black/[0.05] px-4 text-[12px] font-semibold text-[#111827] hover:bg-gray-50 shadow-sm"
+                            >Set up</Button>
+                         </div>
+
                          {/* Perplexity */}
                          <div className="flex items-center justify-between p-4 rounded-[12px] border border-black/[0.03] bg-[#F9F9F7] hover:bg-white hover:shadow-sm transition-all group">
                             <div className="flex items-center gap-4">
