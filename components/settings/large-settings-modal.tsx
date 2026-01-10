@@ -200,10 +200,10 @@ export function LargeSettingsModal() {
       items: [
         {
           id: 'workspace-name',
-          label: "Prasuk's Lovable",
+          label: "Think's Lovable",
           icon: (
-            <div className="w-4 h-4 bg-[#D946EF] rounded text-[10px] text-white flex items-center justify-center font-bold">
-              P
+            <div className="w-4 h-4 bg-[#3B82F6] rounded-[4px] text-[10px] text-white flex items-center justify-center font-bold">
+              T
             </div>
           ),
         },
@@ -216,7 +216,15 @@ export function LargeSettingsModal() {
     {
       section: 'Account',
       items: [
-        { id: 'account', label: 'Prasuk Jain', icon: <User className="w-4 h-4" /> },
+        {
+          id: 'account',
+          label: 'Think',
+          icon: (
+            <div className="w-4 h-4 bg-[#111827]/5 rounded-full text-[10px] text-[#111827] flex items-center justify-center font-bold border border-black/[0.05]">
+              T
+            </div>
+          )
+        },
         { id: 'labs', label: 'Labs', icon: <Beaker className="w-4 h-4" /> },
       ],
     },
