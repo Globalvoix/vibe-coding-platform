@@ -433,11 +433,11 @@ export function LargeSettingsModal() {
                 <div className="max-w-[800px] flex flex-col h-full">
                   <div className="flex items-center justify-between mb-12">
                      <button
-                        onClick={() => setSetupConnector(null)}
+                        onClick={() => setSetupConnectorId(null)}
                         className="flex items-center gap-2 text-[14px] font-medium text-[#111827]/40 hover:text-[#111827] transition-colors"
                      >
                         <ChevronLeft className="w-4 h-4" />
-                        <span>{setupConnector}</span>
+                        <span>{setupConnector.displayName}</span>
                      </button>
                      <a href="#" className="flex items-center gap-1.5 text-[12px] font-medium text-[#111827]/40 hover:text-[#111827] transition-colors">
                         <Globe className="w-3.5 h-3.5" />
@@ -447,18 +447,16 @@ export function LargeSettingsModal() {
 
                   <div className="flex items-center gap-6 mb-12">
                      <div className="w-14 h-14 rounded-[12px] bg-black/[0.03] flex items-center justify-center overflow-hidden p-2">
-                        {setupConnector === 'OpenAI' && <OpenAILogo size={32} />}
-                        {setupConnector === 'Google Gemini' && <GoogleGeminiLogo size={32} />}
-                        {setupConnector === 'Deepseek' && <DeepseekLogo size={32} />}
-                        {setupConnector === 'Together AI' && <TogetherAILogo size={32} />}
-                        {setupConnector === 'Perplexity' && <PerplexityLogo size={32} />}
-                        {setupConnector === 'Firecrawl' && <FirecrawlLogo size={32} />}
-                        {setupConnector === 'Eleven Labs' && <ElevenLabsLogo size={32} />}
-                        {!['OpenAI', 'Google Gemini', 'Deepseek', 'Together AI', 'Perplexity', 'Firecrawl', 'Eleven Labs'].includes(setupConnector) && (
-                          <Layers className="w-8 h-8 text-[#111827]" />
-                        )}
+                        {setupConnectorId === 'openai' && <OpenAILogo size={32} />}
+                        {setupConnectorId === 'google-gemini' && <GoogleGeminiLogo size={32} />}
+                        {setupConnectorId === 'deepseek' && <DeepseekLogo size={32} />}
+                        {setupConnectorId === 'together-ai' && <TogetherAILogo size={32} />}
+                        {setupConnectorId === 'perplexity' && <PerplexityLogo size={32} />}
+                        {setupConnectorId === 'firecrawl' && <FirecrawlLogo size={32} />}
+                        {setupConnectorId === 'eleven-labs' && <ElevenLabsLogo size={32} />}
+                        {!setupConnectorId && <Layers className="w-8 h-8 text-[#111827]" />}
                      </div>
-                     <h1 className="text-[24px] font-semibold text-[#111827] tracking-tight">Create a {setupConnector} connection</h1>
+                     <h1 className="text-[24px] font-semibold text-[#111827] tracking-tight">Create a {setupConnector.displayName} connection</h1>
                   </div>
 
                   <div className="space-y-10">
@@ -469,7 +467,7 @@ export function LargeSettingsModal() {
                            value={setupDisplayName}
                            onChange={(e) => setSetupDisplayName(e.target.value)}
                            className="w-full h-11 px-4 rounded-[12px] border border-black/[0.05] bg-black/[0.01] focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5 transition-all text-[14px]"
-                           placeholder={setupConnector}
+                           placeholder={setupConnector.displayName}
                         />
                      </div>
 
@@ -480,7 +478,7 @@ export function LargeSettingsModal() {
                               Get key <ExternalLink className="w-3 h-3" />
                            </a>
                         </div>
-                        <p className="text-[12px] text-[#111827]/40 font-medium">Your {setupConnector} API key</p>
+                        <p className="text-[12px] text-[#111827]/40 font-medium">Your {setupConnector.displayName} API key</p>
                         <div className="relative">
                            <input
                               type={showApiKey ? 'text' : 'password'}
@@ -505,7 +503,7 @@ export function LargeSettingsModal() {
                         disabled={!setupApiKey || isCreating}
                         className="h-10 px-8 rounded-[8px] bg-blue-600 text-white font-semibold hover:bg-blue-700 active:scale-[0.98] transition-all disabled:opacity-50 disabled:scale-100"
                      >
-                        {isCreating ? 'Creating...' : 'Create'}
+                        {isCreating ? 'Saving...' : 'Save'}
                      </Button>
                   </div>
                 </div>
