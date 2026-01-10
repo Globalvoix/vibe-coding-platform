@@ -405,8 +405,18 @@ export function LargeSettingsModal() {
                   </div>
 
                   <div className="flex items-center gap-6 mb-12">
-                     <div className="w-14 h-14 rounded-[12px] bg-black/[0.03] flex items-center justify-center">
-                        <Layers className="w-8 h-8 text-[#111827]" />
+                     <div className="w-14 h-14 rounded-[12px] bg-black/[0.03] flex items-center justify-center overflow-hidden p-2">
+                        {setupConnector === 'OpenAI' && <OpenAILogo size={32} />}
+                        {setupConnector === 'Google Gemini' && <GoogleGeminiLogo size={32} />}
+                        {setupConnector === 'Deepseek' && <DeepseekLogo size={32} />}
+                        {setupConnector === 'Open Router' && <OpenRouterLogo size={32} />}
+                        {setupConnector === 'Together AI' && <TogetherAILogo size={32} />}
+                        {setupConnector === 'Perplexity' && <PerplexityLogo size={32} />}
+                        {setupConnector === 'Firecrawl' && <FirecrawlLogo size={32} />}
+                        {setupConnector === 'Eleven Labs' && <ElevenLabsLogo size={32} />}
+                        {!['OpenAI', 'Google Gemini', 'Deepseek', 'Open Router', 'Together AI', 'Perplexity', 'Firecrawl', 'Eleven Labs'].includes(setupConnector) && (
+                          <Layers className="w-8 h-8 text-[#111827]" />
+                        )}
                      </div>
                      <h1 className="text-[24px] font-semibold text-[#111827] tracking-tight">Create a {setupConnector} connection</h1>
                   </div>
