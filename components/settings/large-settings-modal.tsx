@@ -249,36 +249,37 @@ export function LargeSettingsModal() {
     }
   }
 
-  const handleStartSetup = (connector: string) => {
-    setSetupConnector(connector)
-    setSetupDisplayName(connector)
+  const handleStartSetup = (connectorId: ConnectorId) => {
+    const connector = CONNECTOR_DEFINITIONS[connectorId]
+    setSetupConnectorId(connectorId)
+    setSetupDisplayName(connector.displayName)
     setSetupApiKey('')
     setShowApiKey(false)
   }
 
   const handleCreateConnection = async () => {
-    if (!projectId || !setupConnector || !setupApiKey) return
+    if (!projectId || !setupConnectorId || !setupConnector || !setupApiKey) return
 
     try {
       setIsCreating(true)
-      const envKey = `${setupConnector.toUpperCase().replace(/\s+/g, '_')}_API_KEY`
 
       const res = await fetch(`/api/projects/${projectId}/env-vars`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          key: envKey,
+          key: setupConnector.envVarKey,
           value: setupApiKey,
           is_sensitive: true,
         }),
       })
 
       if (!res.ok) {
-        const data = await res.json()
+        const data = await res.json().catch(() => ({ error: 'Failed to create connection' }))
         throw new Error(data.error || 'Failed to create connection')
       }
 
-      setSetupConnector(null)
+      setSetupConnectorId(null)
+      await checkConnectorsStatus()
     } catch (error) {
       console.error('Error creating connection:', error)
       alert(error instanceof Error ? error.message : 'Failed to create connection')
