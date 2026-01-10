@@ -240,26 +240,23 @@ export async function POST(req: Request) {
     const extractedEnvVars: Array<{ key: string; value: string }> = []
     const secretsToRedact: string[] = []
 
-    if (projectId) {
+    if (projectId && project) {
       try {
-        const project = await getProject(userId, projectId)
-        if (project) {
-          for (const message of messages) {
-            if (message.role !== 'user') continue
-            for (const part of message.parts ?? []) {
-              if (part.type !== 'text') continue
-              const text = String(part.text ?? '')
-              const vars = extractEnvVarsFromText(text)
-              for (const v of vars) {
-                extractedEnvVars.push(v)
-                secretsToRedact.push(v.value)
-              }
+        for (const message of messages) {
+          if (message.role !== 'user') continue
+          for (const part of message.parts ?? []) {
+            if (part.type !== 'text') continue
+            const text = String(part.text ?? '')
+            const vars = extractEnvVarsFromText(text)
+            for (const v of vars) {
+              extractedEnvVars.push(v)
+              secretsToRedact.push(v.value)
             }
           }
+        }
 
-          for (const { key, value } of extractedEnvVars) {
-            await createOrUpdateEnvVar(projectId, userId, key, value, true)
-          }
+        for (const { key, value } of extractedEnvVars) {
+          await createOrUpdateEnvVar(projectId, userId, key, value, true)
         }
       } catch (error) {
         console.warn('Failed to capture env vars from chat:', error)
