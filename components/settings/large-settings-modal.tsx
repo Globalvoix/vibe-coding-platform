@@ -777,14 +777,24 @@ export function LargeSettingsModal() {
                                   <FirecrawlLogo size={24} />
                                </div>
                                <div>
-                                  <span className="text-[14px] font-semibold text-[#111827]">Firecrawl</span>
+                                  <div className="flex items-center gap-2">
+                                     <span className="text-[14px] font-semibold text-[#111827]">Firecrawl</span>
+                                     {isConnectorConfigured('firecrawl') && (
+                                       <div className="flex items-center gap-1 rounded-full border border-emerald-200/50 bg-emerald-50 px-2 py-0.5">
+                                         <Check className="h-3 w-3 text-emerald-700" />
+                                         <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-tight">
+                                           Connected
+                                         </span>
+                                       </div>
+                                     )}
+                                  </div>
                                   <p className="text-[11px] text-[#111827]/40 font-medium">Turn any website into LLM-ready data.</p>
                                </div>
                             </div>
                             <Button
-                              onClick={() => handleStartSetup('Firecrawl')}
+                              onClick={() => handleStartSetup('firecrawl')}
                               className="h-8 rounded-[6px] bg-white border border-black/[0.05] px-4 text-[12px] font-semibold text-[#111827] hover:bg-gray-50 shadow-sm"
-                            >Set up</Button>
+                            >{isConnectorConfigured('firecrawl') ? 'Manage' : 'Set up'}</Button>
                          </div>
 
                          {/* Eleven Labs */}
@@ -794,14 +804,24 @@ export function LargeSettingsModal() {
                                   <ElevenLabsLogo size={24} />
                                </div>
                                <div>
-                                  <span className="text-[14px] font-semibold text-[#111827]">Eleven Labs</span>
+                                  <div className="flex items-center gap-2">
+                                     <span className="text-[14px] font-semibold text-[#111827]">Eleven Labs</span>
+                                     {isConnectorConfigured('eleven-labs') && (
+                                       <div className="flex items-center gap-1 rounded-full border border-emerald-200/50 bg-emerald-50 px-2 py-0.5">
+                                         <Check className="h-3 w-3 text-emerald-700" />
+                                         <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-tight">
+                                           Connected
+                                         </span>
+                                       </div>
+                                     )}
+                                  </div>
                                   <p className="text-[11px] text-[#111827]/40 font-medium">Leading AI text-to-speech technology.</p>
                                </div>
                             </div>
                             <Button
-                              onClick={() => handleStartSetup('Eleven Labs')}
+                              onClick={() => handleStartSetup('eleven-labs')}
                               className="h-8 rounded-[6px] bg-white border border-black/[0.05] px-4 text-[12px] font-semibold text-[#111827] hover:bg-gray-50 shadow-sm"
-                            >Set up</Button>
+                            >{isConnectorConfigured('eleven-labs') ? 'Manage' : 'Set up'}</Button>
                          </div>
                       </div>
                    </div>
