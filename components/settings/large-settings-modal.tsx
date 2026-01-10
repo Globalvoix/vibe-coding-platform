@@ -631,14 +631,24 @@ export function LargeSettingsModal() {
                                   <OpenAILogo size={24} />
                                </div>
                                <div>
-                                  <span className="text-[14px] font-semibold text-[#111827]">OpenAI</span>
+                                  <div className="flex items-center gap-2">
+                                     <span className="text-[14px] font-semibold text-[#111827]">OpenAI</span>
+                                     {isConnectorConfigured('openai') && (
+                                       <div className="flex items-center gap-1 rounded-full border border-emerald-200/50 bg-emerald-50 px-2 py-0.5">
+                                         <Check className="h-3 w-3 text-emerald-700" />
+                                         <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-tight">
+                                           Connected
+                                         </span>
+                                       </div>
+                                     )}
+                                  </div>
                                   <p className="text-[11px] text-[#111827]/40 font-medium">GPT-4o, o1-preview, and more.</p>
                                </div>
                             </div>
                             <Button
-                              onClick={() => handleStartSetup('OpenAI')}
+                              onClick={() => handleStartSetup('openai')}
                               className="h-8 rounded-[6px] bg-white border border-black/[0.05] px-4 text-[12px] font-semibold text-[#111827] hover:bg-gray-50 shadow-sm"
-                            >Set up</Button>
+                            >{isConnectorConfigured('openai') ? 'Manage' : 'Set up'}</Button>
                          </div>
 
                          {/* Google Gemini */}
@@ -648,14 +658,24 @@ export function LargeSettingsModal() {
                                   <GoogleGeminiLogo size={24} />
                                </div>
                                <div>
-                                  <span className="text-[14px] font-semibold text-[#111827]">Google Gemini</span>
+                                  <div className="flex items-center gap-2">
+                                     <span className="text-[14px] font-semibold text-[#111827]">Google Gemini</span>
+                                     {isConnectorConfigured('google-gemini') && (
+                                       <div className="flex items-center gap-1 rounded-full border border-emerald-200/50 bg-emerald-50 px-2 py-0.5">
+                                         <Check className="h-3 w-3 text-emerald-700" />
+                                         <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-tight">
+                                           Connected
+                                         </span>
+                                       </div>
+                                     )}
+                                  </div>
                                   <p className="text-[11px] text-[#111827]/40 font-medium">Gemini 1.5 Pro, Ultra, and Flash.</p>
                                </div>
                             </div>
                             <Button
-                              onClick={() => handleStartSetup('Google Gemini')}
+                              onClick={() => handleStartSetup('google-gemini')}
                               className="h-8 rounded-[6px] bg-white border border-black/[0.05] px-4 text-[12px] font-semibold text-[#111827] hover:bg-gray-50 shadow-sm"
-                            >Set up</Button>
+                            >{isConnectorConfigured('google-gemini') ? 'Manage' : 'Set up'}</Button>
                          </div>
 
                          {/* Deepseek */}
@@ -665,14 +685,24 @@ export function LargeSettingsModal() {
                                   <DeepseekLogo size={24} />
                                </div>
                                <div>
-                                  <span className="text-[14px] font-semibold text-[#111827]">Deepseek</span>
+                                  <div className="flex items-center gap-2">
+                                     <span className="text-[14px] font-semibold text-[#111827]">Deepseek</span>
+                                     {isConnectorConfigured('deepseek') && (
+                                       <div className="flex items-center gap-1 rounded-full border border-emerald-200/50 bg-emerald-50 px-2 py-0.5">
+                                         <Check className="h-3 w-3 text-emerald-700" />
+                                         <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-tight">
+                                           Connected
+                                         </span>
+                                       </div>
+                                     )}
+                                  </div>
                                   <p className="text-[11px] text-[#111827]/40 font-medium">High-performance open-source models.</p>
                                </div>
                             </div>
                             <Button
-                              onClick={() => handleStartSetup('Deepseek')}
+                              onClick={() => handleStartSetup('deepseek')}
                               className="h-8 rounded-[6px] bg-white border border-black/[0.05] px-4 text-[12px] font-semibold text-[#111827] hover:bg-gray-50 shadow-sm"
-                            >Set up</Button>
+                            >{isConnectorConfigured('deepseek') ? 'Manage' : 'Set up'}</Button>
                          </div>
 
                          {/* Together AI */}
@@ -682,14 +712,24 @@ export function LargeSettingsModal() {
                                   <TogetherAILogo size={24} />
                                </div>
                                <div>
-                                  <span className="text-[14px] font-semibold text-[#111827]">Together AI</span>
+                                  <div className="flex items-center gap-2">
+                                     <span className="text-[14px] font-semibold text-[#111827]">Together AI</span>
+                                     {isConnectorConfigured('together-ai') && (
+                                       <div className="flex items-center gap-1 rounded-full border border-emerald-200/50 bg-emerald-50 px-2 py-0.5">
+                                         <Check className="h-3 w-3 text-emerald-700" />
+                                         <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-tight">
+                                           Connected
+                                         </span>
+                                       </div>
+                                     )}
+                                  </div>
                                   <p className="text-[11px] text-[#111827]/40 font-medium">Fast inference for Llama 3 and more.</p>
                                </div>
                             </div>
                             <Button
-                              onClick={() => handleStartSetup('Together AI')}
+                              onClick={() => handleStartSetup('together-ai')}
                               className="h-8 rounded-[6px] bg-white border border-black/[0.05] px-4 text-[12px] font-semibold text-[#111827] hover:bg-gray-50 shadow-sm"
-                            >Set up</Button>
+                            >{isConnectorConfigured('together-ai') ? 'Manage' : 'Set up'}</Button>
                          </div>
 
                          {/* Perplexity */}
@@ -699,14 +739,24 @@ export function LargeSettingsModal() {
                                   <PerplexityLogo size={24} />
                                </div>
                                <div>
-                                  <span className="text-[14px] font-semibold text-[#111827]">Perplexity</span>
+                                  <div className="flex items-center gap-2">
+                                     <span className="text-[14px] font-semibold text-[#111827]">Perplexity</span>
+                                     {isConnectorConfigured('perplexity') && (
+                                       <div className="flex items-center gap-1 rounded-full border border-emerald-200/50 bg-emerald-50 px-2 py-0.5">
+                                         <Check className="h-3 w-3 text-emerald-700" />
+                                         <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-tight">
+                                           Connected
+                                         </span>
+                                       </div>
+                                     )}
+                                  </div>
                                   <p className="text-[11px] text-[#111827]/40 font-medium">AI-powered search and information discovery.</p>
                                </div>
                             </div>
                             <Button
-                              onClick={() => handleStartSetup('Perplexity')}
+                              onClick={() => handleStartSetup('perplexity')}
                               className="h-8 rounded-[6px] bg-white border border-black/[0.05] px-4 text-[12px] font-semibold text-[#111827] hover:bg-gray-50 shadow-sm"
-                            >Set up</Button>
+                            >{isConnectorConfigured('perplexity') ? 'Manage' : 'Set up'}</Button>
                          </div>
                       </div>
                    </div>
