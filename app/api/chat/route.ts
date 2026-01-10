@@ -141,6 +141,60 @@ function redactSecretsFromText(text: string, secrets: string[]) {
   return redacted
 }
 
+async function buildConnectorContext({
+  projectId,
+  userPromptText,
+}: {
+  projectId: string
+  userPromptText: string
+}): Promise<string> {
+  const envVars = await listEnvVars(projectId)
+  const configuredKeys = new Set(
+    envVars.filter((v) => (v.value ?? '').length > 0).map((v) => v.key)
+  )
+
+  const configuredConnectors = Object.values(CONNECTOR_DEFINITIONS)
+    .filter((c) => configuredKeys.has(c.envVarKey))
+    .sort((a, b) => b.priority - a.priority)
+
+  const detected = detectConnectorFromPhrase(userPromptText)
+    .slice(0, 5)
+    .map((m) => ({ id: m.connector.id as ConnectorId, displayName: m.connector.displayName }))
+
+  const detectedUnique = Array.from(
+    new Map(detected.map((d) => [d.id, d])).values()
+  )
+
+  const configuredNames = configuredConnectors.map((c) => c.displayName)
+  const detectedNames = detectedUnique.map((d) => d.displayName)
+
+  const lines: string[] = []
+  lines.push('# PROJECT CONNECTOR CONTEXT')
+  lines.push('')
+  lines.push('## Configured connectors (available now)')
+  if (configuredNames.length === 0) {
+    lines.push('- (none configured)')
+  } else {
+    for (const name of configuredNames) lines.push(`- ${name}`)
+  }
+
+  lines.push('')
+  lines.push('## Detected needs from the latest user message')
+  if (detectedNames.length === 0) {
+    lines.push('- (no connector-specific needs detected)')
+  } else {
+    for (const name of detectedNames) lines.push(`- ${name}`)
+  }
+
+  lines.push('')
+  lines.push('## Rules')
+  lines.push('- If a detected connector is already configured, use it immediately and generate code that reads its env var (do not ask for the key).')
+  lines.push('- If a detected connector is not configured, instruct the user to configure it in Settings → Connectors, then proceed.')
+  lines.push('- Never include any secret env var values in messages or code.')
+
+  return lines.join('\n')
+}
+
 export async function POST(req: Request) {
   try {
     const checkResult = await checkBotId()
