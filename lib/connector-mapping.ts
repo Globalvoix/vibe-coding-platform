@@ -8,7 +8,6 @@ export type ConnectorId =
   | 'openai'
   | 'google-gemini'
   | 'deepseek'
-  | 'open-router'
   | 'together-ai'
   | 'perplexity'
   | 'firecrawl'
@@ -112,29 +111,6 @@ export const CONNECTOR_DEFINITIONS: Record<ConnectorId, ConnectorDefinition> = {
     ],
     category: 'ai-model',
     priority: 80
-  },
-  'open-router': {
-    id: 'open-router',
-    name: 'Open Router',
-    displayName: 'Open Router',
-    description: 'Unified API providing access to any AI model',
-    envVarKey: 'OPENROUTER_API_KEY',
-    apiKeyPlaceholder: 'sk-or-...',
-    docsUrl: 'https://openrouter.ai/docs',
-    capabilities: [
-      {
-        category: 'Multi-Model Access',
-        description: 'Switch between multiple LLMs without changing code',
-        examples: ['Model comparison', 'Fallback routing', 'Cost optimization']
-      },
-      {
-        category: 'Routing',
-        description: 'Intelligent routing to the best available model',
-        examples: ['Load balancing', 'Provider fallback', 'Dynamic model selection']
-      }
-    ],
-    category: 'ai-model',
-    priority: 75
   },
   'together-ai': {
     id: 'together-ai',
