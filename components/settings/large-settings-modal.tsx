@@ -574,8 +574,8 @@ export function LargeSettingsModal() {
                          {/* OpenAI */}
                          <div className="flex items-center justify-between p-4 rounded-[12px] border border-black/[0.03] bg-[#F9F9F7] hover:bg-white hover:shadow-sm transition-all group">
                             <div className="flex items-center gap-4">
-                               <div className="w-10 h-10 rounded-[8px] bg-white border border-black/[0.05] flex items-center justify-center">
-                                  <Sparkles className="w-5 h-5 text-[#111827]" />
+                               <div className="w-10 h-10 rounded-[8px] bg-white border border-black/[0.05] flex items-center justify-center overflow-hidden">
+                                  <OpenAILogo size={24} />
                                </div>
                                <div>
                                   <span className="text-[14px] font-semibold text-[#111827]">OpenAI</span>
@@ -591,8 +591,8 @@ export function LargeSettingsModal() {
                          {/* Google Gemini */}
                          <div className="flex items-center justify-between p-4 rounded-[12px] border border-black/[0.03] bg-[#F9F9F7] hover:bg-white hover:shadow-sm transition-all group">
                             <div className="flex items-center gap-4">
-                               <div className="w-10 h-10 rounded-[8px] bg-white border border-black/[0.05] flex items-center justify-center">
-                                  <Zap className="w-5 h-5 text-blue-500" />
+                               <div className="w-10 h-10 rounded-[8px] bg-white border border-black/[0.05] flex items-center justify-center overflow-hidden">
+                                  <GoogleGeminiLogo size={24} />
                                </div>
                                <div>
                                   <span className="text-[14px] font-semibold text-[#111827]">Google Gemini</span>
@@ -608,8 +608,8 @@ export function LargeSettingsModal() {
                          {/* Deepseek */}
                          <div className="flex items-center justify-between p-4 rounded-[12px] border border-black/[0.03] bg-[#F9F9F7] hover:bg-white hover:shadow-sm transition-all group">
                             <div className="flex items-center gap-4">
-                               <div className="w-10 h-10 rounded-[8px] bg-white border border-black/[0.05] flex items-center justify-center">
-                                  <Sparkles className="w-5 h-5 text-purple-500" />
+                               <div className="w-10 h-10 rounded-[8px] bg-white border border-black/[0.05] flex items-center justify-center overflow-hidden">
+                                  <DeepseekLogo size={24} />
                                </div>
                                <div>
                                   <span className="text-[14px] font-semibold text-[#111827]">Deepseek</span>
@@ -625,8 +625,8 @@ export function LargeSettingsModal() {
                          {/* Open Router */}
                          <div className="flex items-center justify-between p-4 rounded-[12px] border border-black/[0.03] bg-[#F9F9F7] hover:bg-white hover:shadow-sm transition-all group">
                             <div className="flex items-center gap-4">
-                               <div className="w-10 h-10 rounded-[8px] bg-white border border-black/[0.05] flex items-center justify-center">
-                                  <Layers className="w-5 h-5 text-orange-500" />
+                               <div className="w-10 h-10 rounded-[8px] bg-white border border-black/[0.05] flex items-center justify-center overflow-hidden">
+                                  <OpenRouterLogo size={24} />
                                </div>
                                <div>
                                   <span className="text-[14px] font-semibold text-[#111827]">Open Router</span>
@@ -642,8 +642,8 @@ export function LargeSettingsModal() {
                          {/* Together AI */}
                          <div className="flex items-center justify-between p-4 rounded-[12px] border border-black/[0.03] bg-[#F9F9F7] hover:bg-white hover:shadow-sm transition-all group">
                             <div className="flex items-center gap-4">
-                               <div className="w-10 h-10 rounded-[8px] bg-white border border-black/[0.05] flex items-center justify-center">
-                                  <Zap className="w-5 h-5 text-yellow-500" />
+                               <div className="w-10 h-10 rounded-[8px] bg-white border border-black/[0.05] flex items-center justify-center overflow-hidden">
+                                  <TogetherAILogo size={24} />
                                </div>
                                <div>
                                   <span className="text-[14px] font-semibold text-[#111827]">Together AI</span>
@@ -659,8 +659,8 @@ export function LargeSettingsModal() {
                          {/* Perplexity */}
                          <div className="flex items-center justify-between p-4 rounded-[12px] border border-black/[0.03] bg-[#F9F9F7] hover:bg-white hover:shadow-sm transition-all group">
                             <div className="flex items-center gap-4">
-                               <div className="w-10 h-10 rounded-[8px] bg-white border border-black/[0.05] flex items-center justify-center">
-                                  <Search className="w-5 h-5 text-blue-400" />
+                               <div className="w-10 h-10 rounded-[8px] bg-white border border-black/[0.05] flex items-center justify-center overflow-hidden">
+                                  <PerplexityLogo size={24} />
                                </div>
                                <div>
                                   <span className="text-[14px] font-semibold text-[#111827]">Perplexity</span>
@@ -687,8 +687,8 @@ export function LargeSettingsModal() {
                          {/* Firecrawl */}
                          <div className="flex items-center justify-between p-4 rounded-[12px] border border-black/[0.03] bg-[#F9F9F7] hover:bg-white hover:shadow-sm transition-all group">
                             <div className="flex items-center gap-4">
-                               <div className="w-10 h-10 rounded-[8px] bg-white border border-black/[0.05] flex items-center justify-center">
-                                  <Globe className="w-5 h-5 text-emerald-500" />
+                               <div className="w-10 h-10 rounded-[8px] bg-white border border-black/[0.05] flex items-center justify-center overflow-hidden">
+                                  <FirecrawlLogo size={24} />
                                </div>
                                <div>
                                   <span className="text-[14px] font-semibold text-[#111827]">Firecrawl</span>
@@ -704,8 +704,8 @@ export function LargeSettingsModal() {
                          {/* Eleven Labs */}
                          <div className="flex items-center justify-between p-4 rounded-[12px] border border-black/[0.03] bg-[#F9F9F7] hover:bg-white hover:shadow-sm transition-all group">
                             <div className="flex items-center gap-4">
-                               <div className="w-10 h-10 rounded-[8px] bg-white border border-black/[0.05] flex items-center justify-center">
-                                  <Mic2 className="w-5 h-5 text-rose-500" />
+                               <div className="w-10 h-10 rounded-[8px] bg-white border border-black/[0.05] flex items-center justify-center overflow-hidden">
+                                  <ElevenLabsLogo size={24} />
                                </div>
                                <div>
                                   <span className="text-[14px] font-semibold text-[#111827]">Eleven Labs</span>
