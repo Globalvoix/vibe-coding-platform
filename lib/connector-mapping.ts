@@ -259,25 +259,44 @@ export function getAllConnectors(): ConnectorDefinition[] {
  * Check if a phrase relates to a specific connector capability
  * Returns matching connectors with their primary capability
  */
-export function detectConnectorFromPhrase(phrase: string): { 
+export function detectConnectorFromPhrase(phrase: string): {
   connector: ConnectorDefinition
-  capability: ConnectorCapability 
+  capability: ConnectorCapability
 }[] {
-  const keywords = phrase.toLowerCase().split(/\s+/)
+  const lowerPhrase = phrase.toLowerCase()
+  const keywords = lowerPhrase.split(/\s+/)
   const matches: Map<ConnectorId, ConnectorCapability> = new Map()
 
+  // First pass: direct connector name/id matches
+  for (const connector of Object.values(CONNECTOR_DEFINITIONS)) {
+    const idText = connector.id.replace(/-/g, ' ')
+    const nameText = connector.name.toLowerCase()
+    const displayText = connector.displayName.toLowerCase()
+
+    if (
+      lowerPhrase.includes(nameText) ||
+      lowerPhrase.includes(displayText) ||
+      lowerPhrase.includes(idText)
+    ) {
+      matches.set(connector.id, connector.capabilities[0])
+    }
+  }
+
+  // Second pass: capability keyword matches
   for (const keyword of keywords) {
     const connectors = findConnectorsByCapability(keyword)
     for (const connector of connectors) {
-      if (!matches.has(connector.id)) {
-        const matchingCapability = connector.capabilities.find(cap => 
+      if (matches.has(connector.id)) continue
+
+      const matchingCapability = connector.capabilities.find(
+        (cap) =>
           cap.category.toLowerCase().includes(keyword) ||
           cap.description.toLowerCase().includes(keyword) ||
-          cap.examples.some(ex => ex.toLowerCase().includes(keyword))
-        )
-        if (matchingCapability) {
-          matches.set(connector.id, matchingCapability)
-        }
+          cap.examples.some((ex) => ex.toLowerCase().includes(keyword))
+      )
+
+      if (matchingCapability) {
+        matches.set(connector.id, matchingCapability)
       }
     }
   }
@@ -285,7 +304,7 @@ export function detectConnectorFromPhrase(phrase: string): {
   return Array.from(matches.entries())
     .map(([id, capability]) => ({
       connector: CONNECTOR_DEFINITIONS[id],
-      capability
+      capability,
     }))
     .sort((a, b) => b.connector.priority - a.connector.priority)
 }
