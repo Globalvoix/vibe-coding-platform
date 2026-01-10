@@ -24,6 +24,8 @@ import {
   Search,
   Mic2,
   ChevronDown,
+  ChevronLeft,
+  ExternalLink,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useUIStore } from '@/lib/ui-store'
@@ -69,6 +71,12 @@ export function LargeSettingsModal() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [requestId, setRequestId] = useState<string | null>(null)
   const [showDiagnostics, setShowDiagnostics] = useState(false)
+
+  const [setupConnector, setSetupConnector] = useState<string | null>(null)
+  const [setupDisplayName, setSetupDisplayName] = useState('')
+  const [setupApiKey, setSetupApiKey] = useState('')
+  const [showApiKey, setShowApiKey] = useState(false)
+  const [isCreating, setIsCreating] = useState(false)
 
   const organizations = githubStatus.organizations ?? []
 
@@ -188,6 +196,44 @@ export function LargeSettingsModal() {
       setErrorMessage(msg)
     } finally {
       setUpdatingRepo(false)
+    }
+  }
+
+  const handleStartSetup = (connector: string) => {
+    setSetupConnector(connector)
+    setSetupDisplayName(connector)
+    setSetupApiKey('')
+    setShowApiKey(false)
+  }
+
+  const handleCreateConnection = async () => {
+    if (!projectId || !setupConnector || !setupApiKey) return
+
+    try {
+      setIsCreating(true)
+      const envKey = `${setupConnector.toUpperCase().replace(/\s+/g, '_')}_API_KEY`
+
+      const res = await fetch(`/api/projects/${projectId}/env-vars`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          key: envKey,
+          value: setupApiKey,
+          is_sensitive: true,
+        }),
+      })
+
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || 'Failed to create connection')
+      }
+
+      setSetupConnector(null)
+    } catch (error) {
+      console.error('Error creating connection:', error)
+      alert(error instanceof Error ? error.message : 'Failed to create connection')
+    } finally {
+      setIsCreating(false)
     }
   }
 
@@ -332,7 +378,78 @@ export function LargeSettingsModal() {
             </div>
 
             <div className="flex-1 overflow-y-auto px-16 py-12 custom-scrollbar">
-              {settingsTab === 'github' ? (
+              {setupConnector ? (
+                <div className="max-w-[800px] flex flex-col h-full">
+                  <div className="flex items-center justify-between mb-12">
+                     <button
+                        onClick={() => setSetupConnector(null)}
+                        className="flex items-center gap-2 text-[14px] font-medium text-[#111827]/40 hover:text-[#111827] transition-colors"
+                     >
+                        <ChevronLeft className="w-4 h-4" />
+                        <span>{setupConnector}</span>
+                     </button>
+                     <a href="#" className="flex items-center gap-1.5 text-[12px] font-medium text-[#111827]/40 hover:text-[#111827] transition-colors">
+                        <Globe className="w-3.5 h-3.5" />
+                        <span>Docs</span>
+                     </a>
+                  </div>
+
+                  <div className="flex items-center gap-6 mb-12">
+                     <div className="w-14 h-14 rounded-[12px] bg-black/[0.03] flex items-center justify-center">
+                        <Layers className="w-8 h-8 text-[#111827]" />
+                     </div>
+                     <h1 className="text-[24px] font-semibold text-[#111827] tracking-tight">Create a {setupConnector} connection</h1>
+                  </div>
+
+                  <div className="space-y-10">
+                     <div className="space-y-3">
+                        <label className="text-[14px] font-semibold text-[#111827]">Display name</label>
+                        <input
+                           type="text"
+                           value={setupDisplayName}
+                           onChange={(e) => setSetupDisplayName(e.target.value)}
+                           className="w-full h-11 px-4 rounded-[12px] border border-black/[0.05] bg-black/[0.01] focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5 transition-all text-[14px]"
+                           placeholder={setupConnector}
+                        />
+                     </div>
+
+                     <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                           <label className="text-[14px] font-semibold text-[#111827]">API Key</label>
+                           <a href="#" className="flex items-center gap-1 text-[12px] font-semibold text-[#111827]/40 hover:text-[#111827] transition-colors">
+                              Get key <ExternalLink className="w-3 h-3" />
+                           </a>
+                        </div>
+                        <p className="text-[12px] text-[#111827]/40 font-medium">Your {setupConnector} API key</p>
+                        <div className="relative">
+                           <input
+                              type={showApiKey ? 'text' : 'password'}
+                              value={setupApiKey}
+                              onChange={(e) => setSetupApiKey(e.target.value)}
+                              className="w-full h-11 pl-4 pr-12 rounded-[12px] border border-black/[0.05] bg-black/[0.01] focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5 transition-all text-[14px] font-mono"
+                              placeholder={`sk_xxxxxxxxxxxxxxxxxxxxxxxxxxxxx`}
+                           />
+                           <button
+                              onClick={() => setShowApiKey(!showApiKey)}
+                              className="absolute right-4 top-1/2 -translate-y-1/2 text-[#111827]/20 hover:text-[#111827]/40 transition-colors"
+                           >
+                              <Eye className="w-4 h-4" />
+                           </button>
+                        </div>
+                     </div>
+                  </div>
+
+                  <div className="mt-auto pt-12 flex justify-end">
+                     <Button
+                        onClick={handleCreateConnection}
+                        disabled={!setupApiKey || isCreating}
+                        className="h-10 px-8 rounded-[8px] bg-blue-600 text-white font-semibold hover:bg-blue-700 active:scale-[0.98] transition-all disabled:opacity-50 disabled:scale-100"
+                     >
+                        {isCreating ? 'Creating...' : 'Create'}
+                     </Button>
+                  </div>
+                </div>
+              ) : settingsTab === 'github' ? (
                 <div className="max-w-[840px] space-y-12">
                   {/* Error message display */}
                   {errorMessage && (
@@ -455,7 +572,10 @@ export function LargeSettingsModal() {
                                   <p className="text-[11px] text-[#111827]/40 font-medium">GPT-4o, o1-preview, and more.</p>
                                </div>
                             </div>
-                            <Button className="h-8 rounded-[6px] bg-white border border-black/[0.05] px-4 text-[12px] font-semibold text-[#111827] hover:bg-gray-50 shadow-sm">Set up</Button>
+                            <Button
+                              onClick={() => handleStartSetup('OpenAI')}
+                              className="h-8 rounded-[6px] bg-white border border-black/[0.05] px-4 text-[12px] font-semibold text-[#111827] hover:bg-gray-50 shadow-sm"
+                            >Set up</Button>
                          </div>
 
                          {/* Google Gemini */}
@@ -469,7 +589,10 @@ export function LargeSettingsModal() {
                                   <p className="text-[11px] text-[#111827]/40 font-medium">Gemini 1.5 Pro, Ultra, and Flash.</p>
                                </div>
                             </div>
-                            <Button className="h-8 rounded-[6px] bg-white border border-black/[0.05] px-4 text-[12px] font-semibold text-[#111827] hover:bg-gray-50 shadow-sm">Set up</Button>
+                            <Button
+                              onClick={() => handleStartSetup('Google Gemini')}
+                              className="h-8 rounded-[6px] bg-white border border-black/[0.05] px-4 text-[12px] font-semibold text-[#111827] hover:bg-gray-50 shadow-sm"
+                            >Set up</Button>
                          </div>
 
                          {/* Deepseek */}
@@ -483,7 +606,10 @@ export function LargeSettingsModal() {
                                   <p className="text-[11px] text-[#111827]/40 font-medium">High-performance open-source models.</p>
                                </div>
                             </div>
-                            <Button className="h-8 rounded-[6px] bg-white border border-black/[0.05] px-4 text-[12px] font-semibold text-[#111827] hover:bg-gray-50 shadow-sm">Set up</Button>
+                            <Button
+                              onClick={() => handleStartSetup('Deepseek')}
+                              className="h-8 rounded-[6px] bg-white border border-black/[0.05] px-4 text-[12px] font-semibold text-[#111827] hover:bg-gray-50 shadow-sm"
+                            >Set up</Button>
                          </div>
 
                          {/* Open Router */}
@@ -497,7 +623,10 @@ export function LargeSettingsModal() {
                                   <p className="text-[11px] text-[#111827]/40 font-medium">Unified API for any AI model.</p>
                                </div>
                             </div>
-                            <Button className="h-8 rounded-[6px] bg-white border border-black/[0.05] px-4 text-[12px] font-semibold text-[#111827] hover:bg-gray-50 shadow-sm">Set up</Button>
+                            <Button
+                              onClick={() => handleStartSetup('Open Router')}
+                              className="h-8 rounded-[6px] bg-white border border-black/[0.05] px-4 text-[12px] font-semibold text-[#111827] hover:bg-gray-50 shadow-sm"
+                            >Set up</Button>
                          </div>
 
                          {/* Together AI */}
@@ -511,7 +640,10 @@ export function LargeSettingsModal() {
                                   <p className="text-[11px] text-[#111827]/40 font-medium">Fast inference for Llama 3 and more.</p>
                                </div>
                             </div>
-                            <Button className="h-8 rounded-[6px] bg-white border border-black/[0.05] px-4 text-[12px] font-semibold text-[#111827] hover:bg-gray-50 shadow-sm">Set up</Button>
+                            <Button
+                              onClick={() => handleStartSetup('Together AI')}
+                              className="h-8 rounded-[6px] bg-white border border-black/[0.05] px-4 text-[12px] font-semibold text-[#111827] hover:bg-gray-50 shadow-sm"
+                            >Set up</Button>
                          </div>
 
                          {/* Perplexity */}
@@ -525,7 +657,10 @@ export function LargeSettingsModal() {
                                   <p className="text-[11px] text-[#111827]/40 font-medium">AI-powered search and information discovery.</p>
                                </div>
                             </div>
-                            <Button className="h-8 rounded-[6px] bg-white border border-black/[0.05] px-4 text-[12px] font-semibold text-[#111827] hover:bg-gray-50 shadow-sm">Set up</Button>
+                            <Button
+                              onClick={() => handleStartSetup('Perplexity')}
+                              className="h-8 rounded-[6px] bg-white border border-black/[0.05] px-4 text-[12px] font-semibold text-[#111827] hover:bg-gray-50 shadow-sm"
+                            >Set up</Button>
                          </div>
                       </div>
                    </div>
@@ -550,7 +685,10 @@ export function LargeSettingsModal() {
                                   <p className="text-[11px] text-[#111827]/40 font-medium">Turn any website into LLM-ready data.</p>
                                </div>
                             </div>
-                            <Button className="h-8 rounded-[6px] bg-white border border-black/[0.05] px-4 text-[12px] font-semibold text-[#111827] hover:bg-gray-50 shadow-sm">Set up</Button>
+                            <Button
+                              onClick={() => handleStartSetup('Firecrawl')}
+                              className="h-8 rounded-[6px] bg-white border border-black/[0.05] px-4 text-[12px] font-semibold text-[#111827] hover:bg-gray-50 shadow-sm"
+                            >Set up</Button>
                          </div>
 
                          {/* Eleven Labs */}
@@ -564,7 +702,10 @@ export function LargeSettingsModal() {
                                   <p className="text-[11px] text-[#111827]/40 font-medium">Leading AI text-to-speech technology.</p>
                                </div>
                             </div>
-                            <Button className="h-8 rounded-[6px] bg-white border border-black/[0.05] px-4 text-[12px] font-semibold text-[#111827] hover:bg-gray-50 shadow-sm">Set up</Button>
+                            <Button
+                              onClick={() => handleStartSetup('Eleven Labs')}
+                              className="h-8 rounded-[6px] bg-white border border-black/[0.05] px-4 text-[12px] font-semibold text-[#111827] hover:bg-gray-50 shadow-sm"
+                            >Set up</Button>
                          </div>
                       </div>
                    </div>
