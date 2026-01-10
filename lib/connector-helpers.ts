@@ -84,9 +84,10 @@ export function buildConnectorSummary(): string {
   ]
 
   // Group by category
-  const byCategory = {
-    'ai-model': [] as string[],
-    'specialized-api': [] as string[]
+  const byCategory: Record<'ai-model' | 'specialized-api' | 'tool', string[]> = {
+    'ai-model': [],
+    'specialized-api': [],
+    'tool': []
   }
 
   Object.values(CONNECTOR_DEFINITIONS).forEach(connector => {
@@ -106,6 +107,12 @@ export function buildConnectorSummary(): string {
   if (byCategory['specialized-api'].length > 0) {
     lines.push('## Specialized Tools & APIs')
     lines.push(...byCategory['specialized-api'])
+    lines.push('')
+  }
+
+  if (byCategory['tool'].length > 0) {
+    lines.push('## Tools')
+    lines.push(...byCategory['tool'])
     lines.push('')
   }
 
