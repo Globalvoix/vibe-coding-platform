@@ -25,6 +25,7 @@ export interface ConnectorDefinition {
   displayName: string
   description: string
   envVarKey: string
+  envVarAliases?: string[]
   apiKeyPlaceholder: string
   docsUrl?: string
   capabilities: ConnectorCapability[]
@@ -67,6 +68,7 @@ export const CONNECTOR_DEFINITIONS: Record<ConnectorId, ConnectorDefinition> = {
     displayName: 'Google Gemini',
     description: 'Gemini 1.5 Pro, Ultra, and Flash models from Google',
     envVarKey: 'GOOGLE_GENERATIVE_AI_API_KEY',
+    envVarAliases: ['GOOGLE_GEMINI_API_KEY'],
     apiKeyPlaceholder: 'AIza...',
     docsUrl: 'https://ai.google.dev/api',
     capabilities: [
@@ -118,6 +120,7 @@ export const CONNECTOR_DEFINITIONS: Record<ConnectorId, ConnectorDefinition> = {
     displayName: 'Together AI',
     description: 'Fast inference engine for Llama and other open models',
     envVarKey: 'TOGETHER_API_KEY',
+    envVarAliases: ['TOGETHER_AI_API_KEY'],
     apiKeyPlaceholder: 'sk-...',
     docsUrl: 'https://www.together.ai/docs',
     capabilities: [
@@ -192,6 +195,7 @@ export const CONNECTOR_DEFINITIONS: Record<ConnectorId, ConnectorDefinition> = {
     displayName: 'Eleven Labs',
     description: 'Leading AI text-to-speech with natural-sounding voices',
     envVarKey: 'ELEVEN_LABS_API_KEY',
+    envVarAliases: ['ELEVENLABS_API_KEY'],
     apiKeyPlaceholder: 'sk_...',
     docsUrl: 'https://docs.elevenlabs.io',
     capabilities: [
