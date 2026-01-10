@@ -271,22 +271,22 @@ export function LargeSettingsModal() {
             Configure your project and account settings
           </DialogPrimitive.Description>
 
-          <div className="flex w-[280px] flex-col border-r border-black/[0.04] bg-[#F7F4ED] py-8 overflow-y-auto shrink-0">
+          <div className="flex w-[240px] flex-col border-r border-black/[0.04] bg-[#F7F4ED] py-6 overflow-y-auto shrink-0">
             {menuItems.map((section, idx) => (
-              <div key={idx} className="mb-8 last:mb-0">
-                <h4 className="px-8 text-[10px] font-bold text-[#111827]/30 uppercase tracking-[0.2em] mb-4">
+              <div key={idx} className="mb-6 last:mb-0">
+                <h4 className="px-6 text-[10px] font-semibold text-[#111827]/40 uppercase tracking-widest mb-3">
                   {section.section}
                 </h4>
-                <div className="px-4 space-y-1">
+                <div className="px-2 space-y-0.5">
                   {section.items.map((item) => (
                     <button
                       key={item.id}
                       onClick={() => setSettingsTab(item.id)}
                       className={cn(
-                        'group w-full flex items-center gap-3.5 px-4 py-2.5 text-[14px] font-semibold rounded-xl transition-all',
+                        'group w-full flex items-center gap-2.5 px-4 py-1.5 text-[12px] font-medium rounded-[6px] transition-all',
                         settingsTab === item.id
-                          ? 'bg-white text-[#111827] shadow-[0_4px_12px_rgba(0,0,0,0.05)] border border-black/[0.03]'
-                          : 'text-[#111827]/50 hover:text-[#111827] hover:bg-black/[0.03]'
+                          ? 'bg-white text-[#111827] shadow-sm border border-black/[0.03]'
+                          : 'text-[#111827]/60 hover:text-[#111827] hover:bg-black/[0.02]'
                       )}
                     >
                       <span
@@ -307,13 +307,13 @@ export function LargeSettingsModal() {
             ))}
           </div>
 
-          <div className="flex flex-1 flex-col min-w-0 bg-white m-2 rounded-[20px] shadow-[inset_0_0_0_1px_rgba(0,0,0,0.04)] overflow-hidden">
-            <div className="flex h-20 items-center justify-between border-b border-black/[0.04] px-12 shrink-0">
-              <h2 className="text-[20px] font-bold text-[#111827] tracking-tight">
+          <div className="flex flex-1 flex-col min-w-0 bg-white m-1.5 rounded-[12px] shadow-[0_0_0_1px_rgba(0,0,0,0.04)] overflow-hidden">
+            <div className="flex h-14 items-center justify-between border-b border-black/[0.04] px-12 shrink-0">
+              <h2 className="text-[14px] font-semibold text-[#111827] tracking-tight">
                 {getTabLabel(settingsTab)}
               </h2>
-              <DialogPrimitive.Close className="rounded-full p-2 text-gray-400 transition-all hover:bg-gray-100 hover:text-gray-900 active:scale-90">
-                <X className="h-5 w-5" />
+              <DialogPrimitive.Close className="rounded-full p-1.5 text-gray-400 transition-all hover:bg-gray-100 hover:text-gray-900">
+                <X className="h-4 w-4" />
                 <span className="sr-only">Close</span>
               </DialogPrimitive.Close>
             </div>
