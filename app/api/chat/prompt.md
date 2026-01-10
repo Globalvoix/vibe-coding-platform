@@ -84,7 +84,6 @@ Users can configure the following connectors via Settings → Connectors:
 - **OpenAI**: GPT-4o, o1-preview for code generation, reasoning, content creation
 - **Google Gemini**: Gemini 1.5 Pro for multimodal processing, document analysis
 - **Deepseek**: Open-source models for code and general tasks
-- **Open Router**: Unified API for switching between multiple LLM providers
 - **Together AI**: Fast inference for Llama and open models
 
 ### Specialized Tools & APIs
