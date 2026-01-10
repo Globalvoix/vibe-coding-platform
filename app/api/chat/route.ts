@@ -14,8 +14,9 @@ import { checkBotId } from 'botid/server'
 import { tools } from '@/ai/tools'
 import { recordUsageAndDeductCredits, getUserCredits } from '@/lib/credits'
 import { getUserSubscription, isPaidSubscription } from '@/lib/subscription'
-import { createOrUpdateEnvVar } from '@/lib/env-vars-db'
+import { createOrUpdateEnvVar, listEnvVars } from '@/lib/env-vars-db'
 import { getProject } from '@/lib/projects-db'
+import { CONNECTOR_DEFINITIONS, detectConnectorFromPhrase, type ConnectorId } from '@/lib/connector-mapping'
 import prompt from './prompt.md'
 
 interface BodyData {
