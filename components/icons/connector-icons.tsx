@@ -65,18 +65,6 @@ export function TogetherAILogo({ className, size = 20 }: IconProps) {
   )
 }
 
-export function OpenRouterLogo({ className, size = 20 }: IconProps) {
-  return (
-    <div className={className} style={{ width: size, height: size, position: 'relative' }}>
-      <img
-        src="https://openrouter.ai/favicon.ico"
-        alt="OpenRouter"
-        style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-      />
-    </div>
-  )
-}
-
 export function FirecrawlLogo({ className, size = 20 }: IconProps) {
   return (
     <div className={className} style={{ width: size, height: size, position: 'relative' }}>
