@@ -126,6 +126,24 @@ export function LargeSettingsModal() {
     }
   }, [projectId])
 
+  const checkConnectorsStatus = useCallback(async () => {
+    if (!projectId) return
+
+    try {
+      const res = await fetch(`/api/projects/${projectId}/connectors`)
+      if (!res.ok) return
+
+      const data = (await res.json()) as { connectors: Array<{ id: ConnectorId; isConfigured: boolean }> }
+      const nextStatus: Partial<Record<ConnectorId, boolean>> = {}
+      for (const connector of data.connectors ?? []) {
+        nextStatus[connector.id] = connector.isConfigured
+      }
+      setConnectorStatus(nextStatus)
+    } catch (error) {
+      console.error('Error checking connector status:', error)
+    }
+  }, [projectId])
+
   useEffect(() => {
     if (settingsModalOpen && settingsTab === 'github' && projectId) {
       checkGithubStatus()
