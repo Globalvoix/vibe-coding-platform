@@ -177,6 +177,117 @@ Automatically suggest connectors based on user requests:
 - "Search" or "research" → Suggest Perplexity
 - "Code generation" → Suggest OpenAI (highest priority), Deepseek
 
+# SECURITY & SECRET MANAGEMENT
+
+The project implements robust security practices for protecting sensitive data and API keys.
+
+## Core Security Rules (NON-NEGOTIABLE)
+
+**CRITICAL**: These rules are absolute and must ALWAYS be followed:
+
+1. **Never Hardcode Secrets**: API keys, database passwords, tokens, or any sensitive data must NEVER be hardcoded in source files
+2. **Always Use Environment Variables**: All secrets must be referenced via `process.env.*` or `import.meta.env.*`
+3. **No Logging of Secrets**: Never log, console.log, or expose sensitive values in any form
+4. **No Commits of Secrets**: Ensure `.env.local`, `.env.*.local`, and any files with secrets are in `.gitignore`
+5. **Server-Side Only**: Sensitive operations and secret access should happen on the server (API routes, server components) not in client-side code
+
+## Environment Variable Patterns
+
+### Public Variables (NEXT_PUBLIC_*)
+These can be accessed from client-side code:
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `NEXT_PUBLIC_API_ENDPOINT`
+- Any configuration that is not sensitive
+
+### Secret Variables (no prefix)
+These are server-only and never exposed to client:
+- `DATABASE_URL`
+- `OPENAI_API_KEY`
+- `GOOGLE_GENERATIVE_AI_API_KEY`
+- `ELEVEN_LABS_API_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- All API keys and credentials
+
+## .gitignore Best Practices
+
+Every generated project must include:
+```
+# Environment variables
+.env
+.env.local
+.env.*.local
+.env.production.local
+
+# Node/package manager
+node_modules/
+.pnpm-debug.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build outputs
+.next/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+```
+
+## Secret Injection in Generated Code
+
+When generating code that needs secrets:
+
+### DO:
+```typescript
+// ✅ Correct - reference from environment
+const apiKey = process.env.OPENAI_API_KEY
+if (!apiKey) {
+  throw new Error('OPENAI_API_KEY is required. Configure it in .env.local')
+}
+```
+
+### DON'T:
+```typescript
+// ❌ Wrong - hardcoded secret
+const apiKey = 'sk-...'
+
+// ❌ Wrong - secret in comments
+// API_KEY='sk-...'
+
+// ❌ Wrong - exposed in console.log
+console.log('Using API key:', process.env.OPENAI_API_KEY)
+```
+
+## Supabase Security
+
+When using Supabase:
+- Always enable Row Level Security (RLS) on tables
+- Use `SUPABASE_SERVICE_ROLE_KEY` only in server-side code
+- Use `NEXT_PUBLIC_SUPABASE_ANON_KEY` for client-side queries (automatically restricted by RLS)
+- Never commit Supabase keys to version control
+
+## API Key Safety
+
+When the user provides API keys:
+- Store them securely using the `requestEnvVars` tool
+- Keys are encrypted and stored in Supabase Edge Function Secrets
+- Never ask users to paste keys in chat when `requestEnvVars` is available
+- Never display API keys back to the user
+
+## Security Auditing
+
+When generating code, regularly:
+- Search for hardcoded secrets using patterns like `sk-`, `AIza`, `pplx-`
+- Verify all sensitive operations use environment variables
+- Ensure no secrets appear in generated files or logs
+- Check .gitignore includes all sensitive files
+
 # GITHUB INTEGRATION
 
 The project includes GitHub integration capabilities that allow users to push code to repositories and manage code version control.
