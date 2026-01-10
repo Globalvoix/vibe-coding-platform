@@ -63,11 +63,69 @@ function extractEnvVarsFromText(text: string) {
     found.push({ key, value: rawValue })
   }
 
-  if (!found.some((v) => v.key === 'GOOGLE_GENERATIVE_AI_API_KEY')) {
+  const present = new Set(found.map((v) => v.key))
+  const add = (key: string, value: string | undefined) => {
+    if (!value) return
+    if (present.has(key)) return
+    found.push({ key, value })
+    present.add(key)
+  }
+
+  const extractToken = (re: RegExp) => text.match(re)?.[0]
+
+  // Google Gemini
+  if (!present.has('GOOGLE_GENERATIVE_AI_API_KEY')) {
     const isGeminiMentioned = /\bgemini\b/i.test(text) || /google\s+generative/i.test(text)
-    const tokenMatch = text.match(/AIza[0-9A-Za-z_-]{20,}/)
-    if (isGeminiMentioned && tokenMatch?.[0]) {
-      found.push({ key: 'GOOGLE_GENERATIVE_AI_API_KEY', value: tokenMatch[0] })
+    if (isGeminiMentioned) {
+      add('GOOGLE_GENERATIVE_AI_API_KEY', extractToken(/AIza[0-9A-Za-z_-]{20,}/))
+    }
+  }
+
+  // OpenAI
+  if (!present.has('OPENAI_API_KEY')) {
+    const isOpenAIMentioned = /\bopenai\b/i.test(text) || /\bgpt\b/i.test(text) || /chatgpt/i.test(text)
+    if (isOpenAIMentioned) {
+      add('OPENAI_API_KEY', extractToken(/sk-(?:proj-)?[0-9A-Za-z_-]{20,}/))
+    }
+  }
+
+  // Together AI
+  if (!present.has('TOGETHER_API_KEY')) {
+    const isTogetherMentioned = /\btogether\b/i.test(text)
+    if (isTogetherMentioned) {
+      add('TOGETHER_API_KEY', extractToken(/tgp_v1__?[0-9A-Za-z_-]{20,}/))
+    }
+  }
+
+  // Deepseek (shares sk- prefix, so require explicit mention)
+  if (!present.has('DEEPSEEK_API_KEY')) {
+    const isDeepseekMentioned = /\bdeepseek\b/i.test(text)
+    if (isDeepseekMentioned) {
+      add('DEEPSEEK_API_KEY', extractToken(/sk-[0-9A-Za-z_-]{20,}/))
+    }
+  }
+
+  // Perplexity
+  if (!present.has('PERPLEXITY_API_KEY')) {
+    const isPerplexityMentioned = /\bperplexity\b/i.test(text)
+    if (isPerplexityMentioned) {
+      add('PERPLEXITY_API_KEY', extractToken(/pplx-[0-9A-Za-z_-]{10,}/))
+    }
+  }
+
+  // Firecrawl
+  if (!present.has('FIRECRAWL_API_KEY')) {
+    const isFirecrawlMentioned = /\bfirecrawl\b/i.test(text)
+    if (isFirecrawlMentioned) {
+      add('FIRECRAWL_API_KEY', extractToken(/fc[-_][0-9A-Za-z]{10,}/))
+    }
+  }
+
+  // ElevenLabs
+  if (!present.has('ELEVEN_LABS_API_KEY')) {
+    const isElevenMentioned = /\beleven\b/i.test(text) || /11\s?labs/i.test(text)
+    if (isElevenMentioned) {
+      add('ELEVEN_LABS_API_KEY', extractToken(/sk_[0-9A-Za-z_-]{10,}/))
     }
   }
 
