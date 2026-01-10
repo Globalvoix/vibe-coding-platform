@@ -556,7 +556,7 @@ export function LargeSettingsModal() {
                       <div className="space-y-1">
                          <h3 className="text-[14px] font-semibold text-[#111827] tracking-tight">AI & Foundational Models</h3>
                          <p className="text-[12px] text-[#111827]/40 font-medium leading-relaxed">
-                            Configure API keys for the world's most powerful language models.
+                            Configure API keys for the world&apos;s most powerful language models.
                          </p>
                       </div>
 
