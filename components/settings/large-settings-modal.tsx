@@ -19,6 +19,11 @@ import {
   RefreshCw,
   AlertCircle,
   Eye,
+  Sparkles,
+  Zap,
+  Search,
+  Mic2,
+  ChevronDown,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useUIStore } from '@/lib/ui-store'
@@ -425,164 +430,138 @@ export function LargeSettingsModal() {
                 <div className="max-w-[1000px] space-y-12">
                    <div className="space-y-1">
                       <h1 className="text-[28px] font-semibold text-[#111827] tracking-tight">Connectors</h1>
+                      <p className="text-[13px] text-[#111827]/40 font-medium">
+                        Connect your favorite AI models and tools to power your workspace.
+                      </p>
                    </div>
 
                    <div className="space-y-6">
                       <div className="space-y-1">
-                         <h3 className="text-[14px] font-semibold text-[#111827] tracking-tight">Shared connectors</h3>
+                         <h3 className="text-[14px] font-semibold text-[#111827] tracking-tight">AI & Foundational Models</h3>
                          <p className="text-[12px] text-[#111827]/40 font-medium leading-relaxed">
-                            Add functionality to your apps. Configured once by admins, available to everyone in your workspace.
+                            Configure API keys for the world's most powerful language models.
                          </p>
                       </div>
 
                       <div className="grid grid-cols-2 gap-4">
-                         {/* Lovable Cloud */}
-                         <div className="flex items-center justify-between p-4 rounded-[12px] border border-black/[0.03] bg-[#F9F9F7] hover:bg-white hover:shadow-sm transition-all cursor-pointer group">
+                         {/* OpenAI */}
+                         <div className="flex items-center justify-between p-4 rounded-[12px] border border-black/[0.03] bg-[#F9F9F7] hover:bg-white hover:shadow-sm transition-all group">
                             <div className="flex items-center gap-4">
                                <div className="w-10 h-10 rounded-[8px] bg-white border border-black/[0.05] flex items-center justify-center">
-                                  <Cloud className="w-5 h-5 text-[#111827]" />
+                                  <Sparkles className="w-5 h-5 text-[#111827]" />
                                </div>
                                <div>
-                                  <div className="flex items-center gap-2">
-                                     <span className="text-[14px] font-semibold text-[#111827]">Lovable Cloud</span>
-                                     <span className="px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase tracking-tight">Enabled</span>
-                                  </div>
-                                  <p className="text-[11px] text-[#111827]/40 font-medium">Built-in backend, ready to use</p>
+                                  <span className="text-[14px] font-semibold text-[#111827]">OpenAI</span>
+                                  <p className="text-[11px] text-[#111827]/40 font-medium">GPT-4o, o1-preview, and more.</p>
                                </div>
                             </div>
-                            <ChevronDown className="w-4 h-4 text-[#111827]/20 -rotate-90 group-hover:text-[#111827]/40" />
+                            <Button className="h-8 rounded-[6px] bg-white border border-black/[0.05] px-4 text-[12px] font-semibold text-[#111827] hover:bg-gray-50 shadow-sm">Set up</Button>
                          </div>
 
-                         {/* Lovable AI */}
-                         <div className="flex items-center justify-between p-4 rounded-[12px] border border-black/[0.03] bg-[#F9F9F7] hover:bg-white hover:shadow-sm transition-all cursor-pointer group">
+                         {/* Google Gemini */}
+                         <div className="flex items-center justify-between p-4 rounded-[12px] border border-black/[0.03] bg-[#F9F9F7] hover:bg-white hover:shadow-sm transition-all group">
                             <div className="flex items-center gap-4">
                                <div className="w-10 h-10 rounded-[8px] bg-white border border-black/[0.05] flex items-center justify-center">
-                                  <Beaker className="w-5 h-5 text-[#111827]" />
+                                  <Zap className="w-5 h-5 text-blue-500" />
                                </div>
                                <div>
-                                  <div className="flex items-center gap-2">
-                                     <span className="text-[14px] font-semibold text-[#111827]">Lovable AI</span>
-                                     <span className="px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase tracking-tight">Enabled</span>
-                                  </div>
-                                  <p className="text-[11px] text-[#111827]/40 font-medium">Unlock powerful AI features</p>
+                                  <span className="text-[14px] font-semibold text-[#111827]">Google Gemini</span>
+                                  <p className="text-[11px] text-[#111827]/40 font-medium">Gemini 1.5 Pro, Ultra, and Flash.</p>
                                </div>
                             </div>
-                            <ChevronDown className="w-4 h-4 text-[#111827]/20 -rotate-90 group-hover:text-[#111827]/40" />
+                            <Button className="h-8 rounded-[6px] bg-white border border-black/[0.05] px-4 text-[12px] font-semibold text-[#111827] hover:bg-gray-50 shadow-sm">Set up</Button>
                          </div>
 
-                         {/* Stripe */}
-                         <div className="flex items-center justify-between p-4 rounded-[12px] border border-black/[0.03] bg-black/[0.05] hover:bg-white hover:shadow-sm transition-all cursor-pointer group shadow-[inset_0_0_0_1px_rgba(0,0,0,0.05)]">
-                            <div className="flex items-center gap-4">
-                               <div className="w-10 h-10 rounded-[8px] bg-[#635BFF] flex items-center justify-center">
-                                  <CreditCard className="w-5 h-5 text-white" />
-                               </div>
-                               <div>
-                                  <div className="flex items-center gap-2">
-                                     <span className="text-[14px] font-semibold text-[#111827]">Stripe</span>
-                                     <span className="px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase tracking-tight">Enabled</span>
-                                  </div>
-                                  <p className="text-[11px] text-[#111827]/40 font-medium">Set up payments</p>
-                               </div>
-                            </div>
-                            <ChevronDown className="w-4 h-4 text-[#111827]/20 -rotate-90 group-hover:text-[#111827]/40" />
-                         </div>
-
-                         {/* Shopify */}
-                         <div className="flex items-center justify-between p-4 rounded-[12px] border border-black/[0.03] bg-[#F9F9F7] hover:bg-white hover:shadow-sm transition-all cursor-pointer group">
-                            <div className="flex items-center gap-4">
-                               <div className="w-10 h-10 rounded-[8px] bg-[#95BF47] flex items-center justify-center">
-                                  <Globe className="w-5 h-5 text-white" />
-                               </div>
-                               <div>
-                                  <div className="flex items-center gap-2">
-                                     <span className="text-[14px] font-semibold text-[#111827]">Shopify</span>
-                                     <span className="px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase tracking-tight">Enabled</span>
-                                  </div>
-                                  <p className="text-[11px] text-[#111827]/40 font-medium">Build an eCommerce store</p>
-                               </div>
-                            </div>
-                            <ChevronDown className="w-4 h-4 text-[#111827]/20 -rotate-90 group-hover:text-[#111827]/40" />
-                         </div>
-
-                         {/* Browse connectors */}
-                         <div className="flex items-center justify-between p-4 rounded-[12px] border border-black/[0.03] bg-[#F9F9F7] hover:bg-white hover:shadow-sm transition-all cursor-pointer group">
+                         {/* Deepseek */}
+                         <div className="flex items-center justify-between p-4 rounded-[12px] border border-black/[0.03] bg-[#F9F9F7] hover:bg-white hover:shadow-sm transition-all group">
                             <div className="flex items-center gap-4">
                                <div className="w-10 h-10 rounded-[8px] bg-white border border-black/[0.05] flex items-center justify-center">
-                                  <Layers className="w-5 h-5 text-[#111827]/40" />
+                                  <Sparkles className="w-5 h-5 text-purple-500" />
                                </div>
-                               <span className="text-[14px] font-semibold text-[#111827]">Browse connectors</span>
-                            </div>
-                            <div className="flex items-center gap-3">
-                               <div className="flex -space-x-2">
-                                  <div className="w-6 h-6 rounded-full bg-black flex items-center justify-center text-[8px] text-white border-2 border-[#F9F9F7] group-hover:border-white">A</div>
-                                  <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center text-[8px] text-white border-2 border-[#F9F9F7] group-hover:border-white">L</div>
+                               <div>
+                                  <span className="text-[14px] font-semibold text-[#111827]">Deepseek</span>
+                                  <p className="text-[11px] text-[#111827]/40 font-medium">High-performance open-source models.</p>
                                </div>
-                               <ChevronDown className="w-4 h-4 text-[#111827]/20 -rotate-90 group-hover:text-[#111827]/40" />
                             </div>
+                            <Button className="h-8 rounded-[6px] bg-white border border-black/[0.05] px-4 text-[12px] font-semibold text-[#111827] hover:bg-gray-50 shadow-sm">Set up</Button>
+                         </div>
+
+                         {/* Open Router */}
+                         <div className="flex items-center justify-between p-4 rounded-[12px] border border-black/[0.03] bg-[#F9F9F7] hover:bg-white hover:shadow-sm transition-all group">
+                            <div className="flex items-center gap-4">
+                               <div className="w-10 h-10 rounded-[8px] bg-white border border-black/[0.05] flex items-center justify-center">
+                                  <Layers className="w-5 h-5 text-orange-500" />
+                               </div>
+                               <div>
+                                  <span className="text-[14px] font-semibold text-[#111827]">Open Router</span>
+                                  <p className="text-[11px] text-[#111827]/40 font-medium">Unified API for any AI model.</p>
+                               </div>
+                            </div>
+                            <Button className="h-8 rounded-[6px] bg-white border border-black/[0.05] px-4 text-[12px] font-semibold text-[#111827] hover:bg-gray-50 shadow-sm">Set up</Button>
+                         </div>
+
+                         {/* Together AI */}
+                         <div className="flex items-center justify-between p-4 rounded-[12px] border border-black/[0.03] bg-[#F9F9F7] hover:bg-white hover:shadow-sm transition-all group">
+                            <div className="flex items-center gap-4">
+                               <div className="w-10 h-10 rounded-[8px] bg-white border border-black/[0.05] flex items-center justify-center">
+                                  <Zap className="w-5 h-5 text-yellow-500" />
+                               </div>
+                               <div>
+                                  <span className="text-[14px] font-semibold text-[#111827]">Together AI</span>
+                                  <p className="text-[11px] text-[#111827]/40 font-medium">Fast inference for Llama 3 and more.</p>
+                               </div>
+                            </div>
+                            <Button className="h-8 rounded-[6px] bg-white border border-black/[0.05] px-4 text-[12px] font-semibold text-[#111827] hover:bg-gray-50 shadow-sm">Set up</Button>
+                         </div>
+
+                         {/* Perplexity */}
+                         <div className="flex items-center justify-between p-4 rounded-[12px] border border-black/[0.03] bg-[#F9F9F7] hover:bg-white hover:shadow-sm transition-all group">
+                            <div className="flex items-center gap-4">
+                               <div className="w-10 h-10 rounded-[8px] bg-white border border-black/[0.05] flex items-center justify-center">
+                                  <Search className="w-5 h-5 text-blue-400" />
+                               </div>
+                               <div>
+                                  <span className="text-[14px] font-semibold text-[#111827]">Perplexity</span>
+                                  <p className="text-[11px] text-[#111827]/40 font-medium">AI-powered search and information discovery.</p>
+                               </div>
+                            </div>
+                            <Button className="h-8 rounded-[6px] bg-white border border-black/[0.05] px-4 text-[12px] font-semibold text-[#111827] hover:bg-gray-50 shadow-sm">Set up</Button>
                          </div>
                       </div>
                    </div>
 
                    <div className="space-y-6">
                       <div className="space-y-1">
-                         <h3 className="text-[14px] font-semibold text-[#111827] tracking-tight">Personal connectors</h3>
+                         <h3 className="text-[14px] font-semibold text-[#111827] tracking-tight">Tools & Specialized APIs</h3>
                          <p className="text-[12px] text-[#111827]/40 font-medium leading-relaxed">
-                            Connect your personal tools to provide context while building. Only you can access your connections. <a href="#" className="underline">Read more</a>
+                            Connect specialized services for data, voice, and research.
                          </p>
                       </div>
 
                       <div className="grid grid-cols-2 gap-4">
-                         {/* Atlassian */}
+                         {/* Firecrawl */}
                          <div className="flex items-center justify-between p-4 rounded-[12px] border border-black/[0.03] bg-[#F9F9F7] hover:bg-white hover:shadow-sm transition-all group">
                             <div className="flex items-center gap-4">
-                               <div className="w-10 h-10 rounded-[8px] bg-[#0052CC] flex items-center justify-center">
-                                  <ShieldCheck className="w-5 h-5 text-white" />
+                               <div className="w-10 h-10 rounded-[8px] bg-white border border-black/[0.05] flex items-center justify-center">
+                                  <Globe className="w-5 h-5 text-emerald-500" />
                                </div>
                                <div>
-                                  <span className="text-[14px] font-semibold text-[#111827]">Atlassian</span>
-                                  <p className="text-[11px] text-[#111827]/40 font-medium">Access your Jira issues and Confluence pages.</p>
+                                  <span className="text-[14px] font-semibold text-[#111827]">Firecrawl</span>
+                                  <p className="text-[11px] text-[#111827]/40 font-medium">Turn any website into LLM-ready data.</p>
                                </div>
                             </div>
                             <Button className="h-8 rounded-[6px] bg-white border border-black/[0.05] px-4 text-[12px] font-semibold text-[#111827] hover:bg-gray-50 shadow-sm">Set up</Button>
                          </div>
 
-                         {/* Linear */}
+                         {/* Eleven Labs */}
                          <div className="flex items-center justify-between p-4 rounded-[12px] border border-black/[0.03] bg-[#F9F9F7] hover:bg-white hover:shadow-sm transition-all group">
                             <div className="flex items-center gap-4">
-                               <div className="w-10 h-10 rounded-[8px] bg-[#5E6AD2] flex items-center justify-center">
-                                  <Layers className="w-5 h-5 text-white" />
+                               <div className="w-10 h-10 rounded-[8px] bg-white border border-black/[0.05] flex items-center justify-center">
+                                  <Mic2 className="w-5 h-5 text-rose-500" />
                                </div>
                                <div>
-                                  <span className="text-[14px] font-semibold text-[#111827]">Linear</span>
-                                  <p className="text-[11px] text-[#111827]/40 font-medium">Access your Linear issues and project data.</p>
-                               </div>
-                            </div>
-                            <Button className="h-8 rounded-[6px] bg-white border border-black/[0.05] px-4 text-[12px] font-semibold text-[#111827] hover:bg-gray-50 shadow-sm">Set up</Button>
-                         </div>
-
-                         {/* Miro */}
-                         <div className="flex items-center justify-between p-4 rounded-[12px] border border-black/[0.03] bg-[#F9F9F7] hover:bg-white hover:shadow-sm transition-all group">
-                            <div className="flex items-center gap-4">
-                               <div className="w-10 h-10 rounded-[8px] bg-[#FFD02F] flex items-center justify-center">
-                                  <Layers className="w-5 h-5 text-black" />
-                               </div>
-                               <div>
-                                  <span className="text-[14px] font-semibold text-[#111827]">Miro</span>
-                                  <p className="text-[11px] text-[#111827]/40 font-medium">Access your Miro boards and diagrams.</p>
-                               </div>
-                            </div>
-                            <Button className="h-8 rounded-[6px] bg-white border border-black/[0.05] px-4 text-[12px] font-semibold text-[#111827] hover:bg-gray-50 shadow-sm">Set up</Button>
-                         </div>
-
-                         {/* n8n */}
-                         <div className="flex items-center justify-between p-4 rounded-[12px] border border-black/[0.03] bg-[#F9F9F7] hover:bg-white hover:shadow-sm transition-all group">
-                            <div className="flex items-center gap-4">
-                               <div className="w-10 h-10 rounded-[8px] bg-[#FF6D5A] flex items-center justify-center">
-                                  <RefreshCw className="w-5 h-5 text-white" />
-                               </div>
-                               <div>
-                                  <span className="text-[14px] font-semibold text-[#111827]">n8n</span>
-                                  <p className="text-[11px] text-[#111827]/40 font-medium">Access and power your apps with your n8n workflows.</p>
+                                  <span className="text-[14px] font-semibold text-[#111827]">Eleven Labs</span>
+                                  <p className="text-[11px] text-[#111827]/40 font-medium">Leading AI text-to-speech technology.</p>
                                </div>
                             </div>
                             <Button className="h-8 rounded-[6px] bg-white border border-black/[0.05] px-4 text-[12px] font-semibold text-[#111827] hover:bg-gray-50 shadow-sm">Set up</Button>
