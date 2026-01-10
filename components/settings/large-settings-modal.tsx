@@ -162,6 +162,24 @@ export function LargeSettingsModal() {
     }
   }, [settingsModalOpen, settingsTab, projectId, checkGithubStatus])
 
+  useEffect(() => {
+    if (settingsModalOpen && settingsTab === 'connectors' && projectId) {
+      checkConnectorsStatus()
+    }
+  }, [settingsModalOpen, settingsTab, projectId, checkConnectorsStatus])
+
+  useEffect(() => {
+    if (!settingsModalOpen || settingsTab !== 'connectors' || !projectId) return
+
+    const intervalId = window.setInterval(() => {
+      void checkConnectorsStatus()
+    }, 2500)
+
+    return () => {
+      window.clearInterval(intervalId)
+    }
+  }, [settingsModalOpen, settingsTab, projectId, checkConnectorsStatus])
+
   const handleConnectGithub = () => {
     if (!projectId) return
     setLoading(true)
