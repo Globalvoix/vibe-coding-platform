@@ -31,6 +31,16 @@ import { cn } from '@/lib/utils'
 import { useUIStore } from '@/lib/ui-store'
 import { Button } from '@/components/ui/button'
 import { GithubIcon } from '@/components/icons/github'
+import {
+  OpenAILogo,
+  GoogleGeminiLogo,
+  DeepseekLogo,
+  PerplexityLogo,
+  TogetherAILogo,
+  OpenRouterLogo,
+  FirecrawlLogo,
+  ElevenLabsLogo
+} from '@/components/icons/connector-icons'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 
