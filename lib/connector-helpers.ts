@@ -199,7 +199,7 @@ export function getRecommendedConnector(
 
   // Priority mapping for common use cases
   const priorityMap: Record<string, ConnectorId[]> = {
-    'llm': ['openai', 'google-gemini', 'deepseek', 'open-router', 'together-ai'],
+    'llm': ['openai', 'google-gemini', 'deepseek', 'together-ai'],
     'code': ['openai', 'google-gemini', 'deepseek'],
     'chat': ['openai', 'google-gemini'],
     'text-to-speech': ['eleven-labs'],
