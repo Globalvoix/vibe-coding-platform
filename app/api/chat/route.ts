@@ -154,7 +154,11 @@ async function buildConnectorContext({
   )
 
   const configuredConnectors = Object.values(CONNECTOR_DEFINITIONS)
-    .filter((c) => configuredKeys.has(c.envVarKey))
+    .filter(
+      (c) =>
+        configuredKeys.has(c.envVarKey) ||
+        (c.envVarAliases ?? []).some((alias) => configuredKeys.has(alias))
+    )
     .sort((a, b) => b.priority - a.priority)
 
   const detected = detectConnectorFromPhrase(userPromptText)
