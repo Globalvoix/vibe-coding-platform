@@ -225,6 +225,7 @@ export function LargeSettingsModal() {
       items: [
         { id: 'connectors', label: 'Connectors', icon: <Layers className="w-4 h-4" /> },
         { id: 'github', label: 'GitHub', icon: <GithubIcon className="w-4 h-4" /> },
+        { id: 'memory', label: 'Memory', icon: <BookOpen className="w-4 h-4" /> },
       ],
     },
   ]
@@ -319,267 +320,288 @@ export function LargeSettingsModal() {
 
             <div className="flex-1 overflow-y-auto px-16 py-12 custom-scrollbar">
               {settingsTab === 'github' ? (
-                <div className="max-w-[840px] space-y-14">
+                <div className="max-w-[840px] space-y-12">
                   {/* Error message display */}
                   {errorMessage && (
-                    <div className="rounded-[16px] border border-red-200/50 bg-red-50 p-6">
+                    <div className="rounded-[12px] border border-red-200/50 bg-red-50 p-5">
                       <div className="flex gap-4">
-                        <AlertCircle className="h-5 w-5 text-red-700 shrink-0 mt-0.5" />
+                        <AlertCircle className="h-4 w-4 text-red-700 shrink-0 mt-0.5" />
                         <div className="min-w-0">
-                          <h4 className="text-[14px] font-bold text-red-900 tracking-tight mb-1">
+                          <h4 className="text-[12px] font-bold text-red-900 tracking-tight mb-1">
                             Connection Failed
                           </h4>
-                          <p className="text-[13px] leading-relaxed text-red-800 font-medium mb-3">
+                          <p className="text-[11px] leading-relaxed text-red-800 font-medium mb-3">
                             {errorMessage}
                           </p>
                           <button
                             type="button"
                             onClick={() => setShowDiagnostics(!showDiagnostics)}
-                            className="flex items-center gap-1.5 text-[12px] font-bold text-red-700 hover:text-red-900 transition-colors"
+                            className="flex items-center gap-1.5 text-[10px] font-bold text-red-700 hover:text-red-900 transition-colors"
                           >
-                            <Eye className="h-3.5 w-3.5" />
+                            <Eye className="h-3 w-3" />
                             <span>{showDiagnostics ? 'Hide' : 'Show'} diagnostics</span>
                           </button>
-                          {showDiagnostics && requestId && (
-                            <div className="mt-2 text-[11px] text-red-700 font-mono bg-white rounded border border-red-200 p-2">
-                              Request ID: {requestId}
-                            </div>
-                          )}
                         </div>
                       </div>
                     </div>
                   )}
 
                   <div className="flex items-start justify-between gap-8">
-                    <p className="text-[16px] leading-[1.6] text-[#111827]/60 font-medium">
-                      Sync your project 2-way with GitHub to collaborate at source. High-fidelity
-                      synchronization ensures your codebase stays consistent across environments.
-                    </p>
+                    <div className="space-y-1">
+                      <h1 className="text-[28px] font-semibold text-[#111827] tracking-tight">GitHub</h1>
+                      <p className="text-[13px] text-[#111827]/40 font-medium">
+                        Sync your project 2-way with GitHub to collaborate at source.
+                      </p>
+                    </div>
                     <a
                       href="#"
-                      className="flex items-center gap-2 text-[14px] font-bold text-[#111827]/40 transition-colors hover:text-[#111827] shrink-0 pt-1"
+                      className="flex items-center gap-1.5 text-[12px] font-semibold text-[#111827]/40 transition-colors hover:text-[#111827] shrink-0 pt-2"
                     >
-                      <BookOpen className="h-4.5 w-4.5" />
+                      <Globe className="h-3.5 w-3.5" />
                       <span>Docs</span>
                     </a>
                   </div>
 
-                  <div className="h-px w-full bg-black/[0.04]" />
-
-                  <div className="flex items-start justify-between group gap-10">
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-4">
-                        <h3 className="text-[18px] font-bold text-[#111827] tracking-tight">
-                          Connect project
-                        </h3>
-                        {connectionPill}
+                  <div className="space-y-8">
+                    <div className="flex items-center justify-between group gap-10">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-[14px] font-semibold text-[#111827] tracking-tight">
+                            Connect project
+                          </h3>
+                          <div className="flex items-center gap-1 rounded-full border border-orange-200/50 bg-[#FFF7ED] px-2 py-0.5">
+                            <div className="h-1 w-1 rounded-full bg-orange-500" />
+                            <span className="text-[10px] font-bold text-orange-700 uppercase tracking-tight">
+                              Not connected
+                            </span>
+                          </div>
+                        </div>
+                        <p className="text-[12px] text-[#111827]/40 font-medium leading-relaxed">
+                          Connect your project to your GitHub organization in a 2-way sync.
+                        </p>
                       </div>
-                      <p className="text-[14px] leading-relaxed text-[#111827]/50 font-medium">
-                        Install the Thinksoft GitHub App to connect organizations and create a
-                        repository automatically for this project.
-                      </p>
-                    </div>
-                    {errorMessage ? (
-                      <Button
-                        onClick={handleRetryConnection}
-                        disabled={loading}
-                        className="h-11 rounded-xl bg-orange-600 px-6 text-[14px] font-bold text-white transition-all hover:bg-orange-700 hover:shadow-lg active:scale-[0.97] flex items-center gap-3 shrink-0"
-                      >
-                        <RefreshCw className="h-5 w-5 text-white" />
-                        {loading ? 'Retrying...' : 'Retry'}
-                      </Button>
-                    ) : (
                       <Button
                         onClick={handleConnectGithub}
                         disabled={loading}
-                        className="h-11 rounded-xl bg-[#111827] px-6 text-[14px] font-bold text-white transition-all hover:bg-black hover:shadow-lg active:scale-[0.97] flex items-center gap-3 shrink-0"
+                        className="h-8 rounded-[6px] bg-[#111827] px-4 text-[12px] font-semibold text-white transition-all hover:bg-black active:scale-[0.98] flex items-center gap-2 shrink-0"
                       >
-                        <GithubIcon className="h-5 w-5 text-white" />
+                        <GithubIcon className="h-3.5 w-3.5 text-white" />
                         {loading ? 'Connecting...' : 'Connect project'}
                       </Button>
-                    )}
-                  </div>
+                    </div>
 
-                  <div className="h-px w-full bg-black/[0.04]" />
-
-                  <div className="space-y-6">
-                    <div className="flex items-start justify-between gap-10">
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-4">
-                          <h3 className="text-[18px] font-bold text-[#111827] tracking-tight">
-                            Organizations
+                    <div className="flex items-center justify-between group gap-10">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-[14px] font-semibold text-[#111827] tracking-tight">
+                            Connected account
                           </h3>
-                          <div className="flex items-center gap-2 rounded-full border border-black/[0.04] bg-gray-100 px-3 py-1">
-                            <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">
-                              Select
+                          <div className="flex items-center gap-1 rounded-[4px] bg-orange-100 px-1.5 py-0.5">
+                            <span className="text-[10px] font-bold text-orange-700 uppercase tracking-tight">
+                              Admin
                             </span>
                           </div>
                         </div>
-                        <p className="text-[14px] leading-relaxed text-[#111827]/50 font-medium">
-                          Choose which organization to use for this project. Switching will create a
-                          fresh repository under that organization.
+                        <p className="text-[12px] text-[#111827]/40 font-medium leading-relaxed">
+                          Add your GitHub account to manage connected organizations.
                         </p>
                       </div>
-                      <button
-                        type="button"
-                        onClick={checkGithubStatus}
-                        className="flex items-center gap-2 rounded-xl border border-black/[0.04] bg-[#F7F4ED] px-4 py-2.5 text-[13px] font-bold text-[#111827]/50 transition-all hover:text-[#111827] hover:bg-white hover:shadow-md active:scale-[0.98] shrink-0 mt-1"
-                      >
-                        <RefreshCw className="h-4 w-4" />
-                        <span className="tracking-tight">Refresh</span>
-                      </button>
-                    </div>
-
-                    {organizations.length === 0 ? (
-                      <div className="rounded-[18px] border border-black/[0.04] bg-[#F7F4ED] p-6">
-                        <p className="text-[14px] font-bold text-[#111827] tracking-tight">
-                          No orgs yet — Install GitHub App
-                        </p>
-                        <p className="mt-2 text-[13px] leading-relaxed text-[#111827]/50 font-medium">
-                          Click “Connect project” above to install the app on an organization.
-                        </p>
+                      <div className="flex items-center gap-2 text-[#111827]/40">
+                         <GithubIcon className="h-4 w-4" />
+                         <span className="text-[13px] font-medium">Globalvoix</span>
                       </div>
-                    ) : (
-                      <div className="grid grid-cols-1 gap-3">
-                        {organizations.map((org) => {
-                          const isActive = org.active
-                          const isSwitching = orgSwitchingId === org.installationId
-
-                          return (
-                            <button
-                              key={org.installationId}
-                              type="button"
-                              onClick={() => handleSelectOrganization(org.installationId)}
-                              disabled={isSwitching}
-                              className={cn(
-                                'flex items-center justify-between rounded-[16px] border px-5 py-4 text-left transition-all',
-                                isActive
-                                  ? 'border-black/[0.06] bg-white shadow-[0_8px_24px_rgba(0,0,0,0.06)]'
-                                  : 'border-black/[0.04] bg-[#F7F4ED] hover:bg-white hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)]'
-                              )}
-                            >
-                              <div className="flex items-center gap-4 min-w-0">
-                                {org.avatarUrl ? (
-                                  <img
-                                    src={org.avatarUrl}
-                                    alt={org.login}
-                                    className="h-9 w-9 rounded-full border border-black/[0.06]"
-                                  />
-                                ) : (
-                                  <div className="h-9 w-9 rounded-full bg-black/[0.06]" />
-                                )}
-                                <div className="min-w-0">
-                                  <p className="text-[14px] font-extrabold text-[#111827] tracking-tight truncate">
-                                    {org.login}
-                                  </p>
-                                  <p className="text-[12px] font-semibold text-[#111827]/45 truncate">
-                                    {org.type}
-                                  </p>
-                                </div>
-                              </div>
-
-                              <div className="flex items-center gap-3 shrink-0">
-                                {isSwitching ? (
-                                  <Loader2 className="h-4 w-4 animate-spin text-[#111827]/50" />
-                                ) : isActive ? (
-                                  <div className="flex items-center gap-2 rounded-full bg-emerald-50 border border-emerald-200/60 px-3 py-1">
-                                    <Check className="h-3.5 w-3.5 text-emerald-700" />
-                                    <span className="text-[10px] font-black text-emerald-700 uppercase tracking-widest">
-                                      Active
-                                    </span>
-                                  </div>
-                                ) : (
-                                  <span className="text-[12px] font-bold text-[#111827]/40">
-                                    Use
-                                  </span>
-                                )}
-                              </div>
-                            </button>
-                          )
-                        })}
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="h-px w-full bg-black/[0.04]" />
-
-                  <div className="space-y-6">
-                    <div className="flex items-start justify-between gap-10">
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-4">
-                          <h3 className="text-[18px] font-bold text-[#111827] tracking-tight">
-                            Connect repo
-                          </h3>
-                          <div className="flex items-center gap-2 rounded-full border border-black/[0.04] bg-gray-100 px-3 py-1">
-                            <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">
-                              Auto
-                            </span>
-                          </div>
-                        </div>
-                        <p className="text-[14px] leading-relaxed text-[#111827]/50 font-medium">
-                          Your repository is created automatically after connecting and selecting an
-                          organization.
-                        </p>
-                        {githubStatus.installationId && (
-                          <p className="text-[12px] font-mono text-[#111827]/40">
-                            Installation ID: {githubStatus.installationId}
-                          </p>
-                        )}
-                      </div>
-                      {githubStatus.repository ? (
-                        <a
-                          href={githubStatus.repository.url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="flex items-center gap-3 rounded-xl border border-emerald-200/50 bg-emerald-50 px-5 py-2.5 text-[14px] font-bold text-emerald-700 transition-all hover:text-emerald-900 hover:bg-emerald-100 cursor-pointer shrink-0 mt-1"
-                        >
-                          <Check className="h-5 w-5" />
-                          <span className="tracking-tight">
-                            {githubStatus.repository.owner}/{githubStatus.repository.name}
-                          </span>
-                        </a>
-                      ) : (
-                        <div className="flex items-center gap-3 rounded-xl border border-black/[0.04] bg-[#F7F4ED] px-5 py-2.5 text-[14px] font-bold text-[#111827]/40 shrink-0 mt-1">
-                          {activeOrg ? (
-                            <>
-                              <Loader2 className="h-5 w-5 animate-spin" />
-                              <span className="tracking-tight">Creating repo…</span>
-                            </>
-                          ) : (
-                            <>
-                              <GithubIcon className="h-5 w-5" />
-                              <span className="tracking-tight">Select an org</span>
-                            </>
-                          )}
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="rounded-[18px] border border-black/[0.04] bg-[#F7F4ED] p-6 flex items-center justify-between gap-6">
-                      <div className="min-w-0">
-                        <p className="text-[14px] font-extrabold text-[#111827] tracking-tight">
-                          Update PR
-                        </p>
-                        <p className="mt-2 text-[13px] leading-relaxed text-[#111827]/50 font-medium">
-                          Push the latest project code to the connected repository.
-                        </p>
-                      </div>
-
-                      <Button
-                        onClick={handleUpdatePr}
-                        disabled={!githubStatus.canUpdatePr || updatingRepo}
-                        className="h-11 rounded-xl bg-[#111827] px-6 text-[14px] font-bold text-white transition-all hover:bg-black hover:shadow-lg active:scale-[0.97] flex items-center gap-3 shrink-0"
-                      >
-                        {updatingRepo ? (
-                          <Loader2 className="h-5 w-5 animate-spin text-white" />
-                        ) : (
-                          <RefreshCw className="h-5 w-5 text-white" />
-                        )}
-                        {updatingRepo ? 'Updating…' : 'Update PR'}
-                      </Button>
                     </div>
                   </div>
                 </div>
+              ) : settingsTab === 'connectors' ? (
+                <div className="max-w-[1000px] space-y-12">
+                   <div className="space-y-1">
+                      <h1 className="text-[28px] font-semibold text-[#111827] tracking-tight">Connectors</h1>
+                   </div>
+
+                   <div className="space-y-6">
+                      <div className="space-y-1">
+                         <h3 className="text-[14px] font-semibold text-[#111827] tracking-tight">Shared connectors</h3>
+                         <p className="text-[12px] text-[#111827]/40 font-medium leading-relaxed">
+                            Add functionality to your apps. Configured once by admins, available to everyone in your workspace.
+                         </p>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                         {/* Lovable Cloud */}
+                         <div className="flex items-center justify-between p-4 rounded-[12px] border border-black/[0.03] bg-[#F9F9F7] hover:bg-white hover:shadow-sm transition-all cursor-pointer group">
+                            <div className="flex items-center gap-4">
+                               <div className="w-10 h-10 rounded-[8px] bg-white border border-black/[0.05] flex items-center justify-center">
+                                  <Cloud className="w-5 h-5 text-[#111827]" />
+                               </div>
+                               <div>
+                                  <div className="flex items-center gap-2">
+                                     <span className="text-[14px] font-semibold text-[#111827]">Lovable Cloud</span>
+                                     <span className="px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase tracking-tight">Enabled</span>
+                                  </div>
+                                  <p className="text-[11px] text-[#111827]/40 font-medium">Built-in backend, ready to use</p>
+                               </div>
+                            </div>
+                            <ChevronDown className="w-4 h-4 text-[#111827]/20 -rotate-90 group-hover:text-[#111827]/40" />
+                         </div>
+
+                         {/* Lovable AI */}
+                         <div className="flex items-center justify-between p-4 rounded-[12px] border border-black/[0.03] bg-[#F9F9F7] hover:bg-white hover:shadow-sm transition-all cursor-pointer group">
+                            <div className="flex items-center gap-4">
+                               <div className="w-10 h-10 rounded-[8px] bg-white border border-black/[0.05] flex items-center justify-center">
+                                  <Beaker className="w-5 h-5 text-[#111827]" />
+                               </div>
+                               <div>
+                                  <div className="flex items-center gap-2">
+                                     <span className="text-[14px] font-semibold text-[#111827]">Lovable AI</span>
+                                     <span className="px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase tracking-tight">Enabled</span>
+                                  </div>
+                                  <p className="text-[11px] text-[#111827]/40 font-medium">Unlock powerful AI features</p>
+                               </div>
+                            </div>
+                            <ChevronDown className="w-4 h-4 text-[#111827]/20 -rotate-90 group-hover:text-[#111827]/40" />
+                         </div>
+
+                         {/* Stripe */}
+                         <div className="flex items-center justify-between p-4 rounded-[12px] border border-black/[0.03] bg-black/[0.05] hover:bg-white hover:shadow-sm transition-all cursor-pointer group shadow-[inset_0_0_0_1px_rgba(0,0,0,0.05)]">
+                            <div className="flex items-center gap-4">
+                               <div className="w-10 h-10 rounded-[8px] bg-[#635BFF] flex items-center justify-center">
+                                  <CreditCard className="w-5 h-5 text-white" />
+                               </div>
+                               <div>
+                                  <div className="flex items-center gap-2">
+                                     <span className="text-[14px] font-semibold text-[#111827]">Stripe</span>
+                                     <span className="px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase tracking-tight">Enabled</span>
+                                  </div>
+                                  <p className="text-[11px] text-[#111827]/40 font-medium">Set up payments</p>
+                               </div>
+                            </div>
+                            <ChevronDown className="w-4 h-4 text-[#111827]/20 -rotate-90 group-hover:text-[#111827]/40" />
+                         </div>
+
+                         {/* Shopify */}
+                         <div className="flex items-center justify-between p-4 rounded-[12px] border border-black/[0.03] bg-[#F9F9F7] hover:bg-white hover:shadow-sm transition-all cursor-pointer group">
+                            <div className="flex items-center gap-4">
+                               <div className="w-10 h-10 rounded-[8px] bg-[#95BF47] flex items-center justify-center">
+                                  <Globe className="w-5 h-5 text-white" />
+                               </div>
+                               <div>
+                                  <div className="flex items-center gap-2">
+                                     <span className="text-[14px] font-semibold text-[#111827]">Shopify</span>
+                                     <span className="px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase tracking-tight">Enabled</span>
+                                  </div>
+                                  <p className="text-[11px] text-[#111827]/40 font-medium">Build an eCommerce store</p>
+                               </div>
+                            </div>
+                            <ChevronDown className="w-4 h-4 text-[#111827]/20 -rotate-90 group-hover:text-[#111827]/40" />
+                         </div>
+
+                         {/* Browse connectors */}
+                         <div className="flex items-center justify-between p-4 rounded-[12px] border border-black/[0.03] bg-[#F9F9F7] hover:bg-white hover:shadow-sm transition-all cursor-pointer group">
+                            <div className="flex items-center gap-4">
+                               <div className="w-10 h-10 rounded-[8px] bg-white border border-black/[0.05] flex items-center justify-center">
+                                  <Layers className="w-5 h-5 text-[#111827]/40" />
+                               </div>
+                               <span className="text-[14px] font-semibold text-[#111827]">Browse connectors</span>
+                            </div>
+                            <div className="flex items-center gap-3">
+                               <div className="flex -space-x-2">
+                                  <div className="w-6 h-6 rounded-full bg-black flex items-center justify-center text-[8px] text-white border-2 border-[#F9F9F7] group-hover:border-white">A</div>
+                                  <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center text-[8px] text-white border-2 border-[#F9F9F7] group-hover:border-white">L</div>
+                               </div>
+                               <ChevronDown className="w-4 h-4 text-[#111827]/20 -rotate-90 group-hover:text-[#111827]/40" />
+                            </div>
+                         </div>
+                      </div>
+                   </div>
+
+                   <div className="space-y-6">
+                      <div className="space-y-1">
+                         <h3 className="text-[14px] font-semibold text-[#111827] tracking-tight">Personal connectors</h3>
+                         <p className="text-[12px] text-[#111827]/40 font-medium leading-relaxed">
+                            Connect your personal tools to provide context while building. Only you can access your connections. <a href="#" className="underline">Read more</a>
+                         </p>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                         {/* Atlassian */}
+                         <div className="flex items-center justify-between p-4 rounded-[12px] border border-black/[0.03] bg-[#F9F9F7] hover:bg-white hover:shadow-sm transition-all group">
+                            <div className="flex items-center gap-4">
+                               <div className="w-10 h-10 rounded-[8px] bg-[#0052CC] flex items-center justify-center">
+                                  <ShieldCheck className="w-5 h-5 text-white" />
+                               </div>
+                               <div>
+                                  <span className="text-[14px] font-semibold text-[#111827]">Atlassian</span>
+                                  <p className="text-[11px] text-[#111827]/40 font-medium">Access your Jira issues and Confluence pages.</p>
+                               </div>
+                            </div>
+                            <Button className="h-8 rounded-[6px] bg-white border border-black/[0.05] px-4 text-[12px] font-semibold text-[#111827] hover:bg-gray-50 shadow-sm">Set up</Button>
+                         </div>
+
+                         {/* Linear */}
+                         <div className="flex items-center justify-between p-4 rounded-[12px] border border-black/[0.03] bg-[#F9F9F7] hover:bg-white hover:shadow-sm transition-all group">
+                            <div className="flex items-center gap-4">
+                               <div className="w-10 h-10 rounded-[8px] bg-[#5E6AD2] flex items-center justify-center">
+                                  <Layers className="w-5 h-5 text-white" />
+                               </div>
+                               <div>
+                                  <span className="text-[14px] font-semibold text-[#111827]">Linear</span>
+                                  <p className="text-[11px] text-[#111827]/40 font-medium">Access your Linear issues and project data.</p>
+                               </div>
+                            </div>
+                            <Button className="h-8 rounded-[6px] bg-white border border-black/[0.05] px-4 text-[12px] font-semibold text-[#111827] hover:bg-gray-50 shadow-sm">Set up</Button>
+                         </div>
+
+                         {/* Miro */}
+                         <div className="flex items-center justify-between p-4 rounded-[12px] border border-black/[0.03] bg-[#F9F9F7] hover:bg-white hover:shadow-sm transition-all group">
+                            <div className="flex items-center gap-4">
+                               <div className="w-10 h-10 rounded-[8px] bg-[#FFD02F] flex items-center justify-center">
+                                  <Layers className="w-5 h-5 text-black" />
+                               </div>
+                               <div>
+                                  <span className="text-[14px] font-semibold text-[#111827]">Miro</span>
+                                  <p className="text-[11px] text-[#111827]/40 font-medium">Access your Miro boards and diagrams.</p>
+                               </div>
+                            </div>
+                            <Button className="h-8 rounded-[6px] bg-white border border-black/[0.05] px-4 text-[12px] font-semibold text-[#111827] hover:bg-gray-50 shadow-sm">Set up</Button>
+                         </div>
+
+                         {/* n8n */}
+                         <div className="flex items-center justify-between p-4 rounded-[12px] border border-black/[0.03] bg-[#F9F9F7] hover:bg-white hover:shadow-sm transition-all group">
+                            <div className="flex items-center gap-4">
+                               <div className="w-10 h-10 rounded-[8px] bg-[#FF6D5A] flex items-center justify-center">
+                                  <RefreshCw className="w-5 h-5 text-white" />
+                               </div>
+                               <div>
+                                  <span className="text-[14px] font-semibold text-[#111827]">n8n</span>
+                                  <p className="text-[11px] text-[#111827]/40 font-medium">Access and power your apps with your n8n workflows.</p>
+                               </div>
+                            </div>
+                            <Button className="h-8 rounded-[6px] bg-white border border-black/[0.05] px-4 text-[12px] font-semibold text-[#111827] hover:bg-gray-50 shadow-sm">Set up</Button>
+                         </div>
+                      </div>
+                   </div>
+                </div>
+              ) : settingsTab === 'memory' ? (
+                 <div className="max-w-[840px] space-y-12">
+                   <div className="space-y-1">
+                      <h1 className="text-[28px] font-semibold text-[#111827] tracking-tight">Memory</h1>
+                      <p className="text-[13px] text-[#111827]/40 font-medium">
+                        Manage your AI's long-term memory and context.
+                      </p>
+                   </div>
+                   <div className="flex h-[400px] flex-col items-center justify-center space-y-6 text-[#111827]/20 border border-dashed border-black/[0.05] rounded-[24px]">
+                      <BookOpen className="h-12 w-12 opacity-10" />
+                      <div className="text-center space-y-1">
+                        <p className="text-[16px] font-semibold tracking-tight text-[#111827]/40">
+                          Coming Soon
+                        </p>
+                        <p className="text-[12px] font-medium opacity-50">
+                          Memory features are being developed to give your AI better context.
+                        </p>
+                      </div>
+                   </div>
+                 </div>
               ) : (
                 <div className="flex h-full flex-col items-center justify-center space-y-6 text-[#111827]/20">
                   <div className="rounded-[32px] bg-[#F7F4ED] p-12 shadow-sm border border-black/[0.02]">
