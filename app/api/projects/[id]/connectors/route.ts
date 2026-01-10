@@ -50,7 +50,9 @@ export async function GET(
       displayName: connector.displayName,
       description: connector.description,
       envVarKey: connector.envVarKey,
-      isConfigured: configuredEnvKeys.has(connector.envVarKey),
+      isConfigured:
+        configuredEnvKeys.has(connector.envVarKey) ||
+        (connector.envVarAliases ?? []).some((alias) => configuredEnvKeys.has(alias)),
       category: connector.category
     }))
 
