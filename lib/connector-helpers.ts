@@ -28,7 +28,7 @@ export function validateConnectorApiKey(connectorId: ConnectorId, apiKey: string
   if (connectorId === 'openai' && !apiKey.startsWith('sk-')) return false
   if (connectorId === 'google-gemini' && !apiKey.startsWith('AIza')) return false
   if (connectorId === 'perplexity' && !apiKey.startsWith('pplx-')) return false
-  if (connectorId === 'firecrawl' && !apiKey.startsWith('fc_')) return false
+  if (connectorId === 'firecrawl' && !(apiKey.startsWith('fc_') || apiKey.startsWith('fc-'))) return false
 
   return true
 }
