@@ -82,7 +82,11 @@ export function LargeSettingsModal() {
   const [requestId, setRequestId] = useState<string | null>(null)
   const [showDiagnostics, setShowDiagnostics] = useState(false)
 
-  const [setupConnector, setSetupConnector] = useState<string | null>(null)
+  const [connectorStatus, setConnectorStatus] = useState<Partial<Record<ConnectorId, boolean>>>({})
+
+  const [setupConnectorId, setSetupConnectorId] = useState<ConnectorId | null>(null)
+  const setupConnector = setupConnectorId ? CONNECTOR_DEFINITIONS[setupConnectorId] : null
+
   const [setupDisplayName, setSetupDisplayName] = useState('')
   const [setupApiKey, setSetupApiKey] = useState('')
   const [showApiKey, setShowApiKey] = useState(false)
