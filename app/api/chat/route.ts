@@ -341,7 +341,7 @@ export async function POST(req: Request) {
 
           const result = streamText({
             ...getModelOptions(modelId, { reasoningEffort: effectiveReasoningEffort }),
-            system: prompt,
+            system: systemPrompt,
             messages: convertToModelMessages(processedMessages),
             stopWhen: stepCountIs(20),
             tools: tools({
