@@ -288,6 +288,11 @@ export function LargeSettingsModal() {
     }
   }
 
+  const isConnectorConfigured = useCallback(
+    (connectorId: ConnectorId) => connectorStatus[connectorId] === true,
+    [connectorStatus]
+  )
+
   const menuItems = [
     {
       section: 'Project',
