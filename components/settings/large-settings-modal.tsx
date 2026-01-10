@@ -42,6 +42,7 @@ import {
 } from '@/components/icons/connector-icons'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
+import { CONNECTOR_DEFINITIONS, type ConnectorId } from '@/lib/connector-mapping'
 
 interface GithubOrganization {
   installationId: number
