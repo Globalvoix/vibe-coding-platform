@@ -219,6 +219,8 @@ export async function POST(req: Request) {
       projectId,
     } = bodyData
 
+    const project = projectId ? await getProject(userId, projectId).catch(() => null) : null
+
     const [models, subscription] = await Promise.all([
       getAvailableModels(),
       getUserSubscription(userId),
