@@ -4,7 +4,6 @@ import { auth } from '@clerk/nextjs/server'
 import { getProject } from '@/lib/projects-db'
 import {
   createOrUpdateEnvVar,
-  getEnvVar,
   listEnvVars,
   deleteEnvVar,
 } from '@/lib/env-vars-db'

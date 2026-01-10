@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { getProject } from '@/lib/projects-db'
 import { listEnvVars } from '@/lib/env-vars-db'
-import { CONNECTOR_DEFINITIONS, getAllConnectors, type ConnectorId } from '@/lib/connector-mapping'
+import { getAllConnectors } from '@/lib/connector-mapping'
 
 interface ConnectorParams {
   id: string
