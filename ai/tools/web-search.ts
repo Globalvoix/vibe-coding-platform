@@ -1,86 +1,85 @@
 import type { UIMessageStreamWriter, UIMessage } from 'ai'
 import type { DataPart } from '../messages/data-parts'
+import { tool } from 'ai'
+import z from 'zod/v3'
 
-export function webSearch({
-  writer,
-  projectId,
-}: {
+interface Params {
   writer: UIMessageStreamWriter<UIMessage<never, DataPart>>
   projectId?: string
-}) {
-  return {
-    description: 'Search the web using Exa AI-native search engine for research, current information, and discovery',
-    parameters: {
-      type: 'object',
-      properties: {
-        query: {
-          type: 'string',
-          description: 'The search query to find information on the web'
-        },
-        numResults: {
-          type: 'number',
-          description: 'Number of results to return (default: 5, max: 30)',
-          default: 5
-        },
-        includeSummaries: {
-          type: 'boolean',
-          description: 'Whether to include summaries of the results (default: true)',
-          default: true
-        },
-        searchType: {
-          type: 'string',
-          enum: ['keyword', 'neural'],
-          description: 'Type of search - neural is better for semantic queries, keyword for specific terms (default: neural)',
-          default: 'neural'
-        }
-      },
-      required: ['query']
-    },
-    execute: async (input: {
-      query: string
-      numResults?: number
-      includeSummaries?: boolean
-      searchType?: 'keyword' | 'neural'
-    }) => {
+}
+
+export const webSearch = ({ writer, projectId }: Params) =>
+  tool({
+    description:
+      'Search the web using Exa AI-native search engine for research, current information, and discovery',
+    inputSchema: z.object({
+      query: z.string().describe('The search query to find information on the web'),
+      numResults: z
+        .number()
+        .optional()
+        .default(5)
+        .describe('Number of results to return (default: 5, max: 30)'),
+      includeSummaries: z
+        .boolean()
+        .optional()
+        .default(true)
+        .describe('Whether to include summaries of the results'),
+      searchType: z
+        .enum(['keyword', 'neural'])
+        .optional()
+        .default('neural')
+        .describe('Type of search - neural is better for semantic queries, keyword for specific terms'),
+    }),
+    execute: async (
+      { query, numResults = 5, includeSummaries = true, searchType = 'neural' },
+      { toolCallId }
+    ) => {
       if (!process.env.EXA_API_KEY) {
-        return {
-          success: false,
-          error: 'Exa API key not configured. Please add it in Settings → Connectors → Exa'
-        }
+        writer.write({
+          id: toolCallId,
+          type: 'text',
+          text: 'Error: Exa API key not configured. Please add it in Settings → Connectors → Exa',
+        })
+        return 'Exa API key not configured. Please add it in Settings → Connectors → Exa'
       }
 
       try {
         writer.write({
-          type: 'tool-call',
-          toolName: 'webSearch',
-          args: input,
-          result: 'Searching the web...'
+          id: toolCallId,
+          type: 'text',
+          text: `Searching the web for: "${query}"...`,
         })
 
         const response = await fetch('https://api.exa.ai/search', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'x-api-key': process.env.EXA_API_KEY
+            'x-api-key': process.env.EXA_API_KEY,
           },
           body: JSON.stringify({
-            query: input.query,
-            numResults: input.numResults ?? 5,
+            query,
+            numResults,
             contents: {
               text: {
-                maxCharacters: 1000
-              }
+                maxCharacters: 1000,
+              },
             },
-            type: input.searchType ?? 'neural'
-          })
+            type: searchType,
+          }),
         })
 
         if (!response.ok) {
           const error = await response.text()
-          throw new Error(`Exa API error: ${response.status} ${error}`)
+          const errorMsg = `Exa API error: ${response.status} ${error}`
+          writer.write({
+            id: toolCallId,
+            type: 'text',
+            text: `Error: ${errorMsg}`,
+          })
+          return errorMsg
         }
 
-        const data = await response.json() as {
+        const data = (await response.json()) as {
           results?: Array<{
             title: string
             url: string
@@ -92,51 +91,49 @@ export function webSearch({
         }
 
         if (!data.results || data.results.length === 0) {
-          return {
-            success: true,
-            results: [],
-            message: 'No results found for your search query'
-          }
+          writer.write({
+            id: toolCallId,
+            type: 'text',
+            text: 'No results found for your search query',
+          })
+          return 'No results found for your search query'
         }
 
-        const formattedResults = data.results.map((result, index) => {
-          let formatted = `${index + 1}. **${result.title}**\n`
-          formatted += `   URL: ${result.url}\n`
-          if (result.publishedDate) {
-            formatted += `   Published: ${result.publishedDate}\n`
-          }
-          if (result.author) {
-            formatted += `   Author: ${result.author}\n`
-          }
-          if (input.includeSummaries && result.text) {
-            formatted += `   Summary: ${result.text.substring(0, 500)}${result.text.length > 500 ? '...' : ''}\n`
-          }
-          return formatted
-        }).join('\n')
+        const formattedResults = data.results
+          .map((result, index) => {
+            let formatted = `${index + 1}. **${result.title}**\n`
+            formatted += `   URL: ${result.url}\n`
+            if (result.publishedDate) {
+              formatted += `   Published: ${result.publishedDate}\n`
+            }
+            if (result.author) {
+              formatted += `   Author: ${result.author}\n`
+            }
+            if (includeSummaries && result.text) {
+              const summary =
+                result.text.substring(0, 500) + (result.text.length > 500 ? '...' : '')
+              formatted += `   Summary: ${summary}\n`
+            }
+            return formatted
+          })
+          .join('\n')
 
+        const resultText = `Found ${data.results.length} results:\n\n${formattedResults}`
         writer.write({
-          type: 'tool-result',
-          toolName: 'webSearch',
-          result: `Found ${data.results.length} results:\n\n${formattedResults}`
+          id: toolCallId,
+          type: 'text',
+          text: resultText,
         })
 
-        return {
-          success: true,
-          results: data.results,
-          count: data.results.length
-        }
+        return resultText
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error occurred'
         writer.write({
-          type: 'tool-result',
-          toolName: 'webSearch',
-          result: `Error: ${message}`
+          id: toolCallId,
+          type: 'text',
+          text: `Error: ${message}`,
         })
-        return {
-          success: false,
-          error: message
-        }
+        return `Error: ${message}`
       }
-    }
-  }
-}
+    },
+  })
