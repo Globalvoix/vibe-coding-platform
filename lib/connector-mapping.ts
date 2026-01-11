@@ -4,13 +4,14 @@
  * Enables AI to intelligently detect and suggest appropriate connectors
  */
 
-export type ConnectorId = 
+export type ConnectorId =
   | 'openai'
   | 'google-gemini'
   | 'deepseek'
   | 'together-ai'
   | 'perplexity'
   | 'firecrawl'
+  | 'exa'
   | 'eleven-labs'
 
 export interface ConnectorCapability {
