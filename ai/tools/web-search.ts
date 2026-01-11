@@ -35,21 +35,10 @@ export const webSearch = ({ writer, projectId }: Params) =>
       { toolCallId }
     ) => {
       if (!process.env.EXA_API_KEY) {
-        writer.write({
-          id: toolCallId,
-          type: 'text',
-          text: 'Error: Exa API key not configured. Please add it in Settings → Connectors → Exa',
-        })
-        return 'Exa API key not configured. Please add it in Settings → Connectors → Exa'
+        return 'Error: Exa API key not configured. Please add it in Settings → Connectors → Exa'
       }
 
       try {
-        writer.write({
-          id: toolCallId,
-          type: 'text',
-          text: `Searching the web for: "${query}"...`,
-        })
-
         const response = await fetch('https://api.exa.ai/search', {
           method: 'POST',
           headers: {
@@ -70,13 +59,7 @@ export const webSearch = ({ writer, projectId }: Params) =>
 
         if (!response.ok) {
           const error = await response.text()
-          const errorMsg = `Exa API error: ${response.status} ${error}`
-          writer.write({
-            id: toolCallId,
-            type: 'text',
-            text: `Error: ${errorMsg}`,
-          })
-          return errorMsg
+          return `Exa API error: ${response.status} ${error}`
         }
 
         const data = (await response.json()) as {
@@ -91,11 +74,6 @@ export const webSearch = ({ writer, projectId }: Params) =>
         }
 
         if (!data.results || data.results.length === 0) {
-          writer.write({
-            id: toolCallId,
-            type: 'text',
-            text: 'No results found for your search query',
-          })
           return 'No results found for your search query'
         }
 
@@ -118,21 +96,9 @@ export const webSearch = ({ writer, projectId }: Params) =>
           })
           .join('\n')
 
-        const resultText = `Found ${data.results.length} results:\n\n${formattedResults}`
-        writer.write({
-          id: toolCallId,
-          type: 'text',
-          text: resultText,
-        })
-
-        return resultText
+        return `Found ${data.results.length} results:\n\n${formattedResults}`
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error occurred'
-        writer.write({
-          id: toolCallId,
-          type: 'text',
-          text: `Error: ${message}`,
-        })
         return `Error: ${message}`
       }
     },
