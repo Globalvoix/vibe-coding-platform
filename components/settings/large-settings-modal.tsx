@@ -37,7 +37,6 @@ import {
   DeepseekLogo,
   PerplexityLogo,
   TogetherAILogo,
-  ExaLogo,
   FirecrawlLogo,
   ElevenLabsLogo
 } from '@/components/icons/connector-icons'
