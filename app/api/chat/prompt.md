@@ -130,6 +130,7 @@ Connectors use standardized environment variable keys:
 - DEEPSEEK_API_KEY
 - TOGETHER_API_KEY
 - PERPLEXITY_API_KEY
+- EXA_API_KEY
 - FIRECRAWL_API_KEY
 - ELEVEN_LABS_API_KEY
 
