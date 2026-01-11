@@ -24,6 +24,8 @@ export function tools({ modelId, writer, userId, projectId }: Params) {
     runCommand: runCommand({ writer }),
     requestSupabaseConnection: requestSupabaseConnection({ writer, projectId }),
     requestEnvVars: requestEnvVars({ writer, projectId }),
+    webSearch: webSearch({ writer, projectId }),
+    webScrape: webScrape({ writer, projectId }),
   }
 }
 
