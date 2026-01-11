@@ -40,21 +40,10 @@ export const webScrape = ({ writer, projectId }: Params) =>
       { toolCallId }
     ) => {
       if (!process.env.FIRECRAWL_API_KEY) {
-        writer.write({
-          id: toolCallId,
-          type: 'text',
-          text: 'Error: Firecrawl API key not configured. Please add it in Settings → Connectors → Firecrawl',
-        })
-        return 'Firecrawl API key not configured. Please add it in Settings → Connectors → Firecrawl'
+        return 'Error: Firecrawl API key not configured. Please add it in Settings → Connectors → Firecrawl'
       }
 
       try {
-        writer.write({
-          id: toolCallId,
-          type: 'text',
-          text: `Scraping ${url}...`,
-        })
-
         const response = await fetch('https://api.firecrawl.dev/v1/scrape', {
           method: 'POST',
           headers: {
@@ -74,13 +63,7 @@ export const webScrape = ({ writer, projectId }: Params) =>
 
         if (!response.ok) {
           const error = await response.text()
-          const errorMsg = `Firecrawl API error: ${response.status} ${error}`
-          writer.write({
-            id: toolCallId,
-            type: 'text',
-            text: `Error: ${errorMsg}`,
-          })
-          return errorMsg
+          return `Firecrawl API error: ${response.status} ${error}`
         }
 
         const data = (await response.json()) as {
@@ -102,13 +85,7 @@ export const webScrape = ({ writer, projectId }: Params) =>
         }
 
         if (!data.success || !data.data) {
-          const errorMsg = 'Failed to scrape the webpage'
-          writer.write({
-            id: toolCallId,
-            type: 'text',
-            text: `Error: ${errorMsg}`,
-          })
-          return errorMsg
+          return 'Failed to scrape the webpage'
         }
 
         const content = data.data[format as keyof typeof data.data] || ''
@@ -124,22 +101,9 @@ export const webScrape = ({ writer, projectId }: Params) =>
         }
         result += displayContent
 
-        const displayText =
-          result.substring(0, 2000) + (result.length > 2000 ? '\n\n[Content truncated for display]' : '')
-        writer.write({
-          id: toolCallId,
-          type: 'text',
-          text: `Successfully scraped content from ${url}\n\n${displayText}`,
-        })
-
-        return `Successfully scraped ${url}. Content length: ${content.length} characters. Format: ${format}`
+        return result
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error occurred'
-        writer.write({
-          id: toolCallId,
-          type: 'text',
-          text: `Error: ${message}`,
-        })
         return `Error: ${message}`
       }
     },
