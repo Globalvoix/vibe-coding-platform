@@ -161,6 +161,7 @@ OPENAI_API_KEY=sk-... # For code generation, chat, reasoning (configure in Setti
 GOOGLE_GENERATIVE_AI_API_KEY=AIza... # For multimodal processing
 ELEVEN_LABS_API_KEY=sk_... # For text-to-speech (configure in Settings → Connectors)
 PERPLEXITY_API_KEY=pplx-... # For real-time web search
+EXA_API_KEY=... # For AI-native web search and research
 FIRECRAWL_API_KEY=fc_... # For web scraping
 ```
 
