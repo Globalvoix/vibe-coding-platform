@@ -64,7 +64,7 @@ export function OpenAILogo({ className, size = 20 }: IconProps) {
 export function GoogleGeminiLogo({ className, size = 20 }: IconProps) {
   return (
     <LogoImage
-      src="https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2Fd744a48f659e4abbad0b7d5c1f19f072?format=webp&width=800"
+      src="https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F500ac0b471d143e8a753b4461316be02?format=webp&width=800"
       alt="Google Gemini"
       size={size}
       className={className}
@@ -75,7 +75,7 @@ export function GoogleGeminiLogo({ className, size = 20 }: IconProps) {
 export function DeepseekLogo({ className, size = 20 }: IconProps) {
   return (
     <LogoImage
-      src="https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2Fe94ebf3326bd493e99a88fa0a5b58545?format=webp&width=800"
+      src="https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F1cb8023f0fbd4d73a86e767a49c87e56?format=webp&width=800"
       alt="DeepSeek"
       size={size}
       className={['rounded-[4px]', className ?? ''].join(' ').trim()}
@@ -86,7 +86,7 @@ export function DeepseekLogo({ className, size = 20 }: IconProps) {
 export function TogetherAILogo({ className, size = 20 }: IconProps) {
   return (
     <LogoImage
-      src="https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2Ff377af5d7184471a87f47a6b49d38ee3?format=webp&width=800"
+      src="https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2Fe913c4d994eb401c9e86babd1ba8c490?format=webp&width=800"
       alt="Together AI"
       size={size}
       className={['rounded-[4px]', className ?? ''].join(' ').trim()}
@@ -97,7 +97,7 @@ export function TogetherAILogo({ className, size = 20 }: IconProps) {
 export function PerplexityLogo({ className, size = 20 }: IconProps) {
   return (
     <LogoImage
-      src="https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F10af51757cb24a848b4a4e3198631a6a?format=webp&width=800"
+      src="https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F2ab274d790874fc6b643e4488281642c?format=webp&width=800"
       alt="Perplexity"
       size={size}
       className={className}
@@ -108,7 +108,7 @@ export function PerplexityLogo({ className, size = 20 }: IconProps) {
 export function FirecrawlLogo({ className, size = 20 }: IconProps) {
   return (
     <LogoImage
-      src="https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2Fd0626f7ab562440194b7f32039f63ed2?format=webp&width=800"
+      src="https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F9e670edc325942cfbb4dda37793e81df?format=webp&width=800"
       alt="Firecrawl"
       size={size}
       className={className}
@@ -119,7 +119,7 @@ export function FirecrawlLogo({ className, size = 20 }: IconProps) {
 export function ElevenLabsLogo({ className, size = 20 }: IconProps) {
   return (
     <LogoImage
-      src="https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F27fb3541e3f740b29c40f3c9bee7aa2a?format=webp&width=800"
+      src="https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2Ffbb32398d4d04113ab02f8209004aa05?format=webp&width=800"
       alt="ElevenLabs"
       size={size}
       className={className}
