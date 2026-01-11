@@ -190,6 +190,34 @@ export const CONNECTOR_DEFINITIONS: Record<ConnectorId, ConnectorDefinition> = {
     category: 'specialized-api',
     priority: 65
   },
+  'exa': {
+    id: 'exa',
+    name: 'Exa',
+    displayName: 'Exa',
+    description: 'AI-native search engine for real-time web search and research',
+    envVarKey: 'EXA_API_KEY',
+    apiKeyPlaceholder: 'exa_...',
+    docsUrl: 'https://docs.exa.ai',
+    capabilities: [
+      {
+        category: 'Web Search',
+        description: 'Search the web with AI-native search optimized for LLMs',
+        examples: ['Research queries', 'Real-time information', 'Current events', 'Topic discovery']
+      },
+      {
+        category: 'Content Discovery',
+        description: 'Find relevant web content and similar pages',
+        examples: ['Content recommendations', 'Related articles', 'Similar websites', 'Web exploration']
+      },
+      {
+        category: 'Information Retrieval',
+        description: 'Retrieve and organize web information for AI analysis',
+        examples: ['Research gathering', 'Data collection', 'Information synthesis', 'Web mining']
+      }
+    ],
+    category: 'specialized-api',
+    priority: 70
+  },
   'eleven-labs': {
     id: 'eleven-labs',
     name: 'Eleven Labs',
