@@ -121,6 +121,14 @@ function extractEnvVarsFromText(text: string) {
     }
   }
 
+  // Exa
+  if (!present.has('EXA_API_KEY')) {
+    const isExaMentioned = /\bexa\b/i.test(text)
+    if (isExaMentioned) {
+      add('EXA_API_KEY', extractToken(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i))
+    }
+  }
+
   // ElevenLabs
   if (!present.has('ELEVEN_LABS_API_KEY')) {
     const isElevenMentioned = /\beleven\b/i.test(text) || /11\s?labs/i.test(text)
