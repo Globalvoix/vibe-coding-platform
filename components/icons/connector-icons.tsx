@@ -105,17 +105,6 @@ export function PerplexityLogo({ className, size = 20 }: IconProps) {
   )
 }
 
-export function ExaLogo({ className, size = 20 }: IconProps) {
-  return (
-    <LogoImage
-      src="https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F3361e2b5e2974b2fb41829e083c267c7?format=webp&width=800"
-      alt="Exa"
-      size={size}
-      className={className}
-    />
-  )
-}
-
 export function FirecrawlLogo({ className, size = 20 }: IconProps) {
   return (
     <LogoImage
