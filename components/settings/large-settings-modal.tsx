@@ -37,6 +37,7 @@ import {
   DeepseekLogo,
   PerplexityLogo,
   TogetherAILogo,
+  ExaLogo,
   FirecrawlLogo,
   ElevenLabsLogo
 } from '@/components/icons/connector-icons'
@@ -457,6 +458,7 @@ export function LargeSettingsModal() {
                         {setupConnectorId === 'deepseek' && <DeepseekLogo size={32} />}
                         {setupConnectorId === 'together-ai' && <TogetherAILogo size={32} />}
                         {setupConnectorId === 'perplexity' && <PerplexityLogo size={32} />}
+                        {setupConnectorId === 'exa' && <ExaLogo size={32} />}
                         {setupConnectorId === 'firecrawl' && <FirecrawlLogo size={32} />}
                         {setupConnectorId === 'eleven-labs' && <ElevenLabsLogo size={32} />}
                         {!setupConnectorId && <Layers className="w-8 h-8 text-[#111827]" />}
@@ -757,6 +759,33 @@ export function LargeSettingsModal() {
                               onClick={() => handleStartSetup('perplexity')}
                               className="h-8 rounded-[6px] bg-white border border-black/[0.05] px-4 text-[12px] font-semibold text-[#111827] hover:bg-gray-50 shadow-sm"
                             >{isConnectorConfigured('perplexity') ? 'Manage' : 'Set up'}</Button>
+                         </div>
+
+                         {/* Exa */}
+                         <div className="flex items-center justify-between p-4 rounded-[12px] border border-black/[0.03] bg-[#F9F9F7] hover:bg-white hover:shadow-sm transition-all group">
+                            <div className="flex items-center gap-4">
+                               <div className="w-10 h-10 rounded-[8px] bg-white border border-black/[0.05] flex items-center justify-center overflow-hidden">
+                                  <ExaLogo size={24} />
+                               </div>
+                               <div>
+                                  <div className="flex items-center gap-2">
+                                     <span className="text-[14px] font-semibold text-[#111827]">Exa</span>
+                                     {isConnectorConfigured('exa') && (
+                                       <div className="flex items-center gap-1 rounded-full border border-emerald-200/50 bg-emerald-50 px-2 py-0.5">
+                                         <Check className="h-3 w-3 text-emerald-700" />
+                                         <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-tight">
+                                           Connected
+                                         </span>
+                                       </div>
+                                     )}
+                                  </div>
+                                  <p className="text-[11px] text-[#111827]/40 font-medium">AI-native search and discovery.</p>
+                               </div>
+                            </div>
+                            <Button
+                              onClick={() => handleStartSetup('exa')}
+                              className="h-8 rounded-[6px] bg-white border border-black/[0.05] px-4 text-[12px] font-semibold text-[#111827] hover:bg-gray-50 shadow-sm"
+                            >{isConnectorConfigured('exa') ? 'Manage' : 'Set up'}</Button>
                          </div>
                       </div>
                    </div>
