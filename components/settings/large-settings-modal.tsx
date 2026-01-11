@@ -589,8 +589,8 @@ export function LargeSettingsModal() {
                           <h3 className="text-[14px] font-semibold text-[#111827] tracking-tight">
                             Connected account
                           </h3>
-                          <div className="flex items-center gap-1 rounded-[4px] bg-orange-100 px-1.5 py-0.5">
-                            <span className="text-[10px] font-bold text-orange-700 uppercase tracking-tight">
+                          <div className="flex items-center gap-1 rounded-[4px] bg-[#FFEDD5] px-1.5 py-0.5">
+                            <span className="text-[10px] font-bold text-[#EA580C] uppercase tracking-tight">
                               Admin
                             </span>
                           </div>
@@ -599,9 +599,9 @@ export function LargeSettingsModal() {
                           Add your GitHub account to manage connected organizations.
                         </p>
                       </div>
-                      <div className="flex items-center gap-2 text-[#111827]/40">
+                      <div className="flex items-center gap-2 text-[#111827]/60">
                          <GithubIcon className="h-4 w-4" />
-                         <span className="text-[13px] font-medium">Globalvoix</span>
+                         <span className="text-[13px] font-semibold">Globalvoix</span>
                       </div>
                     </div>
                   </div>
