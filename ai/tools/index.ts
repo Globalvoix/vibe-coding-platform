@@ -6,6 +6,8 @@ import { getSandboxURL } from './get-sandbox-url'
 import { runCommand } from './run-command'
 import { requestSupabaseConnection } from './request-supabase-connection'
 import { requestEnvVars } from './request-env-vars'
+import { webSearch } from './web-search'
+import { webScrape } from './web-scrape'
 
 interface Params {
   modelId: string
