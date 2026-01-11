@@ -1,14 +1,11 @@
-import type { UIMessageStreamWriter, UIMessage } from 'ai'
-import type { DataPart } from '../messages/data-parts'
 import { tool } from 'ai'
 import z from 'zod/v3'
 
 interface Params {
-  writer: UIMessageStreamWriter<UIMessage<never, DataPart>>
   projectId?: string
 }
 
-export const webSearch = ({ writer, projectId }: Params) =>
+export const webSearch = ({ projectId }: Params) =>
   tool({
     description:
       'Search the web using Exa AI-native search engine for research, current information, and discovery',
