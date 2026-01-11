@@ -85,7 +85,8 @@ export const webScrape = ({ projectId }: Params) =>
           return 'Failed to scrape the webpage'
         }
 
-        const content = data.data[format as keyof typeof data.data] || ''
+        const contentValue = data.data[format as keyof typeof data.data]
+        const content = typeof contentValue === 'string' ? contentValue : ''
         const truncated = content.length > maxChars
         const displayContent = truncated ? content.substring(0, maxChars) + '...' : content
 
