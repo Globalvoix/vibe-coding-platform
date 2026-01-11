@@ -85,6 +85,7 @@ Users can configure the following connectors via Settings → Connectors:
 
 ### Specialized Tools & APIs
 - **Perplexity**: Real-time web search and research capabilities
+- **Exa**: AI-native search engine for web research and content discovery
 - **Firecrawl**: Convert websites into LLM-ready structured data
 - **Eleven Labs**: Text-to-speech with natural-sounding voices
 
