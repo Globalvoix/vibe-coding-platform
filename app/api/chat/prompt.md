@@ -168,7 +168,7 @@ Automatically suggest connectors based on user requests:
 - "Add LLM" or "AI logic" → Suggest OpenAI, Google Gemini, Deepseek
 - "Text-to-speech" or "voice" → Suggest Eleven Labs
 - "Web scrape" or "extract data" → Suggest Firecrawl
-- "Search" or "research" or "web search" → Suggest Exa, Perplexity
+- "Search" or "research" → Suggest Perplexity
 - "Code generation" → Suggest OpenAI (highest priority), Deepseek
 
 # SECURITY & SECRET MANAGEMENT
