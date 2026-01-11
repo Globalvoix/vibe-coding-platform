@@ -11,7 +11,6 @@ export type ConnectorId =
   | 'together-ai'
   | 'perplexity'
   | 'firecrawl'
-  | 'exa'
   | 'eleven-labs'
 
 export interface ConnectorCapability {
