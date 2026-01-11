@@ -457,7 +457,6 @@ export function LargeSettingsModal() {
                         {setupConnectorId === 'deepseek' && <DeepseekLogo size={32} />}
                         {setupConnectorId === 'together-ai' && <TogetherAILogo size={32} />}
                         {setupConnectorId === 'perplexity' && <PerplexityLogo size={32} />}
-                        {setupConnectorId === 'exa' && <ExaLogo size={32} />}
                         {setupConnectorId === 'firecrawl' && <FirecrawlLogo size={32} />}
                         {setupConnectorId === 'eleven-labs' && <ElevenLabsLogo size={32} />}
                         {!setupConnectorId && <Layers className="w-8 h-8 text-[#111827]" />}
