@@ -53,7 +53,7 @@ function LogoImage({
 export function OpenAILogo({ className, size = 20 }: IconProps) {
   return (
     <LogoImage
-      src="https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2Ff377af5d7184471a87f47a6b49d38ee3?format=webp&width=800"
+      src="https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F3e54001cbf9148e1a6b1dbb097871767?format=webp&width=800"
       alt="OpenAI"
       size={size}
       className={className}
@@ -86,7 +86,7 @@ export function DeepseekLogo({ className, size = 20 }: IconProps) {
 export function TogetherAILogo({ className, size = 20 }: IconProps) {
   return (
     <LogoImage
-      src="https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F3e54001cbf9148e1a6b1dbb097871767?format=webp&width=800"
+      src="https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2Ff377af5d7184471a87f47a6b49d38ee3?format=webp&width=800"
       alt="Together AI"
       size={size}
       className={['rounded-[4px]', className ?? ''].join(' ').trim()}
@@ -99,6 +99,17 @@ export function PerplexityLogo({ className, size = 20 }: IconProps) {
     <LogoImage
       src="https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F10af51757cb24a848b4a4e3198631a6a?format=webp&width=800"
       alt="Perplexity"
+      size={size}
+      className={className}
+    />
+  )
+}
+
+export function ExaLogo({ className, size = 20 }: IconProps) {
+  return (
+    <LogoImage
+      src="https://cdn.builder.io/api/v1/image/assets%2F1d734cd0ef68491eb64e3e5bf6a74b6f%2F3361e2b5e2974b2fb41829e083c267c7?format=webp&width=800"
+      alt="Exa"
       size={size}
       className={className}
     />
