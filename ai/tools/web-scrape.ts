@@ -1,14 +1,11 @@
-import type { UIMessageStreamWriter, UIMessage } from 'ai'
-import type { DataPart } from '../messages/data-parts'
 import { tool } from 'ai'
 import z from 'zod/v3'
 
 interface Params {
-  writer: UIMessageStreamWriter<UIMessage<never, DataPart>>
   projectId?: string
 }
 
-export const webScrape = ({ writer, projectId }: Params) =>
+export const webScrape = ({ projectId }: Params) =>
   tool({
     description:
       'Scrape and extract content from websites, converting HTML to structured Markdown format suitable for LLM processing',
