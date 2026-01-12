@@ -36,10 +36,14 @@ export function AppSidebar() {
     setSettingsModalOpen(true)
 
     const installStatus = searchParams.get('githubInstall')
+    const isImportFlow = searchParams.get('githubImport') === '1'
+
     if (installStatus === 'success') {
       toast.dismiss() // Clear any previous error toasts
       toast.success('GitHub connected successfully!', {
-        description: 'Your repository has been created and is ready to sync.',
+        description: isImportFlow
+          ? 'Select a repository to import into this project.'
+          : 'Your repository has been created and is ready to sync.',
       })
     } else if (installStatus === 'error') {
       toast.error('Failed to connect GitHub', {
