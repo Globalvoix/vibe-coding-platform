@@ -172,37 +172,15 @@ export function LargeSettingsModal() {
 
   useEffect(() => {
     if (settingsModalOpen && settingsTab === 'github' && projectId) {
+      // Check status immediately when tab opens
       checkGithubStatus()
     }
   }, [settingsModalOpen, settingsTab, projectId, checkGithubStatus])
 
   useEffect(() => {
-    if (!settingsModalOpen || settingsTab !== 'github' || !projectId) return
-
-    const intervalId = window.setInterval(() => {
-      void checkGithubStatus()
-    }, 2500)
-
-    return () => {
-      window.clearInterval(intervalId)
-    }
-  }, [settingsModalOpen, settingsTab, projectId, checkGithubStatus])
-
-  useEffect(() => {
     if (settingsModalOpen && settingsTab === 'connectors' && projectId) {
+      // Check status immediately when tab opens
       checkConnectorsStatus()
-    }
-  }, [settingsModalOpen, settingsTab, projectId, checkConnectorsStatus])
-
-  useEffect(() => {
-    if (!settingsModalOpen || settingsTab !== 'connectors' || !projectId) return
-
-    const intervalId = window.setInterval(() => {
-      void checkConnectorsStatus()
-    }, 2500)
-
-    return () => {
-      window.clearInterval(intervalId)
     }
   }, [settingsModalOpen, settingsTab, projectId, checkConnectorsStatus])
 
@@ -238,7 +216,10 @@ export function LargeSettingsModal() {
         throw new Error(errorData.error || 'Failed to switch organization')
       }
 
-      await checkGithubStatus()
+      // Immediately refresh status after successful org switch
+      setTimeout(() => {
+        void checkGithubStatus()
+      }, 500)
     } catch (error) {
       const msg = error instanceof Error ? error.message : 'Failed to switch organization'
       console.error('Error switching organization:', error)
@@ -265,7 +246,10 @@ export function LargeSettingsModal() {
         throw new Error(errorData.error || 'Failed to update repository')
       }
 
-      await checkGithubStatus()
+      // Immediately refresh status after successful repo update
+      setTimeout(() => {
+        void checkGithubStatus()
+      }, 500)
     } catch (error) {
       const msg = error instanceof Error ? error.message : 'Failed to update repository'
       console.error('Error updating repository:', error)
