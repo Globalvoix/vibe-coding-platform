@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { createInstallationToken, getInstallation, githubRequest } from '@/lib/github-app'
 import { getGithubProject, upsertGithubProject } from '@/lib/github-projects-db'
+import type { GithubRepository } from '@/lib/github-types'
 
 function sanitizeRepoName(name: string): string {
   return name
