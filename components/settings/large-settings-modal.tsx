@@ -126,6 +126,12 @@ export function LargeSettingsModal() {
     [organizations]
   )
 
+  useEffect(() => {
+    setImportRepos([])
+    setSelectedImportRepoFullName('')
+    setImportRepoError(null)
+  }, [activeOrg?.installationId])
+
   const projectConnected = Boolean(githubStatus.repository && githubStatus.installationId)
   const accountConnected = githubStatus.connected
   const connectedLogin = githubStatus.username ?? activeOrg?.login ?? null
