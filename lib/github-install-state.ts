@@ -24,10 +24,15 @@ function getStateSecret() {
   )
 }
 
-export function createGithubInstallState(params: { userId: string; projectId: string }) {
+export function createGithubInstallState(params: {
+  userId: string
+  projectId: string
+  mode?: 'import' | 'sync' | string
+}) {
   const payload = {
     userId: params.userId,
     projectId: params.projectId,
+    mode: params.mode,
     nonce: crypto.randomUUID(),
     ts: Date.now(),
   }
