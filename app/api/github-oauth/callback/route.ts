@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyGithubInstallState } from '@/lib/github-install-state'
 import { exchangeGithubOAuthCode } from '@/lib/github-oauth'
-import { upsertGithubOAuthToken } from '@/lib/github-projects-db'
+import { getInstallation } from '@/lib/github-app'
+import { upsertGithubOAuthToken, upsertGithubInstallation, upsertGithubProject } from '@/lib/github-projects-db'
 import { ensureGithubRepoForInstallation } from '@/lib/github-installation-flow'
 import { pushPersistedProjectToGithubMain } from '@/lib/github-repo-sync'
 
@@ -16,7 +17,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid state' }, { status: 400 })
   }
 
-  const { userId, projectId } = verified
+  const { userId, projectId, mode } = verified
 
   const code = req.nextUrl.searchParams.get('code')
   const installationIdStr = req.nextUrl.searchParams.get('installation_id')
@@ -55,6 +56,33 @@ export async function GET(req: NextRequest) {
     const installationId = Number(installationIdStr)
     if (!Number.isFinite(installationId)) {
       return NextResponse.json({ error: 'Invalid installation_id' }, { status: 400 })
+    }
+
+    if (mode === 'import') {
+      const installation = await getInstallation(installationId)
+
+      await upsertGithubInstallation({
+        userId,
+        projectId,
+        installationId,
+        accountLogin: installation.account.login,
+        accountType: installation.account.type,
+        accountAvatarUrl: installation.account.avatar_url || null,
+      })
+
+      await upsertGithubProject({
+        userId,
+        projectId,
+        activeInstallationId: installationId,
+      })
+
+      const redirectUrl = new URL('/workspace', req.nextUrl.origin)
+      redirectUrl.searchParams.set('projectId', projectId)
+      redirectUrl.searchParams.set('openSettings', '1')
+      redirectUrl.searchParams.set('settingsTab', 'github')
+      redirectUrl.searchParams.set('githubInstall', 'success')
+      redirectUrl.searchParams.set('githubImport', '1')
+      return NextResponse.redirect(redirectUrl.toString())
     }
 
     const repo = await ensureGithubRepoForInstallation({ userId, projectId, installationId })
