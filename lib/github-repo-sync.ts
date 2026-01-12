@@ -77,7 +77,19 @@ function shouldExcludePath(p: string): boolean {
   if (normalized.startsWith('dist/')) return true
   if (normalized.startsWith('build/')) return true
 
+  // Common editor / OS junk
   const baseName = normalized.split('/').pop() ?? normalized
+  if (baseName === '.DS_Store') return true
+  if (baseName === 'Thumbs.db') return true
+
+  // Platform/sandbox artifacts that should never land in a user's repo
+  if (normalized.startsWith('sandbox/')) return true
+  if (normalized.startsWith('sandboxes/')) return true
+  if (normalized.includes('/sandbox/')) return true
+  if (normalized.startsWith('prompts/')) return true
+  if (normalized.includes('/prompts/')) return true
+  if (baseName === 'prompt.md') return true
+
   if (/^\.env(\.|$)/.test(baseName)) return true
   if (/\.pem$/i.test(baseName)) return true
 
@@ -151,6 +163,7 @@ async function pushSnapshotToGithubMain(params: {
   branch: string
   commitMessage: string
   snapshot: SnapshotItem[]
+  replaceTree?: boolean
 }) {
   const installationToken = await createInstallationToken(params.installationId)
 
@@ -192,10 +205,14 @@ async function pushSnapshotToGithubMain(params: {
     'POST',
     `/repos/${encodeURIComponent(params.owner)}/${encodeURIComponent(params.repo)}/git/trees`,
     installationToken,
-    {
-      base_tree: baseTreeSha,
-      tree: treeEntries,
-    }
+    params.replaceTree
+      ? {
+          tree: treeEntries,
+        }
+      : {
+          base_tree: baseTreeSha,
+          tree: treeEntries,
+        }
   )
 
   const commit = await githubRequest<GithubCommit>(
