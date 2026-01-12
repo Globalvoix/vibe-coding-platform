@@ -1,12 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { createGithubInstallState } from '@/lib/github-install-state'
-import { getGithubAppSlug } from '@/lib/github-app'
 
-/**
- * Initiates GitHub App installation flow
- * Redirects user to GitHub to install the app and select account/organization
- */
 export async function GET(req: NextRequest) {
   const { userId } = await auth()
   if (!userId) {
@@ -15,17 +10,17 @@ export async function GET(req: NextRequest) {
 
   const projectId = req.nextUrl.searchParams.get('projectId')
   if (!projectId) {
-    return NextResponse.json(
-      { error: 'Missing projectId' },
-      { status: 400 }
-    )
+    return NextResponse.json({ error: 'Missing projectId' }, { status: 400 })
   }
 
   try {
-    const appSlug = getGithubAppSlug()
+    const appSlug = process.env.GITHUB_APP_SLUG
+    if (!appSlug) {
+      throw new Error('GITHUB_APP_SLUG is not configured')
+    }
+
     const state = createGithubInstallState({ userId, projectId })
 
-    // Redirect to GitHub to start installation flow
     const githubUrl = new URL(`https://github.com/apps/${appSlug}/installations/new`)
     githubUrl.searchParams.set('state', state)
 
@@ -33,7 +28,9 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     console.error('[GitHub Start] Error:', error)
     return NextResponse.json(
-      { error: 'Failed to start GitHub installation' },
+      {
+        error: error instanceof Error ? error.message : 'Failed to start GitHub installation',
+      },
       { status: 500 }
     )
   }
