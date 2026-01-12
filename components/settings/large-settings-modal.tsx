@@ -76,6 +76,8 @@ export function LargeSettingsModal() {
 
   const [githubStatus, setGithubStatus] = useState<GithubConnectionStatus>({ connected: false })
   const [loading, setLoading] = useState(false)
+  const [creatingRepo, setCreatingRepo] = useState(false)
+  const [disconnecting, setDisconnecting] = useState(false)
   const [orgSwitchingId, setOrgSwitchingId] = useState<number | null>(null)
   const [updatingRepo, setUpdatingRepo] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -104,6 +106,11 @@ export function LargeSettingsModal() {
     () => organizations.find((o) => o.active) ?? null,
     [organizations]
   )
+
+  const projectConnected = Boolean(githubStatus.repository && githubStatus.installationId)
+  const accountConnected = githubStatus.connected
+  const connectedLogin = githubStatus.username ?? activeOrg?.login ?? null
+  const connectedAvatarUrl = githubStatus.avatarUrl ?? activeOrg?.avatarUrl ?? null
 
   // Check URL for error parameters on mount
   useEffect(() => {
@@ -190,6 +197,67 @@ export function LargeSettingsModal() {
     setErrorMessage(null)
     setRequestId(null)
     window.location.href = `/api/github-oauth/start?projectId=${projectId}`
+  }
+
+  const handleCreateRepo = async () => {
+    if (!projectId || creatingRepo) return
+
+    try {
+      setCreatingRepo(true)
+      setErrorMessage(null)
+
+      const res = await fetch('/api/github-oauth/create-repo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ projectId }),
+      })
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ error: 'Unknown error' }))
+        throw new Error(errorData.error || 'Failed to create repository')
+      }
+
+      setTimeout(() => {
+        void checkGithubStatus()
+      }, 500)
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : 'Failed to create repository'
+      console.error('Error creating repository:', error)
+      setErrorMessage(msg)
+    } finally {
+      setCreatingRepo(false)
+    }
+  }
+
+  const handleDisconnectGithub = async () => {
+    if (!projectId || disconnecting) return
+
+    try {
+      setDisconnecting(true)
+      setErrorMessage(null)
+
+      const res = await fetch('/api/github-oauth/disconnect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ projectId }),
+      })
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ error: 'Unknown error' }))
+        throw new Error(errorData.error || 'Failed to disconnect')
+      }
+
+      setGithubStatus({ connected: false })
+      setTimeout(() => {
+        void checkGithubStatus()
+      }, 250)
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : 'Failed to disconnect'
+      console.error('Error disconnecting GitHub:', error)
+      setErrorMessage(msg)
+    } finally {
+      setDisconnecting(false)
+    }
   }
 
   const handleRetryConnection = () => {
@@ -623,25 +691,80 @@ export function LargeSettingsModal() {
                           <h3 className="text-[14px] font-semibold text-[#111827] tracking-tight">
                             Connect project
                           </h3>
-                          <div className="flex items-center gap-1 rounded-full border border-orange-200/50 bg-[#FFF7ED] px-2 py-0.5">
-                            <div className="h-1 w-1 rounded-full bg-orange-500" />
-                            <span className="text-[10px] font-bold text-orange-700 uppercase tracking-tight">
-                              Not connected
-                            </span>
-                          </div>
+                          {projectConnected ? (
+                            <div className="flex items-center gap-1 rounded-full border border-emerald-200/50 bg-emerald-50 px-2 py-0.5">
+                              <Check className="h-3 w-3 text-emerald-700" />
+                              <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-tight">
+                                Connected
+                              </span>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-1 rounded-full border border-orange-200/50 bg-[#FFF7ED] px-2 py-0.5">
+                              <div className="h-1 w-1 rounded-full bg-orange-500" />
+                              <span className="text-[10px] font-bold text-orange-700 uppercase tracking-tight">
+                                Not connected
+                              </span>
+                            </div>
+                          )}
                         </div>
                         <p className="text-[12px] text-[#111827]/40 font-medium leading-relaxed">
-                          Connect your project to your GitHub organization in a 2-way sync.
+                          {projectConnected
+                            ? 'Your project is linked to a GitHub repository.'
+                            : 'Connect your project to GitHub and create a private repository.'}
                         </p>
+                        {githubStatus.repository && (
+                          <a
+                            href={githubStatus.repository.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-[#111827]/60 hover:text-[#111827] transition-colors"
+                          >
+                            <span className="truncate max-w-[420px]">
+                              {githubStatus.repository.owner}/{githubStatus.repository.name}
+                            </span>
+                            <ExternalLink className="h-3.5 w-3.5" />
+                          </a>
+                        )}
                       </div>
-                      <Button
-                        onClick={handleConnectGithub}
-                        disabled={loading}
-                        className="h-8 rounded-[6px] bg-[#111827] px-4 text-[12px] font-semibold text-white transition-all hover:bg-black active:scale-[0.98] flex items-center gap-2 shrink-0"
-                      >
-                        <GithubIcon className="h-3.5 w-3.5 text-white" />
-                        {loading ? 'Connecting...' : 'Connect project'}
-                      </Button>
+                      <div className="flex items-center gap-2 shrink-0">
+                        {!accountConnected ? (
+                          <Button
+                            onClick={handleConnectGithub}
+                            disabled={loading}
+                            className="h-8 rounded-[6px] bg-[#111827] px-4 text-[12px] font-semibold text-white transition-all hover:bg-black active:scale-[0.98] flex items-center gap-2"
+                          >
+                            <GithubIcon className="h-3.5 w-3.5 text-white" />
+                            {loading ? 'Connecting...' : 'Connect project'}
+                          </Button>
+                        ) : !githubStatus.repository ? (
+                          <Button
+                            onClick={handleCreateRepo}
+                            disabled={creatingRepo}
+                            className="h-8 rounded-[6px] bg-[#111827] px-4 text-[12px] font-semibold text-white transition-all hover:bg-black active:scale-[0.98] flex items-center gap-2"
+                          >
+                            <GithubIcon className="h-3.5 w-3.5 text-white" />
+                            {creatingRepo ? 'Creating...' : 'Create repo'}
+                          </Button>
+                        ) : (
+                          <>
+                            <Button
+                              onClick={handleUpdatePr}
+                              disabled={updatingRepo || !githubStatus.canUpdatePr}
+                              className="h-8 rounded-[6px] bg-[#111827] px-4 text-[12px] font-semibold text-white transition-all hover:bg-black active:scale-[0.98] flex items-center gap-2"
+                            >
+                              <RefreshCw className="h-3.5 w-3.5 text-white" />
+                              {updatingRepo ? 'Syncing...' : 'Sync now'}
+                            </Button>
+                            <Button
+                              onClick={handleDisconnectGithub}
+                              disabled={disconnecting}
+                              className="h-8 rounded-[6px] bg-white border border-black/[0.05] px-4 text-[12px] font-semibold text-red-600 hover:bg-red-50 shadow-sm"
+                            >
+                              {disconnecting ? 'Disconnecting...' : 'Disconnect'}
+                            </Button>
+                          </>
+                        )}
+                      </div>
                     </div>
 
                     <div className="flex items-center justify-between group gap-10">
@@ -650,21 +773,112 @@ export function LargeSettingsModal() {
                           <h3 className="text-[14px] font-semibold text-[#111827] tracking-tight">
                             Connected account
                           </h3>
-                          <div className="flex items-center gap-1 rounded-[4px] bg-[#FFEDD5] px-1.5 py-0.5">
-                            <span className="text-[10px] font-bold text-[#EA580C] uppercase tracking-tight">
-                              Admin
-                            </span>
-                          </div>
+                          {accountConnected ? (
+                            <div className="flex items-center gap-1 rounded-[4px] bg-[#FFEDD5] px-1.5 py-0.5">
+                              <span className="text-[10px] font-bold text-[#EA580C] uppercase tracking-tight">
+                                Admin
+                              </span>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-1 rounded-[4px] bg-black/[0.04] px-1.5 py-0.5">
+                              <span className="text-[10px] font-bold text-[#111827]/60 uppercase tracking-tight">
+                                Not connected
+                              </span>
+                            </div>
+                          )}
                         </div>
                         <p className="text-[12px] text-[#111827]/40 font-medium leading-relaxed">
-                          Add your GitHub account to manage connected organizations.
+                          {accountConnected
+                            ? 'Choose which GitHub account or organization to connect this project to.'
+                            : 'Connect GitHub to manage connected organizations.'}
                         </p>
                       </div>
                       <div className="flex items-center gap-2 text-[#111827]/60">
-                         <GithubIcon className="h-4 w-4" />
-                         <span className="text-[13px] font-semibold">Globalvoix</span>
+                        {connectedAvatarUrl ? (
+                          <img
+                            src={connectedAvatarUrl}
+                            alt={connectedLogin ?? 'GitHub'}
+                            className="h-6 w-6 rounded-full"
+                          />
+                        ) : (
+                          <GithubIcon className="h-4 w-4" />
+                        )}
+                        <span className="text-[13px] font-semibold">
+                          {connectedLogin ?? '—'}
+                        </span>
                       </div>
                     </div>
+
+                    {accountConnected && organizations.length > 0 && (
+                      <div className="rounded-[12px] border border-black/[0.05] bg-[#F9F9F9] p-5 space-y-3">
+                        <div className="flex items-center justify-between gap-4">
+                          <div>
+                            <h3 className="text-[13px] font-semibold text-[#111827]">Installations</h3>
+                            <p className="text-[11px] text-[#111827]/50 font-medium mt-1">
+                              Select which account owns the repository for this project.
+                            </p>
+                          </div>
+                          {activeOrg && (
+                            <div className="flex items-center gap-2 text-[#111827]/60">
+                              <span className="text-[11px] font-semibold">Active:</span>
+                              <span className="text-[11px] font-semibold text-[#111827]">{activeOrg.login}</span>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {organizations.map((org) => (
+                            <button
+                              key={org.installationId}
+                              type="button"
+                              onClick={() => handleSelectOrganization(org.installationId)}
+                              disabled={orgSwitchingId === org.installationId}
+                              className={cn(
+                                'flex items-center justify-between gap-3 rounded-[10px] border px-3 py-2 text-left transition-all',
+                                org.active
+                                  ? 'border-emerald-200/50 bg-emerald-50'
+                                  : 'border-black/[0.05] bg-white hover:bg-black/[0.01]',
+                                orgSwitchingId === org.installationId ? 'opacity-60' : ''
+                              )}
+                            >
+                              <div className="flex items-center gap-2 min-w-0">
+                                {org.avatarUrl ? (
+                                  <img
+                                    src={org.avatarUrl}
+                                    alt={org.login}
+                                    className="h-6 w-6 rounded-full"
+                                  />
+                                ) : (
+                                  <GithubIcon className="h-4 w-4 text-[#111827]/60" />
+                                )}
+                                <div className="min-w-0">
+                                  <div className="text-[12px] font-semibold text-[#111827] truncate">
+                                    {org.login}
+                                  </div>
+                                  <div className="text-[10px] font-semibold text-[#111827]/40">
+                                    {org.type}
+                                  </div>
+                                </div>
+                              </div>
+                              {org.active ? (
+                                <div className="flex items-center gap-1 rounded-full border border-emerald-200/50 bg-white px-2 py-0.5">
+                                  <Check className="h-3 w-3 text-emerald-700" />
+                                  <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-tight">
+                                    Active
+                                  </span>
+                                </div>
+                              ) : (
+                                <div className="flex items-center gap-1 rounded-full border border-black/[0.05] bg-white px-2 py-0.5">
+                                  <span className="text-[10px] font-bold text-[#111827]/60 uppercase tracking-tight">
+                                    Select
+                                  </span>
+                                </div>
+                              )}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               ) : settingsTab === 'connectors' ? (
