@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse, type NextRequest } from 'next/server'
 import { verifyGithubInstallState } from '@/lib/github-install-state'
 import { ensureGithubRepoForInstallation } from '@/lib/github-installation-flow'
 
