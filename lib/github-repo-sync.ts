@@ -110,7 +110,7 @@ export async function pushProjectToGithubMain(params: {
   const rootDir = params.rootDir ?? process.cwd()
   const installationToken = await createInstallationToken(params.installationId)
 
-  const ref = await githubRequest<{ object: { sha: string } }>(
+  const ref = await githubRequest<GithubGitRef>(
     'GET',
     `/repos/${encodeURIComponent(params.owner)}/${encodeURIComponent(params.repo)}/git/ref/heads/${encodeURIComponent(params.branch)}`,
     installationToken
@@ -118,7 +118,7 @@ export async function pushProjectToGithubMain(params: {
 
   const baseCommitSha = ref.object.sha
 
-  const baseCommit = await githubRequest<{ tree: { sha: string } }>(
+  const baseCommit = await githubRequest<GithubCommit>(
     'GET',
     `/repos/${encodeURIComponent(params.owner)}/${encodeURIComponent(params.repo)}/git/commits/${baseCommitSha}`,
     installationToken
@@ -131,7 +131,7 @@ export async function pushProjectToGithubMain(params: {
   const treeEntries: { path: string; mode: string; type: string; sha: string }[] = []
 
   for (const file of snapshot) {
-    const blob = await githubRequest<{ sha: string }>(
+    const blob = await githubRequest<GithubBlob>(
       'POST',
       `/repos/${encodeURIComponent(params.owner)}/${encodeURIComponent(params.repo)}/git/blobs`,
       installationToken,
@@ -146,7 +146,7 @@ export async function pushProjectToGithubMain(params: {
     })
   }
 
-  const newTree = await githubRequest<{ sha: string }>(
+  const newTree = await githubRequest<GithubTree>(
     'POST',
     `/repos/${encodeURIComponent(params.owner)}/${encodeURIComponent(params.repo)}/git/trees`,
     installationToken,
@@ -156,7 +156,7 @@ export async function pushProjectToGithubMain(params: {
     }
   )
 
-  const commit = await githubRequest<{ sha: string }>(
+  const commit = await githubRequest<GithubCommit>(
     'POST',
     `/repos/${encodeURIComponent(params.owner)}/${encodeURIComponent(params.repo)}/git/commits`,
     installationToken,
@@ -167,7 +167,7 @@ export async function pushProjectToGithubMain(params: {
     }
   )
 
-  await githubRequest<any>(
+  await githubRequest<GithubGitRef>(
     'PATCH',
     `/repos/${encodeURIComponent(params.owner)}/${encodeURIComponent(params.repo)}/git/refs/heads/${encodeURIComponent(params.branch)}`,
     installationToken,
