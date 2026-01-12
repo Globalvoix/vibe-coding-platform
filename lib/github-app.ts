@@ -26,20 +26,13 @@ function normalizePem(pem: string): string {
   // Remove all newlines and whitespace first
   const cleaned = pem.replace(/\\n/g, '').replace(/\n/g, '').replace(/\r/g, '').trim()
 
-  console.log('[GitHub App] PEM input length:', pem.length)
-  console.log('[GitHub App] PEM cleaned length:', cleaned.length)
-
   // Extract the PEM header, body, and footer
   const beginMatch = cleaned.match(/-----BEGIN [^-]+-----/)
   const endMatch = cleaned.match(/-----END [^-]+-----/)
 
   if (!beginMatch || !endMatch) {
-    console.error('[GitHub App] Invalid PEM format - missing headers', {
-      hasBegin: !!beginMatch,
-      hasEnd: !!endMatch,
-      cleanedStart: cleaned.substring(0, 100),
-    })
-    return pem // Return original if we can't parse it
+    console.error('[GitHub App] Invalid PEM format - missing headers')
+    return pem
   }
 
   const header = beginMatch[0]
@@ -50,8 +43,6 @@ function normalizePem(pem: string): string {
   const endIdx = cleaned.indexOf(footer)
   const base64Content = cleaned.substring(startIdx, endIdx)
 
-  console.log('[GitHub App] Base64 content length:', base64Content.length)
-
   // Split base64 into 64-character lines (standard PEM format)
   const lines = [header]
   for (let i = 0; i < base64Content.length; i += 64) {
@@ -59,39 +50,20 @@ function normalizePem(pem: string): string {
   }
   lines.push(footer)
 
-  const result = lines.join('\n')
-  console.log('[GitHub App] Normalized PEM lines:', lines.length)
-
-  return result
+  return lines.join('\n')
 }
 
 function parseGithubPrivateKey(pem: string): KeyObject {
   const normalizedPem = normalizePem(pem)
 
-  // Log the normalized format for debugging
-  console.log('[GitHub App] Normalized PEM format:', {
-    totalLength: normalizedPem.length,
-    lineCount: normalizedPem.split('\n').length,
-    firstLine: normalizedPem.split('\n')[0],
-    lastLine: normalizedPem.split('\n').slice(-1)[0],
-  })
-
   try {
-    // Try creating the private key with the normalized PEM
     return createPrivateKey({
       key: normalizedPem,
       format: 'pem',
     })
   } catch (error) {
-    // Provide more detailed error information
     const errorMsg = error instanceof Error ? error.message : String(error)
-    console.error('[GitHub App] Private key parsing failed:', {
-      error: errorMsg,
-      keyLength: normalizedPem.length,
-      keyStart: normalizedPem.substring(0, 80),
-      keyEnd: normalizedPem.substring(Math.max(0, normalizedPem.length - 80)),
-      lines: normalizedPem.split('\n').slice(0, 3),
-    })
+    console.error('[GitHub App] Private key parsing failed:', errorMsg)
     throw new Error(`Failed to parse GitHub App private key: ${errorMsg}`)
   }
 }
@@ -184,12 +156,7 @@ export async function createInstallationToken(installationId: number): Promise<s
     method: 'POST',
     path: `/app/installations/${installationId}/access_tokens`,
     jwt,
-    body: {
-      permissions: {
-        contents: 'write',
-        metadata: 'read',
-      },
-    },
+    body: {},
   })
 
   return result.token
