@@ -15,7 +15,6 @@ const nextConfig: NextConfig = {
     return config
   },
   turbopack: {
-    root: './',
     rules: {
       '*.md': {
         loaders: ['raw-loader'],
