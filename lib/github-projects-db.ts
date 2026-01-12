@@ -1,5 +1,6 @@
 import { Pool } from 'pg'
 import crypto from 'node:crypto'
+import { decryptEnvVar, encryptEnvVar } from '@/lib/env-encryption'
 
 const connectionString = process.env.DATABASE_URL
 
