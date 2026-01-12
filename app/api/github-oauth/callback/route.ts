@@ -1,76 +1,18 @@
-import type { NextRequest } from 'next/server'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { verifyGithubInstallState } from '@/lib/github-install-state'
 import { getInstallation, createInstallationToken, githubInstallationRequest } from '@/lib/github-app'
 import { upsertGithubInstallation, upsertGithubProject } from '@/lib/github-projects-db'
 
-function sanitizeRepoName(input: string) {
-  return input
-    .toLowerCase()
-    .replace(/[^a-z0-9-_]/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 90)
-}
-
-async function createRepoForInstallation(params: {
-  installationId: number
-  projectId: string
-  defaultRepoName: string
-}) {
-  const installation = await getInstallation(params.installationId)
-  const account = installation.account
-
-  const installationToken = await createInstallationToken(params.installationId)
-
-  const repoName = sanitizeRepoName(params.defaultRepoName)
-
-  const createBody = {
-    name: repoName,
-    private: true,
-    auto_init: true,
-    description: `Thinksoft project ${params.projectId}`,
-  }
-
-  if (account.type === 'Organization') {
-    return githubInstallationRequest<{
-      id: number
-      name: string
-      owner: { login: string }
-      default_branch: string
-      html_url: string
-    }>({
-      method: 'POST',
-      path: `/orgs/${encodeURIComponent(account.login)}/repos`,
-      installationToken,
-      body: createBody,
-    })
-  }
-
-  return githubInstallationRequest<{
-    id: number
-    name: string
-    owner: { login: string }
-    default_branch: string
-    html_url: string
-  }>({
-    method: 'POST',
-    path: `/user/repos`,
-    installationToken,
-    body: createBody,
-  })
-}
-
+/**
+ * GitHub OAuth callback
+ * Called after user completes installation on GitHub
+ * Creates repository and stores connection in DB
+ */
 export async function GET(req: NextRequest) {
-  console.log('[GitHub Callback] Received callback:', {
-    searchParams: Object.fromEntries(req.nextUrl.searchParams),
-  })
-
   const installationIdRaw = req.nextUrl.searchParams.get('installation_id')
   const state = req.nextUrl.searchParams.get('state')
 
   if (!installationIdRaw || !state) {
-    console.error('[GitHub Callback] Missing params:', { installationIdRaw, state: state ? 'present' : 'missing' })
     return NextResponse.json(
       { error: 'Missing installation_id or state' },
       { status: 400 }
@@ -79,40 +21,55 @@ export async function GET(req: NextRequest) {
 
   const installationId = Number(installationIdRaw)
   if (!Number.isFinite(installationId) || installationId <= 0) {
-    console.error('[GitHub Callback] Invalid installation_id:', installationIdRaw)
-    return NextResponse.json({ error: 'Invalid installation_id' }, { status: 400 })
+    return NextResponse.json(
+      { error: 'Invalid installation_id' },
+      { status: 400 }
+    )
   }
 
+  // Verify state to get userId and projectId
   const verified = verifyGithubInstallState(state)
   if (!verified) {
-    console.error('[GitHub Callback] Failed to verify state')
-    return NextResponse.json({ error: 'Invalid state' }, { status: 400 })
+    return NextResponse.json(
+      { error: 'Invalid or expired state' },
+      { status: 400 }
+    )
   }
 
-  console.log('[GitHub Callback] State verified:', { userId: verified.userId, projectId: verified.projectId })
+  const { userId, projectId } = verified
 
   try {
+    // Step 1: Get installation details from GitHub
     const installation = await getInstallation(installationId)
     const account = installation.account
 
+    // Step 2: Save installation to database
     await upsertGithubInstallation({
-      userId: verified.userId,
-      projectId: verified.projectId,
+      userId,
+      projectId,
       installationId,
       accountLogin: account.login,
       accountType: account.type,
       accountAvatarUrl: account.avatar_url ?? null,
     })
 
-    const repo = await createRepoForInstallation({
-      installationId,
-      projectId: verified.projectId,
-      defaultRepoName: `thinksoft-${verified.projectId}`,
-    })
+    // Step 3: Create installation token
+    const installationToken = await createInstallationToken(installationId)
 
+    // Step 4: Create repository
+    const repoName = sanitizeRepoName(`thinksoft-${projectId}`)
+    const repo = await createRepository(
+      installationToken,
+      account.type,
+      account.login,
+      repoName,
+      projectId
+    )
+
+    // Step 5: Save project connection to database
     await upsertGithubProject({
-      userId: verified.userId,
-      projectId: verified.projectId,
+      userId,
+      projectId,
       activeInstallationId: installationId,
       repoOwner: repo.owner.login,
       repoName: repo.name,
@@ -120,34 +77,76 @@ export async function GET(req: NextRequest) {
       defaultBranch: repo.default_branch,
     })
 
+    // Redirect back to workspace with success
     const redirectUrl = new URL('/workspace', req.nextUrl.origin)
-    redirectUrl.searchParams.set('projectId', verified.projectId)
+    redirectUrl.searchParams.set('projectId', projectId)
     redirectUrl.searchParams.set('openSettings', '1')
     redirectUrl.searchParams.set('settingsTab', 'github')
+    redirectUrl.searchParams.set('githubInstall', 'success')
 
     return NextResponse.redirect(redirectUrl.toString())
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error)
-    const errorStack = error instanceof Error ? error.stack : ''
-    const errorCode =
-      error instanceof Error && 'code' in error ? (error.code as string) : 'UNKNOWN'
-    const errorDetails =
-      error instanceof Error && 'detail' in error ? (error.detail as string) : ''
-    console.error('[GitHub Callback] EXCEPTION in GitHub App callback:', {
-      message: errorMessage,
-      code: errorCode,
-      detail: errorDetails,
-      stack: errorStack,
-      installationId: installationIdRaw,
-      verified: verified ? { userId: verified.userId, projectId: verified.projectId } : null,
-    })
+    console.error('[GitHub Callback] Error:', errorMessage)
 
+    // Redirect back with error
     const redirectUrl = new URL('/workspace', req.nextUrl.origin)
-    redirectUrl.searchParams.set('projectId', verified.projectId)
+    redirectUrl.searchParams.set('projectId', projectId)
     redirectUrl.searchParams.set('openSettings', '1')
     redirectUrl.searchParams.set('settingsTab', 'github')
     redirectUrl.searchParams.set('githubInstall', 'error')
+    redirectUrl.searchParams.set('githubError', encodeURIComponent(errorMessage))
 
     return NextResponse.redirect(redirectUrl.toString())
+  }
+}
+
+function sanitizeRepoName(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9-_]/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 100)
+}
+
+async function createRepository(
+  token: string,
+  accountType: 'User' | 'Organization',
+  accountLogin: string,
+  repoName: string,
+  projectId: string
+) {
+  const createBody = {
+    name: repoName,
+    private: true,
+    auto_init: true,
+    description: `Thinksoft project ${projectId}`,
+  }
+
+  try {
+    // Different endpoints for user vs org
+    const path =
+      accountType === 'Organization'
+        ? `/orgs/${encodeURIComponent(accountLogin)}/repos`
+        : '/user/repos'
+
+    const repo = await githubInstallationRequest<{
+      id: number
+      name: string
+      owner: { login: string }
+      default_branch: string
+      html_url: string
+    }>({
+      method: 'POST',
+      path,
+      installationToken: token,
+      body: createBody,
+    })
+
+    return repo
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error)
+    throw new Error(`Failed to create repository "${repoName}": ${errorMsg}`)
   }
 }

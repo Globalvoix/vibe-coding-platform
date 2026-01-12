@@ -1,9 +1,11 @@
-import type { NextRequest } from 'next/server'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { getGithubProject } from '@/lib/github-projects-db'
 import { pushProjectToGithubMain } from '@/lib/github-repo-sync'
 
+/**
+ * Push project snapshot to GitHub main branch
+ */
 export async function POST(req: NextRequest) {
   const { userId } = await auth()
   if (!userId) {
@@ -15,16 +17,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Missing projectId' }, { status: 400 })
   }
 
-  const project = await getGithubProject({ userId, projectId: body.projectId })
-
-  if (!project?.active_installation_id || !project.repo_owner || !project.repo_name) {
-    return NextResponse.json(
-      { error: 'Repository not connected yet' },
-      { status: 400 }
-    )
-  }
-
   try {
+    const project = await getGithubProject({ userId, projectId: body.projectId })
+
+    if (!project?.active_installation_id || !project.repo_owner || !project.repo_name) {
+      return NextResponse.json(
+        { error: 'Repository not connected' },
+        { status: 400 }
+      )
+    }
+
     const branch = project.default_branch ?? 'main'
 
     const result = await pushProjectToGithubMain({
@@ -45,10 +47,8 @@ export async function POST(req: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('Error updating repo', error)
-    return NextResponse.json(
-      { error: 'Failed to update repository' },
-      { status: 500 }
-    )
+    const msg = error instanceof Error ? error.message : 'Unknown error'
+    console.error('[GitHub Update Repo] Error:', msg)
+    return NextResponse.json({ error: msg }, { status: 500 })
   }
 }

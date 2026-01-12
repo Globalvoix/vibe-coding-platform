@@ -1,8 +1,10 @@
-import type { NextRequest } from 'next/server'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { getGithubProject, listGithubInstallations } from '@/lib/github-projects-db'
 
+/**
+ * Get current GitHub connection status for a project
+ */
 export async function GET(req: NextRequest) {
   const { userId } = await auth()
   if (!userId) {
@@ -12,38 +14,30 @@ export async function GET(req: NextRequest) {
   const projectId = req.nextUrl.searchParams.get('projectId')
   if (!projectId) {
     return NextResponse.json(
-      { error: 'Missing projectId query parameter' },
+      { error: 'Missing projectId' },
       { status: 400 }
     )
   }
 
   try {
-    console.log('[GitHub Status] Querying for userId:', userId, 'projectId:', projectId)
-
     const [project, installations] = await Promise.all([
       getGithubProject({ userId, projectId }),
       listGithubInstallations({ userId, projectId }),
     ])
 
-    console.log('[GitHub Status] Query results:', {
-      projectFound: !!project,
-      installationsCount: installations.length,
-      activeInstallationId: project?.active_installation_id,
-    })
-
     const activeInstallationId = project?.active_installation_id ?? null
 
-    const orgs = installations.map((i) => ({
-      installationId: i.installation_id,
-      login: i.account_login,
-      type: i.account_type,
-      avatarUrl: i.account_avatar_url,
-      active: activeInstallationId === i.installation_id,
+    // Build organizations list
+    const organizations = installations.map((inst) => ({
+      installationId: inst.installation_id,
+      login: inst.account_login,
+      type: inst.account_type,
+      avatarUrl: inst.account_avatar_url,
+      active: inst.installation_id === activeInstallationId,
     }))
 
-    const activeOrg = orgs.find((o) => o.active) ?? null
-
-    const repo =
+    // Build repository info if exists
+    const repository =
       project?.repo_owner && project?.repo_name
         ? {
             owner: project.repo_owner,
@@ -53,33 +47,20 @@ export async function GET(req: NextRequest) {
           }
         : null
 
-    console.log('[GitHub Status] Response:', {
-      connected: orgs.length > 0,
-      repoCreated: !!repo,
-      orgsCount: orgs.length,
-    })
-
     return NextResponse.json({
-      connected: orgs.length > 0,
+      connected: organizations.length > 0,
       projectId,
-      username: activeOrg?.login,
-      avatarUrl: activeOrg?.avatarUrl,
-      installationId: activeInstallationId ?? undefined,
-      organizations: orgs,
-      repository: repo,
-      canUpdatePr: Boolean(repo && activeInstallationId),
+      username: organizations.find((o) => o.active)?.login,
+      avatarUrl: organizations.find((o) => o.active)?.avatarUrl,
+      installationId: activeInstallationId,
+      organizations,
+      repository,
+      canUpdatePr: Boolean(repository && activeInstallationId),
     })
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error)
-    const errorStack = error instanceof Error ? error.stack : ''
-    console.error('[GitHub Status] Error checking GitHub connection status:', {
-      message: errorMessage,
-      stack: errorStack,
-      userId,
-      projectId,
-    })
+    console.error('[GitHub Status] Error:', error)
     return NextResponse.json(
-      { error: 'Failed to check connection status' },
+      { error: 'Failed to check GitHub status' },
       { status: 500 }
     )
   }

@@ -1,28 +1,19 @@
-import type { NextRequest } from 'next/server'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
-import { createInstallationToken, getInstallation, githubInstallationRequest } from '@/lib/github-app'
+import { getInstallation, createInstallationToken, githubInstallationRequest } from '@/lib/github-app'
 import { upsertGithubInstallation, upsertGithubProject } from '@/lib/github-projects-db'
 
-function sanitizeRepoName(input: string) {
-  return input
-    .toLowerCase()
-    .replace(/[^a-z0-9-_]/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 90)
-}
-
+/**
+ * Switch active organization/account for a project
+ * Creates repository in the selected organization if needed
+ */
 export async function POST(req: NextRequest) {
   const { userId } = await auth()
   if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const body = (await req.json()) as {
-    projectId?: string
-    installationId?: number
-  }
+  const body = (await req.json()) as { projectId?: string; installationId?: number }
 
   if (!body.projectId || !body.installationId) {
     return NextResponse.json(
@@ -31,15 +22,17 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  const installationId = Number(body.installationId)
-  if (!Number.isFinite(installationId) || installationId <= 0) {
-    return NextResponse.json({ error: 'Invalid installationId' }, { status: 400 })
-  }
-
   try {
+    const installationId = Number(body.installationId)
+    if (!Number.isFinite(installationId)) {
+      return NextResponse.json({ error: 'Invalid installationId' }, { status: 400 })
+    }
+
+    // Get installation details
     const installation = await getInstallation(installationId)
     const account = installation.account
 
+    // Update installation in DB
     await upsertGithubInstallation({
       userId,
       projectId: body.projectId,
@@ -49,10 +42,11 @@ export async function POST(req: NextRequest) {
       accountAvatarUrl: account.avatar_url ?? null,
     })
 
-    const installationToken = await createInstallationToken(installationId)
+    // Create installation token
+    const token = await createInstallationToken(installationId)
 
+    // Create repository
     const repoName = sanitizeRepoName(`thinksoft-${body.projectId}`)
-
     const createBody = {
       name: repoName,
       private: true,
@@ -60,57 +54,25 @@ export async function POST(req: NextRequest) {
       description: `Thinksoft project ${body.projectId}`,
     }
 
-    let repo
-    try {
-      repo =
-        account.type === 'Organization'
-          ? await githubInstallationRequest<{
-              id: number
-              name: string
-              owner: { login: string }
-              default_branch: string
-              html_url: string
-            }>({
-              method: 'POST',
-              path: `/orgs/${encodeURIComponent(account.login)}/repos`,
-              installationToken,
-              body: createBody,
-            })
-          : await githubInstallationRequest<{
-              id: number
-              name: string
-              owner: { login: string }
-              default_branch: string
-              html_url: string
-            }>({
-              method: 'POST',
-              path: `/user/repos`,
-              installationToken,
-              body: createBody,
-            })
-    } catch (repoError) {
-      console.log('[Connect Org] Repository creation failed, checking if it exists:', repoError)
+    const path =
+      account.type === 'Organization'
+        ? `/orgs/${encodeURIComponent(account.login)}/repos`
+        : '/user/repos'
 
-      // Try to get the existing repository
-      try {
-        repo = await githubInstallationRequest<{
-          id: number
-          name: string
-          owner: { login: string }
-          default_branch: string
-          html_url: string
-        }>({
-          method: 'GET',
-          path: `/repos/${encodeURIComponent(account.login)}/${encodeURIComponent(repoName)}`,
-          installationToken,
-        })
-        console.log('[Connect Org] Using existing repository')
-      } catch (getError) {
-        console.error('[Connect Org] Failed to create or get repository:', getError)
-        throw repoError
-      }
-    }
+    const repo = await githubInstallationRequest<{
+      id: number
+      name: string
+      owner: { login: string }
+      default_branch: string
+      html_url: string
+    }>({
+      method: 'POST',
+      path,
+      installationToken: token,
+      body: createBody,
+    })
 
+    // Update project in DB
     await upsertGithubProject({
       userId,
       projectId: body.projectId,
@@ -131,10 +93,17 @@ export async function POST(req: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('Error connecting org', error)
-    return NextResponse.json(
-      { error: 'Failed to connect organization' },
-      { status: 500 }
-    )
+    const msg = error instanceof Error ? error.message : 'Unknown error'
+    console.error('[GitHub Connect Org] Error:', msg)
+    return NextResponse.json({ error: msg }, { status: 500 })
   }
+}
+
+function sanitizeRepoName(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9-_]/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 100)
 }
