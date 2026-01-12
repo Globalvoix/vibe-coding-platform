@@ -163,6 +163,34 @@ export interface GithubOAuthTokenRecord {
   updated_at: string
 }
 
+function coercePgBigintToNumber(value: unknown): number | null {
+  if (typeof value === 'number' && Number.isFinite(value)) return value
+  if (typeof value === 'string' && value.trim()) {
+    const n = Number(value)
+    return Number.isFinite(n) ? n : null
+  }
+  return null
+}
+
+function normalizeGithubProjectRecord(row: GithubProjectRecord): GithubProjectRecord {
+  const record = row as unknown as Record<string, unknown>
+  return {
+    ...row,
+    active_installation_id: coercePgBigintToNumber(record.active_installation_id),
+    repo_id: coercePgBigintToNumber(record.repo_id),
+  }
+}
+
+function normalizeGithubInstallationRecord(row: GithubInstallationRecord): GithubInstallationRecord {
+  const record = row as unknown as Record<string, unknown>
+  const installationId = coercePgBigintToNumber(record.installation_id)
+
+  return {
+    ...row,
+    installation_id: installationId ?? 0,
+  }
+}
+
 export async function upsertGithubOAuthToken(params: {
   userId: string
   projectId: string
@@ -268,7 +296,7 @@ export async function upsertGithubInstallation(params: {
     ]
   )
 
-  return result.rows[0]
+  return normalizeGithubInstallationRecord(result.rows[0])
 }
 
 export async function listGithubInstallations(params: {
@@ -285,7 +313,7 @@ export async function listGithubInstallations(params: {
     [params.userId, params.projectId]
   )
 
-  return result.rows
+  return result.rows.map(normalizeGithubInstallationRecord).filter((r) => r.installation_id > 0)
 }
 
 export async function upsertGithubProject(params: {
@@ -326,7 +354,7 @@ export async function upsertGithubProject(params: {
     ]
   )
 
-  return result.rows[0]
+  return normalizeGithubProjectRecord(result.rows[0])
 }
 
 export async function getGithubProject(params: {
@@ -342,7 +370,7 @@ export async function getGithubProject(params: {
     [params.userId, params.projectId]
   )
 
-  return result.rows[0] ?? null
+  return result.rows[0] ? normalizeGithubProjectRecord(result.rows[0]) : null
 }
 
 export async function deleteGithubProject(params: {
