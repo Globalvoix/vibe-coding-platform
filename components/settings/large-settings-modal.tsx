@@ -112,6 +112,18 @@ export function LargeSettingsModal() {
   const connectedLogin = githubStatus.username ?? activeOrg?.login ?? null
   const connectedAvatarUrl = githubStatus.avatarUrl ?? activeOrg?.avatarUrl ?? null
 
+  const checkGithubStatus = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/github-oauth/status?projectId=${projectId}`)
+      if (res.ok) {
+        const data = (await res.json()) as GithubConnectionStatus
+        setGithubStatus(data)
+      }
+    } catch (error) {
+      console.error('Error checking GitHub status:', error)
+    }
+  }, [projectId])
+
   // Check URL for error parameters on mount
   useEffect(() => {
     const githubInstall = searchParams.get('githubInstall')
@@ -129,18 +141,6 @@ export function LargeSettingsModal() {
       }, 500)
     }
   }, [searchParams, checkGithubStatus])
-
-  const checkGithubStatus = useCallback(async () => {
-    try {
-      const res = await fetch(`/api/github-oauth/status?projectId=${projectId}`)
-      if (res.ok) {
-        const data = (await res.json()) as GithubConnectionStatus
-        setGithubStatus(data)
-      }
-    } catch (error) {
-      console.error('Error checking GitHub status:', error)
-    }
-  }, [projectId])
 
   const checkConnectorsStatus = useCallback(async () => {
     if (!projectId) return
