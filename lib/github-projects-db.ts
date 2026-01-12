@@ -69,6 +69,16 @@ async function ensureGithubTables() {
 
     CREATE INDEX IF NOT EXISTS github_oauth_tokens_user_project_idx
       ON github_oauth_tokens(user_id, project_id);
+
+    -- Ensure ON CONFLICT targets always have a matching UNIQUE constraint, even if tables pre-existed.
+    CREATE UNIQUE INDEX IF NOT EXISTS github_projects_user_project_uniq
+      ON github_projects(user_id, project_id);
+
+    CREATE UNIQUE INDEX IF NOT EXISTS github_project_installations_user_project_installation_uniq
+      ON github_project_installations(user_id, project_id, installation_id);
+
+    CREATE UNIQUE INDEX IF NOT EXISTS github_oauth_tokens_user_project_uniq
+      ON github_oauth_tokens(user_id, project_id);
   `)
 
   initialized = true
