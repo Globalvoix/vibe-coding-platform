@@ -21,14 +21,11 @@ export default function HomePage() {
     ensureUserSubscription().catch(console.error)
   }, [])
 
-  const handlePromptSubmit = async (prompt: string) => {
-    const trimmed = prompt.trim();
-    if (!trimmed) return;
-
+  const createProject = async (prompt: string) => {
     const response = await fetch('/api/projects', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: trimmed }),
+      body: JSON.stringify({ prompt }),
     });
 
     if (!response.ok) {
@@ -36,23 +33,39 @@ export default function HomePage() {
         const data = await response.json();
         if (data?.code === 'APP_LIMIT_REACHED') {
           router.push('/pricing');
-          return;
+          return null;
         }
 
         if (typeof data?.error === 'string' && data.error.trim()) {
-          toast.error(data.error)
-          return
+          toast.error(data.error);
+          return null;
         }
       } catch (error) {
         console.error('Failed to parse project creation error', error);
       }
 
-      toast.error('Failed to create project')
-      return
+      toast.error('Failed to create project');
+      return null;
     }
 
-    const project = await response.json();
+    return response.json();
+  };
+
+  const handlePromptSubmit = async (prompt: string) => {
+    const trimmed = prompt.trim();
+    if (!trimmed) return;
+
+    const project = await createProject(trimmed);
+    if (!project) return;
+
     router.push(`/workspace?projectId=${project.id}`);
+  };
+
+  const handleGithubImport = async () => {
+    const project = await createProject('Import a GitHub repository');
+    if (!project) return;
+
+    router.push(`/workspace?projectId=${project.id}&openSettings=1&settingsTab=github&githubImport=1`);
   };
 
   return (
@@ -65,7 +78,7 @@ export default function HomePage() {
           sidebarOpen ? 'translate-x-64' : 'translate-x-0'
         )}
       >
-        <HeroWave onPromptSubmit={handlePromptSubmit} />
+        <HeroWave onPromptSubmit={handlePromptSubmit} onGithubImport={handleGithubImport} />
 
         <section className="relative py-24 sm:py-32 px-4 bg-white">
           <div className="mx-auto max-w-6xl">
