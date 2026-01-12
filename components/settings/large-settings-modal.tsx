@@ -431,28 +431,6 @@ export function LargeSettingsModal() {
     return 'Settings'
   }
 
-  const connectionPill = githubStatus.connected ? (
-    <div className="flex items-center gap-2 rounded-full border border-emerald-200/50 bg-emerald-50 px-3 py-1">
-      <Check className="h-3.5 w-3.5 text-emerald-700" />
-      <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-widest">
-        Connected
-      </span>
-    </div>
-  ) : errorMessage ? (
-    <div className="flex items-center gap-2 rounded-full border border-red-200/50 bg-red-50 px-3 py-1">
-      <AlertCircle className="h-3.5 w-3.5 text-red-700" />
-      <span className="text-[10px] font-bold text-red-700 uppercase tracking-widest">
-        Failed
-      </span>
-    </div>
-  ) : (
-    <div className="flex items-center gap-2 rounded-full border border-black/[0.05] bg-white px-3 py-1">
-      <div className="h-1.5 w-1.5 rounded-full bg-orange-500" />
-      <span className="text-[10px] font-bold text-[#111827] uppercase tracking-widest">
-        Not connected
-      </span>
-    </div>
-  )
 
   return (
     <DialogPrimitive.Root open={settingsModalOpen} onOpenChange={setSettingsModalOpen}>
