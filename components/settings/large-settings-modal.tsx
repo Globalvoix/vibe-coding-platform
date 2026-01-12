@@ -41,7 +41,8 @@ import {
   ElevenLabsLogo
 } from '@/components/icons/connector-icons'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useSandboxStore } from '@/app/state'
 import { CONNECTOR_DEFINITIONS, type ConnectorId } from '@/lib/connector-mapping'
 
 interface GithubOrganization {
@@ -69,8 +70,19 @@ interface GithubConnectionStatus {
   canUpdatePr?: boolean
 }
 
+interface GithubImportRepo {
+  id: number
+  owner: string
+  name: string
+  fullName: string
+  private: boolean
+  url: string
+  defaultBranch: string
+}
+
 export function LargeSettingsModal() {
   const { settingsModalOpen, setSettingsModalOpen, settingsTab, setSettingsTab } = useUIStore()
+  const router = useRouter()
   const searchParams = useSearchParams()
   const projectId = searchParams.get('projectId')
 
@@ -89,6 +101,13 @@ export function LargeSettingsModal() {
     errors: string[]
     details: Record<string, unknown>
   } | null>(null)
+
+  const githubImportRequested = searchParams.get('githubImport') === '1'
+  const [importRepos, setImportRepos] = useState<GithubImportRepo[]>([])
+  const [importReposLoading, setImportReposLoading] = useState(false)
+  const [selectedImportRepoFullName, setSelectedImportRepoFullName] = useState<string>('')
+  const [importingRepo, setImportingRepo] = useState(false)
+  const [importRepoError, setImportRepoError] = useState<string | null>(null)
 
   const [connectorStatus, setConnectorStatus] = useState<Partial<Record<ConnectorId, boolean>>>({})
 
