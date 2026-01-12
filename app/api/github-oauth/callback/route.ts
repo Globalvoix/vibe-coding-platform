@@ -3,6 +3,7 @@ import { verifyGithubInstallState } from '@/lib/github-install-state'
 import { exchangeGithubOAuthCode } from '@/lib/github-oauth'
 import { upsertGithubOAuthToken } from '@/lib/github-projects-db'
 import { ensureGithubRepoForInstallation } from '@/lib/github-installation-flow'
+import { pushProjectToGithubMain } from '@/lib/github-repo-sync'
 
 export async function GET(req: NextRequest) {
   const state = req.nextUrl.searchParams.get('state')
@@ -56,7 +57,17 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid installation_id' }, { status: 400 })
     }
 
-    await ensureGithubRepoForInstallation({ userId, projectId, installationId })
+    const repo = await ensureGithubRepoForInstallation({ userId, projectId, installationId })
+
+    const branch = repo.default_branch || 'main'
+
+    await pushProjectToGithubMain({
+      installationId,
+      owner: repo.owner.login,
+      repo: repo.name,
+      branch,
+      commitMessage: `Initial sync from Thinksoft (${new Date().toISOString()})`,
+    })
 
     const redirectUrl = new URL('/workspace', req.nextUrl.origin)
     redirectUrl.searchParams.set('projectId', projectId)
