@@ -240,7 +240,7 @@ export async function updateSubscriptionFromWebhook(
       orderIdOrProductId,
     })
 
-    const result = await pool.query(
+    const result = await pool.query<Subscription>(
       `INSERT INTO subscriptions (
         user_id,
         plan_id,

@@ -25,7 +25,7 @@ export async function GET(
   try {
     const tableName = `${projectParams.id}_app_data`.replace(/[^a-z0-9_]/g, '_')
 
-    const tableExistsResult = await pool.query(
+    const tableExistsResult = await pool.query<{ table_exists: string | null }>(
       `SELECT to_regclass($1) AS table_exists`,
       [`public.${tableName}`]
     )
@@ -34,12 +34,12 @@ export async function GET(
       return NextResponse.json({ tables: [] })
     }
 
-    const countResult = await pool.query(
+    const countResult = await pool.query<{ count: string }>(
       `SELECT COUNT(*) as count FROM "${tableName}"`
     )
 
-    const columnsResult = await pool.query(
-      `SELECT column_name FROM information_schema.columns 
+    const columnsResult = await pool.query<ColumnRow>(
+      `SELECT column_name FROM information_schema.columns
        WHERE table_schema = 'public' AND table_name = $1
        ORDER BY ordinal_position`,
       [tableName]
@@ -49,7 +49,7 @@ export async function GET(
       {
         tableName,
         rowCount: parseInt(countResult.rows[0]?.count || '0', 10),
-        columns: columnsResult.rows.map((row: ColumnRow) => row.column_name),
+        columns: columnsResult.rows.map((row) => row.column_name),
       },
     ]
 
