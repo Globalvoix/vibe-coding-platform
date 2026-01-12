@@ -19,9 +19,12 @@ async function ensureProjectFilesTable() {
       user_id TEXT NOT NULL,
       path TEXT NOT NULL,
       content TEXT NOT NULL,
+      encoding TEXT NOT NULL DEFAULT 'utf8',
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       PRIMARY KEY (project_id, path)
     );
+
+    ALTER TABLE project_files ADD COLUMN IF NOT EXISTS encoding TEXT NOT NULL DEFAULT 'utf8';
 
     CREATE INDEX IF NOT EXISTS project_files_project_id_idx ON project_files(project_id);
     CREATE INDEX IF NOT EXISTS project_files_user_id_idx ON project_files(user_id);
@@ -35,20 +38,25 @@ export interface ProjectFileRecord {
   user_id: string
   path: string
   content: string
+  encoding: 'utf8' | 'base64' | string
   updated_at: string
 }
 
 export async function upsertProjectFiles(params: {
   userId: string
   projectId: string
-  files: Array<{ path: string; content: string }>
+  files: Array<{ path: string; content: string; encoding?: 'utf8' | 'base64' | string }>
 }) {
   const { userId, projectId, files } = params
   await ensureProjectFilesTable()
 
   const normalized = files
     .filter((f) => typeof f?.path === 'string' && f.path && typeof f?.content === 'string')
-    .map((f) => ({ path: f.path, content: f.content }))
+    .map((f) => ({
+      path: f.path,
+      content: f.content,
+      encoding: typeof f?.encoding === 'string' && f.encoding ? f.encoding : 'utf8',
+    }))
 
   if (normalized.length === 0) return
 
@@ -56,16 +64,16 @@ export async function upsertProjectFiles(params: {
   const placeholders: string[] = []
 
   for (let i = 0; i < normalized.length; i++) {
-    const base = i * 4
-    placeholders.push(`($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4})`)
-    values.push(projectId, userId, normalized[i].path, normalized[i].content)
+    const base = i * 5
+    placeholders.push(`($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5})`)
+    values.push(projectId, userId, normalized[i].path, normalized[i].content, normalized[i].encoding)
   }
 
   await pool.query(
-    `INSERT INTO project_files (project_id, user_id, path, content)
+    `INSERT INTO project_files (project_id, user_id, path, content, encoding)
      VALUES ${placeholders.join(',')}
      ON CONFLICT (project_id, path)
-     DO UPDATE SET content = EXCLUDED.content, updated_at = NOW()`,
+     DO UPDATE SET content = EXCLUDED.content, encoding = EXCLUDED.encoding, updated_at = NOW()`,
     values
   )
 }
@@ -75,7 +83,7 @@ export async function listProjectFiles(params: { userId: string; projectId: stri
   await ensureProjectFilesTable()
 
   const result = await pool.query<ProjectFileRecord>(
-    `SELECT project_id, user_id, path, content, updated_at
+    `SELECT project_id, user_id, path, content, encoding, updated_at
      FROM project_files
      WHERE user_id = $1 AND project_id = $2
      ORDER BY path ASC`,
@@ -83,6 +91,21 @@ export async function listProjectFiles(params: { userId: string; projectId: stri
   )
 
   return result.rows
+}
+
+export async function replaceProjectFiles(params: {
+  userId: string
+  projectId: string
+  files: Array<{ path: string; content: string; encoding?: 'utf8' | 'base64' | string }>
+}) {
+  await ensureProjectFilesTable()
+
+  await pool.query(`DELETE FROM project_files WHERE user_id = $1 AND project_id = $2`, [
+    params.userId,
+    params.projectId,
+  ])
+
+  await upsertProjectFiles({ userId: params.userId, projectId: params.projectId, files: params.files })
 }
 
 export async function listProjectFilePaths(params: { userId: string; projectId: string }) {
