@@ -221,6 +221,126 @@ export function LargeSettingsModal() {
     window.location.href = `/api/github-oauth/start?projectId=${projectId}`
   }
 
+  const fetchImportRepos = useCallback(async () => {
+    if (!projectId) return
+    if (!activeOrg?.installationId) return
+
+    try {
+      setImportReposLoading(true)
+      setImportRepoError(null)
+
+      const res = await fetch(
+        `/api/github-oauth/repositories?projectId=${projectId}&installationId=${activeOrg.installationId}`
+      )
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => null)
+        throw new Error(typeof data?.error === 'string' ? data.error : 'Failed to load repositories')
+      }
+
+      const data = (await res.json()) as { repositories: GithubImportRepo[] }
+      const repos = Array.isArray(data.repositories) ? data.repositories : []
+
+      setImportRepos(repos)
+
+      if (!selectedImportRepoFullName && repos.length > 0) {
+        setSelectedImportRepoFullName(repos[0].fullName)
+      }
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : 'Failed to load repositories'
+      setImportRepoError(msg)
+    } finally {
+      setImportReposLoading(false)
+    }
+  }, [activeOrg?.installationId, projectId, selectedImportRepoFullName])
+
+  useEffect(() => {
+    if (!settingsModalOpen || settingsTab !== 'github') return
+    if (!githubImportRequested) return
+    if (!accountConnected || !activeOrg?.installationId) return
+    if (importReposLoading) return
+    if (importRepos.length > 0) return
+
+    void fetchImportRepos()
+  }, [
+    accountConnected,
+    activeOrg?.installationId,
+    fetchImportRepos,
+    githubImportRequested,
+    importRepos.length,
+    importReposLoading,
+    settingsModalOpen,
+    settingsTab,
+  ])
+
+  const handleImportRepo = useCallback(async () => {
+    if (!projectId || importingRepo) return
+    if (!activeOrg?.installationId) return
+
+    const selected = importRepos.find((r) => r.fullName === selectedImportRepoFullName)
+    if (!selected) {
+      setImportRepoError('Please select a repository')
+      return
+    }
+
+    try {
+      setImportingRepo(true)
+      setImportRepoError(null)
+
+      const res = await fetch('/api/github-oauth/import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          projectId,
+          installationId: activeOrg.installationId,
+          owner: selected.owner,
+          repo: selected.name,
+        }),
+      })
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => null)
+        throw new Error(typeof data?.error === 'string' ? data.error : 'Failed to import repository')
+      }
+
+      await checkGithubStatus()
+
+      try {
+        const reviveRes = await fetch(`/api/projects/${projectId}/sandbox/revive`, {
+          method: 'POST',
+        })
+
+        if (reviveRes.ok) {
+          const revived = (await reviveRes.json()) as { sandbox_state: any }
+          useSandboxStore.getState().applySandboxState(revived.sandbox_state)
+        }
+      } catch {
+        // best-effort
+      }
+
+      setSettingsModalOpen(false)
+
+      const url = new URL(window.location.href)
+      url.searchParams.delete('githubImport')
+      const next = url.searchParams.toString()
+      router.replace(next ? `${url.pathname}?${next}` : url.pathname)
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : 'Failed to import repository'
+      setImportRepoError(msg)
+    } finally {
+      setImportingRepo(false)
+    }
+  }, [
+    activeOrg?.installationId,
+    checkGithubStatus,
+    importingRepo,
+    importRepos,
+    projectId,
+    router,
+    selectedImportRepoFullName,
+    setSettingsModalOpen,
+  ])
+
   const handleCreateRepo = async () => {
     if (!projectId || creatingRepo) return
 
