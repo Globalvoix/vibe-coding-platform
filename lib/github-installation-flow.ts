@@ -1,4 +1,9 @@
-import { createInstallationToken, getInstallation, githubRequest } from '@/lib/github-app'
+import {
+  createInstallationToken,
+  getInstallation,
+  githubRequest,
+  githubRequestNoContent,
+} from '@/lib/github-app'
 import {
   getGithubOAuthAccessToken,
   upsertGithubInstallation,
@@ -22,6 +27,34 @@ function isGithubAlreadyExistsError(err: unknown): boolean {
 
 export function getDefaultRepoNameForProject(projectId: string): string {
   return sanitizeRepoName(`thinksoft-${projectId}`)
+}
+
+async function ensureRepoIsIncludedInInstallation(params: {
+  userId: string
+  projectId: string
+  installationId: number
+  installationRepositorySelection: 'all' | 'selected' | undefined
+  accountType: 'User' | 'Organization'
+  accountLogin: string
+  repoId: number
+}) {
+  if (params.installationRepositorySelection !== 'selected') return
+
+  const oauthToken = await getGithubOAuthAccessToken({
+    userId: params.userId,
+    projectId: params.projectId,
+  })
+
+  if (!oauthToken) {
+    return
+  }
+
+  const path =
+    params.accountType === 'Organization'
+      ? `/orgs/${encodeURIComponent(params.accountLogin)}/installations/${params.installationId}/repositories/${params.repoId}`
+      : `/user/installations/${params.installationId}/repositories/${params.repoId}`
+
+  await githubRequestNoContent('PUT', path, oauthToken)
 }
 
 export async function ensureGithubRepoForInstallation(params: {
@@ -88,6 +121,16 @@ export async function ensureGithubRepoForInstallation(params: {
       )
     }
   })()
+
+  await ensureRepoIsIncludedInInstallation({
+    userId: params.userId,
+    projectId: params.projectId,
+    installationId: params.installationId,
+    installationRepositorySelection: installation.repository_selection,
+    accountType: account.type,
+    accountLogin: account.login,
+    repoId: repo.id,
+  })
 
   await upsertGithubProject({
     userId: params.userId,
