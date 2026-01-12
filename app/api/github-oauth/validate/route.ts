@@ -1,56 +1,63 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
-import { githubAppClient } from '@/lib/github-api-client'
+import { createGithubAppJwt } from '@/lib/github-app'
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   const { userId } = await auth()
-  
   if (!userId) {
-    return NextResponse.json(
-      {
-        error: 'Unauthorized',
-        authenticated: false,
-      },
-      { status: 401 }
-    )
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  console.log('[GitHub Validate] Starting GitHub App configuration validation')
+  const errors: string[] = []
+  const details: Record<string, any> = {}
 
+  // Check environment variables
+  if (!process.env.GITHUB_APP_ID) {
+    errors.push('GITHUB_APP_ID is not set')
+  } else {
+    details.appId = process.env.GITHUB_APP_ID
+  }
+
+  if (!process.env.GITHUB_PRIVATE_KEY) {
+    errors.push('GITHUB_PRIVATE_KEY is not set')
+  } else {
+    const key = process.env.GITHUB_PRIVATE_KEY
+    if (key.includes('REPLACE_ENV')) {
+      errors.push('GITHUB_PRIVATE_KEY is still a placeholder - set your actual private key')
+    } else if (!key.includes('BEGIN') || !key.includes('END')) {
+      errors.push('GITHUB_PRIVATE_KEY does not look like a valid PEM key')
+    } else {
+      details.hasPrivateKey = true
+    }
+  }
+
+  if (!process.env.GITHUB_APP_SLUG) {
+    errors.push('GITHUB_APP_SLUG is not set')
+  } else {
+    details.appSlug = process.env.GITHUB_APP_SLUG
+  }
+
+  if (!process.env.GITHUB_WEBHOOK_SECRET) {
+    errors.push('GITHUB_WEBHOOK_SECRET is not set')
+  }
+
+  // Try to create JWT
   try {
-    const result = await githubAppClient.validateConfiguration()
-
-    const statusCode = result.valid ? 200 : 400
-
-    console.log('[GitHub Validate] Validation complete', {
-      valid: result.valid,
-      errorCount: result.errors.length,
-    })
-
-    return NextResponse.json(
-      {
-        valid: result.valid,
-        errors: result.errors,
-        details: result.details,
-        timestamp: new Date().toISOString(),
-      },
-      { status: statusCode }
-    )
+    await createGithubAppJwt()
+    details.jwtWorks = true
   } catch (error) {
-    console.error('[GitHub Validate] Validation threw an exception', {
-      error: error instanceof Error ? error.message : String(error),
-    })
-
-    return NextResponse.json(
-      {
-        valid: false,
-        errors: [
-          `Validation failed: ${error instanceof Error ? error.message : String(error)}`,
-        ],
-        details: {},
-        timestamp: new Date().toISOString(),
-      },
-      { status: 500 }
-    )
+    errors.push(`JWT creation failed: ${error instanceof Error ? error.message : String(error)}`)
+    details.jwtWorks = false
   }
+
+  const valid = errors.length === 0
+
+  return NextResponse.json(
+    {
+      valid,
+      errors,
+      details,
+    },
+    { status: valid ? 200 : 400 }
+  )
 }
