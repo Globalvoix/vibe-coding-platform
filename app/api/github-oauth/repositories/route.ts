@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server'
+
+export const dynamic = 'force-dynamic'
 import { auth } from '@clerk/nextjs/server'
 import z from 'zod/v3'
 import { createInstallationToken, githubRequest } from '@/lib/github-app'

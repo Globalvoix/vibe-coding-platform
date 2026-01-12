@@ -68,12 +68,14 @@ export function GithubImportDialog() {
 
     try {
       setStatusLoading(true)
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 15_000)
 
-      const res = await fetch(`/api/github-oauth/status?projectId=${encodeURIComponent(projectId)}`, {
-        signal: controller.signal,
-      }).finally(() => clearTimeout(timeoutId))
+      const timeoutMs = 30_000
+      const res = (await Promise.race([
+        fetch(`/api/github-oauth/status?projectId=${encodeURIComponent(projectId)}`),
+        new Promise<Response>((_, reject) => {
+          setTimeout(() => reject(new Error(`Request timed out after ${timeoutMs}ms`)), timeoutMs)
+        }),
+      ])) as Response
       if (!res.ok) {
         const data = await res.json().catch(() => null)
         throw new Error(typeof data?.error === 'string' ? data.error : 'Failed to check GitHub status')
@@ -103,12 +105,13 @@ export function GithubImportDialog() {
       setReposLoading(true)
       setImportError(null)
 
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 15_000)
-
-      const res = await fetch(`/api/github-oauth/repositories?projectId=${encodeURIComponent(projectId)}`, {
-        signal: controller.signal,
-      }).finally(() => clearTimeout(timeoutId))
+      const timeoutMs = 30_000
+      const res = (await Promise.race([
+        fetch(`/api/github-oauth/repositories?projectId=${encodeURIComponent(projectId)}`),
+        new Promise<Response>((_, reject) => {
+          setTimeout(() => reject(new Error(`Request timed out after ${timeoutMs}ms`)), timeoutMs)
+        }),
+      ])) as Response
       if (!res.ok) {
         const data = await res.json().catch(() => null)
         throw new Error(typeof data?.error === 'string' ? data.error : 'Failed to load repositories')
