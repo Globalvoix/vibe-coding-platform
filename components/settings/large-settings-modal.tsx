@@ -556,14 +556,65 @@ export function LargeSettingsModal() {
                         Sync your project 2-way with GitHub to collaborate at source.
                       </p>
                     </div>
-                    <a
-                      href="#"
-                      className="flex items-center gap-1.5 text-[12px] font-semibold text-[#111827]/40 transition-colors hover:text-[#111827] shrink-0 pt-2"
-                    >
-                      <Globe className="h-3.5 w-3.5" />
-                      <span>Docs</span>
-                    </a>
+                    <div className="flex items-center gap-2 shrink-0 pt-2">
+                      <button
+                        onClick={() => setShowDiagnostics(!showDiagnostics)}
+                        className="flex items-center gap-1.5 text-[12px] font-semibold text-[#111827]/40 transition-colors hover:text-[#111827]"
+                      >
+                        <AlertCircle className="h-3.5 w-3.5" />
+                        <span>{showDiagnostics ? 'Hide' : 'Run'} diagnostics</span>
+                      </button>
+                      <a
+                        href="#"
+                        className="flex items-center gap-1.5 text-[12px] font-semibold text-[#111827]/40 transition-colors hover:text-[#111827]"
+                      >
+                        <Globe className="h-3.5 w-3.5" />
+                        <span>Docs</span>
+                      </a>
+                    </div>
                   </div>
+
+                  {showDiagnostics && (
+                    <div className="rounded-[12px] border border-black/[0.05] bg-[#F9F9F9] p-5 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-[13px] font-semibold text-[#111827]">GitHub App Configuration</h3>
+                        <button
+                          onClick={runDiagnostics}
+                          disabled={diagnosticsLoading}
+                          className="flex items-center gap-1.5 text-[11px] font-semibold text-[#111827]/60 hover:text-[#111827] disabled:opacity-50 transition-colors"
+                        >
+                          <RefreshCw className="h-3 w-3" />
+                          <span>{diagnosticsLoading ? 'Checking...' : 'Check now'}</span>
+                        </button>
+                      </div>
+                      {diagnosticsData && (
+                        <div className="space-y-3">
+                          {diagnosticsData.valid ? (
+                            <div className="rounded-[8px] bg-emerald-50 border border-emerald-200/50 p-3">
+                              <p className="text-[12px] font-semibold text-emerald-700">✓ Configuration valid</p>
+                              <p className="text-[11px] text-emerald-700/70 mt-1">GitHub App is properly configured.</p>
+                            </div>
+                          ) : (
+                            <>
+                              <div className="rounded-[8px] bg-red-50 border border-red-200/50 p-3">
+                                <p className="text-[12px] font-semibold text-red-700">✗ Configuration issues found</p>
+                              </div>
+                              {diagnosticsData.errors.length > 0 && (
+                                <ul className="space-y-2">
+                                  {diagnosticsData.errors.map((error, idx) => (
+                                    <li key={idx} className="text-[11px] text-red-700 flex gap-2">
+                                      <span className="shrink-0">•</span>
+                                      <span>{error}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   <div className="space-y-8">
                     <div className="flex items-center justify-between group gap-10">
