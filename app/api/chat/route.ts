@@ -311,7 +311,12 @@ export async function POST(req: Request) {
     const connectorContext =
       projectId && project ? await buildConnectorContext({ projectId, userPromptText }) : ''
 
-    const systemPrompt = connectorContext ? `${prompt}\n\n${connectorContext}` : prompt
+    const repoContext =
+      project && typeof project.repo_context === 'string' && project.repo_context.trim()
+        ? project.repo_context.trim()
+        : ''
+
+    const systemPrompt = [prompt, connectorContext, repoContext].filter(Boolean).join('\n\n')
 
     return createUIMessageStreamResponse({
       stream: createUIMessageStream({

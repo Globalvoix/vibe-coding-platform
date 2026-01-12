@@ -3,9 +3,10 @@ import { auth } from '@clerk/nextjs/server'
 import z from 'zod/v3'
 import { createInstallationToken, githubRequest } from '@/lib/github-app'
 import type { GithubCommit, GithubGitRef } from '@/lib/github-types'
-import { getProject } from '@/lib/projects-db'
+import { getProject, updateProjectRepoContext } from '@/lib/projects-db'
 import { listGithubInstallations, upsertGithubProject } from '@/lib/github-projects-db'
 import { replaceProjectFiles } from '@/lib/project-files-db'
+import { buildRepoContextFromFiles } from '@/lib/repo-context'
 
 const BodySchema = z.object({
   projectId: z.string().min(1),
@@ -221,6 +222,17 @@ export async function POST(req: Request) {
       repoId: repoInfo.id,
       defaultBranch: branch,
     })
+
+    try {
+      const repoContext = buildRepoContextFromFiles({
+        repoFullName: `${repoInfo.owner.login}/${repoInfo.name}`,
+        defaultBranch: branch,
+        files: normalizedFiles,
+      })
+      await updateProjectRepoContext(userId, projectId, repoContext)
+    } catch {
+      // best-effort
+    }
 
     return NextResponse.json({
       imported: true,
