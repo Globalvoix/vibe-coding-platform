@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
       throw new Error('GITHUB_OAUTH_CLIENT_ID is not configured')
     }
 
-    const state = createGithubInstallState({ userId, projectId })
+    const state = createGithubInstallState({ userId, projectId, mode: mode ?? undefined })
 
     const redirectUri =
       process.env.GITHUB_OAUTH_REDIRECT_URL || `${req.nextUrl.origin}/api/github-oauth/callback`
