@@ -154,7 +154,10 @@ export async function POST(
   }
 
   await sandbox.writeFiles(
-    files.map((f) => ({ path: f.path, content: Buffer.from(f.content, 'utf8') }))
+    files.map((f) => ({
+      path: f.path,
+      content: Buffer.from(f.content, f.encoding === 'base64' ? 'base64' : 'utf8'),
+    }))
   )
 
   const install = buildInstallCommand(pm)
