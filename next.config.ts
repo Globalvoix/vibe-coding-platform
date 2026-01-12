@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
     serverActions: {
       allowedOrigins: ['*'],
     },
+    turbopack: false,
   },
   webpack(config) {
     config.module.rules.push({
