@@ -43,6 +43,18 @@ async function ensureGithubTables() {
       UNIQUE(user_id, project_id, installation_id)
     );
 
+    CREATE TABLE IF NOT EXISTS github_oauth_tokens (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      project_id TEXT NOT NULL,
+      access_token_encrypted TEXT NOT NULL,
+      token_type TEXT,
+      scope TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      UNIQUE(user_id, project_id)
+    );
+
     ALTER TABLE github_projects ADD COLUMN IF NOT EXISTS active_installation_id BIGINT;
     ALTER TABLE github_projects ADD COLUMN IF NOT EXISTS repo_owner TEXT;
     ALTER TABLE github_projects ADD COLUMN IF NOT EXISTS repo_name TEXT;
@@ -54,6 +66,9 @@ async function ensureGithubTables() {
 
     CREATE INDEX IF NOT EXISTS github_project_installations_user_project_idx
       ON github_project_installations(user_id, project_id);
+
+    CREATE INDEX IF NOT EXISTS github_oauth_tokens_user_project_idx
+      ON github_oauth_tokens(user_id, project_id);
   `)
 
   initialized = true
@@ -80,6 +95,17 @@ export interface GithubInstallationRecord {
   account_login: string
   account_type: 'User' | 'Organization'
   account_avatar_url: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface GithubOAuthTokenRecord {
+  id: string
+  user_id: string
+  project_id: string
+  access_token_encrypted: string
+  token_type: string | null
+  scope: string | null
   created_at: string
   updated_at: string
 }
@@ -200,6 +226,11 @@ export async function deleteGithubProject(params: {
   projectId: string
 }): Promise<void> {
   await ensureGithubTables()
+
+  await pool.query(`DELETE FROM github_oauth_tokens WHERE user_id = $1 AND project_id = $2`, [
+    params.userId,
+    params.projectId,
+  ])
 
   await pool.query(
     `DELETE FROM github_project_installations
