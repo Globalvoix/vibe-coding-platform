@@ -61,6 +61,7 @@ export function verifyGithubInstallState(state: string) {
     const decoded = JSON.parse(base64urlDecode(encodedPayload)) as {
       userId: string
       projectId: string
+      mode?: string
       nonce: string
       ts: number
     }
