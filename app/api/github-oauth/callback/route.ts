@@ -1,29 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyGithubInstallState } from '@/lib/github-install-state'
-import { getInstallation, createInstallationToken, githubRequest } from '@/lib/github-app'
-import { upsertGithubInstallation, upsertGithubProject } from '@/lib/github-projects-db'
-import type { GithubRepository } from '@/lib/github-types'
-
-function sanitizeRepoName(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/[^a-z0-9-]/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 100)
-}
+import { exchangeGithubOAuthCode } from '@/lib/github-oauth'
+import { upsertGithubOAuthToken } from '@/lib/github-projects-db'
+import { ensureGithubRepoForInstallation } from '@/lib/github-installation-flow'
 
 export async function GET(req: NextRequest) {
-  const installationIdStr = req.nextUrl.searchParams.get('installation_id')
   const state = req.nextUrl.searchParams.get('state')
-
-  if (!installationIdStr || !state) {
-    return NextResponse.json({ error: 'Missing parameters' }, { status: 400 })
-  }
-
-  const installationId = Number(installationIdStr)
-  if (!Number.isFinite(installationId)) {
-    return NextResponse.json({ error: 'Invalid installation_id' }, { status: 400 })
+  if (!state) {
+    return NextResponse.json({ error: 'Missing state' }, { status: 400 })
   }
 
   const verified = verifyGithubInstallState(state)
@@ -33,57 +17,52 @@ export async function GET(req: NextRequest) {
 
   const { userId, projectId } = verified
 
+  const code = req.nextUrl.searchParams.get('code')
+  const installationIdStr = req.nextUrl.searchParams.get('installation_id')
+
+  const redirectUri =
+    process.env.GITHUB_OAUTH_REDIRECT_URL || `${req.nextUrl.origin}/api/github-oauth/callback`
+
   try {
-    // Fetch installation from GitHub
-    const installation = await getInstallation(installationId)
-    const account = installation.account
+    // OAuth callback: exchange code and store token, then proceed to App installation
+    if (code) {
+      const token = await exchangeGithubOAuthCode({ code, redirectUri })
 
-    // Save installation to DB
-    await upsertGithubInstallation({
-      userId,
-      projectId,
-      installationId,
-      accountLogin: account.login,
-      accountType: account.type,
-      accountAvatarUrl: account.avatar_url || null,
-    })
+      await upsertGithubOAuthToken({
+        userId,
+        projectId,
+        accessToken: token.access_token,
+        tokenType: token.token_type,
+        scope: token.scope,
+      })
 
-    // Create installation token
-    const token = await createInstallationToken(installationId)
+      const appSlug = process.env.GITHUB_APP_SLUG
+      if (!appSlug) {
+        throw new Error('GITHUB_APP_SLUG is not configured')
+      }
 
-    // Create repository
-    const repoName = sanitizeRepoName(`thinksoft-${projectId}`)
+      const githubUrl = new URL(`https://github.com/apps/${appSlug}/installations/new`)
+      githubUrl.searchParams.set('state', state)
+      return NextResponse.redirect(githubUrl.toString())
+    }
 
-    const repoPath =
-      account.type === 'Organization'
-        ? `/orgs/${encodeURIComponent(account.login)}/repos`
-        : '/user/repos'
+    // Installation callback
+    if (!installationIdStr) {
+      return NextResponse.json({ error: 'Missing installation_id' }, { status: 400 })
+    }
 
-    const repo = await githubRequest<GithubRepository>('POST', repoPath, token, {
-      name: repoName,
-      private: true,
-      auto_init: true,
-      description: `Thinksoft project ${projectId}`,
-    })
+    const installationId = Number(installationIdStr)
+    if (!Number.isFinite(installationId)) {
+      return NextResponse.json({ error: 'Invalid installation_id' }, { status: 400 })
+    }
 
-    // Save project to DB
-    await upsertGithubProject({
-      userId,
-      projectId,
-      activeInstallationId: installationId,
-      repoOwner: repo.owner.login,
-      repoName: repo.name,
-      repoId: repo.id,
-      defaultBranch: repo.default_branch,
-    })
+    await ensureGithubRepoForInstallation({ userId, projectId, installationId })
 
-    // Redirect to workspace
     const redirectUrl = new URL('/workspace', req.nextUrl.origin)
     redirectUrl.searchParams.set('projectId', projectId)
     redirectUrl.searchParams.set('openSettings', '1')
     redirectUrl.searchParams.set('settingsTab', 'github')
     redirectUrl.searchParams.set('githubInstall', 'success')
-
     return NextResponse.redirect(redirectUrl.toString())
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error)

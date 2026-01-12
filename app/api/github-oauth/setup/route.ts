@@ -1,17 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyGithubInstallState } from '@/lib/github-install-state'
-import { getInstallation, createInstallationToken, githubRequest } from '@/lib/github-app'
-import { upsertGithubInstallation, upsertGithubProject } from '@/lib/github-projects-db'
-import type { GithubRepository } from '@/lib/github-types'
+import { ensureGithubRepoForInstallation } from '@/lib/github-installation-flow'
 
-function sanitizeRepoName(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/[^a-z0-9-]/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 100)
-}
 
 export async function GET(req: NextRequest) {
   const installationIdStr = req.nextUrl.searchParams.get('installation_id')
@@ -34,47 +24,7 @@ export async function GET(req: NextRequest) {
   const { userId, projectId } = verified
 
   try {
-    // Step 1: Fetch installation details
-    const installation = await getInstallation(installationId)
-    const account = installation.account
-
-    // Step 2: Save installation to DB
-    await upsertGithubInstallation({
-      userId,
-      projectId,
-      installationId,
-      accountLogin: account.login,
-      accountType: account.type,
-      accountAvatarUrl: account.avatar_url || null,
-    })
-
-    // Step 3: Create installation token
-    const token = await createInstallationToken(installationId)
-
-    // Step 4: Create repository
-    const repoName = sanitizeRepoName(`thinksoft-${projectId}`)
-    const repoPath =
-      account.type === 'Organization'
-        ? `/orgs/${encodeURIComponent(account.login)}/repos`
-        : '/user/repos'
-
-    const repo = await githubRequest<GithubRepository>('POST', repoPath, token, {
-      name: repoName,
-      private: true,
-      auto_init: true,
-      description: `Thinksoft project ${projectId}`,
-    })
-
-    // Step 5: Save project to DB
-    await upsertGithubProject({
-      userId,
-      projectId,
-      activeInstallationId: installationId,
-      repoOwner: repo.owner.login,
-      repoName: repo.name,
-      repoId: repo.id,
-      defaultBranch: repo.default_branch,
-    })
+    await ensureGithubRepoForInstallation({ userId, projectId, installationId })
 
     // Redirect to workspace
     const redirectUrl = new URL('/workspace', req.nextUrl.origin)
