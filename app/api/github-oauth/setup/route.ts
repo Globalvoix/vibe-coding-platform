@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyGithubInstallState } from '@/lib/github-install-state'
 import { ensureGithubRepoForInstallation } from '@/lib/github-installation-flow'
-
+import { pushProjectToGithubMain } from '@/lib/github-repo-sync'
 
 export async function GET(req: NextRequest) {
   const installationIdStr = req.nextUrl.searchParams.get('installation_id')
@@ -24,7 +24,17 @@ export async function GET(req: NextRequest) {
   const { userId, projectId } = verified
 
   try {
-    await ensureGithubRepoForInstallation({ userId, projectId, installationId })
+    const repo = await ensureGithubRepoForInstallation({ userId, projectId, installationId })
+
+    const branch = repo.default_branch || 'main'
+
+    await pushProjectToGithubMain({
+      installationId,
+      owner: repo.owner.login,
+      repo: repo.name,
+      branch,
+      commitMessage: `Initial sync from Thinksoft (${new Date().toISOString()})`,
+    })
 
     // Redirect to workspace
     const redirectUrl = new URL('/workspace', req.nextUrl.origin)
