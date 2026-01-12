@@ -6,6 +6,7 @@ import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 import * as PopoverPrimitive from "@radix-ui/react-popover";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { Spinner } from "./spinner";
+import { GithubIcon } from "@/components/icons/github";
 
 // --- Utility Function & Radix Primitives (Unchanged) ---
 type ClassValue = string | number | boolean | null | undefined;
@@ -192,14 +193,28 @@ const toolsList = [
 
 interface PromptBoxProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   onPromptSubmit?: (value: string) => void;
+  onGithubImport?: () => void;
   isLoading?: boolean;
   showMic?: boolean;
   showTools?: boolean;
+  showGithubImport?: boolean;
 }
 
 // --- The Final, Self-Contained PromptBox Component ---
 export const PromptBox = React.forwardRef<HTMLTextAreaElement, PromptBoxProps>(
-  ({ className, onPromptSubmit, isLoading, showMic = true, showTools = true, ...props }, ref) => {
+  (
+    {
+      className,
+      onPromptSubmit,
+      onGithubImport,
+      isLoading,
+      showMic = true,
+      showTools = true,
+      showGithubImport = false,
+      ...props
+    },
+    ref
+  ) => {
     const internalTextareaRef = React.useRef<HTMLTextAreaElement>(null);
     const fileInputRef = React.useRef<HTMLInputElement>(null);
     const [value, setValue] = React.useState("");
@@ -357,6 +372,23 @@ export const PromptBox = React.forwardRef<HTMLTextAreaElement, PromptBoxProps>(
 
               {/* Right-aligned buttons container */}
               <div className="ml-auto flex items-center gap-2">
+                {showGithubImport && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        type="button"
+                        onClick={onGithubImport}
+                        className="flex h-8 w-8 items-center justify-center rounded-full text-foreground dark:text-white transition-colors hover:bg-accent dark:hover:bg-[#515151] focus-visible:outline-none"
+                      >
+                        <GithubIcon className="h-5 w-5" />
+                        <span className="sr-only">Import from GitHub</span>
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" showArrow={true}>
+                      <p>Import from GitHub</p>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
                 {showMic && (
                   <Tooltip>
                     <TooltipTrigger asChild>
