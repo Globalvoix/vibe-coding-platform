@@ -224,7 +224,8 @@ export function LargeSettingsModal() {
     setLoading(true)
     setErrorMessage(null)
     setRequestId(null)
-    window.location.href = `/api/github-oauth/start?projectId=${projectId}`
+    const qs = githubImportRequested ? `&mode=import` : ''
+    window.location.href = `/api/github-oauth/start?projectId=${projectId}${qs}`
   }
 
   const fetchImportRepos = useCallback(async () => {
