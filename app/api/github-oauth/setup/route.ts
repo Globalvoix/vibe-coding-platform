@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyGithubInstallState } from '@/lib/github-install-state'
+import { getInstallation } from '@/lib/github-app'
 import { ensureGithubRepoForInstallation } from '@/lib/github-installation-flow'
+import { upsertGithubInstallation, upsertGithubProject } from '@/lib/github-projects-db'
 import { pushPersistedProjectToGithubMain } from '@/lib/github-repo-sync'
 
 export async function GET(req: NextRequest) {
@@ -21,9 +23,37 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid state' }, { status: 400 })
   }
 
-  const { userId, projectId } = verified
+  const { userId, projectId, mode } = verified
 
   try {
+    if (mode === 'import') {
+      const installation = await getInstallation(installationId)
+
+      await upsertGithubInstallation({
+        userId,
+        projectId,
+        installationId,
+        accountLogin: installation.account.login,
+        accountType: installation.account.type,
+        accountAvatarUrl: installation.account.avatar_url || null,
+      })
+
+      await upsertGithubProject({
+        userId,
+        projectId,
+        activeInstallationId: installationId,
+      })
+
+      const redirectUrl = new URL('/workspace', req.nextUrl.origin)
+      redirectUrl.searchParams.set('projectId', projectId)
+      redirectUrl.searchParams.set('openSettings', '1')
+      redirectUrl.searchParams.set('settingsTab', 'github')
+      redirectUrl.searchParams.set('githubInstall', 'success')
+      redirectUrl.searchParams.set('githubImport', '1')
+
+      return NextResponse.redirect(redirectUrl.toString())
+    }
+
     const repo = await ensureGithubRepoForInstallation({ userId, projectId, installationId })
 
     const branch = repo.default_branch || 'main'
