@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from "react";
+import { GithubImportDialog } from "@/components/github-connect/github-import-dialog";
 import { Snowfall } from "@/components/ui/snowfall";
 import { HeroWave } from "@/components/ui/ai-input-hero";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
@@ -65,7 +66,14 @@ export default function Page() {
     const project = await createProject('Import a GitHub repository');
     if (!project) return;
 
-    router.push(`/workspace?projectId=${project.id}&openSettings=1&settingsTab=github&githubImport=1`);
+    const url = new URL(window.location.href);
+    url.searchParams.set('githubImport', '1');
+    url.searchParams.set('projectId', project.id);
+
+    const qs = url.searchParams.toString();
+    const returnTo = qs ? `${url.pathname}?${qs}` : url.pathname;
+
+    window.location.href = `/api/github-oauth/start?projectId=${encodeURIComponent(project.id)}&mode=import&returnTo=${encodeURIComponent(returnTo)}`;
   };
 
   return (
@@ -79,6 +87,7 @@ export default function Page() {
         )}
       >
         <HeroWave onPromptSubmit={handlePromptSubmit} onGithubImport={handleGithubImport} />
+        <GithubImportDialog />
 
         <section className="relative py-24 sm:py-32 px-4 bg-white">
           <div className="mx-auto max-w-6xl">

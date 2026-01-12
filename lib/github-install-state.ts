@@ -28,11 +28,13 @@ export function createGithubInstallState(params: {
   userId: string
   projectId: string
   mode?: 'import' | 'sync' | string
+  returnTo?: string
 }) {
   const payload = {
     userId: params.userId,
     projectId: params.projectId,
     mode: params.mode,
+    returnTo: params.returnTo,
     nonce: crypto.randomUUID(),
     ts: Date.now(),
   }
@@ -62,6 +64,7 @@ export function verifyGithubInstallState(state: string) {
       userId: string
       projectId: string
       mode?: string
+      returnTo?: string
       nonce: string
       ts: number
     }
@@ -71,7 +74,12 @@ export function verifyGithubInstallState(state: string) {
     const ageMs = Date.now() - decoded.ts
     if (ageMs < 0 || ageMs > 1000 * 60 * 30) return null
 
-    return { userId: decoded.userId, projectId: decoded.projectId, mode: decoded.mode ?? null }
+    return {
+      userId: decoded.userId,
+      projectId: decoded.projectId,
+      mode: decoded.mode ?? null,
+      returnTo: typeof decoded.returnTo === 'string' ? decoded.returnTo : null,
+    }
   } catch {
     return null
   }

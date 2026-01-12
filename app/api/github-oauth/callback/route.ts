@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid state' }, { status: 400 })
   }
 
-  const { userId, projectId, mode } = verified
+  const { userId, projectId, mode, returnTo } = verified
 
   const code = req.nextUrl.searchParams.get('code')
   const installationIdStr = req.nextUrl.searchParams.get('installation_id')
@@ -76,12 +76,14 @@ export async function GET(req: NextRequest) {
         activeInstallationId: installationId,
       })
 
-      const redirectUrl = new URL('/workspace', req.nextUrl.origin)
+      const redirectUrl = returnTo ? new URL(returnTo, req.nextUrl.origin) : new URL('/workspace', req.nextUrl.origin)
       redirectUrl.searchParams.set('projectId', projectId)
-      redirectUrl.searchParams.set('openSettings', '1')
-      redirectUrl.searchParams.set('settingsTab', 'github')
       redirectUrl.searchParams.set('githubInstall', 'success')
       redirectUrl.searchParams.set('githubImport', '1')
+      if (!returnTo) {
+        redirectUrl.searchParams.set('openSettings', '1')
+        redirectUrl.searchParams.set('settingsTab', 'github')
+      }
       return NextResponse.redirect(redirectUrl.toString())
     }
 
@@ -109,13 +111,16 @@ export async function GET(req: NextRequest) {
     const msg = error instanceof Error ? error.message : String(error)
     console.error('[GitHub Callback] Error:', msg)
 
-    const redirectUrl = new URL('/workspace', req.nextUrl.origin)
+    const redirectUrl = returnTo ? new URL(returnTo, req.nextUrl.origin) : new URL('/workspace', req.nextUrl.origin)
     redirectUrl.searchParams.set('projectId', projectId)
-    redirectUrl.searchParams.set('openSettings', '1')
-    redirectUrl.searchParams.set('settingsTab', 'github')
     if (mode === 'import') redirectUrl.searchParams.set('githubImport', '1')
     redirectUrl.searchParams.set('githubInstall', 'error')
     redirectUrl.searchParams.set('githubError', encodeURIComponent(msg))
+
+    if (!returnTo) {
+      redirectUrl.searchParams.set('openSettings', '1')
+      redirectUrl.searchParams.set('settingsTab', 'github')
+    }
 
     return NextResponse.redirect(redirectUrl.toString())
   }

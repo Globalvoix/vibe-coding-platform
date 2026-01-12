@@ -16,6 +16,8 @@ export async function GET(req: NextRequest) {
   }
 
   const mode = req.nextUrl.searchParams.get('mode')
+  const returnToParam = req.nextUrl.searchParams.get('returnTo')
+  const returnTo = typeof returnToParam === 'string' && returnToParam.startsWith('/') ? returnToParam : undefined
 
   try {
     const appSlug = process.env.GITHUB_APP_SLUG
@@ -28,7 +30,7 @@ export async function GET(req: NextRequest) {
       throw new Error('GITHUB_OAUTH_CLIENT_ID is not configured')
     }
 
-    const state = createGithubInstallState({ userId, projectId, mode: mode ?? undefined })
+    const state = createGithubInstallState({ userId, projectId, mode: mode ?? undefined, returnTo })
 
     const redirectUri =
       process.env.GITHUB_OAUTH_REDIRECT_URL || `${req.nextUrl.origin}/api/github-oauth/callback`
