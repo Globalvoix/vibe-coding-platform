@@ -112,7 +112,39 @@ export async function githubRequest<T>(
       throw new Error(`GitHub API error (${res.status}): ${text}`)
     }
 
+    if (res.status === 204) {
+      return undefined as T
+    }
+
     return (await res.json()) as T
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error)
+    throw new Error(`GitHub API request failed: ${msg}`)
+  }
+}
+
+export async function githubRequestNoContent(
+  method: 'PUT' | 'PATCH' | 'DELETE',
+  path: string,
+  token: string,
+  body?: Record<string, unknown>
+): Promise<void> {
+  try {
+    const res = await fetch(`${GITHUB_API_BASE}${path}`, {
+      method,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28',
+        ...(body ? { 'Content-Type': 'application/json' } : {}),
+      },
+      body: body ? JSON.stringify(body) : undefined,
+    })
+
+    if (!res.ok) {
+      const text = await res.text()
+      throw new Error(`GitHub API error (${res.status}): ${text}`)
+    }
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error)
     throw new Error(`GitHub API request failed: ${msg}`)
