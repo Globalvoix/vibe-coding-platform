@@ -890,6 +890,75 @@ export function LargeSettingsModal() {
                     <div className="flex items-center justify-between group gap-10">
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
+                          <h3 className="text-[14px] font-semibold text-[#111827] tracking-tight">Import repository</h3>
+                          {githubImportRequested && (
+                            <div className="flex items-center gap-1 rounded-[4px] bg-black/[0.04] px-1.5 py-0.5">
+                              <span className="text-[10px] font-bold text-[#111827]/60 uppercase tracking-tight">
+                                Import
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        <p className="text-[12px] text-[#111827]/40 font-medium leading-relaxed">
+                          Import an existing GitHub repository into this project.
+                        </p>
+                        {importRepoError && (
+                          <p className="text-[11px] text-red-700 font-medium leading-relaxed">{importRepoError}</p>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-2 shrink-0">
+                        {!accountConnected ? (
+                          <Button
+                            onClick={handleConnectGithub}
+                            disabled={loading}
+                            className="h-8 rounded-[6px] bg-[#111827] px-4 text-[12px] font-semibold text-white transition-all hover:bg-black active:scale-[0.98] flex items-center gap-2"
+                          >
+                            <GithubIcon className="h-3.5 w-3.5 text-white" />
+                            {loading ? 'Connecting...' : 'Connect GitHub'}
+                          </Button>
+                        ) : !activeOrg?.installationId ? (
+                          <div className="text-[12px] font-semibold text-[#111827]/60">—</div>
+                        ) : importRepos.length === 0 ? (
+                          <Button
+                            onClick={fetchImportRepos}
+                            disabled={importReposLoading}
+                            className="h-8 rounded-[6px] bg-white border border-black/[0.05] px-4 text-[12px] font-semibold text-[#111827] hover:bg-gray-50 shadow-sm"
+                          >
+                            {importReposLoading ? 'Loading...' : 'Load repos'}
+                          </Button>
+                        ) : (
+                          <>
+                            <div className="relative">
+                              <select
+                                value={selectedImportRepoFullName}
+                                onChange={(e) => setSelectedImportRepoFullName(e.target.value)}
+                                disabled={importingRepo}
+                                className="h-8 rounded-[6px] border border-black/[0.05] bg-white pl-3 pr-9 text-[12px] font-semibold text-[#111827] shadow-sm focus:outline-none"
+                              >
+                                {importRepos.map((r) => (
+                                  <option key={r.id} value={r.fullName}>
+                                    {r.fullName}
+                                  </option>
+                                ))}
+                              </select>
+                              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#111827]/40" />
+                            </div>
+                            <Button
+                              onClick={handleImportRepo}
+                              disabled={!selectedImportRepoFullName || importingRepo}
+                              className="h-8 rounded-[6px] bg-[#111827] px-4 text-[12px] font-semibold text-white transition-all hover:bg-black active:scale-[0.98] flex items-center gap-2"
+                            >
+                              {importingRepo ? 'Importing...' : 'Import'}
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between group gap-10">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
                           <h3 className="text-[14px] font-semibold text-[#111827] tracking-tight">
                             Connected account
                           </h3>
