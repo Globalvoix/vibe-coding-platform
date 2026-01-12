@@ -124,8 +124,11 @@ export function LargeSettingsModal() {
     } else if (githubInstall === 'success') {
       setErrorMessage(null)
       setRequestId(null)
+      setTimeout(() => {
+        void checkGithubStatus()
+      }, 500)
     }
-  }, [searchParams])
+  }, [searchParams, checkGithubStatus])
 
   const checkGithubStatus = useCallback(async () => {
     try {
