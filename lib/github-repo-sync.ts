@@ -261,6 +261,7 @@ export async function pushPersistedProjectToGithubMain(params: {
     branch: params.branch,
     commitMessage: params.commitMessage,
     snapshot,
+    replaceTree: true,
   })
 }
 
