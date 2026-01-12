@@ -157,10 +157,10 @@ export async function upsertGithubProject(params: {
      ON CONFLICT (user_id, project_id)
      DO UPDATE SET
        active_installation_id = COALESCE(EXCLUDED.active_installation_id, github_projects.active_installation_id),
-       repo_owner = EXCLUDED.repo_owner,
-       repo_name = EXCLUDED.repo_name,
-       repo_id = EXCLUDED.repo_id,
-       default_branch = EXCLUDED.default_branch,
+       repo_owner = COALESCE(EXCLUDED.repo_owner, github_projects.repo_owner),
+       repo_name = COALESCE(EXCLUDED.repo_name, github_projects.repo_name),
+       repo_id = COALESCE(EXCLUDED.repo_id, github_projects.repo_id),
+       default_branch = COALESCE(EXCLUDED.default_branch, github_projects.default_branch),
        updated_at = NOW()
      RETURNING *`,
     [
