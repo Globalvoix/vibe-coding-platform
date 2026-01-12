@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { verifyGithubInstallState } from '@/lib/github-install-state'
 import { getInstallation, createInstallationToken, githubRequest } from '@/lib/github-app'
 import { upsertGithubInstallation, upsertGithubProject } from '@/lib/github-projects-db'
+import type { GithubRepository } from '@/lib/github-types'
 
 function sanitizeRepoName(name: string): string {
   return name
