@@ -14,7 +14,7 @@ declare module 'pg' {
     replication?: string
   }
 
-  export interface QueryResult<T = any> {
+  export interface QueryResult<T = Record<string, unknown>> {
     command: string
     rowCount: number | null
     oid: number | null
@@ -28,28 +28,28 @@ declare module 'pg' {
       dataTypeModifier: number
       format: string
     }>
-    _parsers: any[]
-    _types: any
-    RowCtor: any
+    _parsers: unknown[]
+    _types: unknown
+    RowCtor: unknown
   }
 
   export interface PoolClient {
-    query<T = any>(
-      queryTextOrConfig: string | { text: string; values?: any[] },
-      values?: any[]
+    query<T = Record<string, unknown>>(
+      queryTextOrConfig: string | { text: string; values?: unknown[] },
+      values?: unknown[]
     ): Promise<QueryResult<T>>
     release(err?: Error): void
   }
 
   export class Pool {
     constructor(config?: PoolConfig)
-    query<T = any>(
-      queryTextOrConfig: string | { text: string; values?: any[] },
-      values?: any[]
+    query<T = Record<string, unknown>>(
+      queryTextOrConfig: string | { text: string; values?: unknown[] },
+      values?: unknown[]
     ): Promise<QueryResult<T>>
     connect(): Promise<PoolClient>
     end(): Promise<void>
-    on(event: string, listener: (...args: any[]) => void): this
+    on(event: string, listener: (...args: unknown[]) => void): this
   }
 
   export { Pool as default }

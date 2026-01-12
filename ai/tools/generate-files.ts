@@ -151,25 +151,50 @@ export const generateFiles = ({ writer, modelId, userId, projectId }: Params) =>
         })
       }
 
+      type NodeReadableStreamLike = {
+        setEncoding?: (encoding: BufferEncoding) => void
+        on?: (event: string, listener: (...args: unknown[]) => void) => void
+      }
+
+      const isWebReadableStream = (value: unknown): value is ReadableStream<Uint8Array> => {
+        return !!value && typeof (value as { getReader?: unknown }).getReader === 'function'
+      }
+
+      const isNodeReadableStream = (value: unknown): value is NodeReadableStreamLike => {
+        return !!value && typeof (value as { on?: unknown }).on === 'function'
+      }
+
       const readSandboxTextFile = async (path: string) => {
         const stream = await sandbox!.readFile({ path })
         if (!stream) return null
 
-        const anyStream = stream as unknown as any
-        if (anyStream && typeof anyStream.getReader === 'function') {
-          // Web ReadableStream
-          return await new Response(anyStream).text()
+        if (isWebReadableStream(stream)) {
+          return await new Response(stream).text()
         }
 
-        // Node stream
+        if (!isNodeReadableStream(stream)) {
+          return null
+        }
+
         return await new Promise<string>((resolve, reject) => {
           let data = ''
-          anyStream.setEncoding?.('utf8')
-          anyStream.on?.('data', (chunk: string) => {
-            data += chunk
+
+          stream.setEncoding?.('utf8')
+          stream.on?.('data', (chunk) => {
+            if (typeof chunk === 'string') {
+              data += chunk
+              return
+            }
+
+            if (chunk instanceof Uint8Array) {
+              data += Buffer.from(chunk).toString('utf8')
+              return
+            }
+
+            data += String(chunk)
           })
-          anyStream.on?.('end', () => resolve(data))
-          anyStream.on?.('error', reject)
+          stream.on?.('end', () => resolve(data))
+          stream.on?.('error', (err) => reject(err instanceof Error ? err : new Error(String(err))))
         })
       }
 
@@ -240,16 +265,38 @@ export const generateFiles = ({ writer, modelId, userId, projectId }: Params) =>
 
         if (packages.size === 0) return
 
-        const pkgPath = 'package.json'
-        const existingPkgText = await readSandboxTextFile(pkgPath)
-        let pkg: any
-        try {
-          pkg = existingPkgText ? JSON.parse(existingPkgText) : { name: 'app', private: true }
-        } catch {
-          pkg = { name: 'app', private: true }
+        type PackageJson = {
+          name?: string
+          private?: boolean
+          dependencies?: Record<string, string>
+          [key: string]: unknown
         }
 
-        pkg.dependencies = pkg.dependencies && typeof pkg.dependencies === 'object' ? pkg.dependencies : {}
+        const normalizeStringRecord = (value: unknown): Record<string, string> => {
+          if (!value || typeof value !== 'object' || Array.isArray(value)) return {}
+          const out: Record<string, string> = {}
+          for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+            if (typeof v === 'string') out[k] = v
+          }
+          return out
+        }
+
+        const pkgPath = 'package.json'
+        const existingPkgText = await readSandboxTextFile(pkgPath)
+
+        const defaultPkg: PackageJson = { name: 'app', private: true }
+        let pkg: PackageJson = defaultPkg
+
+        try {
+          const parsed: unknown = existingPkgText ? JSON.parse(existingPkgText) : defaultPkg
+          if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+            pkg = parsed as PackageJson
+          }
+        } catch {
+          pkg = defaultPkg
+        }
+
+        pkg.dependencies = normalizeStringRecord(pkg.dependencies)
 
         let changed = false
         for (const dep of packages) {

@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
   }
 
   const errors: string[] = []
-  const details: Record<string, any> = {}
+  const details: Record<string, unknown> = {}
 
   // Check environment variables
   if (!process.env.GITHUB_APP_ID) {
