@@ -54,6 +54,20 @@ function normalizePem(pem: string): string {
 }
 
 function parseGithubPrivateKey(pem: string): KeyObject {
+  // Check for placeholder values
+  if (pem.includes('REPLACE_ENV') || pem === 'REPLACE_ENV.GITHUB_PRIVATE_KEY') {
+    throw new Error(
+      'GITHUB_PRIVATE_KEY is set to a placeholder value. Please set it to your actual GitHub App private key from https://github.com/settings/apps/thinksoft-bot/private-keys'
+    )
+  }
+
+  // Check if it looks like a PEM key
+  if (!pem.includes('BEGIN') || !pem.includes('END')) {
+    throw new Error(
+      'GITHUB_PRIVATE_KEY does not appear to be a valid PEM-formatted key. It should contain "BEGIN" and "END" markers and be the complete RSA private key from GitHub.'
+    )
+  }
+
   const normalizedPem = normalizePem(pem)
 
   try {
@@ -64,7 +78,9 @@ function parseGithubPrivateKey(pem: string): KeyObject {
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error)
     console.error('[GitHub App] Private key parsing failed:', errorMsg)
-    throw new Error(`Failed to parse GitHub App private key: ${errorMsg}`)
+    throw new Error(
+      `Failed to parse GitHub App private key: ${errorMsg}. Make sure you have the complete private key from https://github.com/settings/apps/thinksoft-bot/private-keys`
+    )
   }
 }
 
