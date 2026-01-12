@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyGithubInstallState } from '@/lib/github-install-state'
 import { ensureGithubRepoForInstallation } from '@/lib/github-installation-flow'
-import { pushProjectToGithubMain } from '@/lib/github-repo-sync'
+import { pushPersistedProjectToGithubMain } from '@/lib/github-repo-sync'
 
 export async function GET(req: NextRequest) {
   const installationIdStr = req.nextUrl.searchParams.get('installation_id')
@@ -28,7 +28,9 @@ export async function GET(req: NextRequest) {
 
     const branch = repo.default_branch || 'main'
 
-    await pushProjectToGithubMain({
+    await pushPersistedProjectToGithubMain({
+      userId,
+      projectId,
       installationId,
       owner: repo.owner.login,
       repo: repo.name,

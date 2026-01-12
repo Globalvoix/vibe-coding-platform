@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { getGithubProject } from '@/lib/github-projects-db'
-import { pushProjectToGithubMain } from '@/lib/github-repo-sync'
+import { pushPersistedProjectToGithubMain } from '@/lib/github-repo-sync'
 
 /**
  * Push project snapshot to GitHub main branch
@@ -29,7 +29,9 @@ export async function POST(req: NextRequest) {
 
     const branch = project.default_branch ?? 'main'
 
-    const result = await pushProjectToGithubMain({
+    const result = await pushPersistedProjectToGithubMain({
+      userId,
+      projectId: body.projectId,
       installationId: project.active_installation_id,
       owner: project.repo_owner,
       repo: project.repo_name,

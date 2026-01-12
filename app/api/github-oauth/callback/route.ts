@@ -3,7 +3,7 @@ import { verifyGithubInstallState } from '@/lib/github-install-state'
 import { exchangeGithubOAuthCode } from '@/lib/github-oauth'
 import { upsertGithubOAuthToken } from '@/lib/github-projects-db'
 import { ensureGithubRepoForInstallation } from '@/lib/github-installation-flow'
-import { pushProjectToGithubMain } from '@/lib/github-repo-sync'
+import { pushPersistedProjectToGithubMain } from '@/lib/github-repo-sync'
 
 export async function GET(req: NextRequest) {
   const state = req.nextUrl.searchParams.get('state')
@@ -61,7 +61,9 @@ export async function GET(req: NextRequest) {
 
     const branch = repo.default_branch || 'main'
 
-    await pushProjectToGithubMain({
+    await pushPersistedProjectToGithubMain({
+      userId,
+      projectId,
       installationId,
       owner: repo.owner.login,
       repo: repo.name,

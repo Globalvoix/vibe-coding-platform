@@ -1,6 +1,7 @@
 import path from 'node:path'
 import fs from 'node:fs/promises'
 import { createInstallationToken, githubRequest } from '@/lib/github-app'
+import { listProjectFiles } from '@/lib/project-files-db'
 import type { GithubGitRef, GithubCommit, GithubBlob, GithubTree } from '@/lib/github-types'
 
 const DEFAULT_INCLUDE_PATHS = [
@@ -64,7 +65,26 @@ async function walkFiles(params: {
   }
 }
 
-async function getSnapshot(rootDir: string) {
+type SnapshotItem = { path: string; contentBase64: string }
+
+function shouldExcludePath(p: string): boolean {
+  const normalized = p.replace(/\\/g, '/').replace(/^\/+/, '')
+
+  if (normalized.startsWith('.git/')) return true
+  if (normalized.startsWith('node_modules/')) return true
+  if (normalized.startsWith('.next/')) return true
+  if (normalized.startsWith('.vercel/')) return true
+  if (normalized.startsWith('dist/')) return true
+  if (normalized.startsWith('build/')) return true
+
+  const baseName = normalized.split('/').pop() ?? normalized
+  if (/^\.env(\.|$)/.test(baseName)) return true
+  if (/\.pem$/i.test(baseName)) return true
+
+  return false
+}
+
+async function getSnapshotFromFs(rootDir: string): Promise<SnapshotItem[]> {
   const files: string[] = []
 
   for (const includePath of DEFAULT_INCLUDE_PATHS) {
@@ -82,9 +102,11 @@ async function getSnapshot(rootDir: string) {
 
   files.sort()
 
-  const items: { path: string; contentBase64: string }[] = []
+  const items: SnapshotItem[] = []
 
   for (const rel of files) {
+    if (shouldExcludePath(rel)) continue
+
     const abs = path.join(rootDir, rel)
     const stat = await fs.stat(abs)
 
@@ -99,15 +121,37 @@ async function getSnapshot(rootDir: string) {
   return items
 }
 
-export async function pushProjectToGithubMain(params: {
+async function getSnapshotFromPersistedProject(params: {
+  userId: string
+  projectId: string
+}): Promise<SnapshotItem[]> {
+  const rows = await listProjectFiles({ userId: params.userId, projectId: params.projectId })
+
+  const items: SnapshotItem[] = []
+
+  for (const row of rows) {
+    const filePath = row.path.replace(/\\/g, '/').replace(/^\/+/, '')
+    if (!filePath || shouldExcludePath(filePath)) continue
+
+    const buf = Buffer.from(row.content ?? '', 'utf8')
+
+    if (buf.length > 1_000_000) continue
+
+    items.push({ path: filePath, contentBase64: buf.toString('base64') })
+  }
+
+  items.sort((a, b) => a.path.localeCompare(b.path))
+  return items
+}
+
+async function pushSnapshotToGithubMain(params: {
   installationId: number
   owner: string
   repo: string
   branch: string
   commitMessage: string
-  rootDir?: string
+  snapshot: SnapshotItem[]
 }) {
-  const rootDir = params.rootDir ?? process.cwd()
   const installationToken = await createInstallationToken(params.installationId)
 
   const ref = await githubRequest<GithubGitRef>(
@@ -126,11 +170,9 @@ export async function pushProjectToGithubMain(params: {
 
   const baseTreeSha = baseCommit.tree.sha
 
-  const snapshot = await getSnapshot(rootDir)
-
   const treeEntries: { path: string; mode: string; type: string; sha: string }[] = []
 
-  for (const file of snapshot) {
+  for (const file of params.snapshot) {
     const blob = await githubRequest<GithubBlob>(
       'POST',
       `/repos/${encodeURIComponent(params.owner)}/${encodeURIComponent(params.repo)}/git/blobs`,
@@ -175,4 +217,57 @@ export async function pushProjectToGithubMain(params: {
   )
 
   return { commitSha: commit.sha }
+}
+
+export async function pushPersistedProjectToGithubMain(params: {
+  userId: string
+  projectId: string
+  installationId: number
+  owner: string
+  repo: string
+  branch: string
+  commitMessage: string
+}) {
+  const snapshot = await getSnapshotFromPersistedProject({
+    userId: params.userId,
+    projectId: params.projectId,
+  })
+
+  if (snapshot.length === 0) {
+    return { commitSha: null as string | null }
+  }
+
+  return pushSnapshotToGithubMain({
+    installationId: params.installationId,
+    owner: params.owner,
+    repo: params.repo,
+    branch: params.branch,
+    commitMessage: params.commitMessage,
+    snapshot,
+  })
+}
+
+export async function pushProjectToGithubMain(params: {
+  installationId: number
+  owner: string
+  repo: string
+  branch: string
+  commitMessage: string
+  rootDir?: string
+}) {
+  const rootDir = params.rootDir ?? process.cwd()
+  const snapshot = await getSnapshotFromFs(rootDir)
+
+  if (snapshot.length === 0) {
+    return { commitSha: null as string | null }
+  }
+
+  return pushSnapshotToGithubMain({
+    installationId: params.installationId,
+    owner: params.owner,
+    repo: params.repo,
+    branch: params.branch,
+    commitMessage: params.commitMessage,
+    snapshot,
+  })
 }
