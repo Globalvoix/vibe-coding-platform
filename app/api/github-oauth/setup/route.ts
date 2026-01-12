@@ -84,6 +84,7 @@ export async function GET(req: NextRequest) {
     redirectUrl.searchParams.set('projectId', projectId)
     redirectUrl.searchParams.set('openSettings', '1')
     redirectUrl.searchParams.set('settingsTab', 'github')
+    if (mode === 'import') redirectUrl.searchParams.set('githubImport', '1')
     redirectUrl.searchParams.set('githubInstall', 'error')
     redirectUrl.searchParams.set('githubError', encodeURIComponent(msg))
 
