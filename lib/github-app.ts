@@ -4,6 +4,27 @@ import type { GithubInstallation } from '@/lib/github-types'
 
 const GITHUB_API_BASE = 'https://api.github.com'
 
+async function fetchWithTimeout(
+  url: string,
+  init: RequestInit,
+  timeoutMs = 15_000
+): Promise<Response> {
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs)
+
+  try {
+    return await fetch(url, { ...init, signal: controller.signal })
+  } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new Error(`Request timed out after ${timeoutMs}ms`)
+    }
+    throw error
+  } finally {
+    clearTimeout(timeoutId)
+  }
+}
+
+
 function getEnv(name: string): string {
   const value = process.env[name]
   if (!value) throw new Error(`${name} environment variable is required`)
@@ -41,7 +62,7 @@ export async function getInstallation(installationId: number): Promise<GithubIns
   try {
     const jwt = await createGithubAppJwt()
 
-    const res = await fetch(`${GITHUB_API_BASE}/app/installations/${installationId}`, {
+    const res = await fetchWithTimeout(`${GITHUB_API_BASE}/app/installations/${installationId}`, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${jwt}`,
@@ -66,7 +87,7 @@ export async function createInstallationToken(installationId: number): Promise<s
   try {
     const jwt = await createGithubAppJwt()
 
-    const res = await fetch(`${GITHUB_API_BASE}/app/installations/${installationId}/access_tokens`, {
+    const res = await fetchWithTimeout(`${GITHUB_API_BASE}/app/installations/${installationId}/access_tokens`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${jwt}`,
@@ -96,7 +117,7 @@ export async function githubRequest<T>(
   body?: Record<string, unknown>
 ): Promise<T> {
   try {
-    const res = await fetch(`${GITHUB_API_BASE}${path}`, {
+    const res = await fetchWithTimeout(`${GITHUB_API_BASE}${path}`, {
       method,
       headers: {
         Authorization: `Bearer ${token}`,
@@ -130,7 +151,7 @@ export async function githubRequestNoContent(
   body?: Record<string, unknown>
 ): Promise<void> {
   try {
-    const res = await fetch(`${GITHUB_API_BASE}${path}`, {
+    const res = await fetchWithTimeout(`${GITHUB_API_BASE}${path}`, {
       method,
       headers: {
         Authorization: `Bearer ${token}`,
