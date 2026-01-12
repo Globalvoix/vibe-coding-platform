@@ -264,6 +264,8 @@ export class GithubAppClient {
     errors: string[]
     details: {
       appId?: string
+      hasPrivateKey?: boolean
+      privateKeyValid?: boolean
       jwtCreated?: boolean
       apiConnectivity?: boolean
       appInfo?: {
@@ -276,6 +278,8 @@ export class GithubAppClient {
     const errors: string[] = []
     const details: {
       appId?: string
+      hasPrivateKey?: boolean
+      privateKeyValid?: boolean
       jwtCreated?: boolean
       apiConnectivity?: boolean
       appInfo?: {
@@ -294,8 +298,27 @@ export class GithubAppClient {
       details.appId = process.env.GITHUB_APP_ID
     }
 
-    if (!process.env.GITHUB_PRIVATE_KEY) {
+    // Check GITHUB_PRIVATE_KEY
+    const privateKey = process.env.GITHUB_PRIVATE_KEY
+    if (!privateKey) {
       errors.push('GITHUB_PRIVATE_KEY is not set')
+      details.hasPrivateKey = false
+    } else {
+      details.hasPrivateKey = true
+      // Check if it looks like a valid PEM
+      if (privateKey.includes('REPLACE_ENV') || privateKey.length < 100) {
+        errors.push(
+          'GITHUB_PRIVATE_KEY appears to be a placeholder or incomplete. Please set the actual GitHub App private key from https://github.com/settings/apps/thinksoft-bot/private-keys'
+        )
+        details.privateKeyValid = false
+      } else if (!privateKey.includes('BEGIN') || !privateKey.includes('END')) {
+        errors.push(
+          'GITHUB_PRIVATE_KEY does not appear to be a valid PEM-formatted key. It should start with "-----BEGIN RSA PRIVATE KEY-----" and end with "-----END RSA PRIVATE KEY-----"'
+        )
+        details.privateKeyValid = false
+      } else {
+        details.privateKeyValid = true
+      }
     }
 
     if (!process.env.GITHUB_APP_SLUG) {
