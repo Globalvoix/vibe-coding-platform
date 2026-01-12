@@ -16,6 +16,7 @@ export type HeroWaveProps = {
   placeholder?: string;
   buttonText?: string;
   onPromptSubmit?: (value: string) => void;
+  onGithubImport?: () => void;
 };
 
 export function HeroWave({
