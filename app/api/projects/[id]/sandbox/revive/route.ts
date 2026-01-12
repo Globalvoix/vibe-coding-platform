@@ -45,17 +45,40 @@ function selectPackageManager(filePaths: string[]) {
 }
 
 function buildInstallCommand(pm: 'npm' | 'pnpm' | 'yarn') {
-  return pm === 'npm' ? 'npm install' : pm === 'pnpm' ? 'pnpm install' : 'yarn install'
+  const corepack = 'corepack enable >/dev/null 2>&1 || true'
+
+  if (pm === 'pnpm') {
+    return [
+      corepack,
+      '(command -v pnpm >/dev/null 2>&1 || corepack prepare pnpm@latest --activate)',
+      'pnpm install',
+    ].join(' && ')
+  }
+
+  if (pm === 'yarn') {
+    return [
+      corepack,
+      '(command -v yarn >/dev/null 2>&1 || corepack prepare yarn@stable --activate)',
+      '(yarn install --immutable || yarn install)',
+    ].join(' && ')
+  }
+
+  return 'npm install'
 }
 
 function buildDevCommand(pm: 'npm' | 'pnpm' | 'yarn', port: number) {
-  // Keep this broadly compatible across frameworks (Next, Vite, etc.).
-  // Many CLIs support --port, while --host/--hostname differs and can crash some frameworks.
-  return pm === 'npm'
-    ? `npm run dev -- --port ${port}`
-    : pm === 'pnpm'
-      ? `pnpm dev -- --port ${port}`
-      : `yarn dev -- --port ${port}`
+  // Broad compatibility:
+  // - Next/Vite generally accept "-- --port".
+  // - CRA and others may not; fallback to plain dev with PORT env.
+  if (pm === 'pnpm') {
+    return `(PORT=${port} pnpm dev -- --port ${port} || PORT=${port} pnpm dev)`
+  }
+
+  if (pm === 'yarn') {
+    return `(PORT=${port} yarn dev -- --port ${port} || PORT=${port} yarn dev)`
+  }
+
+  return `(PORT=${port} npm run dev -- --port ${port} || PORT=${port} npm run dev)`
 }
 
 function buildWaitForPortCommand(port: number, timeoutMs: number) {
@@ -163,10 +186,10 @@ export async function POST(
   )
 
   const install = buildInstallCommand(pm)
-  await sandbox.runCommand({ cmd: 'bash', args: ['-lc', `PORT=${port} ${install}`] })
+  await sandbox.runCommand({ cmd: 'bash', args: ['-lc', install] })
 
   const dev = buildDevCommand(pm, port)
-  await sandbox.runCommand({ cmd: 'bash', args: ['-lc', `PORT=${port} ${dev}`], detached: true })
+  await sandbox.runCommand({ cmd: 'bash', args: ['-lc', dev], detached: true })
 
   try {
     const wait = buildWaitForPortCommand(port, 120_000)

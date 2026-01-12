@@ -37,6 +37,7 @@ export function Preview({
   const [error, setError] = useState<string | null>(null)
   const [inputValue, setInputValue] = useState(url || '')
   const [isLoading, setIsLoading] = useState(false)
+  const [autoRetryCount, setAutoRetryCount] = useState(0)
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const loadStartTime = useRef<number | null>(null)
 
@@ -51,27 +52,46 @@ export function Preview({
     onLoadingChange?.(isLoading)
   }, [isLoading, onLoadingChange])
 
-  const refreshIframe = () => {
-    if (iframeRef.current && currentUrl) {
-      setIsLoading(true)
-      setError(null)
-      loadStartTime.current = Date.now()
+  const bumpUrl = (rawUrl: string) => {
+    try {
+      const next = new URL(rawUrl)
+      next.searchParams.set('t', Date.now().toString())
+      return next.toString()
+    } catch {
+      return rawUrl
+    }
+  }
+
+  const startLoading = (nextUrl: string) => {
+    setIsLoading(true)
+    setError(null)
+    loadStartTime.current = Date.now()
+
+    const bumped = bumpUrl(nextUrl)
+    setCurrentUrl(bumped)
+    setInputValue(bumped)
+
+    if (iframeRef.current) {
       iframeRef.current.src = ''
       setTimeout(() => {
-        if (iframeRef.current) {
-          iframeRef.current.src = currentUrl
-        }
+        if (iframeRef.current) iframeRef.current.src = bumped
       }, 10)
+    }
+  }
+
+  const refreshIframe = () => {
+    if (iframeRef.current && currentUrl) {
+      setAutoRetryCount(0)
+      startLoading(currentUrl)
     }
   }
 
   const loadNewUrl = () => {
     if (iframeRef.current && inputValue) {
+      setAutoRetryCount(0)
+
       if (inputValue !== currentUrl) {
-        setIsLoading(true)
-        setError(null)
-        loadStartTime.current = Date.now()
-        iframeRef.current.src = inputValue
+        startLoading(inputValue)
       } else {
         refreshIframe()
       }
@@ -79,14 +99,47 @@ export function Preview({
   }
 
   const handleIframeLoad = () => {
+    setAutoRetryCount(0)
     setIsLoading(false)
     setError(null)
   }
 
   const handleIframeError = () => {
-    setIsLoading(false)
-    setError('Failed to load the page')
+    const maxRetries = 12
+    if (!currentUrl || autoRetryCount >= maxRetries) {
+      setIsLoading(false)
+      setError('Failed to load the page')
+      return
+    }
+
+    setAutoRetryCount((c) => c + 1)
+    setIsLoading(true)
+    setError(null)
+
+    window.setTimeout(() => {
+      startLoading(currentUrl)
+    }, 2500)
   }
+
+  useEffect(() => {
+    if (!isLoading) return
+    if (!currentUrl) return
+
+    const maxRetries = 12
+    if (autoRetryCount >= maxRetries) return
+
+    const started = loadStartTime.current
+    if (!started) return
+
+    const timeoutId = window.setTimeout(() => {
+      const elapsed = Date.now() - started
+      if (elapsed < 15_000) return
+      setAutoRetryCount((c) => c + 1)
+      startLoading(currentUrl)
+    }, 15_000)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [autoRetryCount, currentUrl, isLoading])
 
   // Expose refresh method to parent via ref
   useEffect(() => {
