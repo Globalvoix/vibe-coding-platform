@@ -81,6 +81,12 @@ export function LargeSettingsModal() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [requestId, setRequestId] = useState<string | null>(null)
   const [showDiagnostics, setShowDiagnostics] = useState(false)
+  const [diagnosticsLoading, setDiagnosticsLoading] = useState(false)
+  const [diagnosticsData, setDiagnosticsData] = useState<{
+    valid: boolean
+    errors: string[]
+    details: Record<string, unknown>
+  } | null>(null)
 
   const [connectorStatus, setConnectorStatus] = useState<Partial<Record<ConnectorId, boolean>>>({})
 
@@ -143,6 +149,26 @@ export function LargeSettingsModal() {
       console.error('Error checking connector status:', error)
     }
   }, [projectId])
+
+  const runDiagnostics = useCallback(async () => {
+    try {
+      setDiagnosticsLoading(true)
+      const res = await fetch('/api/github-oauth/validate')
+      if (res.ok) {
+        const data = (await res.json()) as typeof diagnosticsData
+        setDiagnosticsData(data)
+      }
+    } catch (error) {
+      console.error('Error running diagnostics:', error)
+      setDiagnosticsData({
+        valid: false,
+        errors: ['Failed to run diagnostics'],
+        details: {},
+      })
+    } finally {
+      setDiagnosticsLoading(false)
+    }
+  }, [])
 
   useEffect(() => {
     if (settingsModalOpen && settingsTab === 'github' && projectId) {
