@@ -42,6 +42,9 @@ export async function exchangeGithubOAuthCode(params: {
     redirect_uri: params.redirectUri,
   })
 
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), 15_000)
+
   const res = await fetch('https://github.com/login/oauth/access_token', {
     method: 'POST',
     headers: {
@@ -49,7 +52,8 @@ export async function exchangeGithubOAuthCode(params: {
       'Content-Type': 'application/x-www-form-urlencoded',
     },
     body,
-  })
+    signal: controller.signal,
+  }).finally(() => clearTimeout(timeoutId))
 
   const data: unknown = await res.json().catch(() => null)
 
