@@ -105,6 +105,7 @@ export function LargeSettingsModal() {
   const githubImportRequested = searchParams.get('githubImport') === '1'
   const [importRepos, setImportRepos] = useState<GithubImportRepo[]>([])
   const [importReposLoading, setImportReposLoading] = useState(false)
+  const [importReposAutoFetched, setImportReposAutoFetched] = useState(false)
   const [selectedImportRepoFullName, setSelectedImportRepoFullName] = useState<string>('')
   const [importingRepo, setImportingRepo] = useState(false)
   const [importRepoError, setImportRepoError] = useState<string | null>(null)
@@ -130,6 +131,7 @@ export function LargeSettingsModal() {
     setImportRepos([])
     setSelectedImportRepoFullName('')
     setImportRepoError(null)
+    setImportReposAutoFetched(false)
   }, [activeOrg?.installationId])
 
   const projectConnected = Boolean(githubStatus.repository && githubStatus.installationId)
@@ -271,7 +273,9 @@ export function LargeSettingsModal() {
     if (!accountConnected || !activeOrg?.installationId) return
     if (importReposLoading) return
     if (importRepos.length > 0) return
+    if (importReposAutoFetched) return
 
+    setImportReposAutoFetched(true)
     void fetchImportRepos()
   }, [
     accountConnected,
@@ -279,6 +283,7 @@ export function LargeSettingsModal() {
     fetchImportRepos,
     githubImportRequested,
     importRepos.length,
+    importReposAutoFetched,
     importReposLoading,
     settingsModalOpen,
     settingsTab,

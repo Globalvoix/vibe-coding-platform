@@ -48,6 +48,7 @@ export function GithubImportDialog() {
 
   const [repos, setRepos] = useState<GithubImportRepo[]>([])
   const [reposLoading, setReposLoading] = useState(false)
+  const [reposAutoFetched, setReposAutoFetched] = useState(false)
   const [selectedFullName, setSelectedFullName] = useState('')
 
   const [importing, setImporting] = useState(false)
@@ -200,6 +201,7 @@ export function GithubImportDialog() {
   useEffect(() => {
     if (!importRequested) return
     setRepos([])
+    setReposAutoFetched(false)
     setSelectedFullName('')
     setImportError(null)
   }, [importRequested])
@@ -216,9 +218,11 @@ export function GithubImportDialog() {
     if (!status.connected) return
     if (reposLoading) return
     if (repos.length > 0) return
+    if (reposAutoFetched) return
 
+    setReposAutoFetched(true)
     void fetchRepos()
-  }, [fetchRepos, importRequested, repos.length, reposLoading, status.connected])
+  }, [fetchRepos, importRequested, repos.length, reposAutoFetched, reposLoading, status.connected])
 
   const showError =
     typeof githubError === 'string' && githubError.trim()
@@ -268,7 +272,13 @@ export function GithubImportDialog() {
         ) : repos.length === 0 ? (
           <div className="flex items-center justify-between gap-3">
             <div className="text-sm text-muted-foreground">No repositories found for this installation.</div>
-            <Button onClick={fetchRepos} variant="outline">
+            <Button
+              onClick={() => {
+                setReposAutoFetched(true)
+                void fetchRepos()
+              }}
+              variant="outline"
+            >
               Refresh
             </Button>
           </div>
