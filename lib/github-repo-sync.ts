@@ -109,19 +109,19 @@ export async function pushProjectToGithubMain(params: {
   const rootDir = params.rootDir ?? process.cwd()
   const installationToken = await createInstallationToken(params.installationId)
 
-  const ref = await githubInstallationRequest<{ object: { sha: string } }>({
-    method: 'GET',
-    path: `/repos/${encodeURIComponent(params.owner)}/${encodeURIComponent(params.repo)}/git/ref/heads/${encodeURIComponent(params.branch)}`,
-    installationToken,
-  })
+  const ref = await githubRequest<{ object: { sha: string } }>(
+    'GET',
+    `/repos/${encodeURIComponent(params.owner)}/${encodeURIComponent(params.repo)}/git/ref/heads/${encodeURIComponent(params.branch)}`,
+    installationToken
+  )
 
   const baseCommitSha = ref.object.sha
 
-  const baseCommit = await githubInstallationRequest<{ tree: { sha: string } }>({
-    method: 'GET',
-    path: `/repos/${encodeURIComponent(params.owner)}/${encodeURIComponent(params.repo)}/git/commits/${baseCommitSha}`,
-    installationToken,
-  })
+  const baseCommit = await githubRequest<{ tree: { sha: string } }>(
+    'GET',
+    `/repos/${encodeURIComponent(params.owner)}/${encodeURIComponent(params.repo)}/git/commits/${baseCommitSha}`,
+    installationToken
+  )
 
   const baseTreeSha = baseCommit.tree.sha
 
@@ -130,12 +130,12 @@ export async function pushProjectToGithubMain(params: {
   const treeEntries: { path: string; mode: string; type: string; sha: string }[] = []
 
   for (const file of snapshot) {
-    const blob = await githubInstallationRequest<{ sha: string }>({
-      method: 'POST',
-      path: `/repos/${encodeURIComponent(params.owner)}/${encodeURIComponent(params.repo)}/git/blobs`,
+    const blob = await githubRequest<{ sha: string }>(
+      'POST',
+      `/repos/${encodeURIComponent(params.owner)}/${encodeURIComponent(params.repo)}/git/blobs`,
       installationToken,
-      body: { content: file.contentBase64, encoding: 'base64' },
-    })
+      { content: file.contentBase64, encoding: 'base64' }
+    )
 
     treeEntries.push({
       path: file.path,
@@ -145,33 +145,33 @@ export async function pushProjectToGithubMain(params: {
     })
   }
 
-  const newTree = await githubInstallationRequest<{ sha: string }>({
-    method: 'POST',
-    path: `/repos/${encodeURIComponent(params.owner)}/${encodeURIComponent(params.repo)}/git/trees`,
+  const newTree = await githubRequest<{ sha: string }>(
+    'POST',
+    `/repos/${encodeURIComponent(params.owner)}/${encodeURIComponent(params.repo)}/git/trees`,
     installationToken,
-    body: {
+    {
       base_tree: baseTreeSha,
       tree: treeEntries,
-    },
-  })
+    }
+  )
 
-  const commit = await githubInstallationRequest<{ sha: string }>({
-    method: 'POST',
-    path: `/repos/${encodeURIComponent(params.owner)}/${encodeURIComponent(params.repo)}/git/commits`,
+  const commit = await githubRequest<{ sha: string }>(
+    'POST',
+    `/repos/${encodeURIComponent(params.owner)}/${encodeURIComponent(params.repo)}/git/commits`,
     installationToken,
-    body: {
+    {
       message: params.commitMessage,
       tree: newTree.sha,
       parents: [baseCommitSha],
-    },
-  })
+    }
+  )
 
-  await githubInstallationRequest({
-    method: 'PATCH',
-    path: `/repos/${encodeURIComponent(params.owner)}/${encodeURIComponent(params.repo)}/git/refs/heads/${encodeURIComponent(params.branch)}`,
+  await githubRequest<any>(
+    'PATCH',
+    `/repos/${encodeURIComponent(params.owner)}/${encodeURIComponent(params.repo)}/git/refs/heads/${encodeURIComponent(params.branch)}`,
     installationToken,
-    body: { sha: commit.sha, force: false },
-  })
+    { sha: commit.sha, force: false }
+  )
 
   return { commitSha: commit.sha }
 }
