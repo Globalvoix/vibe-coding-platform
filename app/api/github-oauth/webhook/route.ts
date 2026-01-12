@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'node:crypto'
-import { deleteGithubProject, listGithubInstallations } from '@/lib/github-projects-db'
+import { deleteGithubProjectsByInstallation } from '@/lib/github-projects-db'
 
 /**
  * Verify GitHub webhook signature
@@ -158,13 +158,14 @@ export async function POST(req: NextRequest) {
     })
 
     try {
-      // Find all users with installations linked to this installation ID
-      // Note: We don't have a direct index for this, so we'd need to scan or have a different approach
-      // For now, we'll log that this happened and the admin should handle cleanup
-      console.log(
-        `[GitHub Webhook:${requestId}] Installation ${installation.id} was deleted. ` +
-          `Projects using this installation should be cleaned up. Consider adding a scheduled job to identify orphaned projects.`
-      )
+      const affectedProjectCount = await deleteGithubProjectsByInstallation({
+        installationId: installation.id,
+      })
+
+      console.log(`[GitHub Webhook:${requestId}] Installation deletion completed`, {
+        installationId: installation.id,
+        affectedProjects: affectedProjectCount,
+      })
 
       return NextResponse.json(
         {
@@ -172,7 +173,8 @@ export async function POST(req: NextRequest) {
           processed: true,
           action: 'deleted',
           installationId: installation.id,
-          message: 'Installation deletion acknowledged. Cleanup may be required.',
+          affectedProjects: affectedProjectCount,
+          message: `Installation deleted. ${affectedProjectCount} project(s) disconnected from GitHub.`,
           requestId,
         },
         { status: 200 }
