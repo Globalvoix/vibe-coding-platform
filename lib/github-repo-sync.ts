@@ -145,7 +145,10 @@ async function getSnapshotFromPersistedProject(params: {
     const filePath = row.path.replace(/\\/g, '/').replace(/^\/+/, '')
     if (!filePath || shouldExcludePath(filePath)) continue
 
-    const buf = Buffer.from(row.content ?? '', 'utf8')
+    const buf = Buffer.from(
+      row.content ?? '',
+      row.encoding === 'base64' ? 'base64' : 'utf8'
+    )
 
     if (buf.length > 1_000_000) continue
 
