@@ -1,9 +1,7 @@
 import type { NextConfig } from 'next'
 import { withBotId } from 'botid/next/config'
-import path from 'path'
 
 const nextConfig: NextConfig = {
-  outputFileTracingRoot: path.resolve(__dirname),
   experimental: {
     serverActions: {
       allowedOrigins: ['*'],
