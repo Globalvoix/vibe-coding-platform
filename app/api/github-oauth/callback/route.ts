@@ -3,6 +3,17 @@ import { verifyGithubInstallState } from '@/lib/github-install-state'
 import { getInstallation, createInstallationToken, githubInstallationRequest } from '@/lib/github-app'
 import { upsertGithubInstallation, upsertGithubProject } from '@/lib/github-projects-db'
 
+interface GithubInstallationFull {
+  id: number
+  account: {
+    login: string
+    type: 'User' | 'Organization'
+    avatar_url?: string
+  }
+  repository_selection?: 'all' | 'selected'
+  permissions?: Record<string, string>
+}
+
 /**
  * GitHub OAuth callback
  * Called after user completes installation on GitHub
@@ -40,8 +51,22 @@ export async function GET(req: NextRequest) {
 
   try {
     // Step 1: Get installation details from GitHub
-    const installation = await getInstallation(installationId)
+    const installation = (await getInstallation(installationId)) as GithubInstallationFull
     const account = installation.account
+
+    console.log('[GitHub Callback] Installation details:', {
+      installationId,
+      accountLogin: account.login,
+      accountType: account.type,
+      repositorySelection: installation.repository_selection,
+    })
+
+    // Check if installation is restricted to specific repositories
+    if (installation.repository_selection === 'selected') {
+      throw new Error(
+        `This GitHub App installation is restricted to specific repositories. To use this integration, reinstall the app and select "All repositories" instead of "Only select repositories" at ${account.type === 'Organization' ? 'https://github.com/settings/installations' : 'https://github.com/settings/apps/authorizations'}`
+      )
+    }
 
     // Step 2: Save installation to database
     await upsertGithubInstallation({
@@ -87,7 +112,11 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(redirectUrl.toString())
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error)
-    console.error('[GitHub Callback] Error:', errorMessage)
+    console.error('[GitHub Callback] Error:', {
+      installationId,
+      projectId,
+      error: errorMessage,
+    })
 
     // Redirect back with error
     const redirectUrl = new URL('/workspace', req.nextUrl.origin)
