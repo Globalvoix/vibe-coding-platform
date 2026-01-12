@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
-import { createInstallationToken, getInstallation, githubRequest } from '@/lib/github-app'
-import { getGithubProject, upsertGithubProject } from '@/lib/github-projects-db'
-import type { GithubRepository } from '@/lib/github-types'
+import { getGithubProject } from '@/lib/github-projects-db'
+import { ensureGithubRepoForInstallation } from '@/lib/github-installation-flow'
 
 function sanitizeRepoName(name: string): string {
   return name
@@ -43,34 +42,12 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    // Create new repository
     const installationId = project.active_installation_id
-    const installation = await getInstallation(installationId)
-    const account = installation.account
 
-    const token = await createInstallationToken(installationId)
-    const repoName = sanitizeRepoName(`thinksoft-${body.projectId}`)
-
-    const repoPath =
-      account.type === 'Organization'
-        ? `/orgs/${encodeURIComponent(account.login)}/repos`
-        : '/user/repos'
-
-    const repo = await githubRequest<GithubRepository>('POST', repoPath, token, {
-      name: repoName,
-      private: true,
-      auto_init: true,
-      description: `Thinksoft project ${body.projectId}`,
-    })
-
-    // Save to DB
-    await upsertGithubProject({
+    const repo = await ensureGithubRepoForInstallation({
       userId,
       projectId: body.projectId,
-      repoOwner: repo.owner.login,
-      repoName: repo.name,
-      repoId: repo.id,
-      defaultBranch: repo.default_branch,
+      installationId,
     })
 
     return NextResponse.json({
