@@ -58,7 +58,7 @@ export async function GET(req: NextRequest) {
         ? `/orgs/${encodeURIComponent(account.login)}/repos`
         : '/user/repos'
 
-    const repo = await githubRequest<any>('POST', repoPath, token, {
+    const repo = await githubRequest<GithubRepository>('POST', repoPath, token, {
       name: repoName,
       private: true,
       auto_init: true,
