@@ -236,9 +236,13 @@ export function LargeSettingsModal() {
       setImportReposLoading(true)
       setImportRepoError(null)
 
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 15_000)
+
       const res = await fetch(
-        `/api/github-oauth/repositories?projectId=${projectId}&installationId=${activeOrg.installationId}`
-      )
+        `/api/github-oauth/repositories?projectId=${projectId}&installationId=${activeOrg.installationId}`,
+        { signal: controller.signal }
+      ).finally(() => clearTimeout(timeoutId))
 
       if (!res.ok) {
         const data = await res.json().catch(() => null)
