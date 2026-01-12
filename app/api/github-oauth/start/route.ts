@@ -15,6 +15,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Missing projectId' }, { status: 400 })
   }
 
+  const mode = req.nextUrl.searchParams.get('mode')
+
   try {
     const appSlug = process.env.GITHUB_APP_SLUG
     if (!appSlug) {
