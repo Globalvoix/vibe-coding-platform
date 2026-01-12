@@ -71,7 +71,7 @@ export function verifyGithubInstallState(state: string) {
     const ageMs = Date.now() - decoded.ts
     if (ageMs < 0 || ageMs > 1000 * 60 * 30) return null
 
-    return { userId: decoded.userId, projectId: decoded.projectId }
+    return { userId: decoded.userId, projectId: decoded.projectId, mode: decoded.mode ?? null }
   } catch {
     return null
   }
