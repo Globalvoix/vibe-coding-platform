@@ -26,6 +26,7 @@ export function HeroWave({
   placeholder = "Describe what you want to create...",
   buttonText = "Generate",
   onPromptSubmit,
+  onGithubImport,
 }: HeroWaveProps) {
   const [isLoading, setIsLoading] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -159,6 +160,15 @@ export function HeroWave({
                 isLoading={isLoading}
                 showMic={false}
                 showTools={false}
+                showGithubImport={Boolean(onGithubImport)}
+                onGithubImport={() => {
+                  if (!onGithubImport) return;
+                  if (!isSignedIn) {
+                    openSignIn();
+                    return;
+                  }
+                  onGithubImport();
+                }}
                 onPromptSubmit={async (val) => {
                   if (!isSignedIn) {
                     openSignIn();
