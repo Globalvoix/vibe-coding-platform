@@ -318,8 +318,37 @@ export function LargeSettingsModal() {
         })
 
         if (reviveRes.ok) {
-          const revived = (await reviveRes.json()) as { sandbox_state: any }
-          useSandboxStore.getState().applySandboxState(revived.sandbox_state)
+          type SandboxState = {
+            sandboxId?: string
+            paths?: string[]
+            url?: string
+          } | null
+
+          const coerceSandboxState = (value: unknown): SandboxState => {
+            if (!value || typeof value !== 'object') return null
+            const record = value as Record<string, unknown>
+
+            const sandboxId = typeof record.sandboxId === 'string' ? record.sandboxId : undefined
+            const url = typeof record.url === 'string' ? record.url : undefined
+            const paths = Array.isArray(record.paths)
+              ? record.paths.filter((p): p is string => typeof p === 'string')
+              : undefined
+
+            if (!sandboxId && !url && !paths) return null
+
+            return { sandboxId, url, paths }
+          }
+
+          const revivedJson: unknown = await reviveRes.json()
+          const revivedRecord =
+            revivedJson && typeof revivedJson === 'object'
+              ? (revivedJson as Record<string, unknown>)
+              : null
+
+          const sandboxState = coerceSandboxState(revivedRecord?.sandbox_state)
+          if (sandboxState) {
+            useSandboxStore.getState().applySandboxState(sandboxState)
+          }
         }
       } catch {
         // best-effort
