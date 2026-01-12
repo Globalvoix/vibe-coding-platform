@@ -37,7 +37,7 @@ export async function createGithubAppJwt(): Promise<string> {
   }
 }
 
-export async function getInstallation(installationId: number) {
+export async function getInstallation(installationId: number): Promise<GithubInstallation> {
   try {
     const jwt = await createGithubAppJwt()
 
@@ -55,7 +55,7 @@ export async function getInstallation(installationId: number) {
       throw new Error(`GitHub API error (${res.status}): ${text}`)
     }
 
-    return await res.json()
+    return (await res.json()) as GithubInstallation
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error)
     throw new Error(`Failed to get installation ${installationId}: ${msg}`)
