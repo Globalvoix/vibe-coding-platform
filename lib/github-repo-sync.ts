@@ -1,6 +1,7 @@
 import path from 'node:path'
 import fs from 'node:fs/promises'
 import { createInstallationToken, githubRequest } from '@/lib/github-app'
+import type { GithubGitRef, GithubCommit, GithubBlob, GithubTree } from '@/lib/github-types'
 
 const DEFAULT_INCLUDE_PATHS = [
   'app',
