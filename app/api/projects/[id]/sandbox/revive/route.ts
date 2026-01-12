@@ -83,7 +83,7 @@ attempt();
 }
 
 export async function POST(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id: projectId } = await params
@@ -101,12 +101,14 @@ export async function POST(
   const existingState = coerceSandboxState(project.sandbox_state)
   const port = existingState?.port ?? 3000
 
+  const force = ['1', 'true', 'yes'].includes(req.nextUrl.searchParams.get('force') ?? '')
+
   // Try to check if the existing sandbox is still running
   if (existingState?.sandboxId) {
     try {
       const stopped = await isSandboxStopped(existingState.sandboxId)
 
-      if (!stopped) {
+      if (!stopped && !force) {
         // Sandbox is still running, just update the URL UUID and return it
         const sandbox = await Sandbox.get({ sandboxId: existingState.sandboxId })
         const url = sandbox.domain(port)

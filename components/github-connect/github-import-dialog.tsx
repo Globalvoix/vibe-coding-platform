@@ -189,9 +189,16 @@ export function GithubImportDialog() {
         body: JSON.stringify({ name: selectedRepo.fullName }),
       }).catch(() => null)
 
-      await fetch(`/api/projects/${encodeURIComponent(projectId)}/sandbox/revive`, {
+      const reviveRes = await fetch(`/api/projects/${encodeURIComponent(projectId)}/sandbox/revive?force=1`, {
         method: 'POST',
-      }).catch(() => null)
+      })
+
+      if (!reviveRes.ok) {
+        const data = await reviveRes.json().catch(() => null)
+        throw new Error(typeof data?.error === 'string' ? data.error : 'Failed to start preview')
+      }
+
+      await reviveRes.json().catch(() => null)
 
       router.push(`/workspace?projectId=${encodeURIComponent(projectId)}`)
     } catch (error) {

@@ -326,7 +326,7 @@ export function LargeSettingsModal() {
       await checkGithubStatus()
 
       try {
-        const reviveRes = await fetch(`/api/projects/${projectId}/sandbox/revive`, {
+        const reviveRes = await fetch(`/api/projects/${projectId}/sandbox/revive?force=1`, {
           method: 'POST',
         })
 
@@ -360,7 +360,9 @@ export function LargeSettingsModal() {
 
           const sandboxState = coerceSandboxState(revivedRecord?.sandbox_state)
           if (sandboxState) {
-            useSandboxStore.getState().applySandboxState(sandboxState)
+            const sandboxStore = useSandboxStore.getState()
+            sandboxStore.applySandboxState(sandboxState)
+            sandboxStore.setActiveTab('preview')
           }
         }
       } catch {
