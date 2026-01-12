@@ -3,15 +3,6 @@ import { auth } from '@clerk/nextjs/server'
 import { getGithubProject } from '@/lib/github-projects-db'
 import { ensureGithubRepoForInstallation } from '@/lib/github-installation-flow'
 
-function sanitizeRepoName(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/[^a-z0-9-]/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 100)
-}
-
 export async function POST(req: NextRequest) {
   const { userId } = await auth()
   if (!userId) {
