@@ -71,6 +71,49 @@ async function ensureGithubTables() {
       ON github_oauth_tokens(user_id, project_id);
 
     -- Ensure ON CONFLICT targets always have a matching UNIQUE constraint, even if tables pre-existed.
+    -- First, delete any duplicates (keep most recently updated row).
+    DELETE FROM github_projects
+    WHERE ctid IN (
+      SELECT ctid
+      FROM (
+        SELECT ctid,
+               row_number() OVER (
+                 PARTITION BY user_id, project_id
+                 ORDER BY updated_at DESC, created_at DESC
+               ) AS rn
+        FROM github_projects
+      ) t
+      WHERE t.rn > 1
+    );
+
+    DELETE FROM github_project_installations
+    WHERE ctid IN (
+      SELECT ctid
+      FROM (
+        SELECT ctid,
+               row_number() OVER (
+                 PARTITION BY user_id, project_id, installation_id
+                 ORDER BY updated_at DESC, created_at DESC
+               ) AS rn
+        FROM github_project_installations
+      ) t
+      WHERE t.rn > 1
+    );
+
+    DELETE FROM github_oauth_tokens
+    WHERE ctid IN (
+      SELECT ctid
+      FROM (
+        SELECT ctid,
+               row_number() OVER (
+                 PARTITION BY user_id, project_id
+                 ORDER BY updated_at DESC, created_at DESC
+               ) AS rn
+        FROM github_oauth_tokens
+      ) t
+      WHERE t.rn > 1
+    );
+
     CREATE UNIQUE INDEX IF NOT EXISTS github_projects_user_project_uniq
       ON github_projects(user_id, project_id);
 
