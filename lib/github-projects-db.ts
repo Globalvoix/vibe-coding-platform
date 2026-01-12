@@ -212,3 +212,67 @@ export async function deleteGithubProject(params: {
     [params.userId, params.projectId]
   )
 }
+
+/**
+ * Find all project-user combinations linked to a specific GitHub installation
+ * Used for webhook uninstall cleanup
+ */
+export async function findProjectsByInstallation(params: {
+  installationId: number
+}): Promise<Array<{ userId: string; projectId: string }>> {
+  await ensureGithubTables()
+
+  const result = await pool.query<{ user_id: string; project_id: string }>(
+    `SELECT DISTINCT user_id, project_id
+     FROM github_project_installations
+     WHERE installation_id = $1`,
+    [params.installationId]
+  )
+
+  return result.rows.map((row) => ({
+    userId: row.user_id,
+    projectId: row.project_id,
+  }))
+}
+
+/**
+ * Delete all GitHub connection records for a specific installation
+ * Used for webhook uninstall cleanup
+ */
+export async function deleteGithubProjectsByInstallation(params: {
+  installationId: number
+}): Promise<number> {
+  await ensureGithubTables()
+
+  // First, find how many projects are affected
+  const projectsResult = await pool.query<{ user_id: string; project_id: string }>(
+    `SELECT DISTINCT user_id, project_id
+     FROM github_project_installations
+     WHERE installation_id = $1`,
+    [params.installationId]
+  )
+
+  const affectedCount = projectsResult.rows.length
+
+  // Delete from github_project_installations
+  await pool.query(
+    `DELETE FROM github_project_installations
+     WHERE installation_id = $1`,
+    [params.installationId]
+  )
+
+  // Clear active installation and repo details from github_projects
+  await pool.query(
+    `UPDATE github_projects
+     SET active_installation_id = NULL,
+         repo_owner = NULL,
+         repo_name = NULL,
+         repo_id = NULL,
+         default_branch = NULL,
+         updated_at = NOW()
+     WHERE active_installation_id = $1`,
+    [params.installationId]
+  )
+
+  return affectedCount
+}
