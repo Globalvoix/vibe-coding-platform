@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { NextResponse, type NextRequest } from 'next/server'
 import { verifyGithubInstallState } from '@/lib/github-install-state'
 import { exchangeGithubOAuthCode } from '@/lib/github-oauth'
 import { upsertGithubOAuthToken } from '@/lib/github-projects-db'

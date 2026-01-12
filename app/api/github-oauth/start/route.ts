@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { NextResponse, type NextRequest } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { createGithubInstallState } from '@/lib/github-install-state'
 import { getGithubOAuthAccessToken } from '@/lib/github-projects-db'
