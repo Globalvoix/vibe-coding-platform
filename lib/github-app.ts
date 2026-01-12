@@ -1,5 +1,6 @@
 import { SignJWT } from 'jose'
 import { createPrivateKey } from 'node:crypto'
+import type { GithubInstallation } from '@/lib/github-types'
 
 const GITHUB_API_BASE = 'https://api.github.com'
 
