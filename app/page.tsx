@@ -78,7 +78,7 @@ export default function Page() {
           sidebarOpen ? 'translate-x-64' : 'translate-x-0'
         )}
       >
-        <HeroWave onPromptSubmit={handlePromptSubmit} />
+        <HeroWave onPromptSubmit={handlePromptSubmit} onGithubImport={handleGithubImport} />
 
         <section className="relative py-24 sm:py-32 px-4 bg-white">
           <div className="mx-auto max-w-6xl">
