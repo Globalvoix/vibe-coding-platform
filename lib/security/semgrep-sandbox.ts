@@ -1,0 +1,129 @@
+import { Sandbox } from '@vercel/sandbox'
+
+export type SemgrepFinding = {
+  checkId: string
+  message: string
+  severity: 'ERROR' | 'WARNING' | 'INFO'
+  path: string
+  line: number | null
+}
+
+type SemgrepJson = {
+  results?: Array<{
+    check_id?: string
+    path?: string
+    start?: { line?: number }
+    extra?: {
+      message?: string
+      severity?: string
+    }
+  }>
+}
+
+function normalizeSeverity(value: unknown): SemgrepFinding['severity'] {
+  const v = typeof value === 'string' ? value.toUpperCase().trim() : ''
+  if (v === 'ERROR') return 'ERROR'
+  if (v === 'WARNING') return 'WARNING'
+  return 'INFO'
+}
+
+function sanitizeStdoutToJson(stdout: string): unknown {
+  const trimmed = stdout.trim()
+  if (!trimmed) return null
+
+  try {
+    return JSON.parse(trimmed)
+  } catch {
+    const first = trimmed.indexOf('{')
+    const last = trimmed.lastIndexOf('}')
+    if (first >= 0 && last > first) {
+      const sliced = trimmed.slice(first, last + 1)
+      try {
+        return JSON.parse(sliced)
+      } catch {
+        return null
+      }
+    }
+    return null
+  }
+}
+
+export async function runSemgrepInSandbox(params: {
+  sandboxId: string
+  timeoutSeconds?: number
+}): Promise<{ findings: SemgrepFinding[]; rawExitCode: number | null; stderr: string }> {
+  const sandbox = await Sandbox.get({ sandboxId: params.sandboxId })
+  const timeoutSeconds =
+    typeof params.timeoutSeconds === 'number' && params.timeoutSeconds > 0
+      ? Math.min(300, Math.max(10, params.timeoutSeconds))
+      : 90
+
+  const installAndRun = [
+    'set -e',
+    'export PIP_DISABLE_PIP_VERSION_CHECK=1',
+    'export PYTHONUNBUFFERED=1',
+    // Install semgrep if missing (cache lives in the sandbox filesystem)
+    "python3 -m semgrep --version >/dev/null 2>&1 || python3 -m pip install --user -q semgrep",
+    // Run scan
+    [
+      `python3 -m semgrep`,
+      `--config p/owasp-top-ten`,
+      `--config p/javascript`,
+      `--config p/typescript`,
+      `--json`,
+      `--quiet`,
+      `--metrics=off`,
+      `--timeout ${timeoutSeconds}`,
+      `--max-target-bytes 1000000`,
+      `--exclude node_modules`,
+      `--exclude .next`,
+      `--exclude dist`,
+      `--exclude build`,
+      `--exclude coverage`,
+      `--exclude .vercel`,
+      `.`,
+    ].join(' '),
+  ].join('\n')
+
+  const cmd = await sandbox.runCommand({
+    cmd: 'bash',
+    args: ['-lc', `${installAndRun}\n`],
+  })
+
+  const done = await cmd.wait().catch(() => null)
+  const rawExitCode = done?.exitCode ?? null
+
+  const [stdout, stderr] = await Promise.all([
+    done?.stdout().catch(() => '') ?? Promise.resolve(''),
+    done?.stderr().catch(() => '') ?? Promise.resolve(''),
+  ])
+
+  const parsed = sanitizeStdoutToJson(stdout)
+  const json = parsed && typeof parsed === 'object' ? (parsed as SemgrepJson) : null
+
+  const results = Array.isArray(json?.results) ? json!.results! : []
+  const findings: SemgrepFinding[] = results
+    .map((r) => {
+      const checkId = typeof r.check_id === 'string' ? r.check_id : 'semgrep.unknown'
+      const path = typeof r.path === 'string' ? r.path : ''
+      const message =
+        typeof r.extra?.message === 'string' && r.extra.message.trim()
+          ? r.extra.message.trim()
+          : checkId
+      const severity = normalizeSeverity(r.extra?.severity)
+      const line = typeof r.start?.line === 'number' && Number.isFinite(r.start.line) ? r.start.line : null
+
+      if (!path) return null
+
+      return {
+        checkId,
+        message,
+        severity,
+        path,
+        line,
+      }
+    })
+    .filter((f): f is SemgrepFinding => Boolean(f))
+
+  return { findings, rawExitCode, stderr }
+}
