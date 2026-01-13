@@ -82,6 +82,27 @@ export function SecurityScan() {
     }
   }, [projectId, sandboxId])
 
+  React.useEffect(() => {
+    if (!projectId || !sandboxId) return
+    if (isScanning || isFixing) return
+    if (lastScannedAt) return
+
+    void handleScan()
+  }, [handleScan, isFixing, isScanning, lastScannedAt, projectId, sandboxId])
+
+  React.useEffect(() => {
+    if (!projectId || !sandboxId) return
+
+    const intervalMs = 120_000
+    const id = window.setInterval(() => {
+      if (isScanning || isFixing) return
+      if (!lastScannedAt) return
+      void handleScan()
+    }, intervalMs)
+
+    return () => window.clearInterval(id)
+  }, [handleScan, isFixing, isScanning, lastScannedAt, projectId, sandboxId])
+
   const handleFixAll = React.useCallback(async () => {
     if (!projectId || !sandboxId || issues.length === 0) {
       if (!sandboxId) {
