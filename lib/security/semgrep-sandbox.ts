@@ -73,6 +73,8 @@ export async function runSemgrepInSandbox(params: {
     [
       `python3 -m semgrep`,
       `--config p/owasp-top-ten`,
+      `--config p/security-audit`,
+      `--config p/secrets`,
       `--config p/javascript`,
       `--config p/typescript`,
       `--json`,
