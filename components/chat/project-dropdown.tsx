@@ -87,7 +87,7 @@ export function ProjectDropdown({ projectName, projectId }: ProjectDropdownProps
           <ChevronDown className={cn("w-3.5 h-3.5 text-foreground/30 transition-transform duration-200", open && "rotate-180")} />
         </button>
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-[260px] p-1 rounded-xl shadow-xl border border-black/[0.06] bg-[#F7F4ED] mt-1.5 animate-in fade-in zoom-in-95 duration-200 transition-all">
+      <PopoverContent align="start" className="w-[260px] p-1 rounded-xl shadow-xl border border-black/[0.06] bg-[#FAF9F6] mt-1.5 animate-in fade-in zoom-in-95 duration-200 transition-all">
         <div className="flex flex-col">
           <button
             onClick={() => router.push('/')}

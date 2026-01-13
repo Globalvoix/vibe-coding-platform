@@ -252,7 +252,7 @@ export function Sandbox({ className }: Props) {
                 <PopoverContent
                   side="bottom"
                   align="end"
-                  className="w-[440px] p-0 bg-[#F7F4ED] border-black/10 shadow-lg rounded-xl"
+                  className="w-[440px] p-0 bg-[#FAF9F6] border-black/10 shadow-lg rounded-xl"
                 >
                   <div className="p-4">
                     <div className="flex items-start justify-between gap-4">

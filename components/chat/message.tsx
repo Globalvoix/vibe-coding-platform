@@ -63,7 +63,7 @@ export const Message = memo(function Message({
           {/* Message Content */}
           <div className={cn(
             "space-y-3 w-fit",
-            message.role === 'user' && "bg-[#F7F4ED] px-4 py-2.5 rounded-[22px] text-foreground/90 shadow-sm border border-black/[0.02] transition-all hover:shadow-md hover:border-black/[0.04]"
+            message.role === 'user' && "bg-[#FAF9F6] px-4 py-2.5 rounded-[22px] text-foreground/90 shadow-sm border border-black/[0.02] transition-all hover:shadow-md hover:border-black/[0.04]"
           )}>
             {message.parts.map((part, index) => (
               <MessagePart key={index} part={part} partIndex={index} />
@@ -111,7 +111,7 @@ export const Message = memo(function Message({
               'flex items-center justify-between w-full px-4 py-3 rounded-lg border transition-colors group shadow-xs text-left',
               isLatestVersionCard
                 ? 'bg-[#D2E3FC] hover:bg-[#C6DAFC] border-[#1A73E8]'
-                : 'bg-[#F7F4ED] hover:bg-[#F0EDE5] border-black/[0.06]',
+                : 'bg-[#FAF9F6] hover:bg-[#F0EDE5] border-black/[0.06]',
               isSelected && 'ring-1 ring-black/10'
             )
 
@@ -223,7 +223,7 @@ export const Message = memo(function Message({
                 </div>
 
                 {showRevertPanel && (
-                  <div className="w-full max-w-[520px] rounded-lg border border-black/[0.06] bg-[#F7F4ED] px-4 py-3 shadow-xs">
+                  <div className="w-full max-w-[520px] rounded-lg border border-black/[0.06] bg-[#FAF9F6] px-4 py-3 shadow-xs">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <p className="text-[13px] font-semibold text-foreground/90">
