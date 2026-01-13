@@ -149,10 +149,10 @@ export async function POST(
 
     const semgrep = await runSemgrepInSandbox({ sandboxId, timeoutSeconds: 90 })
 
-    if (semgrep.findings.length === 0 && semgrep.stderr) {
-      // Semgrep can fail due to missing python/pip in the sandbox image.
-      // In that case, return a concrete error rather than a mocked scan.
-      const errText = semgrep.stderr.slice(0, 800)
+    const semgrepFailed = !semgrep.parsedOk && Boolean(semgrep.stderr && semgrep.stderr.trim())
+    if (semgrepFailed) {
+      // Return a concrete error rather than a mocked scan.
+      const errText = semgrep.stderr.slice(0, 1200)
       return NextResponse.json(
         {
           error: 'Semgrep scan failed in the sandbox',

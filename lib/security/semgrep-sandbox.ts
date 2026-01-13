@@ -51,7 +51,12 @@ function sanitizeStdoutToJson(stdout: string): unknown {
 export async function runSemgrepInSandbox(params: {
   sandboxId: string
   timeoutSeconds?: number
-}): Promise<{ findings: SemgrepFinding[]; rawExitCode: number | null; stderr: string }> {
+}): Promise<{
+  findings: SemgrepFinding[]
+  rawExitCode: number | null
+  stderr: string
+  parsedOk: boolean
+}> {
   const sandbox = await Sandbox.get({ sandboxId: params.sandboxId })
   const timeoutSeconds =
     typeof params.timeoutSeconds === 'number' && params.timeoutSeconds > 0
@@ -100,6 +105,7 @@ export async function runSemgrepInSandbox(params: {
 
   const parsed = sanitizeStdoutToJson(stdout)
   const json = parsed && typeof parsed === 'object' ? (parsed as SemgrepJson) : null
+  const parsedOk = Boolean(json && typeof json === 'object' && Array.isArray(json.results))
 
   const results = Array.isArray(json?.results) ? json!.results! : []
   const findings: SemgrepFinding[] = results
@@ -125,5 +131,5 @@ export async function runSemgrepInSandbox(params: {
     })
     .filter((f): f is SemgrepFinding => Boolean(f))
 
-  return { findings, rawExitCode, stderr }
+  return { findings, rawExitCode, stderr, parsedOk }
 }
