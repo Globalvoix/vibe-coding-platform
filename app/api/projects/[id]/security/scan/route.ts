@@ -256,11 +256,11 @@ export async function POST(req: NextRequest, context: { params: Promise<{ id: st
         .map((f) => `[${f.severity}] ${f.path}:${f.line} - ${f.checkId}: ${f.message}`)
         .join('\n')
 
-      if (!semgrep.parsedOk && semgrep.stderr) {
+      if (!semgrep.parsedOk) {
         allIssues.push({
           id: `semgrep:scan-incomplete:${projectId}`,
           level: 'Warning',
-          title: 'Semgrep scan was incomplete or failed to parse',
+          title: 'Semgrep scan was incomplete or failed to parse' + (semgrep.stderr ? `: ${semgrep.stderr.slice(0, 200)}` : ''),
           filePath: 'semgrep',
         })
       }
