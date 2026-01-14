@@ -1,6 +1,9 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { Sandbox } from '@vercel/sandbox'
+import { z } from 'zod'
+import { generateObject } from 'ai'
+import { getModelOptions } from '@/ai/gateway'
 import { getSupabaseProject } from '@/lib/supabase-projects-db'
 import {
   dedupeIssues,
@@ -48,6 +51,17 @@ function isLikelyTextFile(path: string) {
   if (lower.endsWith('.env')) return true
   if (lower.endsWith('.env.local')) return true
   return /\.(ts|tsx|js|jsx|mjs|cjs|json|md|css|scss|sass|less|yaml|yml|toml|sql)$/i.test(path)
+}
+
+function rankPathForSecurity(path: string) {
+  if (path === 'package.json') return 0
+  if (path === 'middleware.ts' || path === 'middleware.js') return 1
+  if (path.startsWith('app/api/')) return 2
+  if (path.includes('/api/')) return 3
+  if (path.startsWith('lib/')) return 4
+  if (path.startsWith('supabase/')) return 5
+  if (path.startsWith('app/')) return 6
+  return 10
 }
 
 async function listSandboxFilePaths(params: {
@@ -107,6 +121,70 @@ async function readSandboxTextFile(params: {
   }
 }
 
+function withLineNumbers(content: string, maxLines: number) {
+  const lines = content.split('\n').slice(0, maxLines)
+  return lines.map((line, idx) => `${String(idx + 1).padStart(4, ' ')}| ${line}`).join('\n')
+}
+
+const gptScanSchema = z.object({
+  issues: z.array(
+    z.object({
+      id: z.string().min(1),
+      level: z.enum(['Error', 'Warning']),
+      title: z.string().min(1),
+      filePath: z.string().optional(),
+      lineNumber: z.number().int().positive().optional(),
+    })
+  ),
+})
+
+async function analyzeSecurityWithGptMini(params: {
+  files: Array<{ path: string; content: string }>
+}): Promise<SecurityIssue[]> {
+  const modelId = 'openai/gpt-4.1-mini'
+  const modelOptions = getModelOptions(modelId)
+
+  const maxFiles = 18
+  const maxLinesPerFile = 180
+
+  const ranked = [...params.files]
+    .sort((a, b) => rankPathForSecurity(a.path) - rankPathForSecurity(b.path) || a.path.localeCompare(b.path))
+    .slice(0, maxFiles)
+    .map((f) => ({
+      path: f.path,
+      content: withLineNumbers(f.content, maxLinesPerFile),
+    }))
+
+  const result = await generateObject({
+    ...modelOptions,
+    schema: gptScanSchema,
+    system:
+      'You are a senior application security engineer reviewing a Next.js/TypeScript project.' +
+      '\nReturn a list of real, actionable security issues found in the provided file excerpts.' +
+      '\nRules:' +
+      '\n- Use only the provided file paths.' +
+      "\n- If you provide a lineNumber, it must match the numbered lines in the excerpt (the format is \'  12| ...\')." +
+      '\n- Do NOT invent issues; prefer high-confidence findings.' +
+      '\n- Focus on auth, data access, injection, SSRF, insecure secrets, missing validation, unsafe redirects, and webhooks.' +
+      '\n- Deduplicate similar issues.' +
+      '\n- Keep titles short and specific.',
+    messages: [
+      {
+        role: 'user',
+        content: `Analyze these files:\n\n${JSON.stringify(ranked, null, 2)}`,
+      },
+    ],
+  })
+
+  return result.object.issues.map((i) => ({
+    id: i.id,
+    level: i.level,
+    title: i.title,
+    filePath: i.filePath,
+    lineNumber: i.lineNumber,
+  }))
+}
+
 export async function POST(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     const { userId } = await auth()
@@ -129,8 +207,11 @@ export async function POST(req: NextRequest, context: { params: Promise<{ id: st
     const allPaths = await listSandboxFilePaths({ sandbox })
     const codePaths = allPaths.filter(isLikelyTextFile)
 
-    const maxFilesToRead = 600
-    const selectedPaths = codePaths.slice(0, maxFilesToRead)
+    const maxFilesToRead = 700
+    const rankedPaths = [...codePaths].sort(
+      (a, b) => rankPathForSecurity(a) - rankPathForSecurity(b) || a.localeCompare(b)
+    )
+    const selectedPaths = rankedPaths.slice(0, maxFilesToRead)
 
     const fileReads = await Promise.all(
       selectedPaths.map(async (path) => ({
@@ -139,14 +220,14 @@ export async function POST(req: NextRequest, context: { params: Promise<{ id: st
       }))
     )
 
-    const oversizedSkippedIssues: SecurityIssue[] = []
+    const oversizedTruncatedIssues: SecurityIssue[] = []
 
     const readableFiles = fileReads
       .filter((f) => typeof f.content === 'string')
       .map((f) => {
         const content = f.content as string
         if (content.length >= 250_000) {
-          oversizedSkippedIssues.push({
+          oversizedTruncatedIssues.push({
             id: `scan:truncated-large-file:${f.path}`,
             level: 'Warning',
             title: 'Large file truncated by security scan (size limit)',
@@ -156,9 +237,22 @@ export async function POST(req: NextRequest, context: { params: Promise<{ id: st
         return { path: f.path, content }
       })
 
-    const codeIssues = scanFilesForIssues(readableFiles)
+    const heuristicIssues = scanFilesForIssues(readableFiles)
 
-    const allIssues: SecurityIssue[] = [...codeIssues, ...oversizedSkippedIssues]
+    const allIssues: SecurityIssue[] = [...heuristicIssues, ...oversizedTruncatedIssues]
+
+    try {
+      const aiIssues = await analyzeSecurityWithGptMini({ files: readableFiles })
+      allIssues.push(...aiIssues)
+    } catch (error) {
+      allIssues.push({
+        id: `ai-security-analysis-failed:${projectId}`,
+        level: 'Warning',
+        title:
+          'AI security analysis failed' + (error instanceof Error && error.message ? `: ${error.message.slice(0, 240)}` : ''),
+        filePath: 'ai',
+      })
+    }
 
     const supabaseProject = await getSupabaseProject(userId, projectId)
     if (supabaseProject?.access_token && supabaseProject.supabase_project_ref) {
