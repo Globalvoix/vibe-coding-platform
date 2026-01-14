@@ -147,9 +147,9 @@ export async function POST(req: NextRequest, context: { params: Promise<{ id: st
         const content = f.content as string
         if (content.length >= 250_000) {
           oversizedSkippedIssues.push({
-            id: `scan:skipped-large-file:${f.path}`,
+            id: `scan:truncated-large-file:${f.path}`,
             level: 'Warning',
-            title: 'Large file skipped by security scan (size limit)',
+            title: 'Large file truncated by security scan (size limit)',
             filePath: f.path,
           })
         }
