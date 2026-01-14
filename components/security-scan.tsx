@@ -263,7 +263,7 @@ export function SecurityScan() {
                 </div>
                 <div className="max-w-[240px] text-center">
                   <p className="text-[12px] font-medium text-[#111827]/80 leading-relaxed">
-                    All clear—no issues spotted. Keep in mind our scan can't catch every possible risk.
+                    All clear—no issues spotted. Keep in mind our scan can&apos;t catch every possible risk.
                   </p>
                 </div>
               </div>
