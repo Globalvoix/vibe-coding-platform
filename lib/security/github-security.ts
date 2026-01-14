@@ -231,11 +231,14 @@ export async function getGithubSecurityIssuesForProject(params: {
       const result = await fetchGithubSecurityAlertsWithToken({ token: oauthToken, owner, repo })
       if (result.issues.length > 0) return result.issues
       if (result.successAny) return []
+      const has401 = result.errors.some((e) => e.includes(':401'))
       return [
         {
           id: `github:security-api-unavailable:${repoRef}`,
           level: 'Warning',
-          title: `GitHub security alert APIs unavailable (${result.errors.join(', ')})`,
+          title: has401
+            ? `GitHub security alert APIs unauthorized (401). Please reconnect GitHub to refresh permissions. (${result.errors.join(', ')})`
+            : `GitHub security alert APIs unavailable (${result.errors.join(', ')})`,
           filePath: `github:${repoRef}`,
         },
       ]
