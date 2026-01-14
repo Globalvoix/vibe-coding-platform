@@ -1,10 +1,9 @@
-import { createInstallationToken, githubRequest } from '@/lib/github-app'
+import { createInstallationToken } from '@/lib/github-app'
 import { getGithubOAuthAccessToken, getGithubProject } from '@/lib/github-projects-db'
 import type { SecurityIssue } from '@/lib/security/security-utils'
 
 type GitHubDependabotAlert = {
   number: number
-  html_url?: string
   security_advisory?: {
     summary?: string
     severity?: string
@@ -18,7 +17,6 @@ type GitHubDependabotAlert = {
 
 type GitHubCodeScanningAlert = {
   number: number
-  html_url?: string
   rule?: {
     description?: string
   }
@@ -32,31 +30,102 @@ type GitHubCodeScanningAlert = {
 
 type GitHubSecretScanningAlert = {
   number: number
-  html_url?: string
   secret_type_display_name?: string
   secret_type?: string
 }
+
+type GitHubApiResult<T> =
+  | { ok: true; status: number; data: T }
+  | { ok: false; status: number; error: string }
+
+const GITHUB_API_BASE = 'https://api.github.com'
 
 function normalizeRepoRef(owner: string, repo: string) {
   return `${owner}/${repo}`
 }
 
-async function tryFetchGithubIssuesWithToken(params: {
+async function githubFetchJson<T>(params: {
+  path: string
+  token: string
+  timeoutMs?: number
+}): Promise<GitHubApiResult<T>> {
+  const controller = new AbortController()
+  const timeoutMs =
+    typeof params.timeoutMs === 'number' && params.timeoutMs > 0 ? Math.min(20_000, params.timeoutMs) : 12_000
+
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs)
+
+  try {
+    const res = await fetch(`${GITHUB_API_BASE}${params.path}`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${params.token}`,
+        Accept: 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28',
+      },
+      signal: controller.signal,
+    })
+
+    if (!res.ok) {
+      const text = await res.text().catch(() => '')
+      return {
+        ok: false,
+        status: res.status,
+        error: text.trim() ? text.trim().slice(0, 600) : `GitHub API error (${res.status})`,
+      }
+    }
+
+    if (res.status === 204) {
+      return { ok: true, status: res.status, data: undefined as T }
+    }
+
+    return { ok: true, status: res.status, data: (await res.json()) as T }
+  } catch (error) {
+    const message =
+      error instanceof Error && error.name === 'AbortError'
+        ? `Request timed out after ${timeoutMs}ms`
+        : error instanceof Error
+          ? error.message
+          : String(error)
+
+    return { ok: false, status: 0, error: message.slice(0, 600) }
+  } finally {
+    clearTimeout(timeoutId)
+  }
+}
+
+async function fetchGithubSecurityAlertsWithToken(params: {
   token: string
   owner: string
   repo: string
-}): Promise<SecurityIssue[]> {
+}): Promise<{ issues: SecurityIssue[]; successAny: boolean; errors: string[] }> {
   const repoRef = normalizeRepoRef(params.owner, params.repo)
   const issues: SecurityIssue[] = []
+  const errors: string[] = []
 
-  try {
-    const alerts = await githubRequest<GitHubDependabotAlert[]>(
-      'GET',
-      `/repos/${params.owner}/${params.repo}/dependabot/alerts?state=open&per_page=100`,
-      params.token
-    )
+  const dependabot = await githubFetchJson<GitHubDependabotAlert[]>({
+    token: params.token,
+    path: `/repos/${params.owner}/${params.repo}/dependabot/alerts?state=open&per_page=100`,
+  })
 
-    for (const alert of Array.isArray(alerts) ? alerts : []) {
+  const codeScanning = await githubFetchJson<GitHubCodeScanningAlert[]>({
+    token: params.token,
+    path: `/repos/${params.owner}/${params.repo}/code-scanning/alerts?state=open&per_page=100`,
+  })
+
+  const secretScanning = await githubFetchJson<GitHubSecretScanningAlert[]>({
+    token: params.token,
+    path: `/repos/${params.owner}/${params.repo}/secret-scanning/alerts?state=open&per_page=100`,
+  })
+
+  const successAny = dependabot.ok || codeScanning.ok || secretScanning.ok
+
+  if (!dependabot.ok) errors.push(`dependabot:${dependabot.status || 'ERR'}`)
+  if (!codeScanning.ok) errors.push(`code-scanning:${codeScanning.status || 'ERR'}`)
+  if (!secretScanning.ok) errors.push(`secret-scanning:${secretScanning.status || 'ERR'}`)
+
+  if (dependabot.ok) {
+    for (const alert of Array.isArray(dependabot.data) ? dependabot.data : []) {
       const pkg = alert.dependency?.package?.name
       const summary = alert.security_advisory?.summary
       const severity = alert.security_advisory?.severity
@@ -75,18 +144,10 @@ async function tryFetchGithubIssuesWithToken(params: {
         filePath: `github:${repoRef}`,
       })
     }
-  } catch {
-    // ignore if repo/app doesn't have permissions
   }
 
-  try {
-    const alerts = await githubRequest<GitHubCodeScanningAlert[]>(
-      'GET',
-      `/repos/${params.owner}/${params.repo}/code-scanning/alerts?state=open&per_page=100`,
-      params.token
-    )
-
-    for (const alert of Array.isArray(alerts) ? alerts : []) {
+  if (codeScanning.ok) {
+    for (const alert of Array.isArray(codeScanning.data) ? codeScanning.data : []) {
       const description = alert.rule?.description
       const path = alert.most_recent_instance?.location?.path
       const line = alert.most_recent_instance?.location?.start_line
@@ -102,18 +163,10 @@ async function tryFetchGithubIssuesWithToken(params: {
         lineNumber: typeof line === 'number' && Number.isFinite(line) && line > 0 ? Math.trunc(line) : undefined,
       })
     }
-  } catch {
-    // ignore if repo/app doesn't have permissions
   }
 
-  try {
-    const alerts = await githubRequest<GitHubSecretScanningAlert[]>(
-      'GET',
-      `/repos/${params.owner}/${params.repo}/secret-scanning/alerts?state=open&per_page=100`,
-      params.token
-    )
-
-    for (const alert of Array.isArray(alerts) ? alerts : []) {
+  if (secretScanning.ok) {
+    for (const alert of Array.isArray(secretScanning.data) ? secretScanning.data : []) {
       const kind =
         (typeof alert.secret_type_display_name === 'string' && alert.secret_type_display_name.trim()
           ? alert.secret_type_display_name.trim()
@@ -127,11 +180,9 @@ async function tryFetchGithubIssuesWithToken(params: {
         filePath: `github:${repoRef}`,
       })
     }
-  } catch {
-    // ignore if repo/app doesn't have permissions
   }
 
-  return issues
+  return { issues, successAny, errors }
 }
 
 export async function getGithubSecurityIssuesForProject(params: {
@@ -151,8 +202,9 @@ export async function getGithubSecurityIssuesForProject(params: {
   if (typeof installationId === 'number' && Number.isFinite(installationId) && installationId > 0) {
     try {
       const token = await createInstallationToken(installationId)
-      const issues = await tryFetchGithubIssuesWithToken({ token, owner, repo })
-      if (issues.length > 0) return issues
+      const result = await fetchGithubSecurityAlertsWithToken({ token, owner, repo })
+      if (result.issues.length > 0) return result.issues
+      if (result.successAny) return []
     } catch {
       // ignore and fallback to oauth token
     }
@@ -161,8 +213,17 @@ export async function getGithubSecurityIssuesForProject(params: {
   const oauthToken = await getGithubOAuthAccessToken({ userId: params.userId, projectId: params.projectId })
   if (oauthToken) {
     try {
-      const issues = await tryFetchGithubIssuesWithToken({ token: oauthToken, owner, repo })
-      if (issues.length > 0) return issues
+      const result = await fetchGithubSecurityAlertsWithToken({ token: oauthToken, owner, repo })
+      if (result.issues.length > 0) return result.issues
+      if (result.successAny) return []
+      return [
+        {
+          id: `github:security-api-unavailable:${repoRef}`,
+          level: 'Warning',
+          title: `GitHub security alert APIs unavailable (${result.errors.join(', ')})`,
+          filePath: `github:${repoRef}`,
+        },
+      ]
     } catch {
       // ignore
     }
@@ -170,9 +231,9 @@ export async function getGithubSecurityIssuesForProject(params: {
 
   return [
     {
-      id: `github:security-unavailable:${repoRef}`,
+      id: `github:security-api-unavailable:${repoRef}`,
       level: 'Warning',
-      title: 'GitHub security alerts are not available (missing permissions or alerts not enabled)',
+      title: 'GitHub security alert APIs unavailable (not connected or missing permissions)',
       filePath: `github:${repoRef}`,
     },
   ]
