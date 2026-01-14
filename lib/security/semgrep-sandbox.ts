@@ -64,7 +64,7 @@ export async function runSemgrepInSandbox(params: {
   const timeoutSeconds =
     typeof params.timeoutSeconds === 'number' && params.timeoutSeconds > 0
       ? Math.min(300, Math.max(10, params.timeoutSeconds))
-      : 90
+      : 120
 
   const installAndRun = [
     'export PIP_DISABLE_PIP_VERSION_CHECK=1',
