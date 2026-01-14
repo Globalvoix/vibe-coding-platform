@@ -62,7 +62,7 @@ async function listSandboxFilePaths(params: {
     'cd .',
     [
       'find .',
-      "( -type d -name node_modules -o -type d -name .next -o -type d -name dist -o -type d -name build -o -type d -name coverage -o -type d -name .vercel )",
+      "\\( -type d -name node_modules -o -type d -name .next -o -type d -name dist -o -type d -name build -o -type d -name coverage -o -type d -name .vercel \\)",
       '-prune',
       '-o -type f -print',
       `| sed 's|^\\./||'`,
