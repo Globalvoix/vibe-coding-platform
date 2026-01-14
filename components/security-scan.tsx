@@ -43,30 +43,66 @@ export function SecurityScan() {
       return
     }
 
-    if (!sandboxId) {
-      setError('Sandbox not initialized. Please generate code first.')
-      setIsScanning(false)
-      return
-    }
-
     setIsScanning(true)
     setError(null)
 
     try {
+      const reviveResponse = await fetch(`/api/projects/${projectId}/sandbox/revive`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      })
+
+      if (!reviveResponse.ok) {
+        let reviveMessage = `Sandbox restore failed with status ${reviveResponse.status}`
+        try {
+          const reviveData = await reviveResponse.json()
+          if (typeof reviveData?.error === 'string' && reviveData.error.trim()) {
+            reviveMessage = reviveData.error
+          }
+        } catch {
+          // ignore
+        }
+        setError(reviveMessage)
+        return
+      }
+
+      const reviveData = await reviveResponse.json()
+      const revivedSandboxState = reviveData?.sandbox_state ?? null
+      applySandboxState(revivedSandboxState)
+
+      const effectiveSandboxId =
+        revivedSandboxState && typeof revivedSandboxState.sandboxId === 'string'
+          ? revivedSandboxState.sandboxId
+          : sandboxId
+
+      if (!effectiveSandboxId) {
+        setError('Sandbox not initialized. Please generate code first.')
+        return
+      }
+
       const response = await fetch(`/api/projects/${projectId}/security/scan`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sandboxId }),
+        body: JSON.stringify({ sandboxId: effectiveSandboxId }),
       })
 
       if (!response.ok) {
         try {
           const errorData = await response.json()
-          setError(errorData.error || `Scan failed with status ${response.status}`)
+          const baseMessage =
+            typeof errorData?.error === 'string' && errorData.error.trim()
+              ? errorData.error
+              : `Scan failed with status ${response.status}`
+
+          const details =
+            typeof errorData?.details === 'string' && errorData.details.trim()
+              ? errorData.details.trim().slice(0, 800)
+              : null
+
+          setError(details ? `${baseMessage}: ${details}` : baseMessage)
         } catch {
           setError(`Scan failed with status ${response.status}`)
         }
-        setIsScanning(false)
         return
       }
 
@@ -80,7 +116,7 @@ export function SecurityScan() {
     } finally {
       setIsScanning(false)
     }
-  }, [projectId, sandboxId])
+  }, [applySandboxState, projectId, sandboxId])
 
 
   const handleFixAll = React.useCallback(async () => {
