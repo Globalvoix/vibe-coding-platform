@@ -1,43 +1,94 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { Sandbox } from '@vercel/sandbox'
-import { z } from 'zod'
-import { generateObject } from 'ai'
-import { getModelOptions } from '@/ai/gateway'
 import { getSupabaseProject } from '@/lib/supabase-projects-db'
-import { dedupeIssues, getSupabaseSecurityIssues, scanFilesForIssues, type SecurityIssue } from '@/lib/security/security-utils'
-import { runSemgrepInSandbox, type SemgrepFinding } from '@/lib/security/semgrep-sandbox'
+import {
+  dedupeIssues,
+  getSupabaseSecurityIssues,
+  scanFilesForIssues,
+  type SecurityIssue,
+} from '@/lib/security/security-utils'
+import { getGithubSecurityIssuesForProject } from '@/lib/security/github-security'
 
 function issueSortKey(issue: SecurityIssue) {
   return `${issue.level}:${issue.title}:${issue.filePath ?? ''}`
 }
 
-function toSecurityLevelFromSemgrep(severity: SemgrepFinding['severity']): SecurityIssue['level'] {
-  if (severity === 'ERROR') return 'Error'
-  return 'Warning'
+type SandboxCmdResult = {
+  exitCode: number | null
+  stdout: string
+  stderr: string
 }
 
-function getSnippet(params: { content: string; line: number | null; radius?: number; maxChars?: number }) {
-  const radius = typeof params.radius === 'number' ? Math.max(0, params.radius) : 3
-  const maxChars = typeof params.maxChars === 'number' ? Math.max(200, params.maxChars) : 900
+async function runSandboxBash(
+  sandbox: Awaited<ReturnType<typeof Sandbox.get>>,
+  script: string
+): Promise<SandboxCmdResult> {
+  const cmd = await sandbox.runCommand({
+    cmd: 'bash',
+    args: ['-lc', script],
+  })
 
-  if (!params.content) return ''
-  const lines = params.content.split('\n')
+  const done = await cmd.wait().catch(() => null)
+  const exitCode = done?.exitCode ?? null
 
-  if (!params.line || params.line <= 0 || params.line > lines.length) {
-    const raw = lines.slice(0, Math.min(lines.length, 25)).join('\n')
-    return raw.length > maxChars ? `${raw.slice(0, maxChars - 1)}…` : raw
+  const [stdout, stderr] = await Promise.all([
+    done?.stdout().catch(() => '') ?? Promise.resolve(''),
+    done?.stderr().catch(() => '') ?? Promise.resolve(''),
+  ])
+
+  return { exitCode, stdout, stderr }
+}
+
+function isLikelyTextFile(path: string) {
+  const lower = path.toLowerCase()
+  if (lower.endsWith('dockerfile')) return true
+  if (lower.endsWith('.gitignore')) return true
+  if (lower.endsWith('.npmrc')) return true
+  if (lower.endsWith('.env')) return true
+  if (lower.endsWith('.env.local')) return true
+  return /\.(ts|tsx|js|jsx|mjs|cjs|json|md|css|scss|sass|less|yaml|yml|toml|sql)$/i.test(path)
+}
+
+async function listSandboxFilePaths(params: {
+  sandbox: Awaited<ReturnType<typeof Sandbox.get>>
+  maxPaths?: number
+}): Promise<string[]> {
+  const maxPaths =
+    typeof params.maxPaths === 'number' && params.maxPaths > 0 ? Math.min(5000, params.maxPaths) : 2000
+
+  const find = [
+    'set -e',
+    'cd .',
+    [
+      'find .',
+      "( -type d -name node_modules -o -type d -name .next -o -type d -name dist -o -type d -name build -o -type d -name coverage -o -type d -name .vercel )",
+      '-prune',
+      '-o -type f -print',
+      `| sed 's|^\\./||'`,
+      `| head -n ${maxPaths}`,
+    ].join(' '),
+  ].join('\n')
+
+  const { exitCode, stdout, stderr } = await runSandboxBash(params.sandbox, find)
+  if (exitCode !== 0) {
+    const details = stderr.trim() ? `: ${stderr.trim().slice(0, 800)}` : ''
+    throw new Error(`Failed to list files in sandbox${details}`)
   }
 
-  const start = Math.max(0, params.line - 1 - radius)
-  const end = Math.min(lines.length, params.line + radius)
-  const raw = lines.slice(start, end).join('\n')
-  return raw.length > maxChars ? `${raw.slice(0, maxChars - 1)}…` : raw
+  return stdout
+    .split('\n')
+    .map((p) => p.trim())
+    .filter(Boolean)
 }
 
-async function readSandboxTextFile(sandbox: Awaited<ReturnType<typeof Sandbox.get>>, path: string) {
+async function readSandboxTextFile(params: {
+  sandbox: Awaited<ReturnType<typeof Sandbox.get>>
+  path: string
+  maxChars?: number
+}): Promise<string | null> {
   try {
-    const stream = await sandbox.readFile({ path })
+    const stream = await params.sandbox.readFile({ path: params.path })
     if (!stream) return null
 
     const chunks: Buffer[] = []
@@ -45,90 +96,18 @@ async function readSandboxTextFile(sandbox: Awaited<ReturnType<typeof Sandbox.ge
       chunks.push(chunk as Buffer)
     }
 
-    return Buffer.concat(chunks).toString('utf-8')
+    const raw = Buffer.concat(chunks).toString('utf-8')
+    if (!raw) return ''
+    if (raw.includes('\u0000')) return null
+
+    const maxChars = typeof params.maxChars === 'number' && params.maxChars > 0 ? params.maxChars : 250_000
+    return raw.length > maxChars ? raw.slice(0, maxChars) : raw
   } catch {
     return null
   }
 }
 
-const gptScanSchema = z.object({
-  issues: z.array(
-    z.object({
-      id: z.string().min(1),
-      level: z.enum(['Error', 'Warning']),
-      title: z.string().min(1),
-      filePath: z.string().optional(),
-      lineNumber: z.number().int().positive().optional(),
-    })
-  ),
-})
-
-async function analyzeWithGptMini(params: {
-  semgrep: SemgrepFinding[]
-  sandboxId: string
-}): Promise<SecurityIssue[]> {
-  const modelId = 'openai/gpt-4.1-mini'
-
-  const sandbox = await Sandbox.get({ sandboxId: params.sandboxId })
-
-  const topFindings = params.semgrep.slice(0, 30)
-
-  const fileCache = new Map<string, string>()
-  const contexts = await Promise.all(
-    topFindings.map(async (f) => {
-      if (!f.path) return null
-      if (!fileCache.has(f.path)) {
-        const content = await readSandboxTextFile(sandbox, f.path)
-        if (typeof content === 'string') fileCache.set(f.path, content)
-      }
-      const content = fileCache.get(f.path) ?? ''
-      const snippet = getSnippet({ content, line: f.line })
-
-      return {
-        checkId: f.checkId,
-        severity: f.severity,
-        message: f.message,
-        path: f.path,
-        line: f.line,
-        snippet,
-      }
-    })
-  )
-
-  const compact = contexts.filter((c): c is NonNullable<typeof c> => Boolean(c))
-
-  const modelOptions = getModelOptions(modelId)
-
-  const result = await generateObject({
-    ...modelOptions,
-    schema: gptScanSchema,
-    system:
-      'You are a security engineer. Use the Semgrep findings + code snippets to produce a clean, deduplicated list of actionable security issues.\n' +
-      '- Do NOT invent file paths/line numbers. Use only what is provided.\n' +
-      '- Prefer high-confidence issues.\n' +
-      '- If two findings are the same root issue, merge them into one.\n' +
-      '- Use level=Error for exploitable vulnerabilities, Warning for best-practice or lower confidence issues.',
-    messages: [
-      {
-        role: 'user',
-        content: `Semgrep findings (with snippets):\n\n${JSON.stringify(compact, null, 2)}`,
-      },
-    ],
-  })
-
-  return result.object.issues.map((i) => ({
-    id: i.id,
-    level: i.level,
-    title: i.title,
-    filePath: i.filePath,
-    lineNumber: i.lineNumber,
-  }))
-}
-
-export async function POST(
-  req: NextRequest,
-  context: { params: Promise<{ id: string }> }
-) {
+export async function POST(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     const { userId } = await auth()
     if (!userId) {
@@ -147,42 +126,39 @@ export async function POST(
 
     const sandbox = await Sandbox.get({ sandboxId })
 
-    const semgrep = await runSemgrepInSandbox({ sandboxId, timeoutSeconds: 90 })
+    const allPaths = await listSandboxFilePaths({ sandbox })
+    const codePaths = allPaths.filter(isLikelyTextFile)
 
-    const semgrepFailed = !semgrep.parsedOk && Boolean(semgrep.stderr && semgrep.stderr.trim())
-    if (semgrepFailed) {
-      // Return a concrete error rather than a mocked scan.
-      const errText = semgrep.stderr.slice(0, 1200)
-      return NextResponse.json(
-        {
-          error: 'Semgrep scan failed in the sandbox',
-          details: errText,
-        },
-        { status: 500 }
-      )
-    }
+    const maxFilesToRead = 600
+    const selectedPaths = codePaths.slice(0, maxFilesToRead)
 
-    const semgrepIssues: SecurityIssue[] = semgrep.findings.map((f) => ({
-      id: `semgrep:${f.checkId}:${f.path}:${f.line ?? 0}`,
-      level: toSecurityLevelFromSemgrep(f.severity),
-      title: f.message,
-      filePath: f.path,
-      lineNumber: f.line ?? undefined,
-    }))
-
-    // Keep a lightweight heuristic pass for extra coverage.
-    const quickFiles = await Promise.all(
-      ['package.json', 'middleware.ts', 'app/layout.tsx'].map(async (p) => ({
-        path: p,
-        content: (await readSandboxTextFile(sandbox, p)) ?? '',
+    const fileReads = await Promise.all(
+      selectedPaths.map(async (path) => ({
+        path,
+        content: (await readSandboxTextFile({ sandbox, path })) ?? null,
       }))
     )
 
-    const codeIssues = scanFilesForIssues(quickFiles.filter((f) => f.content))
+    const oversizedSkippedIssues: SecurityIssue[] = []
 
-    const gptIssues = await analyzeWithGptMini({ semgrep: semgrep.findings, sandboxId })
+    const readableFiles = fileReads
+      .filter((f) => typeof f.content === 'string')
+      .map((f) => {
+        const content = f.content as string
+        if (content.length >= 250_000) {
+          oversizedSkippedIssues.push({
+            id: `scan:skipped-large-file:${f.path}`,
+            level: 'Warning',
+            title: 'Large file skipped by security scan (size limit)',
+            filePath: f.path,
+          })
+        }
+        return { path: f.path, content }
+      })
 
-    const allIssues: SecurityIssue[] = [...semgrepIssues, ...codeIssues, ...gptIssues]
+    const codeIssues = scanFilesForIssues(readableFiles)
+
+    const allIssues: SecurityIssue[] = [...codeIssues, ...oversizedSkippedIssues]
 
     const supabaseProject = await getSupabaseProject(userId, projectId)
     if (supabaseProject?.access_token && supabaseProject.supabase_project_ref) {
@@ -193,20 +169,35 @@ export async function POST(
         })
         allIssues.push(...supabaseIssues)
       } catch (error) {
-        console.warn('Supabase security check skipped:', error instanceof Error ? error.message : undefined)
+        allIssues.push({
+          id: `supabase:scan-failed:${supabaseProject.supabase_project_ref}`,
+          level: 'Warning',
+          title:
+            'Supabase security scan failed' +
+            (error instanceof Error && error.message ? `: ${error.message.slice(0, 300)}` : ''),
+          filePath: `supabase_project:${supabaseProject.supabase_project_ref}`,
+        })
       }
+    }
+
+    try {
+      const githubIssues = await getGithubSecurityIssuesForProject({ userId, projectId })
+      allIssues.push(...githubIssues)
+    } catch (error) {
+      allIssues.push({
+        id: `github:scan-failed:${projectId}`,
+        level: 'Warning',
+        title: 'GitHub security scan failed' + (error instanceof Error ? `: ${error.message.slice(0, 300)}` : ''),
+        filePath: 'github',
+      })
     }
 
     const issues = dedupeIssues(allIssues).sort((a, b) => issueSortKey(a).localeCompare(issueSortKey(b)))
 
     return NextResponse.json({
       issues,
-      filesScanned: null,
+      filesScanned: readableFiles.length,
       scannedAt: new Date().toISOString(),
-      semgrep: {
-        findings: semgrep.findings.length,
-        exitCode: semgrep.rawExitCode,
-      },
     })
   } catch (error) {
     console.error('Security scan failed:', error)
