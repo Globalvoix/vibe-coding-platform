@@ -140,6 +140,7 @@ const gptScanSchema = z.object({
 
 async function analyzeSecurityWithGptMini(params: {
   files: Array<{ path: string; content: string }>
+  rawFindings?: string
 }): Promise<SecurityIssue[]> {
   const modelId = 'openai/gpt-4.1-mini'
   const modelOptions = getModelOptions(modelId)
@@ -160,7 +161,7 @@ async function analyzeSecurityWithGptMini(params: {
     schema: gptScanSchema,
     system:
       'You are a senior application security engineer reviewing a Next.js/TypeScript project.' +
-      '\nReturn a list of real, actionable security issues found in the provided file excerpts.' +
+      '\nReturn a list of real, actionable security issues found in the provided file excerpts and raw scanner findings.' +
       '\nRules:' +
       '\n- Use only the provided file paths.' +
       "\n- If you provide a lineNumber, it must match the numbered lines in the excerpt (the format is \'  12| ...\')." +
@@ -171,7 +172,7 @@ async function analyzeSecurityWithGptMini(params: {
     messages: [
       {
         role: 'user',
-        content: `Analyze these files:\n\n${JSON.stringify(ranked, null, 2)}`,
+        content: `Analyze these files:\n\n${JSON.stringify(ranked, null, 2)}${params.rawFindings ? `\n\nRaw scanner findings:\n${params.rawFindings}` : ''}`,
       },
     ],
   })
@@ -238,22 +239,9 @@ export async function POST(req: NextRequest, context: { params: Promise<{ id: st
       })
 
     const heuristicIssues = scanFilesForIssues(readableFiles)
-
     const allIssues: SecurityIssue[] = [...heuristicIssues, ...oversizedTruncatedIssues]
 
-    try {
-      const aiIssues = await analyzeSecurityWithGptMini({ files: readableFiles })
-      allIssues.push(...aiIssues)
-    } catch (error) {
-      allIssues.push({
-        id: `ai-security-analysis-failed:${projectId}`,
-        level: 'Warning',
-        title:
-          'AI security analysis failed' + (error instanceof Error && error.message ? `: ${error.message.slice(0, 240)}` : ''),
-        filePath: 'ai',
-      })
-    }
-
+    let semgrepFindingsText = ''
     try {
       const semgrep = await runSemgrepInSandbox({ sandboxId })
       const semgrepIssues: SecurityIssue[] = semgrep.findings.map((f) => ({
@@ -264,6 +252,9 @@ export async function POST(req: NextRequest, context: { params: Promise<{ id: st
         lineNumber: f.line ?? undefined,
       }))
       allIssues.push(...semgrepIssues)
+      semgrepFindingsText = semgrep.findings
+        .map((f) => `[${f.severity}] ${f.path}:${f.line} - ${f.checkId}: ${f.message}`)
+        .join('\n')
 
       if (!semgrep.parsedOk && semgrep.stderr) {
         allIssues.push({
@@ -279,6 +270,22 @@ export async function POST(req: NextRequest, context: { params: Promise<{ id: st
         level: 'Warning',
         title: 'Semgrep scan failed in the sandbox' + (error instanceof Error ? `: ${error.message.slice(0, 300)}` : ''),
         filePath: 'semgrep',
+      })
+    }
+
+    try {
+      const aiIssues = await analyzeSecurityWithGptMini({
+        files: readableFiles,
+        rawFindings: semgrepFindingsText,
+      })
+      allIssues.push(...aiIssues)
+    } catch (error) {
+      allIssues.push({
+        id: `ai-security-analysis-failed:${projectId}`,
+        level: 'Warning',
+        title:
+          'AI security analysis failed' + (error instanceof Error && error.message ? `: ${error.message.slice(0, 240)}` : ''),
+        filePath: 'ai',
       })
     }
 
