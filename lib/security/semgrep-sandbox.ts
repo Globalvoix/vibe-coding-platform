@@ -34,13 +34,16 @@ function sanitizeStdoutToJson(stdout: string): unknown {
   try {
     return JSON.parse(trimmed)
   } catch {
-    const first = trimmed.indexOf('{')
-    const last = trimmed.lastIndexOf('}')
-    if (first >= 0 && last > first) {
-      const sliced = trimmed.slice(first, last + 1)
+    // Try to find the JSON object if there is leading/trailing junk
+    const firstBrace = trimmed.indexOf('{')
+    const lastBrace = trimmed.lastIndexOf('}')
+
+    if (firstBrace >= 0 && lastBrace > firstBrace) {
+      const candidate = trimmed.slice(firstBrace, lastBrace + 1)
       try {
-        return JSON.parse(sliced)
+        return JSON.parse(candidate)
       } catch {
+        // If it still fails, maybe it's multiple JSON objects or partial
         return null
       }
     }
@@ -64,23 +67,19 @@ export async function runSemgrepInSandbox(params: {
       : 90
 
   const installAndRun = [
-    'set -e',
     'export PIP_DISABLE_PIP_VERSION_CHECK=1',
     'export PYTHONUNBUFFERED=1',
     'export PATH="$HOME/.local/bin:$PATH"',
-    // Install semgrep if missing (cache lives in the sandbox filesystem)
-    [
-      'if command -v semgrep >/dev/null 2>&1; then',
-      '  SEMGREP_CMD="semgrep";',
-      'elif python3 -m semgrep --version >/dev/null 2>&1; then',
-      '  SEMGREP_CMD="python3 -m semgrep";',
-      'else',
-      '  (python3 -m pip --version >/dev/null 2>&1 || (python3 -m ensurepip --upgrade >/dev/null 2>&1 || true))',
-      '  python3 -m pip --version >/dev/null 2>&1 || (echo "pip is not available in this sandbox; cannot install semgrep" >&2; exit 1)',
-      '  python3 -m pip install --user -q semgrep',
-      '  SEMGREP_CMD="python3 -m semgrep";',
-      'fi',
-    ].join('\n'),
+    // Robust install/detect
+    'if command -v semgrep >/dev/null 2>&1; then SEMGREP_CMD="semgrep";',
+    'elif [ -f "$HOME/.local/bin/semgrep" ]; then SEMGREP_CMD="$HOME/.local/bin/semgrep";',
+    'elif python3 -m semgrep --version >/dev/null 2>&1; then SEMGREP_CMD="python3 -m semgrep";',
+    'else',
+    '  python3 -m pip install --user -q semgrep >/dev/null 2>&1 || (python3 -m ensurepip --user >/dev/null 2>&1 && python3 -m pip install --user -q semgrep >/dev/null 2>&1) || true',
+    '  if [ -f "$HOME/.local/bin/semgrep" ]; then SEMGREP_CMD="$HOME/.local/bin/semgrep";',
+    '  elif python3 -m semgrep --version >/dev/null 2>&1; then SEMGREP_CMD="python3 -m semgrep";',
+    '  else echo "semgrep installation failed" >&2; exit 1; fi',
+    'fi',
     // Run scan
     [
       '$SEMGREP_CMD',
