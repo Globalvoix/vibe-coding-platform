@@ -135,9 +135,9 @@ async function fetchGithubSecurityAlertsWithToken(params: {
 
   const successAny = dependabot.ok || codeScanning.ok || secretScanning.ok
 
-  if (!dependabot.ok) errors.push(`dependabot:${dependabot.status || 'ERR'}`)
-  if (!codeScanning.ok) errors.push(`code-scanning:${codeScanning.status || 'ERR'}`)
-  if (!secretScanning.ok) errors.push(`secret-scanning:${secretScanning.status || 'ERR'}`)
+  if (!dependabot.ok) errors.push(`dependabot:${dependabot.status || 'ERR'}${dependabot.error ? `:${dependabot.error}` : ''}`)
+  if (!codeScanning.ok) errors.push(`code-scanning:${codeScanning.status || 'ERR'}${codeScanning.error ? `:${codeScanning.error}` : ''}`)
+  if (!secretScanning.ok) errors.push(`secret-scanning:${secretScanning.status || 'ERR'}${secretScanning.error ? `:${secretScanning.error}` : ''}`)
 
   if (dependabot.ok) {
     for (const alert of Array.isArray(dependabot.data) ? dependabot.data : []) {
