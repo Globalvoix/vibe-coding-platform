@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
         clientId,
         redirectUri,
         state,
-        scope: 'repo',
+        scope: 'repo security_events',
       })
       return NextResponse.redirect(authorizeUrl)
     }

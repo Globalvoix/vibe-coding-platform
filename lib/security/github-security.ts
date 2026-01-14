@@ -49,19 +49,25 @@ async function githubFetchJson<T>(params: {
   token: string
   timeoutMs?: number
 }): Promise<GitHubApiResult<T>> {
+  const token = params.token.trim()
+  if (!token) {
+    return { ok: false, status: 0, error: 'Missing GitHub token' }
+  }
+
   const controller = new AbortController()
   const timeoutMs =
     typeof params.timeoutMs === 'number' && params.timeoutMs > 0 ? Math.min(20_000, params.timeoutMs) : 12_000
 
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs)
 
-  try {
+  async function fetchOnce(authHeader: string): Promise<GitHubApiResult<T>> {
     const res = await fetch(`${GITHUB_API_BASE}${params.path}`, {
       method: 'GET',
       headers: {
-        Authorization: `Bearer ${params.token}`,
+        Authorization: authHeader,
         Accept: 'application/vnd.github+json',
         'X-GitHub-Api-Version': '2022-11-28',
+        'User-Agent': 'thinksoft-security-scan',
       },
       signal: controller.signal,
     })
@@ -80,6 +86,15 @@ async function githubFetchJson<T>(params: {
     }
 
     return { ok: true, status: res.status, data: (await res.json()) as T }
+  }
+
+  try {
+    // Some GitHub APIs behave differently depending on the auth scheme.
+    // Try the canonical OAuth/PAT scheme first, then fallback.
+    const tokenResult = await fetchOnce(`token ${token}`)
+    if (tokenResult.ok || tokenResult.status !== 401) return tokenResult
+
+    return await fetchOnce(`Bearer ${token}`)
   } catch (error) {
     const message =
       error instanceof Error && error.name === 'AbortError'
