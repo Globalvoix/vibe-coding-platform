@@ -11,7 +11,7 @@ import {
   scanFilesForIssues,
   type SecurityIssue,
 } from '@/lib/security/security-utils'
-import { getGithubSecurityIssuesForProject } from '@/lib/security/github-security'
+import { runSemgrepInSandbox } from '@/lib/security/semgrep-sandbox'
 
 function issueSortKey(issue: SecurityIssue) {
   return `${issue.level}:${issue.title}:${issue.filePath ?? ''}`
@@ -254,37 +254,35 @@ export async function POST(req: NextRequest, context: { params: Promise<{ id: st
       })
     }
 
-    const supabaseProject = await getSupabaseProject(userId, projectId)
-    if (supabaseProject?.access_token && supabaseProject.supabase_project_ref) {
-      try {
-        const supabaseIssues = await getSupabaseSecurityIssues({
-          projectRef: supabaseProject.supabase_project_ref,
-          accessToken: supabaseProject.access_token,
-        })
-        allIssues.push(...supabaseIssues)
-      } catch (error) {
+    try {
+      const semgrep = await runSemgrepInSandbox({ sandboxId })
+      const semgrepIssues: SecurityIssue[] = semgrep.findings.map((f) => ({
+        id: `semgrep:${f.checkId}:${f.path}:${f.line ?? 0}`,
+        level: f.severity === 'ERROR' ? 'Error' : 'Warning',
+        title: f.message,
+        filePath: f.path,
+        lineNumber: f.line ?? undefined,
+      }))
+      allIssues.push(...semgrepIssues)
+
+      if (!semgrep.parsedOk && semgrep.stderr) {
         allIssues.push({
-          id: `supabase:scan-failed:${supabaseProject.supabase_project_ref}`,
+          id: `semgrep:scan-incomplete:${projectId}`,
           level: 'Warning',
-          title:
-            'Supabase security scan failed' +
-            (error instanceof Error && error.message ? `: ${error.message.slice(0, 300)}` : ''),
-          filePath: `supabase_project:${supabaseProject.supabase_project_ref}`,
+          title: 'Semgrep scan was incomplete or failed to parse',
+          filePath: 'semgrep',
         })
       }
-    }
-
-    try {
-      const githubIssues = await getGithubSecurityIssuesForProject({ userId, projectId })
-      allIssues.push(...githubIssues)
     } catch (error) {
       allIssues.push({
-        id: `github:scan-failed:${projectId}`,
+        id: `semgrep:scan-failed:${projectId}`,
         level: 'Warning',
-        title: 'GitHub security scan failed' + (error instanceof Error ? `: ${error.message.slice(0, 300)}` : ''),
-        filePath: 'github',
+        title: 'Semgrep scan failed in the sandbox' + (error instanceof Error ? `: ${error.message.slice(0, 300)}` : ''),
+        filePath: 'semgrep',
       })
     }
+
+    const supabaseProject = await getSupabaseProject(userId, projectId)
 
     const issues = dedupeIssues(allIssues).sort((a, b) => issueSortKey(a).localeCompare(issueSortKey(b)))
 
