@@ -6,7 +6,7 @@ import type { JSONValue } from 'ai'
 import type { OpenAIResponsesProviderOptions } from '@ai-sdk/openai'
 import type { LanguageModelV2 } from '@ai-sdk/provider'
 
-const DEFAULT_GATEWAY_BASE_URL = 'https://ai-gateway.vercel.sh/v1'
+const DEFAULT_GATEWAY_BASE_URL = 'https://ai-gateway.vercel.sh/v1/ai'
 
 export async function getAvailableModels() {
   const models: Array<{ id: string; name: string }> = []
