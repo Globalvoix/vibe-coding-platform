@@ -247,7 +247,7 @@ export async function POST(req: Request) {
         console.warn('Failed to capture env vars from chat:', error)
       }
     }
-    const effectiveReasoningEffort: BodyData['reasoningEffort'] = reasoningEffort ?? 'medium'
+    const effectiveReasoningEffort = 'medium' as const
 
     const toolModel = models.find((model) => model.id === toolModelId)
     if (!toolModel) {
