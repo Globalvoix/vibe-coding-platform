@@ -32,6 +32,14 @@ export const SUPPORTED_MODELS = [
   Models.AnthropicClaude45Sonnet,
 ] as const
 
+export type SupportedModelId = (typeof SUPPORTED_MODELS)[number]
+
+const SUPPORTED_MODEL_ID_SET = new Set<string>(SUPPORTED_MODELS)
+
+export function isSupportedModelId(id: string): id is SupportedModelId {
+  return SUPPORTED_MODEL_ID_SET.has(id)
+}
+
 export const TEST_PROMPTS = [
   'Generate a Next.js app that allows to list and search Pokemons',
   'Create a `golang` server that responds with "Hello World" to any request',

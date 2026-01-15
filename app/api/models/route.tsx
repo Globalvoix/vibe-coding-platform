@@ -1,8 +1,14 @@
-import { SUPPORTED_MODELS, Models } from '@/ai/constants'
+import { isSupportedModelId, Models, type SupportedModelId } from '@/ai/constants'
 import { getAvailableModels } from '@/ai/gateway'
 import { getUserSubscription, isPaidSubscription } from '@/lib/subscription'
 import { auth } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
+
+type AvailableModel = Awaited<ReturnType<typeof getAvailableModels>>[number]
+
+type SupportedAvailableModel = AvailableModel & {
+  id: SupportedModelId
+}
 
 export async function GET() {
   const { userId } = await auth()
@@ -10,7 +16,9 @@ export async function GET() {
   const canUsePaidModels = isPaidSubscription(subscription)
 
   const allModels = await getAvailableModels()
-  const supported = allModels.filter((model) => SUPPORTED_MODELS.includes(model.id))
+  const supported = allModels.filter(
+    (model): model is SupportedAvailableModel => isSupportedModelId(model.id)
+  )
 
   return NextResponse.json({
     models: supported.map((model) => {
