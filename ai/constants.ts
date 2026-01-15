@@ -23,14 +23,14 @@ export enum Models {
 // Default for UI creation
 export const DEFAULT_MODEL = Models.GoogleGeminiFlash3
 
-export const SUPPORTED_MODELS: GatewayModelId[] = [
+export const SUPPORTED_MODELS = [
   Models.GoogleGeminiFlash3,
   Models.OpenAIGPT5Mini,
   Models.OpenAIGPT5,
   Models.OpenAIGPT51CodexMax,
   Models.Minimax21,
   Models.AnthropicClaude45Sonnet,
-]
+] as const
 
 export const TEST_PROMPTS = [
   'Generate a Next.js app that allows to list and search Pokemons',
