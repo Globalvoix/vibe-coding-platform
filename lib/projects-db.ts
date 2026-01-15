@@ -19,6 +19,7 @@ async function ensureProjectsTable() {
       name TEXT NOT NULL,
       initial_prompt TEXT,
       sandbox_state JSONB,
+      preview_image_url TEXT,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       cloud_enabled BOOLEAN NOT NULL DEFAULT FALSE,
@@ -30,6 +31,8 @@ async function ensureProjectsTable() {
       ADD COLUMN IF NOT EXISTS cloud_enabled BOOLEAN NOT NULL DEFAULT FALSE;
     ALTER TABLE projects
       ADD COLUMN IF NOT EXISTS repo_context TEXT;
+    ALTER TABLE projects
+      ADD COLUMN IF NOT EXISTS preview_image_url TEXT;
 
     CREATE TABLE IF NOT EXISTS project_versions (
       id TEXT PRIMARY KEY,
@@ -51,6 +54,7 @@ export interface ProjectRecord {
   name: string
   initial_prompt: string | null
   sandbox_state: unknown | null
+  preview_image_url: string | null
   created_at: string
   updated_at: string
   cloud_enabled: boolean
