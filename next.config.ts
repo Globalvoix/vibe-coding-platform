@@ -86,6 +86,22 @@ const nextConfig: NextConfig = {
         hostname: 'picsum.photos',
         port: '',
       },
+      // Microlink - screenshot snapshots for project previews
+      {
+        protocol: 'https',
+        hostname: 'api.microlink.io',
+        port: '',
+      },
+      {
+        protocol: 'https',
+        hostname: 'i.microlink.io',
+        port: '',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cdn.microlink.io',
+        port: '',
+      },
     ],
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',
