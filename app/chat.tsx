@@ -116,9 +116,9 @@ export function Chat({ className, initialPrompt, projectId, projectName }: Props
   useEffect(() => {
     if (!projectId) return
     const storageKey = `prompt-draft-${projectId}`
-    if (input.trim()) {
+    if (input) {
       localStorage.setItem(storageKey, input)
-    } else if (input === '') {
+    } else {
       localStorage.removeItem(storageKey)
     }
   }, [input, projectId])
