@@ -39,6 +39,7 @@ function WorkspaceContent({
   const [horizontalSizes] = useState<[number, number] | null>(null)
   const { sandboxId, paths: sandboxPaths, url, currentProjectId } = useSandboxStore()
   const lastPreviewSnapshotRef = useRef<{ url: string; capturedAt: number } | null>(null)
+  const lastUrlRef = useRef<string | null>(null)
 
   useEffect(() => {
     const sandboxState = useSandboxStore.getState()
@@ -151,7 +152,11 @@ function WorkspaceContent({
   useEffect(() => {
     if (!projectId || !currentProjectId || projectId !== currentProjectId) return
 
-    const timeoutId = window.setTimeout(async () => {
+    // If URL just became available, trigger an immediate save instead of waiting for the debounce.
+    const urlJustBecameAvailable = !lastUrlRef.current && !!url
+    lastUrlRef.current = url || null
+
+    const performSave = async () => {
       try {
         const sandboxState = {
           sandboxId: sandboxId ?? null,
@@ -173,41 +178,26 @@ function WorkspaceContent({
         if (url) {
           const now = Date.now()
           const last = lastPreviewSnapshotRef.current
-          const shouldCapture = !last || last.url !== url || now - last.capturedAt > 10 * 60 * 1000
+          const shouldCapture = !last || last.url !== url || now - last.capturedAt > 5 * 60 * 1000
 
           if (shouldCapture) {
             try {
+              // We use a shorter timeout and skip the complex JSON check if we can.
               const microlinkRes = await fetch(
                 `https://api.microlink.io?url=${encodeURIComponent(url)}&screenshot=true&ttl=30d`
               )
 
               if (microlinkRes.ok) {
-                const microlinkJson: unknown = await microlinkRes.json()
+                const microlinkJson = (await microlinkRes.json()) as any
+                const screenshotUrl = microlinkJson?.data?.screenshot?.url
 
-                const screenshotUrl =
-                  typeof microlinkJson === 'object' &&
-                  microlinkJson !== null &&
-                  'status' in microlinkJson &&
-                  (microlinkJson as { status?: unknown }).status === 'success' &&
-                  'data' in microlinkJson &&
-                  typeof (microlinkJson as { data?: unknown }).data === 'object' &&
-                  (microlinkJson as { data?: unknown }).data !== null &&
-                  'screenshot' in (microlinkJson as { data: Record<string, unknown> }).data &&
-                  typeof (microlinkJson as { data: { screenshot?: unknown } }).data.screenshot === 'object' &&
-                  (microlinkJson as { data: { screenshot?: unknown } }).data.screenshot !== null &&
-                  'url' in (microlinkJson as { data: { screenshot: Record<string, unknown> } }).data.screenshot &&
-                  typeof (microlinkJson as { data: { screenshot: { url?: unknown } } }).data.screenshot.url ===
-                    'string'
-                    ? (microlinkJson as { data: { screenshot: { url: string } } }).data.screenshot.url
-                    : null
-
-                if (screenshotUrl) {
+                if (typeof screenshotUrl === 'string') {
                   body.previewImageUrl = screenshotUrl
                   lastPreviewSnapshotRef.current = { url, capturedAt: now }
                 }
               }
-            } catch {
-              // ignore snapshot failures; sandboxState save should still succeed
+            } catch (err) {
+              console.warn('Failed to capture snapshot from Microlink:', err)
             }
           }
         }
@@ -218,6 +208,7 @@ function WorkspaceContent({
           body: JSON.stringify(body),
         })
 
+        // Also create a version entry
         await fetch(`/api/projects/${projectId}/versions`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -229,7 +220,14 @@ function WorkspaceContent({
       } catch (error) {
         console.error('Failed to save project state', error)
       }
-    }, 1000)
+    }
+
+    if (urlJustBecameAvailable) {
+      performSave()
+      return
+    }
+
+    const timeoutId = window.setTimeout(performSave, 1000)
 
     return () => window.clearTimeout(timeoutId)
   }, [projectId, currentProjectId, sandboxId, sandboxPaths, url])
