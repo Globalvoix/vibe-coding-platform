@@ -36,6 +36,7 @@ export async function getAvailableModels() {
   ensure(Models.GoogleGeminiFlash3, 'Google Gemini Flash 3', hasGateway)
   ensure(Models.OpenAIGPT51CodexMax, 'OpenAI GPT-5.1 Codex Max', hasGateway)
   ensure(Models.Minimax21, 'Minimax 2.1', hasGateway)
+  ensure(Models.AnthropicClaude45Sonnet, 'Anthropic Claude Sonnet 4.5', hasGateway)
 
   // Direct provider models
   ensure(Models.AnthropicClaude4Sonnet, 'Anthropic Claude 4 Sonnet', hasAnthropic)
