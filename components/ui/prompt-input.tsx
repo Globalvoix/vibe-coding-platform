@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils'
 import React, {
   createContext,
   useContext,
-  useEffect,
+  useLayoutEffect,
   useRef,
   useState,
 } from 'react'
@@ -102,21 +102,36 @@ export type PromptInputTextareaProps = {
 function PromptInputTextarea({
   className,
   onKeyDown,
+  onChange,
   disableAutosize = false,
   ...props
 }: PromptInputTextareaProps) {
   const { value, setValue, maxHeight, onSubmit, disabled } = usePromptInput()
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const selectionRef = useRef<{ start: number; end: number } | null>(null)
 
-  useEffect(() => {
-    if (disableAutosize) return
-
+  useLayoutEffect(() => {
     if (!textareaRef.current) return
-    textareaRef.current.style.height = 'auto'
-    textareaRef.current.style.height =
-      typeof maxHeight === 'number'
-        ? `${Math.min(textareaRef.current.scrollHeight, maxHeight)}px`
-        : `min(${textareaRef.current.scrollHeight}px, ${maxHeight})`
+
+    if (!disableAutosize) {
+      textareaRef.current.style.height = 'auto'
+      textareaRef.current.style.height =
+        typeof maxHeight === 'number'
+          ? `${Math.min(textareaRef.current.scrollHeight, maxHeight)}px`
+          : `min(${textareaRef.current.scrollHeight}px, ${maxHeight})`
+    }
+
+    const selection = selectionRef.current
+    if (!selection) return
+    selectionRef.current = null
+
+    if (document.activeElement !== textareaRef.current) return
+
+    try {
+      textareaRef.current.setSelectionRange(selection.start, selection.end)
+    } catch {
+      // ignore
+    }
   }, [value, maxHeight, disableAutosize])
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -127,11 +142,20 @@ function PromptInputTextarea({
     onKeyDown?.(e)
   }
 
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    selectionRef.current = {
+      start: e.target.selectionStart ?? e.target.value.length,
+      end: e.target.selectionEnd ?? e.target.value.length,
+    }
+    setValue(e.target.value)
+    onChange?.(e)
+  }
+
   return (
     <Textarea
       ref={textareaRef}
       value={value}
-      onChange={(e) => setValue(e.target.value)}
+      onChange={handleChange}
       onKeyDown={handleKeyDown}
       className={cn(
         'text-sm min-h-[32px] w-full resize-none border-none bg-transparent shadow-none outline-none focus-visible:ring-0 focus-visible:ring-offset-0',
