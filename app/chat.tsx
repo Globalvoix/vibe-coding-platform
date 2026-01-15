@@ -17,7 +17,6 @@ import {
   PromptInputTextarea,
 } from '@/components/ui/prompt-input'
 import { Message } from '@/components/chat/message'
-import { ModelSelector } from '@/components/settings/model-selector'
 import { Panel, PanelHeader } from '@/components/panels/panels'
 import { Settings } from '@/components/settings/settings'
 import { ComingSoonModal } from '@/components/modals/coming-soon-modal'
@@ -25,7 +24,6 @@ import { HistoryPanel } from '@/components/history-panel/history-panel'
 import { useChat } from '@ai-sdk/react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSharedChatContext } from '@/lib/chat-context'
-import { useSettings } from '@/components/settings/use-settings'
 import { useSandboxStore } from './state'
 import { useAuth, useClerk } from '@clerk/nextjs'
 import type { ChatUIMessage } from '@/components/chat/types'
@@ -45,7 +43,6 @@ interface Props {
 
 export function Chat({ className, initialPrompt, projectId, projectName }: Props) {
   const { chat } = useSharedChatContext()
-  const { modelId, reasoningEffort } = useSettings()
   const { messages, sendMessage, status } = useChat<ChatUIMessage>({ chat })
   const { setChatStatus, setViewingVersion, setRevertInChatVersionId } = useSandboxStore()
   const { toggleSidebar } = useUIStore()
@@ -147,8 +144,6 @@ export function Chat({ className, initialPrompt, projectId, projectName }: Props
           { text: messageText },
           {
             body: {
-              modelId,
-              reasoningEffort,
               projectId,
               supabaseConnected,
             },
@@ -160,7 +155,7 @@ export function Chat({ className, initialPrompt, projectId, projectName }: Props
         }
       }
     },
-    [isSignedIn, openSignIn, sendMessage, modelId, setInput, reasoningEffort, projectId, supabaseConnected]
+    [isSignedIn, openSignIn, sendMessage, setInput, projectId, supabaseConnected]
   )
 
   const previousChatStatusRef = useRef(status)
@@ -377,7 +372,6 @@ export function Chat({ className, initialPrompt, projectId, projectName }: Props
                       className="flex items-center gap-1 rounded-full px-1 py-0.5 border border-border/60 shadow-xs chat-toolbar-settings-group"
                     >
                       <Settings />
-                      <ModelSelector />
                     </div>
                   </div>
                   <PromptInputActions>

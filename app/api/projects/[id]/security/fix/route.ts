@@ -11,7 +11,6 @@ import { dedupeIssues, getSandboxFiles, getSupabaseSecurityIssues, scanFilesForI
 interface FixRequest {
   sandboxId: string
   issues: SecurityIssue[]
-  modelId?: string
 }
 
 const SECURITY_FIX_COST_CREDITS = 5
@@ -129,7 +128,7 @@ export async function POST(
     const params = await context.params
     const projectId = params.id
     const body = (await req.json()) as FixRequest
-    const { sandboxId, issues, modelId } = body
+    const { sandboxId, issues } = body
 
     if (!sandboxId || !issues || issues.length === 0) {
       return NextResponse.json({ error: 'Missing required parameters' }, { status: 400 })
@@ -148,7 +147,7 @@ export async function POST(
       )
     }
 
-    const selectedModelId = modelId || getDefaultSecurityFixModelId()
+    const selectedModelId = getDefaultSecurityFixModelId()
 
     const supabaseProject = await getSupabaseProject(userId, projectId)
 

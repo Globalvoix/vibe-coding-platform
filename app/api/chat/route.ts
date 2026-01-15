@@ -13,7 +13,6 @@ import { getAvailableModels, getModelOptions } from '@/ai/gateway'
 import { checkBotId } from 'botid/server'
 import { tools } from '@/ai/tools'
 import { recordUsageAndDeductCredits, getUserCredits } from '@/lib/credits'
-import { getUserSubscription, isPaidSubscription } from '@/lib/subscription'
 import { createOrUpdateEnvVar, listEnvVars } from '@/lib/env-vars-db'
 import { getProject } from '@/lib/projects-db'
 import { CONNECTOR_DEFINITIONS, detectConnectorFromPhrase, type ConnectorId } from '@/lib/connector-mapping'
@@ -21,8 +20,6 @@ import prompt from './prompt.md'
 
 interface BodyData {
   messages: ChatUIMessage[]
-  modelId?: string
-  reasoningEffort?: 'low' | 'medium'
   projectId?: string
 }
 
@@ -216,28 +213,14 @@ export async function POST(req: Request) {
     }
 
     const bodyData = (await req.json()) as BodyData
-    const { messages, modelId: requestedModelId, reasoningEffort, projectId } = bodyData
+    const { messages, projectId } = bodyData
 
-    const toolModelId = requestedModelId ?? DEFAULT_MODEL
+    const toolModelId = DEFAULT_MODEL
     const chatModelId = Models.OpenAIGPT5Mini
 
     const project = projectId ? await getProject(userId, projectId).catch(() => null) : null
 
-    const [models, subscription] = await Promise.all([
-      getAvailableModels(),
-      getUserSubscription(userId),
-    ])
-
-    if (toolModelId === Models.AnthropicClaude45Sonnet && !isPaidSubscription(subscription)) {
-      return NextResponse.json(
-        {
-          error:
-            'Claude Sonnet 4.5 is available on paid plans. Please upgrade to use it.',
-          code: 'PAID_PLAN_REQUIRED',
-        },
-        { status: 403 }
-      )
-    }
+    const models = await getAvailableModels()
 
     const extractedEnvVars: Array<{ key: string; value: string }> = []
     const secretsToRedact: string[] = []

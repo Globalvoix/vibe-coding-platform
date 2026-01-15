@@ -5,7 +5,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
-import { ReasoningEffort } from './reasoning-effort'
 import { SlidersVerticalIcon } from 'lucide-react'
 
 export function Settings() {
@@ -24,7 +23,6 @@ export function Settings() {
       <PopoverContent className="p-0 w-96">
         <div className="p-4 space-y-6">
           <AutoFixErrors />
-          <ReasoningEffort />
         </div>
       </PopoverContent>
     </Popover>
