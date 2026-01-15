@@ -4,6 +4,7 @@ import { recordUsageAndDeductCredits, getUserCredits } from '@/lib/credits'
 import { generateObject } from 'ai'
 import { z } from 'zod'
 import { getModelOptions } from '@/ai/gateway'
+import { getDefaultSecurityFixModelId } from '@/ai/model-routing'
 import { getSupabaseProject } from '@/lib/supabase-projects-db'
 import { dedupeIssues, getSandboxFiles, getSupabaseSecurityIssues, scanFilesForIssues, tryFixSupabaseIssue, type SecurityIssue } from '@/lib/security/security-utils'
 
@@ -147,7 +148,7 @@ export async function POST(
       )
     }
 
-    const selectedModelId = modelId || 'openai/gpt-4.1'
+    const selectedModelId = modelId || getDefaultSecurityFixModelId()
 
     const supabaseProject = await getSupabaseProject(userId, projectId)
 
