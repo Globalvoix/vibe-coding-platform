@@ -476,7 +476,7 @@ function ProjectCard({
 
   // Vercel sandboxes typically stop after ~15-30 minutes of inactivity.
   // If the project hasn't been updated recently, the sandbox is likely stopped.
-  // In that case, we show the placeholder instead of a screenshot of the 410 error page.
+  // In that case, we prefer the cached preview_image_url if available.
   const isLikelyActive = useMemo(() => {
     if (!previewUrl) return false
     const lastUpdate = new Date(project.updated_at).getTime()
@@ -484,7 +484,16 @@ function ProjectCard({
     return lastUpdate > fifteenMinutesAgo
   }, [project.updated_at, previewUrl])
 
-  const showPreview = previewUrl && isLikelyActive && !hasImageError
+  const displayImageUrl = useMemo(() => {
+    if (hasImageError) return null
+    // If we have a cached permanent image, use it.
+    if (project.preview_image_url) return project.preview_image_url
+    // Otherwise, if the sandbox is active, use a live screenshot.
+    if (previewUrl && isLikelyActive) {
+      return `https://api.microlink.io?url=${encodeURIComponent(previewUrl)}&screenshot=true&embed=screenshot.url`
+    }
+    return null
+  }, [project.preview_image_url, previewUrl, isLikelyActive, hasImageError])
 
   if (!isGrid) {
     return (
@@ -494,10 +503,10 @@ function ProjectCard({
       >
         <div className="flex items-center gap-4 min-w-0">
           <div className="relative w-20 h-12 rounded-lg bg-gray-50 border border-gray-100 overflow-hidden shrink-0">
-            {showPreview ? (
+            {displayImageUrl ? (
               <Image
-                key={previewUrl}
-                src={`https://api.microlink.io?url=${encodeURIComponent(previewUrl)}&screenshot=true&embed=screenshot.url`}
+                key={displayImageUrl}
+                src={displayImageUrl}
                 alt=""
                 fill
                 className="object-cover bg-gray-50"
@@ -543,10 +552,10 @@ function ProjectCard({
       {/* Preview Section */}
       <div className="relative bg-gray-50 overflow-hidden flex-1 border-b border-gray-100">
         <div className="absolute inset-0 flex items-center justify-center">
-          {showPreview ? (
+          {displayImageUrl ? (
             <Image
-              key={previewUrl}
-              src={`https://api.microlink.io?url=${encodeURIComponent(previewUrl)}&screenshot=true&embed=screenshot.url`}
+              key={displayImageUrl}
+              src={displayImageUrl}
               alt=""
               fill
               className="object-cover transition-transform duration-700 group-hover:scale-105 bg-gray-50"
