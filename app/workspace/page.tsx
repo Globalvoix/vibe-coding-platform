@@ -158,7 +158,14 @@ function WorkspaceContent({
           url,
         }
 
-        const body: any = { sandboxState }
+        const body: {
+          sandboxState: {
+            sandboxId: string | null
+            paths: string[]
+            url: string | null
+          }
+          previewImageUrl?: string
+        } = { sandboxState }
 
         // If we have a URL, also update the preview image URL to act as a "latest banner"
         if (url) {
