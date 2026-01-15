@@ -8,6 +8,7 @@ import { tool } from 'ai'
 import description from './generate-files.md'
 import z from 'zod/v3'
 import { upsertProjectFiles } from '@/lib/project-files-db'
+import { chooseFileGenerationModelId } from '@/ai/model-routing'
 
 interface Params {
   modelId: string
@@ -450,7 +451,12 @@ export const generateFiles = ({ writer, modelId, userId, projectId }: Params) =>
       }
 
       const effectivePaths = normalizedPaths.concat(extraPaths)
-      const iterator = getContents({ messages, modelId, paths: effectivePaths })
+      const effectiveModelId = chooseFileGenerationModelId({
+        paths: effectivePaths,
+        messages,
+        fallbackModelId: modelId,
+      })
+      const iterator = getContents({ messages, modelId: effectiveModelId, paths: effectivePaths })
       const uploaded: File[] = []
 
       const persistFiles = async (files: File[]) => {
@@ -492,7 +498,7 @@ export const generateFiles = ({ writer, modelId, userId, projectId }: Params) =>
       } catch (error) {
         const richError = getRichError({
           action: 'generate file contents',
-          args: { modelId, paths: effectivePaths },
+          args: { modelId: effectiveModelId, paths: effectivePaths },
           error,
         })
 
