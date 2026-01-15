@@ -216,12 +216,10 @@ export async function POST(req: Request) {
     }
 
     const bodyData = (await req.json()) as BodyData
-    const {
-      messages,
-      modelId = DEFAULT_MODEL,
-      reasoningEffort,
-      projectId,
-    } = bodyData
+    const { messages, modelId: requestedModelId, reasoningEffort, projectId } = bodyData
+
+    const toolModelId = requestedModelId ?? DEFAULT_MODEL
+    const chatModelId = Models.OpenAIGPT5Mini
 
     const project = projectId ? await getProject(userId, projectId).catch(() => null) : null
 
@@ -230,7 +228,7 @@ export async function POST(req: Request) {
       getUserSubscription(userId),
     ])
 
-    if (modelId === Models.AnthropicClaude45Sonnet && !isPaidSubscription(subscription)) {
+    if (toolModelId === Models.AnthropicClaude45Sonnet && !isPaidSubscription(subscription)) {
       return NextResponse.json(
         {
           error:
@@ -267,15 +265,17 @@ export async function POST(req: Request) {
       }
     }
     const effectiveReasoningEffort: BodyData['reasoningEffort'] =
-      reasoningEffort ?? (modelId === Models.OpenAIGPT5 ? 'medium' : 'low')
+      reasoningEffort ?? (chatModelId === Models.OpenAIGPT5 ? 'medium' : 'low')
 
-    const model = models.find((model) => model.id === modelId)
-    if (!model) {
+    const toolModel = models.find((model) => model.id === toolModelId)
+    if (!toolModel) {
       return NextResponse.json(
-        { error: `Model ${modelId} not found.` },
+        { error: `Model ${toolModelId} not found.` },
         { status: 400 }
       )
     }
+
+    const chatModel = models.find((model) => model.id === chatModelId) ?? toolModel
 
     // Extract user's latest message text to calculate cost
     let userPromptText = ''
@@ -349,12 +349,12 @@ export async function POST(req: Request) {
           })
 
           const result = streamText({
-            ...getModelOptions(modelId, { reasoningEffort: effectiveReasoningEffort }),
+            ...getModelOptions(chatModelId, { reasoningEffort: effectiveReasoningEffort }),
             system: systemPrompt,
             messages: convertToModelMessages(processedMessages),
             stopWhen: stepCountIs(20),
             tools: tools({
-              modelId,
+              modelId: toolModelId,
               writer,
               userId,
               projectId,
@@ -367,7 +367,7 @@ export async function POST(req: Request) {
               try {
                 await recordUsageAndDeductCredits({
                   userId,
-                  modelId,
+                  modelId: chatModelId,
                   usage,
                   creditsRequired: requiredCredits,
                   metadata: { source: 'chat' },
@@ -383,7 +383,7 @@ export async function POST(req: Request) {
               sendReasoning: true,
               sendStart: false,
               messageMetadata: () => ({
-                model: model.name,
+                model: chatModel.name,
               }),
             })
           )
