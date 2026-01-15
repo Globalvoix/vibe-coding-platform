@@ -506,8 +506,8 @@ function ProjectCard({
         </div>
 
         <div className="flex items-center gap-2 min-w-0">
-          <div className={cn("w-6 h-6 rounded-full flex items-center justify-center shrink-0 font-bold text-white text-[10px]", getAvatarColor(project.name))}>
-            {project.name.charAt(0).toUpperCase()}
+          <div className={cn("w-6 h-6 rounded-full flex items-center justify-center shrink-0 font-bold text-white text-[10px]", getAvatarColor(creatorEmail))}>
+            {creatorEmail.charAt(0).toUpperCase()}
           </div>
           <span className="text-[13px] text-gray-600 truncate font-medium">{creatorEmail}</span>
         </div>
@@ -567,9 +567,9 @@ function ProjectCard({
           <div className="flex items-center gap-3 min-w-0">
             <div className={cn(
               "w-8 h-8 rounded-full flex items-center justify-center shrink-0 font-bold text-white text-[12px] shadow-sm",
-              getAvatarColor(project.name)
+              getAvatarColor(creatorEmail)
             )}>
-              {project.name.charAt(0).toUpperCase()}
+              {creatorEmail.charAt(0).toUpperCase()}
             </div>
             <div className="flex flex-col min-w-0">
               <h2 className="text-[14px] font-semibold text-gray-900 truncate tracking-tight group-hover:text-blue-600 transition-colors">
