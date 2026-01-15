@@ -153,9 +153,9 @@ function WorkspaceContent({
     const timeoutId = window.setTimeout(async () => {
       try {
         const sandboxState = {
-          sandboxId,
+          sandboxId: sandboxId ?? null,
           paths: sandboxPaths,
-          url,
+          url: url ?? null,
         }
 
         const body: {
