@@ -244,8 +244,9 @@ export default function ProjectsPage() {
       >
         <main className="max-w-[1440px] mx-auto px-6 py-12 lg:px-10">
           {/* Header Section */}
-          <div className="mb-10">
+          <div className="mb-10 flex items-center gap-2">
             <h1 className="text-2xl font-semibold text-[#111111] tracking-tight">Projects</h1>
+            <MoreHorizontal className="w-5 h-5 text-gray-400 cursor-pointer hover:text-gray-600 transition-colors mt-1" />
           </div>
 
           {/* Filters Bar */}
@@ -469,40 +470,48 @@ function ProjectCard({
   creatorEmail: string;
 }) {
   const isGrid = viewMode === 'grid'
-  
+  const sandboxState = project.sandbox_state as { url?: string } | null
+  const previewUrl = sandboxState?.url
+
   if (!isGrid) {
     return (
       <div
-        className="group grid grid-cols-[1fr,150px,250px,40px] gap-6 items-center px-6 py-4 bg-white border border-gray-100 rounded-2xl hover:border-blue-400/30 transition-all duration-300 cursor-pointer"
+        className="group grid grid-cols-[1fr,150px,250px,40px] gap-6 items-center px-6 py-4 bg-white border border-gray-100 rounded-2xl hover:border-gray-300 transition-all duration-300 cursor-pointer shadow-sm hover:shadow-md"
         onClick={() => onOpen(project.id)}
       >
         <div className="flex items-center gap-4 min-w-0">
-          <div className="relative w-20 h-12 rounded-lg bg-[#111111] overflow-hidden shrink-0">
-            <Image
-              src={`https://api.dicebear.com/7.x/identicon/svg?seed=${project.id}&backgroundColor=111111`}
-              alt="Preview"
-              fill
-              className="object-cover opacity-30 grayscale"
-              unoptimized
-            />
+          <div className="relative w-20 h-12 rounded-lg bg-gray-50 border border-gray-100 overflow-hidden shrink-0">
+            {previewUrl ? (
+              <Image
+                src={`https://api.microlink.io?url=${encodeURIComponent(previewUrl)}&screenshot=true&embed=screenshot.url`}
+                alt="Preview"
+                fill
+                className="object-cover"
+                unoptimized
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-gray-50 text-gray-300">
+                <Globe className="w-6 h-6" />
+              </div>
+            )}
           </div>
           <div className="flex flex-col min-w-0">
              <h2 className="text-[14px] font-semibold text-gray-900 truncate tracking-tight">{project.name}</h2>
              <p className="text-[12px] text-gray-400 font-medium">Edited {formatDistance(project.updated_at)}</p>
           </div>
         </div>
-        
+
         <div className="text-[13px] text-gray-500 font-medium whitespace-nowrap">
           {formatDistance(project.created_at)}
         </div>
-        
+
         <div className="flex items-center gap-2 min-w-0">
           <div className={cn("w-6 h-6 rounded-full flex items-center justify-center shrink-0 font-bold text-white text-[10px]", getAvatarColor(project.name))}>
             {project.name.charAt(0).toUpperCase()}
           </div>
           <span className="text-[13px] text-gray-600 truncate font-medium">{creatorEmail}</span>
         </div>
-        
+
         <div className="flex justify-end">
            <Star className="w-4 h-4 text-gray-200 hover:text-yellow-400 transition-colors" />
         </div>
@@ -512,39 +521,48 @@ function ProjectCard({
 
   return (
     <div
-      className="group flex flex-col bg-white border border-gray-200 rounded-[24px] hover:border-blue-400/50 hover:shadow-md transition-all duration-500 overflow-hidden cursor-pointer h-[300px]"
+      className="group flex flex-col bg-white border border-gray-200 rounded-[24px] hover:border-gray-300 hover:shadow-xl transition-all duration-500 overflow-hidden cursor-pointer h-[320px]"
       onClick={() => onOpen(project.id)}
     >
       {/* Preview Section */}
-      <div className="relative bg-[#111111] overflow-hidden flex-1">
+      <div className="relative bg-gray-50 overflow-hidden flex-1 border-b border-gray-100">
         <div className="absolute inset-0 flex items-center justify-center">
-          <Image
-            src={`https://api.dicebear.com/7.x/identicon/svg?seed=${project.id}&backgroundColor=111111&fontFamily=Inter`}
-            alt="Preview"
-            fill
-            className="object-cover opacity-30 grayscale brightness-125"
-            unoptimized
-          />
+          {previewUrl ? (
+            <Image
+              src={`https://api.microlink.io?url=${encodeURIComponent(previewUrl)}&screenshot=true&embed=screenshot.url`}
+              alt="Preview"
+              fill
+              className="object-cover transition-transform duration-700 group-hover:scale-105"
+              unoptimized
+            />
+          ) : (
+            <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 text-gray-200 gap-3">
+              <Globe className="w-12 h-12 opacity-50" strokeWidth={1} />
+              <span className="text-[10px] font-medium tracking-widest uppercase opacity-40">No preview available</span>
+            </div>
+          )}
         </div>
-        
-        <button 
+
+        <button
           onClick={(e) => e.stopPropagation()}
-          className="absolute top-4 right-4 p-2 bg-black/20 backdrop-blur-md rounded-lg border border-white/10 text-white/40 hover:text-yellow-400 transition-all hover:scale-110"
+          className="absolute top-4 right-4 p-2 bg-white/80 backdrop-blur-md rounded-lg border border-gray-200 text-gray-400 hover:text-yellow-500 transition-all hover:scale-110 shadow-sm opacity-0 group-hover:opacity-100"
         >
-          <Star className="w-3.5 h-3.5 fill-current" />
+          <Star className="w-3.5 h-3.5" />
         </button>
 
-        <div className="absolute bottom-4 left-4 flex items-center">
-          <div className="px-3 py-1 bg-black/40 backdrop-blur-md border border-white/10 rounded-full">
-            <span className="text-[10px] font-bold text-white/80 uppercase tracking-widest leading-none">
-              {project.cloud_enabled ? 'Published' : 'Draft'}
-            </span>
+        {!project.cloud_enabled && (
+          <div className="absolute bottom-4 left-4 flex items-center">
+            <div className="px-3 py-1 bg-black/80 backdrop-blur-md border border-white/10 rounded-full shadow-lg">
+              <span className="text-[10px] font-bold text-white uppercase tracking-widest leading-none">
+                Draft
+              </span>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Info Section */}
-      <div className="p-6 flex flex-col gap-2">
+      <div className="p-5 flex flex-col gap-2 bg-white">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 min-w-0">
             <div className={cn(
@@ -554,36 +572,36 @@ function ProjectCard({
               {project.name.charAt(0).toUpperCase()}
             </div>
             <div className="flex flex-col min-w-0">
-              <h2 className="text-[14px] font-semibold text-gray-900 truncate tracking-tight">
+              <h2 className="text-[14px] font-semibold text-gray-900 truncate tracking-tight group-hover:text-blue-600 transition-colors">
                 {project.name}
               </h2>
-              <p className="text-[12px] text-gray-400 font-medium">
+              <p className="text-[11px] text-gray-400 font-medium">
                 Edited {formatDistance(project.updated_at)}
               </p>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0">
             <button
               onClick={(e) => { e.stopPropagation(); onFork(project.id); }}
-              className="p-2 hover:bg-gray-100 rounded-xl transition-colors text-gray-400 hover:text-gray-900"
+              className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors text-gray-400 hover:text-gray-900"
               title="Duplicate"
             >
-              <Copy className="w-4 h-4" />
+              <Copy className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={(e) => { e.stopPropagation(); onRename(project.id); }}
-              className="p-2 hover:bg-gray-100 rounded-xl transition-colors text-gray-400 hover:text-gray-900"
+              className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors text-gray-400 hover:text-gray-900"
               title="Rename"
             >
-              <Edit2 className="w-4 h-4" />
+              <Edit2 className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={(e) => { e.stopPropagation(); onDelete(project.id); }}
-              className="p-2 hover:bg-red-50 rounded-xl transition-colors text-gray-400 hover:text-red-500"
+              className="p-1.5 hover:bg-red-50 rounded-lg transition-colors text-gray-400 hover:text-red-500"
               title="Delete"
             >
-              <Trash2 className="w-4 h-4" />
+              <Trash2 className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
@@ -593,15 +611,5 @@ function ProjectCard({
 }
 
 function getAvatarColor(name: string) {
-  const colors = [
-    'bg-blue-500',
-    'bg-indigo-500',
-    'bg-purple-500',
-    'bg-rose-500',
-    'bg-amber-500',
-    'bg-emerald-500',
-    'bg-cyan-500'
-  ]
-  const index = name.length % colors.length
-  return colors[index]
+  return 'bg-green-600'
 }
