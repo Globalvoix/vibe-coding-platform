@@ -486,12 +486,22 @@ function ProjectCard({
 
   const displayImageUrl = useMemo(() => {
     if (hasImageError) return null
-    // If we have a cached permanent image, use it.
-    if (project.preview_image_url) return project.preview_image_url
+
+    const cached = project.preview_image_url
+
+    // If we have a cached snapshot URL, use it.
+    // (Older records may have stored a Microlink *API* URL which can re-screenshot a stopped sandbox; gate those by activity.)
+    if (cached) {
+      const isLegacyMicrolinkApiUrl = cached.includes('api.microlink.io') && cached.includes('screenshot=true')
+      if (!isLegacyMicrolinkApiUrl) return cached
+      if (isLikelyActive) return cached
+    }
+
     // Otherwise, if the sandbox is active, use a live screenshot.
     if (previewUrl && isLikelyActive) {
       return `https://api.microlink.io?url=${encodeURIComponent(previewUrl)}&screenshot=true&embed=screenshot.url`
     }
+
     return null
   }, [project.preview_image_url, previewUrl, isLikelyActive, hasImageError])
 
