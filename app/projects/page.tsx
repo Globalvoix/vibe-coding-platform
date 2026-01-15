@@ -473,6 +473,18 @@ function ProjectCard({
   const sandboxState = project.sandbox_state as { url?: string } | null
   const previewUrl = sandboxState?.url
 
+  // Vercel sandboxes typically stop after ~30 minutes of inactivity.
+  // If the project hasn't been updated recently, the sandbox is likely stopped.
+  // In that case, we show the placeholder instead of a screenshot of the 410 error page.
+  const isLikelyActive = useMemo(() => {
+    if (!previewUrl) return false
+    const lastUpdate = new Date(project.updated_at).getTime()
+    const thirtyMinutesAgo = Date.now() - (30 * 60 * 1000)
+    return lastUpdate > thirtyMinutesAgo
+  }, [project.updated_at, previewUrl])
+
+  const showPreview = previewUrl && isLikelyActive
+
   if (!isGrid) {
     return (
       <div
@@ -481,7 +493,7 @@ function ProjectCard({
       >
         <div className="flex items-center gap-4 min-w-0">
           <div className="relative w-20 h-12 rounded-lg bg-gray-50 border border-gray-100 overflow-hidden shrink-0">
-            {previewUrl ? (
+            {showPreview ? (
               <Image
                 src={`https://api.microlink.io?url=${encodeURIComponent(previewUrl)}&screenshot=true&embed=screenshot.url`}
                 alt="Preview"
@@ -528,7 +540,7 @@ function ProjectCard({
       {/* Preview Section */}
       <div className="relative bg-gray-50 overflow-hidden flex-1 border-b border-gray-100">
         <div className="absolute inset-0 flex items-center justify-center">
-          {previewUrl ? (
+          {showPreview ? (
             <Image
               src={`https://api.microlink.io?url=${encodeURIComponent(previewUrl)}&screenshot=true&embed=screenshot.url`}
               alt="Preview"
