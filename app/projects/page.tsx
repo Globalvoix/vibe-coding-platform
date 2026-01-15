@@ -472,6 +472,7 @@ function ProjectCard({
   const isGrid = viewMode === 'grid'
   const sandboxState = project.sandbox_state as { url?: string } | null
   const previewUrl = sandboxState?.url
+  const [hasImageError, setHasImageError] = useState(false)
 
   // Vercel sandboxes typically stop after ~30 minutes of inactivity.
   // If the project hasn't been updated recently, the sandbox is likely stopped.
@@ -483,7 +484,7 @@ function ProjectCard({
     return lastUpdate > thirtyMinutesAgo
   }, [project.updated_at, previewUrl])
 
-  const showPreview = previewUrl && isLikelyActive
+  const showPreview = previewUrl && isLikelyActive && !hasImageError
 
   if (!isGrid) {
     return (
@@ -496,11 +497,12 @@ function ProjectCard({
             {showPreview ? (
               <Image
                 src={`https://api.microlink.io?url=${encodeURIComponent(previewUrl)}&screenshot=true&embed=screenshot.url`}
-                alt="Preview"
+                alt=""
                 fill
                 className="object-cover"
                 unoptimized
                 priority
+                onError={() => setHasImageError(true)}
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-gray-50 text-gray-400">
@@ -543,11 +545,12 @@ function ProjectCard({
           {showPreview ? (
             <Image
               src={`https://api.microlink.io?url=${encodeURIComponent(previewUrl)}&screenshot=true&embed=screenshot.url`}
-              alt="Preview"
+              alt=""
               fill
               className="object-cover transition-transform duration-700 group-hover:scale-105"
               unoptimized
               priority
+              onError={() => setHasImageError(true)}
             />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 text-gray-400 gap-3">
