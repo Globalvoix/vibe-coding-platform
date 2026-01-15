@@ -4,6 +4,7 @@ import { Sandbox } from '@vercel/sandbox'
 import { z } from 'zod'
 import { generateObject } from 'ai'
 import { getModelOptions } from '@/ai/gateway'
+import { Models } from '@/ai/constants'
 import { getSupabaseProject } from '@/lib/supabase-projects-db'
 import {
   dedupeIssues,
@@ -142,7 +143,7 @@ async function analyzeSecurityWithGptMini(params: {
   files: Array<{ path: string; content: string }>
   rawFindings?: string
 }): Promise<SecurityIssue[]> {
-  const modelId = 'openai/gpt-4.1-mini'
+  const modelId = Models.GoogleGeminiFlash3
   const modelOptions = getModelOptions(modelId)
 
   const maxFiles = 18
