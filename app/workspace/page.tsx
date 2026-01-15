@@ -158,10 +158,17 @@ function WorkspaceContent({
           url,
         }
 
+        const body: any = { sandboxState }
+
+        // If we have a URL, also update the preview image URL to act as a "latest banner"
+        if (url) {
+          body.previewImageUrl = `https://api.microlink.io?url=${encodeURIComponent(url)}&screenshot=true&embed=screenshot.url&ttl=7d`
+        }
+
         await fetch(`/api/projects/${projectId}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sandboxState }),
+          body: JSON.stringify(body),
         })
 
         await fetch(`/api/projects/${projectId}/versions`, {
