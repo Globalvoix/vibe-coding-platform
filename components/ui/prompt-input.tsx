@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils'
 import React, {
   createContext,
   useContext,
+  useEffect,
   useLayoutEffect,
   useRef,
   useState,
@@ -65,7 +66,7 @@ function PromptInput({
 }: PromptInputProps) {
   const [internalValue, setInternalValue] = useState(value || '')
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (value !== undefined) {
       setInternalValue(value)
     }
