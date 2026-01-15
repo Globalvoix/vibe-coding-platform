@@ -32,8 +32,8 @@ function extractLatestUserText(messages: ModelMessage[]): string {
     if (Array.isArray(content)) {
       for (const part of content) {
         if (typeof part === 'string') return part
-        if (part && typeof part === 'object' && 'text' in part && typeof (part as any).text === 'string') {
-          return String((part as any).text)
+        if (part && typeof part === 'object' && 'text' in part && typeof (part as { text?: unknown }).text === 'string') {
+          return String((part as { text: string }).text)
         }
       }
     }
