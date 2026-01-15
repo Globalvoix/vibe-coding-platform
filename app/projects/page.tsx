@@ -30,7 +30,6 @@ import {
   ExternalLink,
   ShieldCheck
 } from 'lucide-react'
-import Image from 'next/image'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Copy, Heart } from 'lucide-react'
 import { toast } from 'sonner'
