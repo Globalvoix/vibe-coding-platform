@@ -13,7 +13,7 @@ import {
 import { cn } from '@/lib/utils'
 import { useEffect, useMemo } from 'react'
 import { toast } from 'sonner'
-import { DEFAULT_MODEL } from '@/ai/constants'
+import { DEFAULT_MODEL, isSupportedModelId } from '@/ai/constants'
 import { useAvailableModels } from './use-available-models'
 import { useModelId } from './use-settings'
 
@@ -43,7 +43,9 @@ export function ModelSelector({ className }: { className?: string }) {
   return (
     <Select
       value={modelId}
-      onValueChange={setModelId}
+      onValueChange={(value) => {
+        if (isSupportedModelId(value)) setModelId(value)
+      }}
       disabled={isLoading || !!error || !models?.length}
     >
       <SelectTrigger

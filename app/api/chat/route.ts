@@ -264,8 +264,7 @@ export async function POST(req: Request) {
         console.warn('Failed to capture env vars from chat:', error)
       }
     }
-    const effectiveReasoningEffort: BodyData['reasoningEffort'] =
-      reasoningEffort ?? (chatModelId === Models.OpenAIGPT5 || chatModelId === Models.OpenAIGPT5Mini ? 'medium' : 'low')
+    const effectiveReasoningEffort: BodyData['reasoningEffort'] = reasoningEffort ?? 'medium'
 
     const toolModel = models.find((model) => model.id === toolModelId)
     if (!toolModel) {

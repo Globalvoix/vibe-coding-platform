@@ -11,9 +11,7 @@ export function useSettings() {
 export function useModelId() {
   return useQueryState(
     'modelId',
-    parseAsStringLiteral(SUPPORTED_MODELS.map((model) => model)).withDefault(
-      DEFAULT_MODEL
-    )
+    parseAsStringLiteral(SUPPORTED_MODELS).withDefault(DEFAULT_MODEL)
   )
 }
 
