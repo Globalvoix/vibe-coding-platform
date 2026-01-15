@@ -82,8 +82,11 @@ function PromptInput({
       <PromptInputContext.Provider
         value={{
           isLoading,
-          value: value ?? internalValue,
-          setValue: onValueChange ?? handleChange,
+          value: value !== undefined ? value : internalValue,
+          setValue: (newValue: string) => {
+            setInternalValue(newValue)
+            onValueChange?.(newValue)
+          },
           maxHeight,
           onSubmit,
           disabled,
