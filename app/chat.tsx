@@ -115,20 +115,22 @@ export function Chat({ className, initialPrompt, projectId, projectName }: Props
 
   useEffect(() => {
     if (!projectId) return
+    const storageKey = `prompt-draft-${projectId}`
     if (input.trim()) {
-      localStorage.setItem(`prompt-draft-${projectId}`, input)
+      localStorage.setItem(storageKey, input)
+    } else if (input === '') {
+      localStorage.removeItem(storageKey)
     }
   }, [input, projectId])
 
   useEffect(() => {
     if (!projectId) return
-    if (typeof window !== 'undefined' && !input) {
-      const stored = localStorage.getItem(`prompt-draft-${projectId}`)
-      if (stored) {
-        setInput(stored)
-      }
+    const storageKey = `prompt-draft-${projectId}`
+    const stored = localStorage.getItem(storageKey)
+    if (stored && !input) {
+      setInput(stored)
     }
-  }, [projectId, input])
+  }, [projectId]) // Only run on mount or when projectId changes
 
   const validateAndSubmitMessage = useCallback(
     (text: string) => {
