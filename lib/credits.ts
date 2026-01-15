@@ -38,8 +38,11 @@ const MODEL_PRICING_PER_1K: Record<string, { inputUsd: number; outputUsd: number
   [Models.AmazonNovaPro]: { inputUsd: 0.0025, outputUsd: 0.01 },
   [Models.MoonshotKimiK2]: { inputUsd: 0.002, outputUsd: 0.008 },
   [Models.XaiGrok3Fast]: { inputUsd: 0.001, outputUsd: 0.003 },
-  [Models.GoogleGeminiFlash]: { inputUsd: 0.00035, outputUsd: 0.00053 },
+  [Models.GoogleGeminiFlash3]: { inputUsd: 0.00035, outputUsd: 0.00053 },
   [Models.OpenAIGPT5]: { inputUsd: 0.005, outputUsd: 0.015 },
+  [Models.OpenAIGPT5Mini]: { inputUsd: 0.001, outputUsd: 0.003 },
+  [Models.OpenAIGPT51CodexMax]: { inputUsd: 0.01, outputUsd: 0.03 },
+  [Models.Minimax21]: { inputUsd: 0.0015, outputUsd: 0.0025 },
 }
 
 const DEFAULT_MODEL_PRICING = { inputUsd: 0.002, outputUsd: 0.004 }
