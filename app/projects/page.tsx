@@ -472,7 +472,6 @@ function ProjectCard({
   const isGrid = viewMode === 'grid'
   const sandboxState = project.sandbox_state as { url?: string } | null
   const previewUrl = sandboxState?.url
-  const [hasImageError, setHasImageError] = useState(false)
 
   // Vercel sandboxes typically stop after ~15-30 minutes of inactivity.
   // If the project hasn't been updated recently, the sandbox is likely stopped.
