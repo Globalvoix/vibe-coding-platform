@@ -1,49 +1,46 @@
 import { createGatewayProvider } from '@ai-sdk/gateway'
 import { createOpenAI } from '@ai-sdk/openai'
 import { createAnthropic } from '@ai-sdk/anthropic'
-import { createGoogleGenerativeAI } from '@ai-sdk/google'
 import { Models } from './constants'
 import type { JSONValue } from 'ai'
 import type { OpenAIResponsesProviderOptions } from '@ai-sdk/openai'
 import type { LanguageModelV2 } from '@ai-sdk/provider'
 
-const GOOGLE_GEMINI_FLASH_MODEL_ID = 'gemini-2.5-flash' as const
+const DEFAULT_GATEWAY_BASE_URL = 'https://ai-gateway.vercel.sh/v1'
 
 export async function getAvailableModels() {
-  const gateway = gatewayInstance()
-  const response = await gateway.getAvailableModels()
+  const models: Array<{ id: string; name: string }> = []
 
-  const models = response.models.map((model) => ({ id: model.id, name: model.name }))
-
-  if (process.env.OPENAI_API_KEY) {
-    const hasGpt5 = models.some((model) => model.id === Models.OpenAIGPT5)
-    if (!hasGpt5) {
-      models.push({ id: Models.OpenAIGPT5, name: 'OpenAI GPT-5' })
-    }
+  try {
+    const gateway = gatewayInstance()
+    const response = await gateway.getAvailableModels()
+    models.push(...response.models.map((model) => ({ id: model.id, name: model.name })))
+  } catch {
+    // best-effort; we'll fall back to a curated list below
   }
 
-  if (process.env.ANTHROPIC_API_KEY) {
-    const hasClaude4 = models.some(
-      (model) => model.id === Models.AnthropicClaude4Sonnet
-    )
-    if (!hasClaude4) {
-      models.push({
-        id: Models.AnthropicClaude4Sonnet,
-        name: 'Anthropic Claude 4 Sonnet',
-      })
-    }
+  const ensure = (id: string, name: string, enabled: boolean) => {
+    if (!enabled) return
+    if (models.some((m) => m.id === id)) return
+    models.push({ id, name })
   }
 
-  if (process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
-    const hasGeminiFlash = models.some((model) => model.id === Models.GoogleGeminiFlash)
-    if (!hasGeminiFlash) {
-      models.push({
-        id: Models.GoogleGeminiFlash,
-        name: 'Google Gemini 2.5 Flash',
-      })
-    }
-  }
+  const hasOpenAI = Boolean(process.env.OPENAI_API_KEY)
+  const hasAnthropic = Boolean(process.env.ANTHROPIC_API_KEY)
+  const hasGateway = Boolean(process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_AI_GATEWAY_API_KEY)
 
+  ensure(Models.OpenAIGPT5, 'OpenAI GPT-5', hasOpenAI)
+  ensure(Models.OpenAIGPT5Mini, 'OpenAI GPT-5 Mini', hasOpenAI)
+
+  // Gateway-routed models
+  ensure(Models.GoogleGeminiFlash3, 'Google Gemini Flash 3', hasGateway)
+  ensure(Models.OpenAIGPT51CodexMax, 'OpenAI GPT-5.1 Codex Max', hasGateway)
+  ensure(Models.Minimax21, 'Minimax 2.1', hasGateway)
+
+  // Direct provider models
+  ensure(Models.AnthropicClaude4Sonnet, 'Anthropic Claude 4 Sonnet', hasAnthropic)
+
+  // Keep the list stable for UI
   return models
 }
 
@@ -57,7 +54,7 @@ export function getModelOptions(
   modelId: string,
   options?: { reasoningEffort?: 'minimal' | 'low' | 'medium' }
 ): ModelOptions {
-  if (modelId === Models.OpenAIGPT5) {
+  if (modelId === Models.OpenAIGPT5 || modelId === Models.OpenAIGPT5Mini) {
     const openai = openaiInstance()
     return {
       model: openai(modelId),
@@ -79,13 +76,6 @@ export function getModelOptions(
           cacheControl: { type: 'ephemeral' },
         },
       },
-    }
-  }
-
-  if (modelId === Models.GoogleGeminiFlash && process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
-    const google = googleInstance()
-    return {
-      model: google(GOOGLE_GEMINI_FLASH_MODEL_ID),
     }
   }
 
@@ -121,14 +111,9 @@ function anthropicInstance() {
   })
 }
 
-function googleInstance() {
-  return createGoogleGenerativeAI({
-    apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
-  })
-}
-
 function gatewayInstance() {
   return createGatewayProvider({
-    baseURL: process.env.AI_GATEWAY_BASE_URL,
+    baseURL: process.env.AI_GATEWAY_BASE_URL || DEFAULT_GATEWAY_BASE_URL,
+    apiKey: process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_AI_GATEWAY_API_KEY,
   })
 }
