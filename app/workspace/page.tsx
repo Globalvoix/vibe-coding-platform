@@ -188,7 +188,9 @@ function WorkspaceContent({
               )
 
               if (microlinkRes.ok) {
-                const microlinkJson = (await microlinkRes.json()) as any
+                const microlinkJson = (await microlinkRes.json()) as {
+                  data?: { screenshot?: { url?: string } }
+                }
                 const screenshotUrl = microlinkJson?.data?.screenshot?.url
 
                 if (typeof screenshotUrl === 'string') {
