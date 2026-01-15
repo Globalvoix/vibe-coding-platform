@@ -485,25 +485,25 @@ function ProjectCard({
   }, [project.updated_at, previewUrl])
 
   const displayImageUrl = useMemo(() => {
-    if (hasImageError) return null
-
     const cached = project.preview_image_url
 
-    // If we have a cached snapshot URL, use it.
-    // (Older records may have stored a Microlink *API* URL which can re-screenshot a stopped sandbox; gate those by activity.)
+    // 1. If we have a stable cached snapshot URL, use it first.
     if (cached) {
       const isLegacyMicrolinkApiUrl = cached.includes('api.microlink.io') && cached.includes('screenshot=true')
+      // Only treat it as "cached" if it's NOT a legacy live-API URL.
       if (!isLegacyMicrolinkApiUrl) return cached
+      // If it is legacy, only use it if we think the sandbox might still be alive.
       if (isLikelyActive) return cached
     }
 
-    // Otherwise, if the sandbox is active, use a live screenshot.
+    // 2. If no cached snapshot but sandbox is likely active, try a live screenshot.
     if (previewUrl && isLikelyActive) {
       return `https://api.microlink.io?url=${encodeURIComponent(previewUrl)}&screenshot=true&embed=screenshot.url`
     }
 
+    // 3. Last resort fallback to a generic placeholder if sandbox is stopped and no snapshot exists.
     return null
-  }, [project.preview_image_url, previewUrl, isLikelyActive, hasImageError])
+  }, [project.preview_image_url, previewUrl, isLikelyActive])
 
   if (!isGrid) {
     return (
@@ -514,15 +514,12 @@ function ProjectCard({
         <div className="flex items-center gap-4 min-w-0">
           <div className="relative w-20 h-12 rounded-lg bg-gray-50 border border-gray-100 overflow-hidden shrink-0">
             {displayImageUrl ? (
-              <Image
+              <img
                 key={displayImageUrl}
                 src={displayImageUrl}
                 alt=""
-                fill
-                className="object-cover bg-gray-50"
-                unoptimized
-                priority
-                onError={() => setHasImageError(true)}
+                className="w-full h-full object-cover bg-gray-50"
+                loading="lazy"
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-gray-50 text-gray-400">
@@ -563,15 +560,12 @@ function ProjectCard({
       <div className="relative bg-gray-50 overflow-hidden flex-1 border-b border-gray-100">
         <div className="absolute inset-0 flex items-center justify-center">
           {displayImageUrl ? (
-            <Image
+            <img
               key={displayImageUrl}
               src={displayImageUrl}
               alt=""
-              fill
-              className="object-cover transition-transform duration-700 group-hover:scale-105 bg-gray-50"
-              unoptimized
-              priority
-              onError={() => setHasImageError(true)}
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 bg-gray-50"
+              loading="lazy"
             />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 text-gray-400 gap-3">
