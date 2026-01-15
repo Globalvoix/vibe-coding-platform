@@ -265,7 +265,7 @@ export async function POST(req: Request) {
       }
     }
     const effectiveReasoningEffort: BodyData['reasoningEffort'] =
-      reasoningEffort ?? (chatModelId === Models.OpenAIGPT5 ? 'medium' : 'low')
+      reasoningEffort ?? (chatModelId === Models.OpenAIGPT5 || chatModelId === Models.OpenAIGPT5Mini ? 'medium' : 'low')
 
     const toolModel = models.find((model) => model.id === toolModelId)
     if (!toolModel) {
