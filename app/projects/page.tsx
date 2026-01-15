@@ -488,10 +488,11 @@ function ProjectCard({
                 fill
                 className="object-cover"
                 unoptimized
+                priority
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center bg-gray-50 text-gray-300">
-                <Globe className="w-6 h-6" />
+              <div className="w-full h-full flex items-center justify-center bg-gray-50 text-gray-400">
+                <Globe className="w-6 h-6 opacity-30" />
               </div>
             )}
           </div>
@@ -534,11 +535,12 @@ function ProjectCard({
               fill
               className="object-cover transition-transform duration-700 group-hover:scale-105"
               unoptimized
+              priority
             />
           ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 text-gray-200 gap-3">
-              <Globe className="w-12 h-12 opacity-50" strokeWidth={1} />
-              <span className="text-[10px] font-medium tracking-widest uppercase opacity-40">No preview available</span>
+            <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 text-gray-400 gap-3">
+              <Globe className="w-12 h-12 opacity-40" strokeWidth={1} />
+              <span className="text-[10px] font-bold tracking-widest uppercase opacity-60">No preview available</span>
             </div>
           )}
         </div>
