@@ -173,6 +173,22 @@ export async function updateProjectCloudEnabled(
   return result.rows[0] ?? null
 }
 
+export async function updateProjectPreviewImageUrl(
+  userId: string,
+  id: string,
+  previewImageUrl: string | null
+): Promise<ProjectRecord | null> {
+  await ensureProjectsTable()
+  const result = await pool.query<ProjectRecord>(
+    `UPDATE projects
+     SET preview_image_url = $3, updated_at = NOW()
+     WHERE user_id = $1 AND id = $2
+     RETURNING *`,
+    [userId, id, previewImageUrl]
+  )
+  return result.rows[0] ?? null
+}
+
 export async function deleteProject(userId: string, id: string): Promise<void> {
   await ensureProjectsTable()
   await pool.query(`DELETE FROM projects WHERE user_id = $1 AND id = $2`, [userId, id])
