@@ -10,7 +10,7 @@ import { SecurityScan } from '@/components/security-scan'
 import { TabContent, TabItem } from '@/components/tabs'
 import { AppSidebar } from '@/components/sidebar/app-sidebar'
 import { EnvVarsManager } from '@/components/env-vars/env-vars-manager'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useSandboxStore, useFileExplorerStore } from '../state'
 import { Suspense } from 'react'
 import { WorkspaceProvider } from './workspace-provider'
@@ -38,6 +38,7 @@ function WorkspaceContent({
   const [projectName, setProjectName] = useState<string>('')
   const [horizontalSizes] = useState<[number, number] | null>(null)
   const { sandboxId, paths: sandboxPaths, url, currentProjectId } = useSandboxStore()
+  const lastPreviewSnapshotRef = useRef<{ url: string; capturedAt: number } | null>(null)
 
   useEffect(() => {
     const sandboxState = useSandboxStore.getState()
@@ -167,9 +168,48 @@ function WorkspaceContent({
           previewImageUrl?: string
         } = { sandboxState }
 
-        // If we have a URL, also update the preview image URL to act as a "latest banner"
+        // If we have a URL, also update the preview image URL to act as a "latest banner".
+        // We store the *direct screenshot URL* returned by Microlink so it stays valid even if the sandbox later stops.
         if (url) {
-          body.previewImageUrl = `https://api.microlink.io?url=${encodeURIComponent(url)}&screenshot=true&embed=screenshot.url&ttl=7d`
+          const now = Date.now()
+          const last = lastPreviewSnapshotRef.current
+          const shouldCapture = !last || last.url !== url || now - last.capturedAt > 10 * 60 * 1000
+
+          if (shouldCapture) {
+            try {
+              const microlinkRes = await fetch(
+                `https://api.microlink.io?url=${encodeURIComponent(url)}&screenshot=true&ttl=30d`
+              )
+
+              if (microlinkRes.ok) {
+                const microlinkJson: unknown = await microlinkRes.json()
+
+                const screenshotUrl =
+                  typeof microlinkJson === 'object' &&
+                  microlinkJson !== null &&
+                  'status' in microlinkJson &&
+                  (microlinkJson as { status?: unknown }).status === 'success' &&
+                  'data' in microlinkJson &&
+                  typeof (microlinkJson as { data?: unknown }).data === 'object' &&
+                  (microlinkJson as { data?: unknown }).data !== null &&
+                  'screenshot' in (microlinkJson as { data: Record<string, unknown> }).data &&
+                  typeof (microlinkJson as { data: { screenshot?: unknown } }).data.screenshot === 'object' &&
+                  (microlinkJson as { data: { screenshot?: unknown } }).data.screenshot !== null &&
+                  'url' in (microlinkJson as { data: { screenshot: Record<string, unknown> } }).data.screenshot &&
+                  typeof (microlinkJson as { data: { screenshot: { url?: unknown } } }).data.screenshot.url ===
+                    'string'
+                    ? (microlinkJson as { data: { screenshot: { url: string } } }).data.screenshot.url
+                    : null
+
+                if (screenshotUrl) {
+                  body.previewImageUrl = screenshotUrl
+                  lastPreviewSnapshotRef.current = { url, capturedAt: now }
+                }
+              }
+            } catch {
+              // ignore snapshot failures; sandboxState save should still succeed
+            }
+          }
         }
 
         await fetch(`/api/projects/${projectId}`, {
