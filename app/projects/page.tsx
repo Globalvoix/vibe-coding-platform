@@ -550,15 +550,6 @@ function ProjectCard({
           <Star className="w-3.5 h-3.5" />
         </button>
 
-        {!project.cloud_enabled && (
-          <div className="absolute bottom-4 left-4 flex items-center">
-            <div className="px-3 py-1 bg-black/80 backdrop-blur-md border border-white/10 rounded-full shadow-lg">
-              <span className="text-[10px] font-bold text-white uppercase tracking-widest leading-none">
-                Draft
-              </span>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Info Section */}
