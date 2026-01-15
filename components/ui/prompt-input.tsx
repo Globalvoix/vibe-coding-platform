@@ -64,25 +64,20 @@ function PromptInput({
   children,
   disabled = false,
 }: PromptInputProps) {
-  const [internalValue, setInternalValue] = useState(value || '')
+  const [internalValue, setInternalValue] = useState(value ?? '')
 
   useEffect(() => {
-    if (value !== undefined) {
+    if (value !== undefined && value !== internalValue) {
       setInternalValue(value)
     }
   }, [value])
-
-  const handleChange = (newValue: string) => {
-    setInternalValue(newValue)
-    onValueChange?.(newValue)
-  }
 
   return (
     <TooltipProvider>
       <PromptInputContext.Provider
         value={{
           isLoading,
-          value: value !== undefined ? value : internalValue,
+          value: internalValue,
           setValue: (newValue: string) => {
             setInternalValue(newValue)
             onValueChange?.(newValue)
