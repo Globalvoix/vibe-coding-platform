@@ -65,6 +65,12 @@ function PromptInput({
 }: PromptInputProps) {
   const [internalValue, setInternalValue] = useState(value || '')
 
+  React.useEffect(() => {
+    if (value !== undefined) {
+      setInternalValue(value)
+    }
+  }, [value])
+
   const handleChange = (newValue: string) => {
     setInternalValue(newValue)
     onValueChange?.(newValue)
