@@ -5,6 +5,9 @@ import { getRichError } from './get-rich-error'
 import { tool } from 'ai'
 import description from './run-command.md'
 import z from 'zod/v3'
+import { defaultRetryStrategy } from './retry-strategy'
+import { buildOutputParser } from './build-output-parser'
+import { generationLogger } from './generation-logger'
 
 interface Params {
   writer: UIMessageStreamWriter<UIMessage<never, DataPart>>
