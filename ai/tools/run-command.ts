@@ -1,44 +1,13 @@
 import type { UIMessageStreamWriter, UIMessage } from 'ai'
 import type { DataPart } from '../messages/data-parts'
-import { Command, Sandbox } from '@vercel/sandbox'
+import { Sandbox } from '@vercel/sandbox'
 import { getRichError } from './get-rich-error'
 import { tool } from 'ai'
 import description from './run-command.md'
 import z from 'zod/v3'
-import { defaultRetryStrategy } from './retry-strategy'
-import { buildOutputParser } from './build-output-parser'
-import { generationLogger } from './generation-logger'
-import { isFeatureEnabled, getPackageManagerPreference } from '@/lib/generation-config'
-import { autoInstallMissingPackages } from './auto-install-missing-packages'
 
 interface Params {
   writer: UIMessageStreamWriter<UIMessage<never, DataPart>>
-}
-
-function buildInstallFallbackSequence(
-  currentPM: 'npm' | 'yarn' | 'pnpm'
-): { pm: 'npm' | 'yarn' | 'pnpm'; flags: string[] }[] {
-  const pmPreference = getPackageManagerPreference()
-  const fallbackSequence: { pm: 'npm' | 'yarn' | 'pnpm'; flags: string[] }[] = []
-
-  for (const pm of pmPreference) {
-    if (pm === 'pnpm') {
-      fallbackSequence.push({ pm: 'pnpm', flags: ['install', '--force'] })
-      fallbackSequence.push({ pm: 'pnpm', flags: ['install'] })
-    } else if (pm === 'yarn') {
-      fallbackSequence.push({ pm: 'yarn', flags: ['install', '--ignore-engines'] })
-      fallbackSequence.push({ pm: 'yarn', flags: ['install'] })
-    } else if (pm === 'npm') {
-      fallbackSequence.push({ pm: 'npm', flags: ['install', '--legacy-peer-deps'] })
-      fallbackSequence.push({ pm: 'npm', flags: ['install'] })
-    }
-  }
-
-  if (!fallbackSequence.some((x) => x.pm === currentPM)) {
-    fallbackSequence.unshift({ pm: currentPM, flags: ['install'] })
-  }
-
-  return fallbackSequence
 }
 
 export const runCommand = ({ writer }: Params) =>
