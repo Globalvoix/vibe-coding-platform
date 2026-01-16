@@ -250,6 +250,16 @@ ${hasLibFiles ? `
 - Well-documented with JSDoc comments
 ` : ''}
 
+# ROUTE GENERATION RULES (CRITICAL)
+
+${blueprint ? `The blueprint identified these routes that MUST be built: ${blueprint.componentStructure.routes.join(', ')}` : ''}
+
+For each route identified in the blueprint:
+- Generate a complete page.tsx file in app/route-name/page.tsx
+- Never reference a route in navigation links unless its page.tsx file is generated
+- If you create a navbar/navigation component, ONLY link to routes that have corresponding page.tsx files
+- Every link in navigation must have a matching page.tsx implementation
+
 # BLOCKERS (WILL FAIL GENERATION IF VIOLATED)
 
 ❌ Missing imports that are used in code
@@ -262,6 +272,8 @@ ${hasLibFiles ? `
 ❌ Invalid JSON in config files
 ❌ Generic or off-topic images (e.g., shoes in a streaming app)
 ❌ Hard-coded passwords, API keys, or secrets
+❌ Navigation links that don't have corresponding page files (DEAD LINKS)
+❌ Missing page.tsx files for routes in the blueprint
 
 # GENERATION CHECKLIST (Before outputting each file)
 
