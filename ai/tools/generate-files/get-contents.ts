@@ -1,6 +1,7 @@
 import { streamObject, type ModelMessage } from 'ai'
 import { getModelOptions } from '@/ai/gateway'
 import { Deferred } from '@/lib/deferred'
+import type { GenerationBlueprint } from '@/lib/generation-blueprint'
 import z from 'zod/v3'
 
 export type File = z.infer<typeof fileSchema>
@@ -22,6 +23,7 @@ interface Params {
   messages: ModelMessage[]
   modelId: string
   paths: string[]
+  blueprint?: GenerationBlueprint
 }
 
 interface FileContentChunk {
