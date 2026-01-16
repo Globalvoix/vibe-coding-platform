@@ -38,7 +38,7 @@ export async function* getContents(
   const generated: z.infer<typeof fileSchema>[] = []
   const deferred = new Deferred<void>()
 
-  const systemPrompt = buildEnhancedSystemPrompt(params.paths)
+  const systemPrompt = buildEnhancedSystemPrompt(params.paths, params.blueprint)
 
   const result = streamObject({
     ...getModelOptions(params.modelId, { reasoningEffort: 'medium' }),
