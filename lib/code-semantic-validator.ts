@@ -30,7 +30,10 @@ interface FileToValidate {
 /**
  * Validate a batch of generated files
  */
-export function validateGeneratedFiles(files: FileToValidate[]): ValidationResult {
+export function validateGeneratedFiles(
+  files: FileToValidate[],
+  expectedRoutes?: string[]
+): ValidationResult {
   const allErrors: ValidationError[] = []
   const allWarnings: ValidationError[] = []
 
@@ -38,6 +41,12 @@ export function validateGeneratedFiles(files: FileToValidate[]): ValidationResul
     const fileErrors = validateFile(file)
     allErrors.push(...fileErrors.errors)
     allWarnings.push(...fileErrors.warnings)
+  }
+
+  // Check for missing page files if routes were expected
+  if (expectedRoutes && expectedRoutes.length > 0) {
+    const pageErrors = validateRoutesHavePages(files, expectedRoutes)
+    allErrors.push(...pageErrors)
   }
 
   const isValid = allErrors.length === 0
@@ -50,6 +59,39 @@ export function validateGeneratedFiles(files: FileToValidate[]): ValidationResul
     warnings: allWarnings,
     summary,
   }
+}
+
+/**
+ * Check that all expected routes have corresponding page.tsx files
+ */
+function validateRoutesHavePages(files: FileToValidate[], expectedRoutes: string[]): ValidationError[] {
+  const errors: ValidationError[] = []
+  const generatedPagePaths = new Set(files.filter((f) => f.path.includes('/page.tsx')).map((f) => f.path))
+
+  for (const route of expectedRoutes) {
+    const routePath = route === '/' ? 'app/page.tsx' : `app/${route.replace(/^\//, '')}/page.tsx`
+
+    if (!generatedPagePaths.has(routePath)) {
+      // Check if there's a variant with parentheses (route groups)
+      const hasVariant = Array.from(generatedPagePaths).some(
+        (p) =>
+          p.includes(`/${route.replace(/^\//, '')}/`) ||
+          p === routePath.replace('app/', 'app/(').replace('/page.tsx', ')/page.tsx')
+      )
+
+      if (!hasVariant) {
+        errors.push({
+          file: routePath,
+          message: `Missing page file for route "${route}" - expected ${routePath}`,
+          severity: 'error',
+          code: 'MISSING_PAGE_FILE',
+          suggestion: `Generate page.tsx file for the ${route} route`,
+        })
+      }
+    }
+  }
+
+  return errors
 }
 
 function validateFile(file: FileToValidate): { errors: ValidationError[]; warnings: ValidationError[] } {
