@@ -57,6 +57,54 @@ export const generateFiles = ({ writer, modelId, userId, projectId }: Params) =>
         return richError.message
       }
 
+      // Pre-generation validation if feature enabled
+      if (isFeatureEnabled('preValidation')) {
+        try {
+          generationLogger.start('generation', 'Running pre-generation validation')
+          const validationResult = await preGenerationValidator.validate(sandbox)
+
+          if (!validationResult.valid) {
+            const validationReport = preGenerationValidator.formatResultMessage(validationResult)
+            generationLogger.error(
+              'validation',
+              'Pre-generation validation failed',
+              'VALIDATION_FAILED',
+              validationReport
+            )
+
+            writer.write({
+              id: toolCallId,
+              type: 'data-generating-files',
+              data: {
+                error: {
+                  message: 'Pre-generation validation failed',
+                  json: validationResult,
+                },
+                paths: [],
+                status: 'error',
+              },
+            })
+
+            return (
+              'Pre-generation validation failed. Issues detected:\n' +
+              validationResult.errors.map((e) => `- ${e}`).join('\n') +
+              '\n\nSuggestions:\n' +
+              validationResult.suggestions.map((s) => `- ${s}`).join('\n')
+            )
+          }
+
+          generationLogger.success('validation', 'Pre-generation validation passed')
+        } catch (error) {
+          generationLogger.error(
+            'validation',
+            'Pre-generation validation error',
+            'VALIDATION_ERROR',
+            String(error)
+          )
+          // Continue even if validation fails
+        }
+      }
+
       const writeFiles = getWriteFiles({ sandbox, toolCallId, writer })
 
       const normalizePath = (p: string) => p.trim().replace(/^\.{1,2}\//, '').replace(/^\//, '')
