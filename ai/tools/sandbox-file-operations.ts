@@ -63,13 +63,12 @@ export class SandboxFileOperations {
       await sandbox.writeFiles([
         {
           path: file.path,
-          data: content,
+          content,
         },
       ])
 
       // Read file back to verify
-      const readBack = await sandbox.readFile({ path: file.path })
-      const readBackBuffer = Buffer.isBuffer(readBack) ? readBack : Buffer.from(readBack)
+      const readBackBuffer = await this.readFileToBuffer(sandbox, file.path)
       const readBackChecksum = this.calculateChecksum(readBackBuffer)
 
       const verified = originalChecksum === readBackChecksum
@@ -109,8 +108,8 @@ export class SandboxFileOperations {
    */
   async readPackageJson(sandbox: Sandbox): Promise<Record<string, unknown> | null> {
     try {
-      const content = await sandbox.readFile({ path: 'package.json' })
-      const text = typeof content === 'string' ? content : content.toString()
+      const buffer = await this.readFileToBuffer(sandbox, 'package.json')
+      const text = buffer.toString('utf8')
       return JSON.parse(text) as Record<string, unknown>
     } catch (error) {
       generationLogger.error(
@@ -201,6 +200,25 @@ export class SandboxFileOperations {
     return createHash('sha256').update(content).digest('hex')
   }
 
+  private async streamToBuffer(stream: NodeJS.ReadableStream): Promise<Buffer> {
+    const chunks: Buffer[] = []
+
+    for await (const chunk of stream) {
+      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
+    }
+
+    return Buffer.concat(chunks)
+  }
+
+  private async readFileToBuffer(sandbox: Sandbox, path: string): Promise<Buffer> {
+    const stream = await sandbox.readFile({ path })
+    if (!stream) {
+      throw new Error(`File not found: ${path}`)
+    }
+
+    return this.streamToBuffer(stream)
+  }
+
   /**
    * Check if file exists in sandbox
    */
@@ -218,8 +236,7 @@ export class SandboxFileOperations {
    */
   async getFileSize(sandbox: Sandbox, path: string): Promise<number> {
     try {
-      const content = await sandbox.readFile({ path })
-      const buffer = Buffer.isBuffer(content) ? content : Buffer.from(content)
+      const buffer = await this.readFileToBuffer(sandbox, path)
       return buffer.length
     } catch {
       return 0
@@ -231,13 +248,13 @@ export class SandboxFileOperations {
    */
   async createBackup(sandbox: Sandbox, path: string): Promise<boolean> {
     try {
-      const content = await sandbox.readFile({ path })
+      const content = await this.readFileToBuffer(sandbox, path)
       const backupPath = `${path}.backup`
 
       await sandbox.writeFiles([
         {
           path: backupPath,
-          data: Buffer.isBuffer(content) ? content : Buffer.from(content),
+          content,
         },
       ])
 
