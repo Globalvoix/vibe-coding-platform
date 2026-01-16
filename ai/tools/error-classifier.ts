@@ -36,6 +36,16 @@ export class ErrorClassifier {
     /try again/i,
     /rate limit/i,
     /too many requests/i,
+    /ECONNABORTED/,
+    /ERR_HTTP2_STREAM_ERROR/i,
+    /getaddrinfo.*ENOTFOUND/i,
+    /connect.*ECONNREFUSED/i,
+    /network.*error/i,
+    /registry.*unreachable/i,
+    /npm.*registry.*timeout/i,
+    /disk.*full/i,
+    /out of memory/i,
+    /insufficient.*space/i,
   ]
 
   private permanentPatterns = [
@@ -54,6 +64,14 @@ export class ErrorClassifier {
     /401|403/,
     /invalid syntax/i,
     /parse error/i,
+    /expected.*but/i,
+    /unexpected token/i,
+    /AssertionError/,
+    /does not exist/i,
+    /not found in package/i,
+    /ERR_MODULE_NOT_FOUND/i,
+    /invalid package name/i,
+    /ERR_INVALID_/i,
   ]
 
   private recoverablePatterns = [
@@ -66,6 +84,11 @@ export class ErrorClassifier {
     /version mismatch/i,
     /incompatible/i,
     /downgrade/i,
+    /requires.*but you have/i,
+    /conflicting peer/i,
+    /ERR!.*peer/i,
+    /pnpm.*peer.*conflict/i,
+    /ignore.*peer.*dependencies/i,
   ]
 
   classify(error: unknown, context?: Record<string, unknown>): ClassifiedError {
