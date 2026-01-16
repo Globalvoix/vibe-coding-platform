@@ -205,9 +205,12 @@ export async function POST(
     }))
   )
 
-  const install = buildInstallCommand(pm)
+  // Use fallback strategy for more resilient installation
+  // This will try pnpm (with --force for peer deps), then yarn, then npm
+  const install = buildInstallCommandWithFallback()
   await sandbox.runCommand({ cmd: 'bash', args: ['-lc', install] })
 
+  // Use the detected PM for dev command for consistency
   const dev = buildDevCommand(pm, port)
   await sandbox.runCommand({ cmd: 'bash', args: ['-lc', dev], detached: true })
 
