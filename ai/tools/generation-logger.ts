@@ -285,6 +285,106 @@ export class GenerationLogger {
   setLogLevel(level: LogLevel): void {
     this.logLevel = level
   }
+
+  /**
+   * Export logs as JSON string
+   */
+  exportAsJSON(): string {
+    return JSON.stringify(
+      {
+        exportedAt: new Date().toISOString(),
+        totalLogs: this.logs.length,
+        errorCount: this.getErrors().length,
+        logs: this.logs,
+      },
+      null,
+      2
+    )
+  }
+
+  /**
+   * Export logs as CSV string
+   */
+  exportAsCSV(): string {
+    const headers = ['timestamp', 'level', 'action', 'status', 'message', 'errorType', 'errorMessage', 'attempt', 'totalAttempts', 'duration']
+    const rows = this.logs.map((log) => [
+      new Date(log.timestamp).toISOString(),
+      log.level,
+      log.action,
+      log.status,
+      `"${log.message.replace(/"/g, '""')}"`,
+      log.errorType || '',
+      `"${(log.errorMessage || '').replace(/"/g, '""')}"`,
+      log.attempt || '',
+      log.totalAttempts || '',
+      log.duration || '',
+    ])
+
+    return [headers, ...rows].map((row) => row.join(',')).join('\n')
+  }
+
+  /**
+   * Persist logs to database via adapter
+   */
+  async persistToDatabase(projectId: string, userId: string): Promise<void> {
+    if (!this.persistenceAdapter) {
+      console.warn('No persistence adapter configured for generation logs')
+      return
+    }
+
+    try {
+      await this.persistenceAdapter.save(projectId, userId, this.logs)
+      console.log(`Generation logs persisted for project ${projectId}`)
+    } catch (error) {
+      console.error(`Failed to persist generation logs: ${String(error)}`)
+    }
+  }
+
+  /**
+   * Retrieve persisted logs from database
+   */
+  async retrieveFromDatabase(projectId: string, limit?: number): Promise<GenerationLogEntry[]> {
+    if (!this.persistenceAdapter) {
+      console.warn('No persistence adapter configured for generation logs')
+      return []
+    }
+
+    try {
+      return await this.persistenceAdapter.retrieve(projectId, limit)
+    } catch (error) {
+      console.error(`Failed to retrieve generation logs: ${String(error)}`)
+      return []
+    }
+  }
+
+  /**
+   * Get summary statistics about generation
+   */
+  getStatistics(): {
+    totalLogs: number
+    errorCount: number
+    successCount: number
+    duration: number
+    actions: Record<ActionType, number>
+  } {
+    const actions: Record<string, number> = {}
+
+    for (const log of this.logs) {
+      actions[log.action] = (actions[log.action] || 0) + 1
+    }
+
+    const startLog = this.logs[0]
+    const endLog = this.logs[this.logs.length - 1]
+    const duration = endLog && startLog ? endLog.timestamp - startLog.timestamp : 0
+
+    return {
+      totalLogs: this.logs.length,
+      errorCount: this.getErrors().length,
+      successCount: this.getLogsByStatus('success').length,
+      duration,
+      actions: actions as Record<ActionType, number>,
+    }
+  }
 }
 
 export const generationLogger = new GenerationLogger()
