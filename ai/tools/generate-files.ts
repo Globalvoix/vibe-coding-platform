@@ -139,7 +139,8 @@ export const generateFiles = ({ writer, modelId, userId, projectId }: Params) =>
         uploaded.map((file) => ({
           path: file.path,
           content: file.content,
-        }))
+        })),
+        blueprint.componentStructure.routes
       )
 
       if (!validationResult.isValid) {
