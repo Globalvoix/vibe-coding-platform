@@ -9,6 +9,12 @@ import description from './generate-files.md'
 import z from 'zod/v3'
 import { upsertProjectFiles } from '@/lib/project-files-db'
 import { chooseFileGenerationModelId } from '@/ai/model-routing'
+import { preGenerationValidator } from './pre-generation-validator'
+import { sandboxHealthChecker } from './sandbox-health-check'
+import { sandboxFileOps } from './sandbox-file-operations'
+import { generationLogger } from './generation-logger'
+import { dependencyResolver } from './dependency-resolver'
+import { isFeatureEnabled } from '@/lib/generation-config'
 
 interface Params {
   modelId: string
