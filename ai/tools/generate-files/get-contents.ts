@@ -286,6 +286,9 @@ For each route identified in the blueprint:
 - [ ] Images use next/image with alt text
 - [ ] File is complete and production-ready
 - [ ] No hardcoded secrets or credentials
+- [ ] All routes from blueprint have corresponding page.tsx files
+- [ ] Navigation only links to routes with generated page.tsx files
+- [ ] No dead links or missing route implementations
 
 # OUTPUT FORMAT
 
