@@ -15,14 +15,12 @@ interface Params {
   writer: UIMessageStreamWriter<UIMessage<never, DataPart>>
 }
 
-/**
- * Build install command with fallback sequence for a specific package manager
- */
-function buildInstallFallbackSequence(currentPM: 'npm' | 'yarn' | 'pnpm'): { pm: 'npm' | 'yarn' | 'pnpm', flags: string[] }[] {
+function buildInstallFallbackSequence(
+  currentPM: 'npm' | 'yarn' | 'pnpm'
+): { pm: 'npm' | 'yarn' | 'pnpm'; flags: string[] }[] {
   const pmPreference = getPackageManagerPreference()
-  const fallbackSequence: { pm: 'npm' | 'yarn' | 'pnpm', flags: string[] }[] = []
+  const fallbackSequence: { pm: 'npm' | 'yarn' | 'pnpm'; flags: string[] }[] = []
 
-  // Build fallback sequence starting with preferred PMs
   for (const pm of pmPreference) {
     if (pm === 'pnpm') {
       fallbackSequence.push({ pm: 'pnpm', flags: ['install', '--force'] })
@@ -36,6 +34,10 @@ function buildInstallFallbackSequence(currentPM: 'npm' | 'yarn' | 'pnpm'): { pm:
     }
   }
 
+  if (!fallbackSequence.some((x) => x.pm === currentPM)) {
+    fallbackSequence.unshift({ pm: currentPM, flags: ['install'] })
+  }
+
   return fallbackSequence
 }
 
@@ -43,9 +45,7 @@ export const runCommand = ({ writer }: Params) =>
   tool({
     description,
     inputSchema: z.object({
-      sandboxId: z
-        .string()
-        .describe('The ID of the Vercel Sandbox to run the command in'),
+      sandboxId: z.string().describe('The ID of the Vercel Sandbox to run the command in'),
       command: z
         .string()
         .describe(
@@ -57,27 +57,21 @@ export const runCommand = ({ writer }: Params) =>
         .describe(
           "Array of arguments for the command. Each argument should be a separate string (e.g., ['install', '--verbose'] for npm install --verbose, or ['src/index.js'] to run a file, or ['-la', './src'] to list files). IMPORTANT: Use relative paths (e.g., 'src/file.js') or absolute paths instead of trying to change directories with 'cd' first, since each command runs in a fresh shell session."
         ),
-      sudo: z
-        .boolean()
-        .optional()
-        .describe('Whether to run the command with sudo'),
+      sudo: z.boolean().optional().describe('Whether to run the command with sudo'),
       wait: z
         .boolean()
         .describe(
           'Whether to wait for the command to finish before returning. If true, the command will block until it completes, and you will receive its output.'
         ),
     }),
-    execute: async (
-      { sandboxId, command, sudo, wait, args = [] },
-      { toolCallId }
-    ) => {
+    execute: async ({ sandboxId, command, sudo, wait, args = [] }, { toolCallId }) => {
       writer.write({
         id: toolCallId,
         type: 'data-run-command',
         data: { sandboxId, command, args, status: 'executing' },
       })
 
-      let sandbox: Sandbox | null = null
+      let sandbox: Sandbox
 
       try {
         sandbox = await Sandbox.get({ sandboxId })
@@ -103,75 +97,100 @@ export const runCommand = ({ writer }: Params) =>
         return richError.message
       }
 
-      let cmd: Command | null = null
+      // If we don't wait, behave like the original: start in background and return immediately.
+      if (!wait) {
+        const cmd = await sandbox.runCommand({
+          detached: true,
+          cmd: command,
+          args,
+          sudo,
+        })
 
-      // Determine if this is a retryable command (install/build operations)
-      const isRetryableCommand = ['npm', 'yarn', 'pnpm', 'npm install', 'yarn install', 'pnpm install'].some(
-        (prefix) => command.toLowerCase().startsWith(prefix) || (command === 'npm' && args?.[0] === 'install')
-      )
+        writer.write({
+          id: toolCallId,
+          type: 'data-run-command',
+          data: {
+            sandboxId,
+            commandId: cmd.cmdId,
+            command,
+            args,
+            status: 'running',
+          },
+        })
 
-      // Detect if this is an install command specifically
-      const isInstallCommand = (cmd: string, cmdArgs?: string[]) => {
-        return cmd === 'npm' || cmd === 'yarn' || cmd === 'pnpm' ? cmdArgs?.[0] === 'install' : cmd.includes('install')
+        return `The command \`${command} ${args.join(
+          ' '
+        )}\` has been started in the background in the sandbox with ID \`${sandboxId}\` with the commandId ${
+          cmd.cmdId
+        }.`
       }
 
-      const currentPM = (command === 'npm' || command === 'yarn' || command === 'pnpm' ? command : 'npm') as 'npm' | 'yarn' | 'pnpm'
+      const isInstallCommand = (cmd: string, cmdArgs: string[]) => {
+        if (cmd === 'npm' || cmd === 'yarn' || cmd === 'pnpm') return cmdArgs[0] === 'install'
+        return cmd.toLowerCase().includes('install')
+      }
 
-      const executeCommand = async (pm?: 'npm' | 'yarn' | 'pnpm', flags?: string[]) => {
+      const currentPM = (command === 'npm' || command === 'yarn' || command === 'pnpm' ? command : 'npm') as
+        | 'npm'
+        | 'yarn'
+        | 'pnpm'
+
+      const isRetryableCommand =
+        (command === 'npm' || command === 'yarn' || command === 'pnpm') &&
+        (args[0] === 'install' || args[0] === 'run' || args[0] === 'build')
+
+      const runForeground = async (cmdToRun: string, argsToRun: string[]) => {
         try {
-          const cmdToRun = pm || command
-          const argsToRun = flags || args
-
-          const result = await sandbox.runCommand({
-            detached: true,
+          const res = await sandbox.runCommand({
             cmd: cmdToRun,
             args: argsToRun,
             sudo,
           })
-          return result
+          return res
         } catch (error) {
           const richError = getRichError({
             action: 'run command in sandbox',
-            args: { sandboxId, command, args },
+            args: { sandboxId, command: cmdToRun, args: argsToRun },
             error,
           })
 
-          // Log for potential retry
-          if (richError.classification.isRetryable) {
-            generationLogger.progress(
-              'run_command',
-              `Command failed with transient error, attempting retry: ${command}`
-            )
+          if (richError.classification?.isRetryable) {
+            generationLogger.progress('run_command', `Command failed with transient error: ${cmdToRun}`)
           }
 
           throw error
         }
       }
 
-      // Use retry strategy for install/build commands, direct execution for others
+      let cmd: Command
+
       try {
-        if (isRetryableCommand) {
-          cmd = await defaultRetryStrategy.execute(() => executeCommand(), `${command} ${args?.join(' ') || ''}`)
+        if (isRetryableCommand && isFeatureEnabled('aggressiveRecovery')) {
+          cmd = await defaultRetryStrategy.execute(
+            () => runForeground(command, args),
+            `${command} ${args.join(' ')}`
+          )
         } else {
-          cmd = await executeCommand()
+          cmd = await runForeground(command, args)
         }
 
-        // If install failed and fallback is enabled, try alternate package managers
         if (isFeatureEnabled('fallbackStrategies') && isInstallCommand(command, args) && cmd.exitCode !== 0) {
-          generationLogger.progress('run_command', `Install command failed with exit code ${cmd.exitCode}, attempting PM fallback`)
+          generationLogger.progress(
+            'run_command',
+            `Install command failed with exit code ${cmd.exitCode}, attempting PM fallback`
+          )
 
           const fallbackSequence = buildInstallFallbackSequence(currentPM)
           let fallbackSuccess = false
 
           for (const { pm, flags: fallbackFlags } of fallbackSequence) {
             if (pm === currentPM && JSON.stringify(fallbackFlags) === JSON.stringify(args)) {
-              // Skip the exact same command we already tried
               continue
             }
 
             try {
               generationLogger.progress('run_command', `Attempting fallback: ${pm} ${fallbackFlags.join(' ')}`)
-              const fallbackCmd = await executeCommand(pm, fallbackFlags)
+              const fallbackCmd = await runForeground(pm, fallbackFlags)
 
               if (fallbackCmd.exitCode === 0) {
                 generationLogger.success('run_command', `Fallback succeeded with ${pm} ${fallbackFlags.join(' ')}`)
@@ -179,14 +198,18 @@ export const runCommand = ({ writer }: Params) =>
                 fallbackSuccess = true
                 break
               }
-            } catch (fallbackError) {
+            } catch {
               generationLogger.progress('run_command', `Fallback ${pm} ${fallbackFlags.join(' ')} failed, trying next`)
-              continue
             }
           }
 
           if (!fallbackSuccess) {
-            generationLogger.error('run_command', 'All fallback attempts failed', 'INSTALL_FAILED', 'Install command and all fallbacks failed')
+            generationLogger.error(
+              'run_command',
+              'All fallback attempts failed',
+              'INSTALL_FAILED',
+              'Install command and all fallbacks failed'
+            )
           }
         }
       } catch (error) {
@@ -219,87 +242,52 @@ export const runCommand = ({ writer }: Params) =>
           commandId: cmd.cmdId,
           command,
           args,
-          status: 'executing',
-        },
-      })
-
-      if (!wait) {
-        writer.write({
-          id: toolCallId,
-          type: 'data-run-command',
-          data: {
-            sandboxId,
-            commandId: cmd.cmdId,
-            command,
-            args,
-            status: 'running',
-          },
-        })
-
-        return `The command \`${command} ${args.join(
-          ' '
-        )}\` has been started in the background in the sandbox with ID \`${sandboxId}\` with the commandId ${
-          cmd.cmdId
-        }.`
-      }
-
-      writer.write({
-        id: toolCallId,
-        type: 'data-run-command',
-        data: {
-          sandboxId,
-          commandId: cmd.cmdId,
-          command,
-          args,
           status: 'waiting',
         },
       })
 
       const done = await cmd.wait()
+
       try {
-        const [stdout, stderr] = await Promise.all([
-          done.stdout(),
-          done.stderr(),
-        ])
+        const [stdout, stderr] = await Promise.all([done.stdout(), done.stderr()])
 
-        // Parse build/install output for specific errors
-        let parsedErrors = null
         const combinedOutput = `${stdout}\n${stderr}`
+        let parsedErrors: ReturnType<typeof buildOutputParser.parseInstallOutput> | null = null
 
-        if (command === 'npm' || command === 'yarn' || command === 'pnpm' || command.includes('npm') || command.includes('yarn') || command.includes('pnpm')) {
-          if (done.exitCode !== 0) {
-            const parser = buildOutputParser
-            parsedErrors = parser.parseInstallOutput(stdout as string, stderr as string, (command === 'npm' ? 'npm' : command === 'yarn' ? 'yarn' : 'pnpm') as 'npm' | 'yarn' | 'pnpm')
+        if (isFeatureEnabled('buildOutputParsing')) {
+          if (command === 'npm' || command === 'yarn' || command === 'pnpm') {
+            parsedErrors = buildOutputParser.parseInstallOutput(stdout, stderr, currentPM)
 
             if (parsedErrors.length > 0) {
               generationLogger.progress('run_command', `Parsed ${parsedErrors.length} errors from build output`)
 
-              // Try auto-install missing packages if feature is enabled
-              if (isFeatureEnabled('autoTargetedInstall')) {
+              if (isFeatureEnabled('autoTargetedInstall') && done.exitCode !== 0) {
                 generationLogger.progress('run_command', 'Attempting to auto-install missing packages')
                 const installResults = await autoInstallMissingPackages(sandbox, combinedOutput, currentPM)
 
                 if (installResults.length > 0 && installResults.some((r) => r.installed)) {
-                  generationLogger.progress('run_command', `Auto-installed ${installResults.filter((r) => r.installed).length} packages, retrying command`)
+                  generationLogger.progress(
+                    'run_command',
+                    `Auto-installed ${installResults.filter((r) => r.installed).length} packages, retrying command`
+                  )
 
-                  // Retry the command after auto-install
                   try {
-                    const retryCmd = await sandbox.runCommand({
-                      detached: true,
+                    const retryDone = await sandbox.runCommand({
                       cmd: command,
                       args,
                       sudo,
                     })
-                    const retryDone = await retryCmd.wait()
 
                     if (retryDone.exitCode === 0) {
                       generationLogger.success('run_command', 'Command succeeded after auto-install')
                       const retryStdout = await retryDone.stdout()
-                      const retrySummary = `Auto-installed ${installResults.filter((r) => r.installed).length} packages and re-ran command successfully.\n\nRetry output:\n\`\`\`\n${retryStdout}\n\`\`\``
-                      return retrySummary
+                      return `Auto-installed ${installResults.filter((r) => r.installed).length} packages and re-ran command successfully.\n\nRetry output:\n\`\`\`\n${retryStdout}\n\`\`\``
                     }
-                  } catch (retryError) {
-                    generationLogger.progress('run_command', 'Command still failed after auto-install, continuing with error report')
+                  } catch {
+                    generationLogger.progress(
+                      'run_command',
+                      'Command still failed after auto-install, continuing with error report'
+                    )
                   }
                 }
               }
@@ -321,15 +309,12 @@ export const runCommand = ({ writer }: Params) =>
         })
 
         let resultMessage =
-          `The command \`${command} ${args.join(
-            ' '
-          )}\` has finished with exit code ${done.exitCode}.` +
+          `The command \`${command} ${args.join(' ')}\` has finished with exit code ${done.exitCode}.` +
           `\n\nStdout of the command was: \n` +
           `\`\`\`\n${stdout}\n\`\`\`\n` +
           `Stderr of the command was: \n` +
           `\`\`\`\n${stderr}\n\`\`\``
 
-        // Append parsed errors if any
         if (parsedErrors && parsedErrors.length > 0) {
           const summary = buildOutputParser.generateSummary(parsedErrors)
           resultMessage += `\n\n## Parsed Error Summary:\n${summary}`

@@ -39,7 +39,7 @@ export const createSandbox = ({ writer }: Params) =>
 
       try {
         const sandbox = await Sandbox.create({
-          timeout: timeout ?? 2700000,
+          timeout: timeout ?? 600000,
           ports,
         })
 
