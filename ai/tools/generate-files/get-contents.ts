@@ -103,12 +103,62 @@ export async function* getContents(
 /**
  * Build enhanced system prompt with institutional quality standards
  */
-function buildEnhancedSystemPrompt(paths: string[]): string {
+function buildEnhancedSystemPrompt(paths: string[], blueprint?: GenerationBlueprint): string {
   const hasUIFiles = paths.some((p) => p.includes('components/') || (p.includes('app/') && p.endsWith('.tsx')))
   const hasConfigFiles = paths.some((p) => p.includes('package.json') || p.includes('.config.ts'))
   const hasLibFiles = paths.some((p) => p.includes('lib/') && !p.includes('lib/image'))
 
+  let blueprintContext = ''
+  if (blueprint) {
+    blueprintContext = `
+# GENERATION BLUEPRINT (from analysis phase)
+
+## Detected App Type: ${blueprint.appType || 'General'}
+
+## Routes to Generate (REQUIRED):
+${blueprint.componentStructure.routes.map((r) => `- ${r}`).join('\n')}
+
+## Required Pages:
+${blueprint.componentStructure.requiredPages} pages MUST be created with corresponding page.tsx files
+
+## Required Components:
+${blueprint.componentStructure.mainComponents.length > 0 ? blueprint.componentStructure.mainComponents.map((c) => `- ${c}`).join('\n') : 'None specified'}
+
+## Animation Requirements:
+${blueprint.animationRequirements.length > 0 ? blueprint.animationRequirements.map((a) => `- ${a}`).join('\n') : 'Minimal animations for this app type'}
+
+## Image Audit Plan:
+- Image contexts needed: ${blueprint.imageAudit.contexts.join(', ')}
+- Total images to embed: ${blueprint.imageAudit.totalImagesNeeded}
+- Using Unsplash search terms: ${blueprint.imageAudit.unsplashSearchTerms.join(', ')}
+
+## Required Libraries (must install):
+${
+  [
+    ...blueprint.libraryDependencies.ui,
+    ...blueprint.libraryDependencies.animation,
+    ...blueprint.libraryDependencies.utilities,
+  ]
+    .filter((lib) => lib && lib.length > 0)
+    .map((lib) => `- ${lib}`)
+    .join('\n') || 'Standard Next.js dependencies'
+}
+
+## Design Tokens to Use:
+- Spacing Grid: ${blueprint.designTokens.spacingScale}
+- Typography: ${blueprint.designTokens.typographyHierarchy.join(', ')}
+- Colors: ${blueprint.designTokens.colorPalette}
+
+## State Management Needed: ${blueprint.componentStructure.stateManagementNeeded ? 'Yes (use zustand or React context)' : 'No (local state sufficient)'}
+
+## Validation Rules:
+${blueprint.validationRules.map((r) => `- [${r.enforcementLevel.toUpperCase()}] ${r.rule}`).join('\n')}
+
+`
+  }
+
   return `You are an institutional-grade code generator. Your mission is to create code that meets Apple, Netflix, and Stripe standards.
+${blueprintContext}
 
 # CORE PRINCIPLES (NON-NEGOTIABLE)
 
