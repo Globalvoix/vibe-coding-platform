@@ -8,6 +8,16 @@ export type ActionType =
   | 'error_recovery'
   | 'validation'
   | 'generation'
+  | 'run_command'
+  | 'auto_install'
+  | 'port_resolution'
+  | 'sandbox_setup'
+
+export interface LogPersistenceAdapter {
+  save(projectId: string, userId: string, logs: GenerationLogEntry[]): Promise<void>
+  retrieve(projectId: string, limit?: number): Promise<GenerationLogEntry[]>
+  delete(projectId: string, logIdOrTimestamp?: string | number): Promise<void>
+}
 
 export interface SandboxHealth {
   disk?: string
