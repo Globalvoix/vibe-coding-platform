@@ -14,8 +14,9 @@ export const dataPartSchema = z.object({
   }),
   'generating-files': z.object({
     paths: z.array(z.string()),
-    status: z.enum(['generating', 'uploading', 'uploaded', 'done', 'error']),
+    status: z.enum(['analyzing', 'generating', 'uploading', 'uploaded', 'validating', 'done', 'error']),
     error: errorSchema.optional(),
+    message: z.string().optional(),
   }),
   'run-command': z.object({
     sandboxId: z.string(),
