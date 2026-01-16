@@ -503,6 +503,18 @@ function gatherLibraryDependencies(
 }
 
 function planDataModel(appType: AppType | null): DataModelPlan {
+  if (!appType) {
+    return {
+      entities: [],
+      mockDataLocation: 'lib/data.ts',
+      minimumItems: 5,
+      requiredFields: {},
+      errorStates: ['error'],
+      loadingStates: ['loading'],
+      emptyStates: ['empty'],
+    }
+  }
+
   const plans: Record<AppType, DataModelPlan> = {
     streaming: {
       entities: ['Movie', 'Series', 'Genre', 'User', 'WatchList'],
