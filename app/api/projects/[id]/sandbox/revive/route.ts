@@ -127,6 +127,43 @@ attempt();
   return `node -e ${JSON.stringify(script)}`
 }
 
+/**
+ * Check if a port is available in the sandbox
+ */
+async function isPortAvailable(sandbox: Sandbox, port: number): Promise<boolean> {
+  try {
+    const result = await sandbox.runCommand({
+      cmd: 'bash',
+      args: ['-c', `! lsof -i :${port} >/dev/null 2>&1`],
+      detached: false,
+    })
+    return result.exitCode === 0
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Find an available port in the given range
+ */
+async function findAvailablePort(
+  sandbox: Sandbox,
+  preferredPort: number,
+  startRange: number = preferredPort + 1,
+  endRange: number = preferredPort + 10
+): Promise<number> {
+  for (let port = startRange; port <= endRange; port++) {
+    if (await isPortAvailable(sandbox, port)) {
+      generationLogger.progress('port_resolution', `Found available port: ${port}`)
+      return port
+    }
+  }
+
+  // If no available port found in range, return preferred port anyway (will likely fail but we tried)
+  generationLogger.progress('port_resolution', `No available ports in range ${startRange}-${endRange}, using preferred port ${preferredPort}`)
+  return preferredPort
+}
+
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
