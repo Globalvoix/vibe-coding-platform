@@ -264,6 +264,8 @@ export const runCommand = ({ writer }: Params) =>
 
         // Parse build/install output for specific errors
         let parsedErrors = null
+        const combinedOutput = `${stdout}\n${stderr}`
+
         if (command === 'npm' || command === 'yarn' || command === 'pnpm' || command.includes('npm') || command.includes('yarn') || command.includes('pnpm')) {
           if (done.exitCode !== 0) {
             const parser = buildOutputParser
@@ -271,6 +273,36 @@ export const runCommand = ({ writer }: Params) =>
 
             if (parsedErrors.length > 0) {
               generationLogger.progress('run_command', `Parsed ${parsedErrors.length} errors from build output`)
+
+              // Try auto-install missing packages if feature is enabled
+              if (isFeatureEnabled('autoTargetedInstall')) {
+                generationLogger.progress('run_command', 'Attempting to auto-install missing packages')
+                const installResults = await autoInstallMissingPackages(sandbox, combinedOutput, currentPM)
+
+                if (installResults.length > 0 && installResults.some((r) => r.installed)) {
+                  generationLogger.progress('run_command', `Auto-installed ${installResults.filter((r) => r.installed).length} packages, retrying command`)
+
+                  // Retry the command after auto-install
+                  try {
+                    const retryCmd = await sandbox.runCommand({
+                      detached: true,
+                      cmd: command,
+                      args,
+                      sudo,
+                    })
+                    const retryDone = await retryCmd.wait()
+
+                    if (retryDone.exitCode === 0) {
+                      generationLogger.success('run_command', 'Command succeeded after auto-install')
+                      const retryStdout = await retryDone.stdout()
+                      const retrySummary = `Auto-installed ${installResults.filter((r) => r.installed).length} packages and re-ran command successfully.\n\nRetry output:\n\`\`\`\n${retryStdout}\n\`\`\``
+                      return retrySummary
+                    }
+                  } catch (retryError) {
+                    generationLogger.progress('run_command', 'Command still failed after auto-install, continuing with error report')
+                  }
+                }
+              }
             }
           }
         }
