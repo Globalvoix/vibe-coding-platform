@@ -256,25 +256,46 @@ export async function POST(
   }
   await sandbox.runCommand({ cmd: 'bash', args: ['-lc', install] })
 
-  // Use the detected PM for dev command for consistency
-  const dev = buildDevCommand(pm, port)
+  // Determine which port to use (may be auto-resolved if port is in use)
+  let finalPort = port
+
+  // Try auto-port resolution if enabled
+  if (isFeatureEnabled('autoPortResolution')) {
+    generationLogger.progress('port_resolution', `Checking if port ${port} is available`)
+    const portAvailable = await isPortAvailable(sandbox, port)
+
+    if (!portAvailable) {
+      generationLogger.progress('port_resolution', `Port ${port} is in use, finding alternative`)
+      finalPort = await findAvailablePort(sandbox, port)
+
+      if (finalPort !== port) {
+        generationLogger.success('port_resolution', `Selected alternate port ${finalPort}`)
+      }
+    } else {
+      generationLogger.progress('port_resolution', `Port ${port} is available`)
+    }
+  }
+
+  // Use the detected PM for dev command for consistency with final port
+  const dev = buildDevCommand(pm, finalPort)
   await sandbox.runCommand({ cmd: 'bash', args: ['-lc', dev], detached: true })
 
   try {
-    const wait = buildWaitForPortCommand(port, 120_000)
+    const wait = buildWaitForPortCommand(finalPort, 120_000)
     await sandbox.runCommand({ cmd: 'bash', args: ['-lc', wait] })
   } catch {
     // best-effort
+    generationLogger.progress('port_resolution', `Wait for port ${finalPort} timed out or failed, continuing anyway`)
   }
 
-  const url = sandbox.domain(port)
+  const url = sandbox.domain(finalPort)
   const urlUUID = crypto.randomUUID()
   const nextState = {
     sandboxId: sandbox.sandboxId,
     paths: filePaths,
     url,
     urlUUID,
-    port,
+    port: finalPort,
   }
 
   await updateProjectSandboxState(userId, projectId, nextState)
