@@ -6,6 +6,7 @@ export type ActionType =
   | 'dev_start'
   | 'sandbox_health_check'
   | 'error_recovery'
+  | 'error_remediation'
   | 'validation'
   | 'generation'
   | 'run_command'
