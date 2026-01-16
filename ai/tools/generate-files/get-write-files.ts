@@ -3,9 +3,8 @@ import type { File } from './get-contents'
 import type { Sandbox } from '@vercel/sandbox'
 import type { UIMessageStreamWriter, UIMessage } from 'ai'
 import { getRichError } from '../get-rich-error'
-import { sandboxFileOps } from '../sandbox-file-operations'
 import { generationLogger } from '../generation-logger'
-import { isFeatureEnabled } from '@/lib/generation-config'
+import { validateGeneratedFiles } from '@/lib/code-semantic-validator'
 
 interface Params {
   sandbox: Sandbox
