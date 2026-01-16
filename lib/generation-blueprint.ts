@@ -676,15 +676,7 @@ function planDataModel(appType: AppType | null): DataModelPlan {
     },
   }
 
-  return plans[appType] || {
-    entities: [],
-    mockDataLocation: 'lib/data.ts',
-    minimumItems: 5,
-    requiredFields: {},
-    errorStates: ['error'],
-    loadingStates: ['loading'],
-    emptyStates: ['empty'],
-  }
+  return plans[appType]
 }
 
 function planDesignTokens(appType: AppType | null): DesignTokenPlan {
