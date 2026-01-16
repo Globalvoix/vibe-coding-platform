@@ -26,24 +26,66 @@ export function getWriteFiles({ sandbox, toolCallId, writer }: Params) {
     })
 
     try {
-      const integrityChecksEnabled = isFeatureEnabled('integrityChecks')
+      // Pre-write validation
+      generationLogger.progress('file_write', `Validating ${params.files.length} files before upload`)
 
-      if (integrityChecksEnabled) {
-        generationLogger.progress('file_write', `Writing ${params.files.length} files with integrity verification`)
-        await sandboxFileOps.writeFilesWithVerification(sandbox, params.files)
-        generationLogger.success('file_write', `All ${params.files.length} files written and verified`)
-      } else {
-        await sandbox.writeFiles(
-          params.files.map((file) => ({
-            content: Buffer.from(file.content, 'utf8'),
-            path: file.path,
-          }))
-        )
+      const validationResult = validateGeneratedFiles(
+        params.files.map((file) => ({
+          path: file.path,
+          content: file.content,
+        }))
+      )
+
+      if (!validationResult.isValid) {
+        const errorSummary = validationResult.errors
+          .slice(0, 3)
+          .map((e) => `${e.file}: ${e.message}`)
+          .join('\n')
+
+        const message = `Pre-write validation failed:\n${errorSummary}`
+
+        generationLogger.error('file_write', message, 'VALIDATION_ERROR', message)
+
+        writer.write({
+          id: toolCallId,
+          type: 'data-generating-files',
+          data: {
+            error: { message },
+            status: 'error',
+            paths: params.paths,
+          },
+        })
+
+        return message
       }
+
+      generationLogger.progress('file_write', `Writing ${params.files.length} validated files to sandbox`)
+
+      // Write files to sandbox with proper encoding
+      const filesToWrite = params.files.map((file) => {
+        // Ensure content is string and properly encoded
+        let content = file.content
+        if (typeof content !== 'string') {
+          content = String(content)
+        }
+
+        return {
+          content: Buffer.from(content, 'utf8'),
+          path: file.path,
+        }
+      })
+
+      await sandbox.writeFiles(filesToWrite)
+
+      generationLogger.success('file_write', `Successfully wrote ${params.files.length} files to sandbox`)
     } catch (error) {
       const richError = getRichError({
         action: 'write files to sandbox',
-        args: params,
+        args: {
+          fileCount: params.files.length,
+          paths: params.paths,
+          firstError: error instanceof Error ? error.message : 'unknown',
+        },
         error,
       })
 
