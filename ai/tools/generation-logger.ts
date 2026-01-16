@@ -48,9 +48,17 @@ export class GenerationLogger {
   private logs: GenerationLogEntry[] = []
   private startTimes: Map<string, number> = new Map()
   private logLevel: LogLevel
+  private persistenceAdapter?: LogPersistenceAdapter
 
   constructor(logLevel: LogLevel = 'info') {
     this.logLevel = logLevel
+  }
+
+  /**
+   * Set a persistence adapter for saving logs to database
+   */
+  setPersistenceAdapter(adapter: LogPersistenceAdapter): void {
+    this.persistenceAdapter = adapter
   }
 
   /**
