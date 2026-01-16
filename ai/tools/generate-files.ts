@@ -105,6 +105,23 @@ export const generateFiles = ({ writer, modelId, userId, projectId }: Params) =>
         }
       }
 
+      // Log feature flags status
+      if (isFeatureEnabled('integrityChecks')) {
+        generationLogger.progress('generation', 'File integrity verification enabled')
+      }
+      if (isFeatureEnabled('healthChecks')) {
+        generationLogger.progress('generation', 'Sandbox health checks enabled')
+      }
+      if (isFeatureEnabled('autoTargetedInstall')) {
+        generationLogger.progress('generation', 'Auto-targeted package install enabled')
+      }
+      if (isFeatureEnabled('autoPortResolution')) {
+        generationLogger.progress('generation', 'Auto port resolution enabled')
+      }
+      if (isFeatureEnabled('fallbackStrategies')) {
+        generationLogger.progress('generation', 'Package manager fallback strategies enabled')
+      }
+
       const writeFiles = getWriteFiles({ sandbox, toolCallId, writer })
 
       const normalizePath = (p: string) => p.trim().replace(/^\.{1,2}\//, '').replace(/^\//, '')
