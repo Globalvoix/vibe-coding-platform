@@ -133,7 +133,7 @@ function checkTypescriptSyntax(file: FileToValidate, lines: string[]): Validatio
   const openAngles = (file.content.match(/<(?!\/)/g) || []).length
   const closeAngles = (file.content.match(/\/>/g) || []).length + (file.content.match(/<\/\w+>/g) || []).length
   if (openAngles !== closeAngles && file.path.endsWith('.tsx')) {
-    warnings.push({
+    errors.push({
       file: file.path,
       message: 'Possible unmatched JSX tags',
       severity: 'warning',
