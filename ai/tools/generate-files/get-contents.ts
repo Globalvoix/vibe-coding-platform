@@ -35,11 +35,13 @@ export async function* getContents(
 ): AsyncGenerator<FileContentChunk> {
   const generated: z.infer<typeof fileSchema>[] = []
   const deferred = new Deferred<void>()
+
+  const systemPrompt = buildEnhancedSystemPrompt(params.paths)
+
   const result = streamObject({
     ...getModelOptions(params.modelId, { reasoningEffort: 'medium' }),
     maxOutputTokens: 64000,
-    system:
-      'You are a file content generator. You must generate files based on the conversation history and the provided paths. NEVER generate lock files (pnpm-lock.yaml, package-lock.json, yarn.lock). Every file you output must be COMPLETE (no placeholders, no TODOs).',
+    system: systemPrompt,
     messages: [
       ...params.messages,
       {
