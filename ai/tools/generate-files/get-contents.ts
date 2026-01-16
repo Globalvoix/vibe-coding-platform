@@ -294,5 +294,19 @@ For each route identified in the blueprint:
 
 Generate ONLY valid, complete files. Each file must be ready to save directly to the sandbox.
 
+## Examples of Complete Multi-Page Apps:
+
+If routes are [/, /about, /contact], you MUST generate:
+- app/page.tsx (for /)
+- app/about/page.tsx (for /about)
+- app/contact/page.tsx (for /contact)
+
+If your navbar links to /about, the app/about/page.tsx file MUST exist.
+
+Every route reference in code must have a corresponding page.tsx file.
+
+${blueprint && blueprint.componentStructure.requiredPages > 1 ? `## For This Generation:
+You MUST generate AT LEAST ${blueprint.componentStructure.requiredPages} complete page files corresponding to these routes: ${blueprint.componentStructure.routes.join(', ')}` : ''}
+
 Start generating now - aim for institutional quality.`
 }
