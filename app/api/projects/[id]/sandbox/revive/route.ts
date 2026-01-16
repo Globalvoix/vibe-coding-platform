@@ -66,6 +66,26 @@ function buildInstallCommand(pm: 'npm' | 'pnpm' | 'yarn') {
   return 'npm install'
 }
 
+/**
+ * Build install command with fallback strategy
+ * Tries to install with preferred PM, falls back to others if it fails
+ */
+function buildInstallCommandWithFallback() {
+  const corepack = 'corepack enable >/dev/null 2>&1 || true'
+
+  // Try pnpm first, then yarn, then npm
+  const installCommands = [
+    // pnpm: try with force flag first (for peer dependency issues)
+    '(command -v pnpm >/dev/null 2>&1 || corepack prepare pnpm@latest --activate) && (pnpm install --force || pnpm install) && echo "pnpm-install-success"',
+    // yarn: fallback if pnpm fails
+    '(command -v yarn >/dev/null 2>&1 || corepack prepare yarn@stable --activate) && (yarn install --ignore-engines || yarn install) && echo "yarn-install-success"',
+    // npm: final fallback
+    'npm install --legacy-peer-deps || npm install && echo "npm-install-success"',
+  ]
+
+  return [corepack, `(${installCommands.join(' || ')})`].join(' && ')
+}
+
 function buildDevCommand(pm: 'npm' | 'pnpm' | 'yarn', port: number) {
   // Broad compatibility:
   // - Next/Vite generally accept "-- --port".
