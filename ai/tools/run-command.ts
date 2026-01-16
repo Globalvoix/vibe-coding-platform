@@ -79,17 +79,50 @@ export const runCommand = ({ writer }: Params) =>
 
       let cmd: Command | null = null
 
+      // Determine if this is a retryable command (install/build operations)
+      const isRetryableCommand = ['npm', 'yarn', 'pnpm', 'npm install', 'yarn install', 'pnpm install'].some(
+        (prefix) => command.toLowerCase().startsWith(prefix) || (command === 'npm' && args?.[0] === 'install')
+      )
+
+      const executeCommand = async () => {
+        try {
+          const result = await sandbox.runCommand({
+            detached: true,
+            cmd: command,
+            args,
+            sudo,
+          })
+          return result
+        } catch (error) {
+          const richError = getRichError({
+            action: 'run command in sandbox',
+            args: { sandboxId, command, args },
+            error,
+          })
+
+          // Log for potential retry
+          if (richError.classification.isRetryable) {
+            generationLogger.progress(
+              'run_command',
+              `Command failed with transient error, attempting retry: ${command}`
+            )
+          }
+
+          throw error
+        }
+      }
+
+      // Use retry strategy for install/build commands, direct execution for others
       try {
-        cmd = await sandbox.runCommand({
-          detached: true,
-          cmd: command,
-          args,
-          sudo,
-        })
+        if (isRetryableCommand) {
+          cmd = await defaultRetryStrategy.execute(() => executeCommand(), `${command} ${args?.join(' ') || ''}`)
+        } else {
+          cmd = await executeCommand()
+        }
       } catch (error) {
         const richError = getRichError({
           action: 'run command in sandbox',
-          args: { sandboxId },
+          args: { sandboxId, command, args },
           error,
         })
 
