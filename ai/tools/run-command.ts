@@ -9,6 +9,7 @@ import { defaultRetryStrategy } from './retry-strategy'
 import { buildOutputParser } from './build-output-parser'
 import { generationLogger } from './generation-logger'
 import { isFeatureEnabled, getPackageManagerPreference } from '@/lib/generation-config'
+import { autoInstallMissingPackages } from './auto-install-missing-packages'
 
 interface Params {
   writer: UIMessageStreamWriter<UIMessage<never, DataPart>>
