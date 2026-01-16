@@ -4,6 +4,8 @@ import { Deferred } from '@/lib/deferred'
 import type { GenerationBlueprint } from '@/lib/generation-blueprint'
 import z from 'zod/v3'
 
+const streamObject = await import('ai').then(m => m.streamObject)
+
 export type File = z.infer<typeof fileSchema>
 
 const fileSchema = z.object({
