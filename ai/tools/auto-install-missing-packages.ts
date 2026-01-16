@@ -138,7 +138,10 @@ export async function autoInstallMissingPackages(
   generationLogger.progress('auto_install', `Detected ${packageNames.length} missing packages: ${packageNames.join(', ')}`)
 
   const results: PackageInstallResult[] = []
-  const pmSequence: ('pnpm' | 'yarn' | 'npm')[] = [preferredPM, ...['pnpm', 'yarn', 'npm'].filter((pm) => pm !== preferredPM)]
+
+  type PackageManager = 'pnpm' | 'yarn' | 'npm'
+  const allPMs: PackageManager[] = ['pnpm', 'yarn', 'npm']
+  const pmSequence: PackageManager[] = [preferredPM, ...allPMs.filter((pm) => pm !== preferredPM)]
 
   for (const packageName of packageNames) {
     let installed = false
