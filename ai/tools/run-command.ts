@@ -8,9 +8,34 @@ import z from 'zod/v3'
 import { defaultRetryStrategy } from './retry-strategy'
 import { buildOutputParser } from './build-output-parser'
 import { generationLogger } from './generation-logger'
+import { isFeatureEnabled, getPackageManagerPreference } from '@/lib/generation-config'
 
 interface Params {
   writer: UIMessageStreamWriter<UIMessage<never, DataPart>>
+}
+
+/**
+ * Build install command with fallback sequence for a specific package manager
+ */
+function buildInstallFallbackSequence(currentPM: 'npm' | 'yarn' | 'pnpm'): { pm: 'npm' | 'yarn' | 'pnpm', flags: string[] }[] {
+  const pmPreference = getPackageManagerPreference()
+  const fallbackSequence: { pm: 'npm' | 'yarn' | 'pnpm', flags: string[] }[] = []
+
+  // Build fallback sequence starting with preferred PMs
+  for (const pm of pmPreference) {
+    if (pm === 'pnpm') {
+      fallbackSequence.push({ pm: 'pnpm', flags: ['install', '--force'] })
+      fallbackSequence.push({ pm: 'pnpm', flags: ['install'] })
+    } else if (pm === 'yarn') {
+      fallbackSequence.push({ pm: 'yarn', flags: ['install', '--ignore-engines'] })
+      fallbackSequence.push({ pm: 'yarn', flags: ['install'] })
+    } else if (pm === 'npm') {
+      fallbackSequence.push({ pm: 'npm', flags: ['install', '--legacy-peer-deps'] })
+      fallbackSequence.push({ pm: 'npm', flags: ['install'] })
+    }
+  }
+
+  return fallbackSequence
 }
 
 export const runCommand = ({ writer }: Params) =>
@@ -84,12 +109,22 @@ export const runCommand = ({ writer }: Params) =>
         (prefix) => command.toLowerCase().startsWith(prefix) || (command === 'npm' && args?.[0] === 'install')
       )
 
-      const executeCommand = async () => {
+      // Detect if this is an install command specifically
+      const isInstallCommand = (cmd: string, cmdArgs?: string[]) => {
+        return cmd === 'npm' || cmd === 'yarn' || cmd === 'pnpm' ? cmdArgs?.[0] === 'install' : cmd.includes('install')
+      }
+
+      const currentPM = (command === 'npm' || command === 'yarn' || command === 'pnpm' ? command : 'npm') as 'npm' | 'yarn' | 'pnpm'
+
+      const executeCommand = async (pm?: 'npm' | 'yarn' | 'pnpm', flags?: string[]) => {
         try {
+          const cmdToRun = pm || command
+          const argsToRun = flags || args
+
           const result = await sandbox.runCommand({
             detached: true,
-            cmd: command,
-            args,
+            cmd: cmdToRun,
+            args: argsToRun,
             sudo,
           })
           return result
@@ -118,6 +153,40 @@ export const runCommand = ({ writer }: Params) =>
           cmd = await defaultRetryStrategy.execute(() => executeCommand(), `${command} ${args?.join(' ') || ''}`)
         } else {
           cmd = await executeCommand()
+        }
+
+        // If install failed and fallback is enabled, try alternate package managers
+        if (isFeatureEnabled('fallbackStrategies') && isInstallCommand(command, args) && cmd.exitCode !== 0) {
+          generationLogger.progress('run_command', `Install command failed with exit code ${cmd.exitCode}, attempting PM fallback`)
+
+          const fallbackSequence = buildInstallFallbackSequence(currentPM)
+          let fallbackSuccess = false
+
+          for (const { pm, flags: fallbackFlags } of fallbackSequence) {
+            if (pm === currentPM && JSON.stringify(fallbackFlags) === JSON.stringify(args)) {
+              // Skip the exact same command we already tried
+              continue
+            }
+
+            try {
+              generationLogger.progress('run_command', `Attempting fallback: ${pm} ${fallbackFlags.join(' ')}`)
+              const fallbackCmd = await executeCommand(pm, fallbackFlags)
+
+              if (fallbackCmd.exitCode === 0) {
+                generationLogger.success('run_command', `Fallback succeeded with ${pm} ${fallbackFlags.join(' ')}`)
+                cmd = fallbackCmd
+                fallbackSuccess = true
+                break
+              }
+            } catch (fallbackError) {
+              generationLogger.progress('run_command', `Fallback ${pm} ${fallbackFlags.join(' ')} failed, trying next`)
+              continue
+            }
+          }
+
+          if (!fallbackSuccess) {
+            generationLogger.error('run_command', 'All fallback attempts failed', 'INSTALL_FAILED', 'Install command and all fallbacks failed')
+          }
         }
       } catch (error) {
         const richError = getRichError({
