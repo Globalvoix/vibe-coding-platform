@@ -209,7 +209,14 @@ export async function POST(
 
   // Use fallback strategy for more resilient installation
   // This will try pnpm (with --force for peer deps), then yarn, then npm
-  const install = buildInstallCommandWithFallback()
+  let install: string
+  if (isFeatureEnabled('fallbackStrategies')) {
+    generationLogger.progress('sandbox_setup', 'Using package manager fallback strategy')
+    install = buildInstallCommandWithFallback()
+  } else {
+    generationLogger.progress('sandbox_setup', 'Using single package manager (fallback disabled)')
+    install = buildInstallCommand(pm)
+  }
   await sandbox.runCommand({ cmd: 'bash', args: ['-lc', install] })
 
   // Use the detected PM for dev command for consistency
