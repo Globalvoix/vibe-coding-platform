@@ -192,6 +192,19 @@ export const runCommand = ({ writer }: Params) =>
           done.stderr(),
         ])
 
+        // Parse build/install output for specific errors
+        let parsedErrors = null
+        if (command === 'npm' || command === 'yarn' || command === 'pnpm' || command.includes('npm') || command.includes('yarn') || command.includes('pnpm')) {
+          if (done.exitCode !== 0) {
+            const parser = buildOutputParser
+            parsedErrors = parser.parseInstallOutput(stdout as string, stderr as string, (command === 'npm' ? 'npm' : command === 'yarn' ? 'yarn' : 'pnpm') as 'npm' | 'yarn' | 'pnpm')
+
+            if (parsedErrors.length > 0) {
+              generationLogger.progress('run_command', `Parsed ${parsedErrors.length} errors from build output`)
+            }
+          }
+        }
+
         writer.write({
           id: toolCallId,
           type: 'data-run-command',
@@ -205,15 +218,22 @@ export const runCommand = ({ writer }: Params) =>
           },
         })
 
-        return (
+        let resultMessage =
           `The command \`${command} ${args.join(
             ' '
           )}\` has finished with exit code ${done.exitCode}.` +
-          `Stdout of the command was: \n` +
+          `\n\nStdout of the command was: \n` +
           `\`\`\`\n${stdout}\n\`\`\`\n` +
           `Stderr of the command was: \n` +
           `\`\`\`\n${stderr}\n\`\`\``
-        )
+
+        // Append parsed errors if any
+        if (parsedErrors && parsedErrors.length > 0) {
+          const summary = buildOutputParser.generateSummary(parsedErrors)
+          resultMessage += `\n\n## Parsed Error Summary:\n${summary}`
+        }
+
+        return resultMessage
       } catch (error) {
         const richError = getRichError({
           action: 'wait for command to finish',
