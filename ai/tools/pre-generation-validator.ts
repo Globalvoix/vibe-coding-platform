@@ -90,10 +90,9 @@ export class PreGenerationValidator {
       const nodeResult = await sandbox.runCommand({
         cmd: 'node',
         args: ['--version'],
-        wait: true,
       })
 
-      const versionOutput = (nodeResult.stdout as string).trim()
+      const versionOutput = (await nodeResult.stdout()).trim()
       const match = versionOutput.match(/v(\d+)\.(\d+)\.(\d+)/)
 
       if (match) {
@@ -128,7 +127,6 @@ export class PreGenerationValidator {
         await sandbox.runCommand({
           cmd: pm,
           args: ['--version'],
-          wait: true,
         })
         available.push(pm)
       } catch {
@@ -155,10 +153,9 @@ export class PreGenerationValidator {
       const psResult = await sandbox.runCommand({
         cmd: 'ps',
         args: ['aux'],
-        wait: true,
       })
 
-      const output = (psResult.stdout as string).toLowerCase()
+      const output = (await psResult.stdout()).toLowerCase()
 
       // Check for common dev server processes
       const conflicts = [
