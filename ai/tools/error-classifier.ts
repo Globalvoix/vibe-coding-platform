@@ -206,15 +206,26 @@ export class ErrorClassifier {
     if (fullText.includes('peer dependency') || fullText.includes('peer dependencies')) {
       hints.push(
         'Peer dependency conflict detected.',
-        'Try: Use compatible versions or install with --legacy-peer-deps flag (npm) or --force (pnpm).',
+        'AUTO-FIX: System will automatically try with compatibility flags (--legacy-peer-deps for npm, --force for pnpm).',
+        'MANUAL: Update package.json to use compatible versions.',
         'Example: npm install --legacy-peer-deps'
+      )
+    }
+
+    if (fullText.includes('cannot find module') || fullText.includes('module_not_found')) {
+      hints.push(
+        'Missing package or module detected.',
+        'AUTO-FIX: System will attempt to auto-install the missing package.',
+        'MANUAL: Add the package to package.json or run: npm install <package-name>',
+        'Verify package name is spelled correctly'
       )
     }
 
     if (fullText.includes('port') && fullText.includes('in use')) {
       hints.push(
         'Port is already in use by another process.',
-        'Try: Kill the process using this port or use a different port.',
+        'AUTO-FIX: System will automatically select an available alternate port.',
+        'MANUAL: Kill the process using this port or specify a different port.',
         'Example: lsof -i :PORT to find the process'
       )
     }
@@ -222,16 +233,54 @@ export class ErrorClassifier {
     if (fullText.includes('version') || fullText.includes('mismatch')) {
       hints.push(
         'Version conflict between packages.',
-        'Try: Update package.json to compatible versions or use a specific version constraint.',
+        'AUTO-FIX: System will retry with compatibility flags and alternate package managers.',
+        'MANUAL: Review package.json and update to compatible versions.',
         'Check package documentation for version compatibility'
+      )
+    }
+
+    if (fullText.includes('timeout') || fullText.includes('etimedout')) {
+      hints.push(
+        'Operation timed out.',
+        'AUTO-FIX: System will retry with exponential backoff.',
+        'MANUAL: Check network connectivity and registry availability.',
+        'Increase timeout if operation is large (many dependencies)'
+      )
+    }
+
+    if (fullText.includes('permission denied') || fullText.includes('eacces')) {
+      hints.push(
+        'File system permission error.',
+        'Check file and directory permissions.',
+        'Ensure sufficient access rights to write to sandbox directories.',
+        'May need to adjust ownership or permissions'
+      )
+    }
+
+    if (fullText.includes('syntax error') || fullText.includes('type error') || fullText.includes('reference error')) {
+      hints.push(
+        'Code syntax or runtime error detected.',
+        'Review generated code for errors.',
+        'Check that all required dependencies are installed.',
+        'Run type checker: pnpm tsc --noEmit'
+      )
+    }
+
+    if (fullText.includes('network') || fullText.includes('enotfound') || fullText.includes('econnrefused')) {
+      hints.push(
+        'Network or registry connection error.',
+        'AUTO-FIX: System will retry with exponential backoff.',
+        'MANUAL: Check internet connection and npm/yarn/pnpm registry availability.',
+        'Try using a different registry: npm config set registry https://registry.npmjs.org/'
       )
     }
 
     if (hints.length === 0) {
       hints.push(
-        'This error requires specific handling.',
-        'Review the error message and take appropriate action.',
-        'If unsure, check the package/tool documentation.'
+        'This error may be recoverable or requires specific handling.',
+        'The system will attempt relevant auto-fixes based on error classification.',
+        'If auto-fixes fail, review the error message and take appropriate action.',
+        'Check package/tool documentation if needed.'
       )
     }
 
