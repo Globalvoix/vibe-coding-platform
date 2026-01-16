@@ -20,6 +20,9 @@ export interface GenerationConfig {
     fallbackStrategies: boolean
     buildOutputParsing: boolean
     dependencyPrecheck: boolean
+    autoTargetedInstall: boolean
+    autoPortResolution: boolean
+    aggressiveRecovery: boolean
   }
   sandbox: {
     healthCheckTimeoutMs: number
@@ -65,6 +68,9 @@ export const DEFAULT_GENERATION_CONFIG: GenerationConfig = {
     fallbackStrategies: true,
     buildOutputParsing: true,
     dependencyPrecheck: true,
+    autoTargetedInstall: true,
+    autoPortResolution: true,
+    aggressiveRecovery: true,
   },
   sandbox: {
     healthCheckTimeoutMs: 5000,
