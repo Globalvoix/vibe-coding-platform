@@ -93,66 +93,90 @@ export const runCommand = ({ writer }: Params) =>
         }.`
       }
 
-      try {
-        const cmd = await sandbox.runCommand({
-          cmd: command,
-          args,
-          sudo,
-        })
+      // For waiting commands, add retry logic for transient failures
+      let lastError: unknown = null
+      const maxRetries = 2
 
-        writer.write({
-          id: toolCallId,
-          type: 'data-run-command',
-          data: {
-            sandboxId,
-            commandId: cmd.cmdId,
-            command,
+      for (let attempt = 0; attempt <= maxRetries; attempt++) {
+        try {
+          const cmd = await sandbox.runCommand({
+            cmd: command,
             args,
-            status: 'waiting',
-          },
-        })
+            sudo,
+          })
 
-        const done = await cmd.wait()
-        const [stdout, stderr] = await Promise.all([done.stdout(), done.stderr()])
+          writer.write({
+            id: toolCallId,
+            type: 'data-run-command',
+            data: {
+              sandboxId,
+              commandId: cmd.cmdId,
+              command,
+              args,
+              status: 'waiting',
+            },
+          })
 
-        writer.write({
-          id: toolCallId,
-          type: 'data-run-command',
-          data: {
-            sandboxId,
-            commandId: cmd.cmdId,
-            command,
-            args,
-            exitCode: done.exitCode,
-            status: 'done',
-          },
-        })
+          const done = await cmd.wait()
+          const [stdout, stderr] = await Promise.all([done.stdout(), done.stderr()])
 
-        return (
-          `The command \`${command} ${args.join(' ')}\` has finished with exit code ${done.exitCode}.` +
-          `\n\nStdout:\n\`\`\`\n${stdout}\n\`\`\`` +
-          `\n\nStderr:\n\`\`\`\n${stderr}\n\`\`\``
-        )
-      } catch (error) {
-        const richError = getRichError({
-          action: 'run command in sandbox',
-          args: { sandboxId, command, args },
-          error,
-        })
+          writer.write({
+            id: toolCallId,
+            type: 'data-run-command',
+            data: {
+              sandboxId,
+              commandId: cmd.cmdId,
+              command,
+              args,
+              exitCode: done.exitCode,
+              status: 'done',
+            },
+          })
 
-        writer.write({
-          id: toolCallId,
-          type: 'data-run-command',
-          data: {
-            sandboxId,
-            command,
-            args,
-            error: richError.error,
-            status: 'error',
-          },
-        })
+          return (
+            `The command \`${command} ${args.join(' ')}\` has finished with exit code ${done.exitCode}.` +
+            `\n\nStdout:\n\`\`\`\n${stdout}\n\`\`\`` +
+            `\n\nStderr:\n\`\`\`\n${stderr}\n\`\`\``
+          )
+        } catch (error) {
+          lastError = error
 
-        return richError.message
+          const errorStr = String(error)
+          const isTransient =
+            errorStr.includes('timeout') ||
+            errorStr.includes('ETIMEDOUT') ||
+            errorStr.includes('ECONNREFUSED') ||
+            errorStr.includes('temporarily')
+
+          if (!isTransient || attempt === maxRetries) {
+            break // Don't retry for non-transient errors or if max retries reached
+          }
+
+          // Wait before retrying (exponential backoff: 1s, 2s)
+          const delayMs = Math.pow(2, attempt) * 1000
+          await new Promise((resolve) => setTimeout(resolve, delayMs))
+        }
       }
+
+      // All retries exhausted, return error
+      const richError = getRichError({
+        action: 'run command in sandbox',
+        args: { sandboxId, command, args },
+        error: lastError,
+      })
+
+      writer.write({
+        id: toolCallId,
+        type: 'data-run-command',
+        data: {
+          sandboxId,
+          command,
+          args,
+          error: richError.error,
+          status: 'error',
+        },
+      })
+
+      return richError.message
     },
   })
