@@ -66,7 +66,6 @@ export const runCommand = ({ writer }: Params) =>
         return richError.message
       }
 
-      // If we don't wait, behave like the original: start in background and return immediately.
       if (!wait) {
         const cmd = await sandbox.runCommand({
           detached: true,
@@ -94,98 +93,11 @@ export const runCommand = ({ writer }: Params) =>
         }.`
       }
 
-      const isInstallCommand = (cmd: string, cmdArgs: string[]) => {
-        if (cmd === 'npm' || cmd === 'yarn' || cmd === 'pnpm') return cmdArgs[0] === 'install'
-        return cmd.toLowerCase().includes('install')
-      }
-
-      const currentPM = (command === 'npm' || command === 'yarn' || command === 'pnpm' ? command : 'npm') as
-        | 'npm'
-        | 'yarn'
-        | 'pnpm'
-
-      const isRetryableCommand =
-        (command === 'npm' || command === 'yarn' || command === 'pnpm') &&
-        (args[0] === 'install' || args[0] === 'run' || args[0] === 'build')
-
-      const runForeground = async (cmdToRun: string, argsToRun: string[]) => {
-        try {
-          const res = await sandbox.runCommand({
-            cmd: cmdToRun,
-            args: argsToRun,
-            sudo,
-          })
-          return res
-        } catch (error) {
-          const richError = getRichError({
-            action: 'run command in sandbox',
-            args: { sandboxId, command: cmdToRun, args: argsToRun },
-            error,
-          })
-
-          if (richError.classification?.isRetryable) {
-            generationLogger.progress('run_command', `Command failed with transient error: ${cmdToRun}`)
-          }
-
-          throw error
-        }
-      }
-
-      let cmd: Command
-
       try {
-        if (isRetryableCommand && isFeatureEnabled('aggressiveRecovery')) {
-          cmd = await defaultRetryStrategy.execute(
-            () => runForeground(command, args),
-            `${command} ${args.join(' ')}`
-          )
-        } else {
-          cmd = await runForeground(command, args)
-        }
-
-        if (isFeatureEnabled('fallbackStrategies') && isInstallCommand(command, args) && cmd.exitCode !== 0) {
-          generationLogger.progress(
-            'run_command',
-            `Install command failed with exit code ${cmd.exitCode}, attempting PM fallback`
-          )
-
-          const fallbackSequence = buildInstallFallbackSequence(currentPM)
-          let fallbackSuccess = false
-
-          for (const { pm, flags: fallbackFlags } of fallbackSequence) {
-            if (pm === currentPM && JSON.stringify(fallbackFlags) === JSON.stringify(args)) {
-              continue
-            }
-
-            try {
-              generationLogger.progress('run_command', `Attempting fallback: ${pm} ${fallbackFlags.join(' ')}`)
-              const fallbackCmd = await runForeground(pm, fallbackFlags)
-
-              if (fallbackCmd.exitCode === 0) {
-                generationLogger.success('run_command', `Fallback succeeded with ${pm} ${fallbackFlags.join(' ')}`)
-                cmd = fallbackCmd
-                fallbackSuccess = true
-                break
-              }
-            } catch {
-              generationLogger.progress('run_command', `Fallback ${pm} ${fallbackFlags.join(' ')} failed, trying next`)
-            }
-          }
-
-          if (!fallbackSuccess) {
-            generationLogger.error(
-              'run_command',
-              'All fallback attempts failed',
-              'INSTALL_FAILED',
-              'Install command and all fallbacks failed'
-            )
-          }
-        }
-      } catch (error) {
-        const richError = getRichError({
-          action: 'run command in sandbox',
-          args: { sandboxId, command, args },
-          error,
+        const cmd = await sandbox.runCommand({
+          cmd: command,
+          args,
+          sudo,
         })
 
         writer.write({
@@ -193,76 +105,15 @@ export const runCommand = ({ writer }: Params) =>
           type: 'data-run-command',
           data: {
             sandboxId,
+            commandId: cmd.cmdId,
             command,
             args,
-            error: richError.error,
-            status: 'error',
+            status: 'waiting',
           },
         })
 
-        return richError.message
-      }
-
-      writer.write({
-        id: toolCallId,
-        type: 'data-run-command',
-        data: {
-          sandboxId,
-          commandId: cmd.cmdId,
-          command,
-          args,
-          status: 'waiting',
-        },
-      })
-
-      const done = await cmd.wait()
-
-      try {
+        const done = await cmd.wait()
         const [stdout, stderr] = await Promise.all([done.stdout(), done.stderr()])
-
-        const combinedOutput = `${stdout}\n${stderr}`
-        let parsedErrors: ReturnType<typeof buildOutputParser.parseInstallOutput> | null = null
-
-        if (isFeatureEnabled('buildOutputParsing')) {
-          if (command === 'npm' || command === 'yarn' || command === 'pnpm') {
-            parsedErrors = buildOutputParser.parseInstallOutput(stdout, stderr, currentPM)
-
-            if (parsedErrors.length > 0) {
-              generationLogger.progress('run_command', `Parsed ${parsedErrors.length} errors from build output`)
-
-              if (isFeatureEnabled('autoTargetedInstall') && done.exitCode !== 0) {
-                generationLogger.progress('run_command', 'Attempting to auto-install missing packages')
-                const installResults = await autoInstallMissingPackages(sandbox, combinedOutput, currentPM)
-
-                if (installResults.length > 0 && installResults.some((r) => r.installed)) {
-                  generationLogger.progress(
-                    'run_command',
-                    `Auto-installed ${installResults.filter((r) => r.installed).length} packages, retrying command`
-                  )
-
-                  try {
-                    const retryDone = await sandbox.runCommand({
-                      cmd: command,
-                      args,
-                      sudo,
-                    })
-
-                    if (retryDone.exitCode === 0) {
-                      generationLogger.success('run_command', 'Command succeeded after auto-install')
-                      const retryStdout = await retryDone.stdout()
-                      return `Auto-installed ${installResults.filter((r) => r.installed).length} packages and re-ran command successfully.\n\nRetry output:\n\`\`\`\n${retryStdout}\n\`\`\``
-                    }
-                  } catch {
-                    generationLogger.progress(
-                      'run_command',
-                      'Command still failed after auto-install, continuing with error report'
-                    )
-                  }
-                }
-              }
-            }
-          }
-        }
 
         writer.write({
           id: toolCallId,
@@ -277,23 +128,15 @@ export const runCommand = ({ writer }: Params) =>
           },
         })
 
-        let resultMessage =
+        return (
           `The command \`${command} ${args.join(' ')}\` has finished with exit code ${done.exitCode}.` +
-          `\n\nStdout of the command was: \n` +
-          `\`\`\`\n${stdout}\n\`\`\`\n` +
-          `Stderr of the command was: \n` +
-          `\`\`\`\n${stderr}\n\`\`\``
-
-        if (parsedErrors && parsedErrors.length > 0) {
-          const summary = buildOutputParser.generateSummary(parsedErrors)
-          resultMessage += `\n\n## Parsed Error Summary:\n${summary}`
-        }
-
-        return resultMessage
+          `\n\nStdout:\n\`\`\`\n${stdout}\n\`\`\`` +
+          `\n\nStderr:\n\`\`\`\n${stderr}\n\`\`\``
+        )
       } catch (error) {
         const richError = getRichError({
-          action: 'wait for command to finish',
-          args: { sandboxId, commandId: cmd.cmdId },
+          action: 'run command in sandbox',
+          args: { sandboxId, command, args },
           error,
         })
 
@@ -302,7 +145,6 @@ export const runCommand = ({ writer }: Params) =>
           type: 'data-run-command',
           data: {
             sandboxId,
-            commandId: cmd.cmdId,
             command,
             args,
             error: richError.error,
