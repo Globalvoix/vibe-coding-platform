@@ -3,6 +3,9 @@ import type { File } from './get-contents'
 import type { Sandbox } from '@vercel/sandbox'
 import type { UIMessageStreamWriter, UIMessage } from 'ai'
 import { getRichError } from '../get-rich-error'
+import { sandboxFileOps } from '../sandbox-file-operations'
+import { generationLogger } from '../generation-logger'
+import { isFeatureEnabled } from '@/lib/generation-config'
 
 interface Params {
   sandbox: Sandbox
@@ -24,18 +27,33 @@ export function getWriteFiles({ sandbox, toolCallId, writer }: Params) {
     })
 
     try {
-      await sandbox.writeFiles(
-        params.files.map((file) => ({
-          content: Buffer.from(file.content, 'utf8'),
-          path: file.path,
-        }))
-      )
+      const integrityChecksEnabled = isFeatureEnabled('integrityChecks')
+
+      if (integrityChecksEnabled) {
+        generationLogger.progress('file_write', `Writing ${params.files.length} files with integrity verification`)
+        await sandboxFileOps.writeFilesWithVerification(sandbox, params.files)
+        generationLogger.success('file_write', `All ${params.files.length} files written and verified`)
+      } else {
+        await sandbox.writeFiles(
+          params.files.map((file) => ({
+            content: Buffer.from(file.content, 'utf8'),
+            path: file.path,
+          }))
+        )
+      }
     } catch (error) {
       const richError = getRichError({
         action: 'write files to sandbox',
         args: params,
         error,
       })
+
+      generationLogger.error(
+        'file_write',
+        'Failed to write files to sandbox',
+        'FILE_WRITE_ERROR',
+        String(error)
+      )
 
       writer.write({
         id: toolCallId,
