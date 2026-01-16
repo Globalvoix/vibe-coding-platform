@@ -5,6 +5,8 @@ import { Sandbox } from '@vercel/sandbox'
 import { getProject, updateProjectSandboxState } from '@/lib/projects-db'
 import { listProjectFiles, listProjectFilePaths } from '@/lib/project-files-db'
 import { syncProjectEnvToSandbox } from '@/ai/tools/project-env'
+import { isFeatureEnabled } from '@/lib/generation-config'
+import { generationLogger } from '@/ai/tools/generation-logger'
 
 function coerceSandboxState(value: unknown): {
   sandboxId?: string
