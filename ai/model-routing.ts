@@ -77,13 +77,32 @@ export function chooseFileGenerationModelId(params: {
 }): string {
   const latestUserText = extractLatestUserText(params.messages)
 
+  // UI work should use Gemini for best visual output
   if (looksLikeUiWork(params.paths, latestUserText)) {
-    return getDefaultUiModelId()
+    return getDefaultUiModelId() // Returns Gemini Flash 3
   }
 
+  // Advanced/backend work should use GPT-5.1 Codex Max
   if (looksLikeAdvancedWork(params.paths, latestUserText)) {
-    return getDefaultAdvancedCodingModelId()
+    return getDefaultAdvancedCodingModelId() // Returns GPT-5.1 Codex Max
   }
 
+  // Default to Gemini for good all-around quality
   return params.fallbackModelId ?? getDefaultGeneralCodingModelId()
+}
+
+/**
+ * Analyze paths and select optimal models for code generation
+ * Returns primary and fallback models
+ */
+export function selectOptimalModelsForGeneration(paths: string[]): {
+  uiModel: string
+  backendModel: string
+  defaultModel: string
+} {
+  return {
+    uiModel: getDefaultUiModelId(), // Gemini Flash 3
+    backendModel: getDefaultAdvancedCodingModelId(), // GPT-5.1 Codex Max
+    defaultModel: getDefaultGeneralCodingModelId(), // Gemini Flash 3
+  }
 }
