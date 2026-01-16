@@ -2,6 +2,8 @@ import z from 'zod/v3'
 
 export const errorSchema = z.object({
   message: z.string(),
+  json: z.unknown().optional(),
+  text: z.string().optional(),
 })
 
 export const dataPartSchema = z.object({
