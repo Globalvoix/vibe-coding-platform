@@ -34,6 +34,7 @@ export function useChatPersistence(
   seedMessages?: ChatUIMessage[] | null
 ) {
   const [restoredMessages, setRestoredMessages] = useState<ChatUIMessage[]>([])
+  const [hasRestored, setHasRestored] = useState(false)
   const projectIdRef = useRef(projectId)
   const hasRestoredRef = useRef(false)
 
@@ -58,16 +59,19 @@ export function useChatPersistence(
   useEffect(() => {
     if (!projectId) {
       hasRestoredRef.current = false
+      setHasRestored(false)
       setRestoredMessages([])
       return
     }
 
     if (projectIdRef.current === projectId && hasRestoredRef.current) {
+      setHasRestored(true)
       return
     }
 
     projectIdRef.current = projectId
     hasRestoredRef.current = true
+    setHasRestored(true)
 
     if (typeof window === 'undefined') return
 
@@ -91,5 +95,5 @@ export function useChatPersistence(
     }
   }, [projectId, seedMessages])
 
-  return { restoredMessages, allMessages, hasRestored: hasRestoredRef.current }
+  return { restoredMessages, allMessages, hasRestored }
 }

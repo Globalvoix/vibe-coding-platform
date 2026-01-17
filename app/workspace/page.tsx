@@ -63,6 +63,8 @@ function WorkspaceContent({
 
     async function loadProject() {
       if (projectId) {
+        // Prevent briefly showing chat from a previous project while loading.
+        setInitialChatMessages(null)
         try {
           const response = await fetch(`/api/projects/${projectId}`)
           if (!response.ok) {
