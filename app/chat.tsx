@@ -276,44 +276,11 @@ export function Chat({ className, initialPrompt, initialMessages, projectId, pro
     !forceEnableInput && (status === 'streaming' || status === 'submitted')
   const isInputDisabled = !forceEnableInput && status !== 'ready'
 
-  const handleStopGeneration = useCallback(async () => {
-    if (!projectId) return
-    try {
-      await fetch(`/api/projects/${projectId}/generation-stop`, {
-        method: 'POST',
-      })
-      setActiveGenerationId(null)
-      toast.success('Generation stopped')
-    } catch (error) {
-      console.error('Failed to stop generation:', error)
-      toast.error('Failed to stop generation')
-    }
-  }, [projectId])
-
-  // Poll for generation progress updates to show latest state
-  useEffect(() => {
-    if (!projectId || !isLoading) return
-
-    const pollGenerationProgress = async () => {
-      try {
-        const response = await fetch(`/api/projects/${projectId}/generation-progress`)
-        if (response.ok) {
-          const data = (await response.json()) as {
-            isActive: boolean
-            session: { id: string; status: string; progress: unknown } | null
-          }
-          if (!data.isActive && data.session?.status !== 'active') {
-            setActiveGenerationId(null)
-          }
-        }
-      } catch (error) {
-        console.error('Failed to poll generation progress:', error)
-      }
-    }
-
-    const interval = window.setInterval(pollGenerationProgress, 2000)
-    return () => clearInterval(interval)
-  }, [projectId, isLoading])
+  const handleStopGeneration = useCallback(() => {
+    // Stop the current client-side stream using the useChat hook
+    stop()
+    toast.success('Generation stopped')
+  }, [stop])
 
   const handleVersionSelect = (version: ProjectVersion) => {
     setSelectedVersionId(version.id)
