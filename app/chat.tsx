@@ -74,6 +74,45 @@ export function Chat({ className, initialPrompt, initialMessages, projectId, pro
 
   const { allMessages, hasRestored } = useChatPersistence(projectId || null, messages, seedChatMessages)
 
+  const chatSaveTimeoutRef = useRef<number | null>(null)
+
+  useEffect(() => {
+    if (!projectId) return
+    if (!hasRestored) return
+    if (typeof window === 'undefined') return
+
+    // Avoid writing empty chats.
+    if (allMessages.length === 0) return
+
+    // Debounce to reduce write frequency.
+    if (chatSaveTimeoutRef.current !== null) {
+      window.clearTimeout(chatSaveTimeoutRef.current)
+    }
+
+    const pruned = allMessages.slice(-200)
+
+    chatSaveTimeoutRef.current = window.setTimeout(async () => {
+      try {
+        await fetch(`/api/projects/${projectId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chatState: { messages: pruned },
+          }),
+        })
+      } catch (error) {
+        console.warn('Failed to persist chat state:', error)
+      }
+    }, 800)
+
+    return () => {
+      if (chatSaveTimeoutRef.current !== null) {
+        window.clearTimeout(chatSaveTimeoutRef.current)
+        chatSaveTimeoutRef.current = null
+      }
+    }
+  }, [allMessages, hasRestored, projectId])
+
   const latestVersionMessageId = useMemo(() => {
     let lastId: string | null = null
     for (const msg of allMessages) {
