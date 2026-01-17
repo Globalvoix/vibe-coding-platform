@@ -19,6 +19,9 @@ interface ProjectResponse {
   id: string
   name: string
   initial_prompt: string | null
+  chat_state?: {
+    messages?: unknown
+  } | null
   sandbox_state: {
     sandboxId?: string
     paths?: string[]
@@ -36,6 +39,7 @@ function WorkspaceContent({
 }) {
   const [initialPrompt, setInitialPrompt] = useState<string>('')
   const [projectName, setProjectName] = useState<string>('')
+  const [initialChatMessages, setInitialChatMessages] = useState<unknown[] | null>(null)
   const [horizontalSizes] = useState<[number, number] | null>(null)
   const { sandboxId, paths: sandboxPaths, url, currentProjectId } = useSandboxStore()
   const lastPreviewSnapshotRef = useRef<{ url: string; capturedAt: number } | null>(null)
@@ -71,6 +75,11 @@ function WorkspaceContent({
           setInitialPrompt(project.initial_prompt ?? '')
           setProjectName(project.name)
 
+          const chatMessages = Array.isArray(project.chat_state?.messages)
+            ? (project.chat_state?.messages as unknown[])
+            : null
+          setInitialChatMessages(chatMessages)
+
           const sandboxState = useSandboxStore.getState()
 
           sandboxState.setCurrentProjectId(projectId)
@@ -84,11 +93,17 @@ function WorkspaceContent({
               typeof cached.url === 'string' ||
               (Array.isArray(cached.paths) && cached.paths.length > 0))
 
-          // If the project has any prior sandbox state, don't show the cached URL (it may be a stopped sandbox that returns 410).
-          // Instead, show the restoring UI while we try to revive / rebuild.
+          // If the project has any prior sandbox state, restore what we can immediately for a fast preview,
+          // while we also try to revive / rebuild in the background.
           if (hasAnySandboxState) {
             if (cached?.sandboxId) {
               sandboxState.setSandboxId(cached.sandboxId)
+            }
+
+            // Optimistically restore the last known URL so preview loads immediately if the sandbox is still alive.
+            // If the sandbox is stopped, the revive step below will update the URL.
+            if (typeof cached?.url === 'string' && cached.url) {
+              sandboxState.setUrl(cached.url)
             } else {
               sandboxState.clearUrl()
             }
@@ -119,6 +134,8 @@ function WorkspaceContent({
                   sandboxState.applySandboxState(revived.sandbox_state)
                 }
               } else if (reviveRes.status === 409) {
+                // If the sandbox cannot be revived because the project has no persisted files, don't show a stale URL.
+                sandboxState.clearUrl()
                 sandboxState.setRestoreError('missing_files')
               } else {
                 sandboxState.setRestoreError('unknown')
