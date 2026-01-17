@@ -447,6 +447,17 @@ export function Chat({ className, initialPrompt, initialMessages, projectId, pro
           />
         ) : (
           <>
+            {activeGenerationId && !isLoading && (
+              <div className="px-3 py-2 bg-blue-900/20 border-b border-blue-700/30 text-sm text-blue-200 flex items-center justify-between">
+                <span>Generation in progress. It will continue in the background.</span>
+                <button
+                  onClick={handleStopGeneration}
+                  className="text-xs px-2 py-1 rounded bg-blue-700 hover:bg-blue-600 transition-colors"
+                >
+                  Stop
+                </button>
+              </div>
+            )}
             <Conversation className="relative w-full flex-1 min-h-0 bg-background">
               <ConversationContent className="space-y-4">
                 {allMessages.map((message, index) => (
