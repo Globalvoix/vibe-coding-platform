@@ -317,6 +317,31 @@ export function Chat({ className, initialPrompt, initialMessages, projectId, pro
     }
   }, [projectId])
 
+  // Poll for generation progress updates to show latest state
+  useEffect(() => {
+    if (!projectId || !isLoading) return
+
+    const pollGenerationProgress = async () => {
+      try {
+        const response = await fetch(`/api/projects/${projectId}/generation-progress`)
+        if (response.ok) {
+          const data = (await response.json()) as {
+            isActive: boolean
+            session: { id: string; status: string; progress: unknown } | null
+          }
+          if (!data.isActive && data.session?.status !== 'active') {
+            setActiveGenerationId(null)
+          }
+        }
+      } catch (error) {
+        console.error('Failed to poll generation progress:', error)
+      }
+    }
+
+    const interval = window.setInterval(pollGenerationProgress, 2000)
+    return () => clearInterval(interval)
+  }, [projectId, isLoading])
+
   const handleVersionSelect = (version: ProjectVersion) => {
     setSelectedVersionId(version.id)
   }
