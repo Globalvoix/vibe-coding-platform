@@ -221,6 +221,18 @@ export class SandboxFileOperations {
   }
 
   /**
+   * Read a file from sandbox and return its text content
+   */
+  async readFileText(sandbox: Sandbox, path: string, encoding: BufferEncoding = 'utf-8'): Promise<string | null> {
+    try {
+      const buffer = await this.readFileToBuffer(sandbox, path)
+      return buffer.toString(encoding)
+    } catch {
+      return null
+    }
+  }
+
+  /**
    * Check if file exists in sandbox
    */
   async fileExists(sandbox: Sandbox, path: string): Promise<boolean> {
