@@ -159,10 +159,13 @@ export const generateFiles = ({ writer, modelId, userId, projectId }: Params) =>
 
       // Get package.json to check what's installed
       let packageJsonContent = ''
+      let packageJsonFile = uploaded.find((f) => f.path === 'package.json')
+      let wasPackageJsonGenerated = false
+
       try {
-        const packageJsonFile = uploaded.find((f) => f.path === 'package.json')
         if (packageJsonFile) {
           packageJsonContent = packageJsonFile.content
+          wasPackageJsonGenerated = true
         } else {
           // Try to read from sandbox if not generated
           const pkgResult = await sandbox?.readFile({ path: 'package.json' })
