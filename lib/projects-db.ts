@@ -33,6 +33,8 @@ async function ensureProjectsTable() {
       ADD COLUMN IF NOT EXISTS repo_context TEXT;
     ALTER TABLE projects
       ADD COLUMN IF NOT EXISTS preview_image_url TEXT;
+    ALTER TABLE projects
+      ADD COLUMN IF NOT EXISTS chat_state JSONB;
 
     CREATE TABLE IF NOT EXISTS project_versions (
       id TEXT PRIMARY KEY,
@@ -55,6 +57,7 @@ export interface ProjectRecord {
   initial_prompt: string | null
   sandbox_state: unknown | null
   preview_image_url: string | null
+  chat_state: unknown | null
   created_at: string
   updated_at: string
   cloud_enabled: boolean
@@ -185,6 +188,22 @@ export async function updateProjectPreviewImageUrl(
      WHERE user_id = $1 AND id = $2
      RETURNING *`,
     [userId, id, previewImageUrl]
+  )
+  return result.rows[0] ?? null
+}
+
+export async function updateProjectChatState(
+  userId: string,
+  id: string,
+  chatState: unknown
+): Promise<ProjectRecord | null> {
+  await ensureProjectsTable()
+  const result = await pool.query<ProjectRecord>(
+    `UPDATE projects
+     SET chat_state = $3, updated_at = NOW()
+     WHERE user_id = $1 AND id = $2
+     RETURNING *`,
+    [userId, id, chatState]
   )
   return result.rows[0] ?? null
 }
