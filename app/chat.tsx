@@ -302,7 +302,7 @@ export function Chat({ className, initialPrompt, initialMessages, projectId, pro
 
   const isLoading =
     !forceEnableInput && (status === 'streaming' || status === 'submitted' || isBackgroundGenerating)
-  const isInputDisabled = !forceEnableInput && status !== 'ready' && !isBackgroundGenerating
+  const isInputDisabled = !forceEnableInput && (status !== 'ready' || isBackgroundGenerating)
 
   const handleStopGeneration = useCallback(async () => {
     // Stop the current client-side stream using the useChat hook
