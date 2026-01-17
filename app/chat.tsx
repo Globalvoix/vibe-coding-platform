@@ -452,7 +452,11 @@ export function Chat({ className, initialPrompt, initialMessages, projectId, pro
               className="bg-background p-2"
               onSubmit={async (event) => {
                 event.preventDefault()
-                validateAndSubmitMessage(input)
+                if (isLoading) {
+                  handleStopGeneration()
+                } else {
+                  validateAndSubmitMessage(input)
+                }
               }}
             >
               <PromptInput
