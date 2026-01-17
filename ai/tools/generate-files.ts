@@ -183,6 +183,39 @@ export const generateFiles = ({ writer, modelId, userId, projectId }: Params) =>
         packageJsonContent
       )
 
+      // If package.json was generated and we have missing deps, update it
+      if (wasPackageJsonGenerated && dependencyReport.missingPackages.length > 0 && packageJsonFile) {
+        try {
+          const pkgJson = JSON.parse(packageJsonFile.content)
+          if (!pkgJson.dependencies) {
+            pkgJson.dependencies = {}
+          }
+
+          // Add missing packages to dependencies with latest version indicator
+          for (const pkg of dependencyReport.missingPackages) {
+            if (!pkgJson.dependencies[pkg]) {
+              pkgJson.dependencies[pkg] = '^1.0.0' // Will be resolved during npm install
+            }
+          }
+
+          // Update the package.json file in uploaded array
+          packageJsonFile.content = JSON.stringify(pkgJson, null, 2)
+          packageJsonContent = packageJsonFile.content
+
+          writer.write({
+            id: toolCallId,
+            type: 'data-generating-files',
+            data: {
+              paths: uploaded.map((f) => f.path),
+              status: 'analyzing',
+              message: `Updated package.json to include ${dependencyReport.missingPackages.length} missing package(s)`,
+            },
+          })
+        } catch (error) {
+          console.error('Failed to update package.json:', error)
+        }
+      }
+
       if (dependencyReport.missingPackages.length > 0) {
         writer.write({
           id: toolCallId,
