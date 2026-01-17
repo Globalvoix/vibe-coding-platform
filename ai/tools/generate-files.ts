@@ -31,20 +31,30 @@ export const generateFiles = ({ writer, modelId, userId, projectId }: Params) =>
     execute: async ({ sandboxId, paths }, { toolCallId, messages }) => {
       const sessionTracker = new GenerationSessionTracker(toolCallId, projectId || '', userId)
 
+      // Safe writer that doesn't throw if the stream is closed
+      const safeWrite = (part: any) => {
+        try {
+          writer.write(part)
+        } catch (error) {
+          // Ignore stream closure errors
+          console.warn('Stream write failed (possibly closed):', error)
+        }
+      }
+
       try {
         // Initialize session tracking
         if (projectId) {
           await sessionTracker.initialize(sandboxId)
         }
 
-        writer.write({
+        safeWrite({
           id: toolCallId,
           type: 'data-generating-files',
           data: { paths: [], status: 'generating' },
         })
 
         // Step 1: Build generation blueprint for context
-        writer.write({
+        safeWrite({
           id: toolCallId,
           type: 'data-generating-files',
           data: { paths: [], status: 'analyzing', message: 'Analyzing generation requirements...' },
@@ -85,7 +95,7 @@ export const generateFiles = ({ writer, modelId, userId, projectId }: Params) =>
           return richError.message
         }
 
-        const writeFiles = getWriteFiles({ sandbox, toolCallId, writer })
+        const writeFiles = getWriteFiles({ sandbox, toolCallId, writer: { write: safeWrite } as any })
         const iterator = getContents({ messages, modelId, paths, blueprint })
         const uploaded: File[] = []
         const allGeneratedFiles: File[] = []
@@ -115,7 +125,7 @@ export const generateFiles = ({ writer, modelId, userId, projectId }: Params) =>
                   await sessionTracker.complete('cancelled')
                 }
 
-                writer.write({
+                safeWrite({
                   id: toolCallId,
                   type: 'data-generating-files',
                   data: {
@@ -143,7 +153,7 @@ export const generateFiles = ({ writer, modelId, userId, projectId }: Params) =>
               uploaded.push(...chunk.files)
               await persistFiles(chunk.files)
             } else {
-              writer.write({
+              safeWrite({
                 id: toolCallId,
                 type: 'data-generating-files',
                 data: {
@@ -160,7 +170,7 @@ export const generateFiles = ({ writer, modelId, userId, projectId }: Params) =>
             error,
           })
 
-          writer.write({
+          safeWrite({
             id: toolCallId,
             type: 'data-generating-files',
             data: {
@@ -177,7 +187,7 @@ export const generateFiles = ({ writer, modelId, userId, projectId }: Params) =>
         }
 
         // Step 2: Validate generated files
-        writer.write({
+        safeWrite({
           id: toolCallId,
           type: 'data-generating-files',
           data: { paths: uploaded.map((f) => f.path), status: 'validating', message: 'Validating generated code...' },
@@ -208,7 +218,7 @@ export const generateFiles = ({ writer, modelId, userId, projectId }: Params) =>
         }
 
         // Step 3: Detect and install missing dependencies
-        writer.write({
+        safeWrite({
           id: toolCallId,
           type: 'data-generating-files',
           data: { paths: uploaded.map((f) => f.path), status: 'analyzing', message: 'Checking for missing dependencies...' },
@@ -238,7 +248,7 @@ export const generateFiles = ({ writer, modelId, userId, projectId }: Params) =>
 
         // If we couldn't read package.json, skip dependency detection to avoid false positives
         if (!packageJsonContent || packageJsonContent.trim().length === 0) {
-          writer.write({
+          safeWrite({
             id: toolCallId,
             type: 'data-generating-files',
             data: {
@@ -248,7 +258,7 @@ export const generateFiles = ({ writer, modelId, userId, projectId }: Params) =>
             },
           })
 
-          writer.write({
+          safeWrite({
             id: toolCallId,
             type: 'data-generating-files',
             data: { paths: uploaded.map((file) => file.path), status: 'done' },
@@ -269,7 +279,7 @@ export const generateFiles = ({ writer, modelId, userId, projectId }: Params) =>
         )
 
         if (dependencyReport.missingPackages.length > 0) {
-          writer.write({
+          safeWrite({
             id: toolCallId,
             type: 'data-generating-files',
             data: {
@@ -300,7 +310,7 @@ export const generateFiles = ({ writer, modelId, userId, projectId }: Params) =>
               })
 
               if (cmdResult.exitCode === 0) {
-                writer.write({
+                safeWrite({
                   id: toolCallId,
                   type: 'data-generating-files',
                   data: {
@@ -311,7 +321,7 @@ export const generateFiles = ({ writer, modelId, userId, projectId }: Params) =>
                 })
               } else {
                 const stderr = await cmdResult.stderr()
-                writer.write({
+                safeWrite({
                   id: toolCallId,
                   type: 'data-generating-files',
                   data: {
@@ -325,7 +335,7 @@ export const generateFiles = ({ writer, modelId, userId, projectId }: Params) =>
             }
           } catch (error) {
             const installCommand = generateInstallCommand(dependencyReport.missingPackages, 'npm')
-            writer.write({
+            safeWrite({
               id: toolCallId,
               type: 'data-generating-files',
               data: {
@@ -338,7 +348,7 @@ export const generateFiles = ({ writer, modelId, userId, projectId }: Params) =>
           }
         }
 
-        writer.write({
+        safeWrite({
           id: toolCallId,
           type: 'data-generating-files',
           data: { paths: uploaded.map((file) => file.path), status: 'done' },
