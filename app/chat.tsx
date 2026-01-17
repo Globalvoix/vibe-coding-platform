@@ -44,7 +44,7 @@ interface Props {
 
 export function Chat({ className, initialPrompt, initialMessages, projectId, projectName }: Props) {
   const { chat } = useSharedChatContext()
-  const { messages, sendMessage, status } = useChat<ChatUIMessage>({ chat })
+  const { messages, sendMessage, status, stop } = useChat<ChatUIMessage>({ chat })
   const { setChatStatus, setViewingVersion, setRevertInChatVersionId } = useSandboxStore()
   const { toggleSidebar } = useUIStore()
   const [input, setInput] = useState('')
@@ -65,8 +65,6 @@ export function Chat({ className, initialPrompt, initialMessages, projectId, pro
   })
   const [showHistoryPanel, setShowHistoryPanel] = useState(false)
   const [selectedVersionId, setSelectedVersionId] = useState<string | null>(null)
-  const [activeGenerationId, setActiveGenerationId] = useState<string | null>(null)
-  const generationCheckIntervalRef = useRef<number | null>(null)
 
   // Persist and restore chat messages across page refreshes and across devices (seeded from project DB)
   const seedChatMessages = useMemo(() => {
