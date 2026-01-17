@@ -28,7 +28,11 @@ function dedupeMessages(messages: ChatUIMessage[]): ChatUIMessage[] {
   return out
 }
 
-export function useChatPersistence(projectId: string | null, messages: ChatUIMessage[]) {
+export function useChatPersistence(
+  projectId: string | null,
+  messages: ChatUIMessage[],
+  seedMessages?: ChatUIMessage[] | null
+) {
   const [restoredMessages, setRestoredMessages] = useState<ChatUIMessage[]>([])
   const projectIdRef = useRef(projectId)
   const hasRestoredRef = useRef(false)
@@ -50,7 +54,7 @@ export function useChatPersistence(projectId: string | null, messages: ChatUIMes
     }
   }, [projectId, allMessages])
 
-  // Restore messages from localStorage when projectId changes
+  // Restore messages from localStorage (or seed from server) when projectId changes
   useEffect(() => {
     if (!projectId) {
       hasRestoredRef.current = false
@@ -73,6 +77,11 @@ export function useChatPersistence(projectId: string | null, messages: ChatUIMes
       if (stored) {
         const restored = JSON.parse(stored) as ChatUIMessage[]
         setRestoredMessages(dedupeMessages(restored))
+      } else if (Array.isArray(seedMessages) && seedMessages.length > 0) {
+        // Seed from server when local storage is empty (helps restore across devices / cleared cache)
+        const seeded = dedupeMessages(seedMessages)
+        setRestoredMessages(seeded)
+        localStorage.setItem(storageKey, JSON.stringify(seeded))
       } else {
         setRestoredMessages([])
       }
@@ -80,7 +89,7 @@ export function useChatPersistence(projectId: string | null, messages: ChatUIMes
       console.error('Failed to restore chat messages:', error)
       setRestoredMessages([])
     }
-  }, [projectId])
+  }, [projectId, seedMessages])
 
-  return { restoredMessages, allMessages }
+  return { restoredMessages, allMessages, hasRestored: hasRestoredRef.current }
 }

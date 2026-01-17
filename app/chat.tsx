@@ -37,11 +37,12 @@ interface Props {
   className: string
   modelId?: string
   initialPrompt?: string
+  initialMessages?: unknown[] | null
   projectId?: string | null
   projectName?: string
 }
 
-export function Chat({ className, initialPrompt, projectId, projectName }: Props) {
+export function Chat({ className, initialPrompt, initialMessages, projectId, projectName }: Props) {
   const { chat } = useSharedChatContext()
   const { messages, sendMessage, status } = useChat<ChatUIMessage>({ chat })
   const { setChatStatus, setViewingVersion, setRevertInChatVersionId } = useSandboxStore()
@@ -65,8 +66,13 @@ export function Chat({ className, initialPrompt, projectId, projectName }: Props
   const [showHistoryPanel, setShowHistoryPanel] = useState(false)
   const [selectedVersionId, setSelectedVersionId] = useState<string | null>(null)
 
-  // Persist and restore chat messages across page refreshes
-  const { allMessages } = useChatPersistence(projectId || null, messages)
+  // Persist and restore chat messages across page refreshes and across devices (seeded from project DB)
+  const seedChatMessages = useMemo(() => {
+    if (!Array.isArray(initialMessages)) return null
+    return initialMessages as ChatUIMessage[]
+  }, [initialMessages])
+
+  const { allMessages, hasRestored } = useChatPersistence(projectId || null, messages, seedChatMessages)
 
   const latestVersionMessageId = useMemo(() => {
     let lastId: string | null = null
@@ -125,12 +131,18 @@ export function Chat({ className, initialPrompt, projectId, projectName }: Props
 
   useEffect(() => {
     if (!projectId) return
+
+    // Switching projects: reset per-project refs and input first.
+    hasSubmittedInitialPromptRef.current = false
+    setForceEnableInput(false)
+    setInput('')
+
     const storageKey = `prompt-draft-${projectId}`
     const stored = localStorage.getItem(storageKey)
-    if (stored && !input) {
+    if (typeof stored === 'string' && stored.length > 0) {
       setInput(stored)
     }
-  }, [projectId]) // Only run on mount or when projectId changes
+  }, [projectId])
 
   const validateAndSubmitMessage = useCallback(
     (text: string) => {
@@ -204,16 +216,21 @@ export function Chat({ className, initialPrompt, projectId, projectName }: Props
   }, [chat, status])
 
   useEffect(() => {
-    if (
-      !hasSubmittedInitialPromptRef.current &&
-      initialPrompt &&
-      initialPrompt.trim() &&
-      status === 'ready'
-    ) {
+    if (!projectId) return
+    if (!hasRestored) return
+    if (hasSubmittedInitialPromptRef.current) return
+    if (status !== 'ready') return
+
+    // Only prefill the initial prompt if there is no history and no draft.
+    // This avoids showing the "first prompt" when reopening an existing project.
+    const hasAnyHistory = allMessages.length > 0
+    const hasDraft = input.trim().length > 0
+
+    if (!hasAnyHistory && !hasDraft && initialPrompt && initialPrompt.trim()) {
       hasSubmittedInitialPromptRef.current = true
       setInput(initialPrompt)
     }
-  }, [initialPrompt, status, setInput])
+  }, [allMessages.length, hasRestored, initialPrompt, input, projectId, status])
 
   const isLoading =
     !forceEnableInput && (status === 'streaming' || status === 'submitted')

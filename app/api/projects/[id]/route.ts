@@ -7,6 +7,7 @@ import {
   updateProjectSandboxState,
   updateProjectCloudEnabled,
   updateProjectPreviewImageUrl,
+  updateProjectChatState,
 } from '@/lib/projects-db'
 import { auth } from '@clerk/nextjs/server'
 
@@ -47,6 +48,7 @@ export async function PATCH(
     sandboxState?: unknown
     cloudEnabled?: boolean
     previewImageUrl?: string
+    chatState?: unknown
   }
 
   let project = null
@@ -65,6 +67,10 @@ export async function PATCH(
 
   if (typeof body.previewImageUrl === 'string') {
     project = await updateProjectPreviewImageUrl(userId, projectParams.id, body.previewImageUrl)
+  }
+
+  if (body.chatState !== undefined) {
+    project = await updateProjectChatState(userId, projectParams.id, body.chatState)
   }
 
   if (!project) {
