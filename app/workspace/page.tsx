@@ -298,6 +298,7 @@ function WorkspaceContent({
               <Chat
                 className="flex-1 overflow-hidden"
                 initialPrompt={initialPrompt}
+                initialMessages={initialChatMessages}
                 projectId={projectId}
                 projectName={projectName}
               />
