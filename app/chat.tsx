@@ -136,31 +136,6 @@ export function Chat({ className, initialPrompt, initialMessages, projectId, pro
     })
   }
 
-  // Check for and resume active generation sessions
-  useEffect(() => {
-    if (!projectId) return
-
-    const checkGenerationStatus = async () => {
-      try {
-        const response = await fetch(
-          `/api/projects/${projectId}/generation-status`
-        )
-        if (response.ok) {
-          const data = (await response.json()) as {
-            isActive: boolean
-            session: { id: string; status: string; progress: unknown } | null
-          }
-          if (data.isActive && data.session) {
-            setActiveGenerationId(data.session.id)
-          }
-        }
-      } catch (error) {
-        console.error('Failed to check generation status:', error)
-      }
-    }
-
-    checkGenerationStatus()
-  }, [projectId])
 
   useEffect(() => {
     if (!projectId) return
