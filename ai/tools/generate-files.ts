@@ -111,10 +111,18 @@ export const generateFiles = ({ writer, modelId, userId, projectId }: Params) =>
             if (projectId) {
               const isCancelled = await GenerationSessionTracker.isCancelled(toolCallId)
               if (isCancelled) {
+                if (projectId) {
+                  await sessionTracker.complete('cancelled')
+                }
+
                 writer.write({
                   id: toolCallId,
                   type: 'data-generating-files',
-                  data: { paths, status: 'error', error: 'Generation was cancelled by user' },
+                  data: {
+                    paths,
+                    status: 'error',
+                    error: { message: 'Generation was cancelled by user' },
+                  },
                 })
                 return 'Generation was cancelled by user.'
               }
