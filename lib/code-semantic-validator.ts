@@ -20,6 +20,7 @@ export interface ValidationResult {
   errors: ValidationError[]
   warnings: ValidationError[]
   summary: string
+  missingDependencies?: string[]
 }
 
 interface FileToValidate {
