@@ -11,7 +11,7 @@ import { upsertProjectFiles } from '@/lib/project-files-db'
 import { buildGenerationBlueprint } from '@/lib/generation-blueprint'
 import { validateGeneratedFiles } from '@/lib/code-semantic-validator'
 import { detectMissingDependencies, generateInstallCommand } from '@/lib/missing-dependencies-detector'
-import { autoInstallMissingPackages } from './auto-install-missing-packages'
+import { sandboxFileOps } from './sandbox-file-operations'
 
 interface Params {
   modelId: string
@@ -168,13 +168,37 @@ export const generateFiles = ({ writer, modelId, userId, projectId }: Params) =>
           wasPackageJsonGenerated = true
         } else {
           // Try to read from sandbox if not generated
-          const pkgResult = await sandbox?.readFile({ path: 'package.json' })
-          if (pkgResult) {
-            packageJsonContent = await pkgResult.text()
+          if (sandbox) {
+            const pkgText = await sandboxFileOps.readFileText(sandbox, 'package.json')
+            if (typeof pkgText === 'string') {
+              packageJsonContent = pkgText
+            }
           }
         }
       } catch (error) {
         console.error('Failed to read package.json:', error)
+      }
+
+      // If we couldn't read package.json, skip dependency detection to avoid false positives
+      if (!packageJsonContent || packageJsonContent.trim().length === 0) {
+        writer.write({
+          id: toolCallId,
+          type: 'data-generating-files',
+          data: {
+            paths: uploaded.map((f) => f.path),
+            status: 'analyzing',
+            message: 'Skipping dependency check (package.json could not be read from sandbox).',
+          },
+        })
+
+        writer.write({
+          id: toolCallId,
+          type: 'data-generating-files',
+          data: { paths: uploaded.map((file) => file.path), status: 'done' },
+        })
+
+        const pathList = uploaded.map((file) => `- ${file.path}`).join('\n')
+        return `Successfully generated and validated ${uploaded.length} files.\n\nPaths:\n${pathList}`
       }
 
       // Detect missing dependencies
@@ -182,39 +206,6 @@ export const generateFiles = ({ writer, modelId, userId, projectId }: Params) =>
         uploaded.map((f) => ({ path: f.path, content: f.content })),
         packageJsonContent
       )
-
-      // If package.json was generated and we have missing deps, update it
-      if (wasPackageJsonGenerated && dependencyReport.missingPackages.length > 0 && packageJsonFile) {
-        try {
-          const pkgJson = JSON.parse(packageJsonFile.content)
-          if (!pkgJson.dependencies) {
-            pkgJson.dependencies = {}
-          }
-
-          // Add missing packages to dependencies with latest version indicator
-          for (const pkg of dependencyReport.missingPackages) {
-            if (!pkgJson.dependencies[pkg]) {
-              pkgJson.dependencies[pkg] = '^1.0.0' // Will be resolved during npm install
-            }
-          }
-
-          // Update the package.json file in uploaded array
-          packageJsonFile.content = JSON.stringify(pkgJson, null, 2)
-          packageJsonContent = packageJsonFile.content
-
-          writer.write({
-            id: toolCallId,
-            type: 'data-generating-files',
-            data: {
-              paths: uploaded.map((f) => f.path),
-              status: 'analyzing',
-              message: `Updated package.json to include ${dependencyReport.missingPackages.length} missing package(s)`,
-            },
-          })
-        } catch (error) {
-          console.error('Failed to update package.json:', error)
-        }
-      }
 
       if (dependencyReport.missingPackages.length > 0) {
         writer.write({
