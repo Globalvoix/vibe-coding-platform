@@ -65,6 +65,8 @@ export function Chat({ className, initialPrompt, initialMessages, projectId, pro
   })
   const [showHistoryPanel, setShowHistoryPanel] = useState(false)
   const [selectedVersionId, setSelectedVersionId] = useState<string | null>(null)
+  const [activeGenerationId, setActiveGenerationId] = useState<string | null>(null)
+  const generationCheckIntervalRef = useRef<number | null>(null)
 
   // Persist and restore chat messages across page refreshes and across devices (seeded from project DB)
   const seedChatMessages = useMemo(() => {
@@ -135,6 +137,32 @@ export function Chat({ className, initialPrompt, initialMessages, projectId, pro
       description,
     })
   }
+
+  // Check for and resume active generation sessions
+  useEffect(() => {
+    if (!projectId) return
+
+    const checkGenerationStatus = async () => {
+      try {
+        const response = await fetch(
+          `/api/projects/${projectId}/generation-status`
+        )
+        if (response.ok) {
+          const data = (await response.json()) as {
+            isActive: boolean
+            session: { id: string; status: string; progress: unknown } | null
+          }
+          if (data.isActive && data.session) {
+            setActiveGenerationId(data.session.id)
+          }
+        }
+      } catch (error) {
+        console.error('Failed to check generation status:', error)
+      }
+    }
+
+    checkGenerationStatus()
+  }, [projectId])
 
   useEffect(() => {
     if (!projectId) return
@@ -275,6 +303,20 @@ export function Chat({ className, initialPrompt, initialMessages, projectId, pro
     !forceEnableInput && (status === 'streaming' || status === 'submitted')
   const isInputDisabled = !forceEnableInput && status !== 'ready'
 
+  const handleStopGeneration = useCallback(async () => {
+    if (!projectId) return
+    try {
+      await fetch(`/api/projects/${projectId}/generation-stop`, {
+        method: 'POST',
+      })
+      setActiveGenerationId(null)
+      toast.success('Generation stopped')
+    } catch (error) {
+      console.error('Failed to stop generation:', error)
+      toast.error('Failed to stop generation')
+    }
+  }, [projectId])
+
   const handleVersionSelect = (version: ProjectVersion) => {
     setSelectedVersionId(version.id)
   }
@@ -408,8 +450,14 @@ export function Chat({ className, initialPrompt, initialMessages, projectId, pro
                 value={input}
                 onValueChange={setInput}
                 isLoading={isLoading}
-                onSubmit={() => validateAndSubmitMessage(input)}
-                disabled={isInputDisabled}
+                onSubmit={() => {
+                  if (isLoading) {
+                    handleStopGeneration()
+                  } else {
+                    validateAndSubmitMessage(input)
+                  }
+                }}
+                disabled={isInputDisabled && !isLoading}
                 className="w-full"
               >
                 <PromptInputTextarea
@@ -441,7 +489,7 @@ export function Chat({ className, initialPrompt, initialMessages, projectId, pro
                         variant="default"
                         size="icon"
                         className="h-7 w-7 rounded-full"
-                        disabled={isInputDisabled || !input.trim()}
+                        disabled={isInputDisabled && !isLoading}
                       >
                         {isLoading ? (
                           <Square className="size-4 fill-current" />
