@@ -65,6 +65,8 @@ export function Chat({ className, initialPrompt, initialMessages, projectId, pro
   })
   const [showHistoryPanel, setShowHistoryPanel] = useState(false)
   const [selectedVersionId, setSelectedVersionId] = useState<string | null>(null)
+  const [isBackgroundGenerating, setIsBackgroundGenerating] = useState(false)
+  const [activeGenerationId, setActiveGenerationId] = useState<string | null>(null)
 
   // Persist and restore chat messages across page refreshes and across devices (seeded from project DB)
   const seedChatMessages = useMemo(() => {
@@ -272,15 +274,59 @@ export function Chat({ className, initialPrompt, initialMessages, projectId, pro
     }
   }, [allMessages.length, hasRestored, initialPrompt, input, projectId, status])
 
-  const isLoading =
-    !forceEnableInput && (status === 'streaming' || status === 'submitted')
-  const isInputDisabled = !forceEnableInput && status !== 'ready'
+  useEffect(() => {
+    if (!projectId) return
 
-  const handleStopGeneration = useCallback(() => {
+    const checkGenerationStatus = async () => {
+      try {
+        const response = await fetch(`/api/projects/${projectId}/generation-status`)
+        if (response.ok) {
+          const data = await response.json()
+          if (data.isActive) {
+            setIsBackgroundGenerating(true)
+            setActiveGenerationId(data.session?.id)
+          } else {
+            setIsBackgroundGenerating(false)
+            setActiveGenerationId(null)
+          }
+        }
+      } catch (error) {
+        console.error('Failed to check generation status:', error)
+      }
+    }
+
+    checkGenerationStatus()
+    const interval = setInterval(checkGenerationStatus, 3000)
+    return () => clearInterval(interval)
+  }, [projectId])
+
+  const isLoading =
+    !forceEnableInput && (status === 'streaming' || status === 'submitted' || isBackgroundGenerating)
+  const isInputDisabled = !forceEnableInput && status !== 'ready' && !isBackgroundGenerating
+
+  const handleStopGeneration = useCallback(async () => {
     // Stop the current client-side stream using the useChat hook
     stop()
-    toast.success('Generation stopped')
-  }, [stop])
+
+    if (projectId) {
+      try {
+        const response = await fetch(`/api/projects/${projectId}/generation-stop`, {
+          method: 'POST',
+        })
+        if (response.ok) {
+          toast.success('Generation stop signal sent')
+        } else {
+          toast.error('Failed to send stop signal')
+        }
+      } catch (error) {
+        console.error('Error stopping generation:', error)
+        toast.error('Error stopping generation')
+      }
+    }
+
+    setIsBackgroundGenerating(false)
+    setActiveGenerationId(null)
+  }, [stop, projectId])
 
   const handleVersionSelect = (version: ProjectVersion) => {
     setSelectedVersionId(version.id)
