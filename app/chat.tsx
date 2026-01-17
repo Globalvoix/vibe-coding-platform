@@ -470,7 +470,7 @@ export function Chat({ className, initialPrompt, initialMessages, projectId, pro
                     validateAndSubmitMessage(input)
                   }
                 }}
-                disabled={isInputDisabled && !isLoading}
+                disabled={isInputDisabled}
                 className="w-full"
               >
                 <PromptInputTextarea
