@@ -12,6 +12,7 @@ import { buildGenerationBlueprint } from '@/lib/generation-blueprint'
 import { validateGeneratedFiles } from '@/lib/code-semantic-validator'
 import { detectMissingDependencies, generateInstallCommand } from '@/lib/missing-dependencies-detector'
 import { sandboxFileOps } from './sandbox-file-operations'
+import { GenerationSessionTracker } from '@/lib/generation-session-tracker'
 
 interface Params {
   modelId: string
