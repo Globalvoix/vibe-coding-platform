@@ -150,6 +150,98 @@ export const generateFiles = ({ writer, modelId, userId, projectId }: Params) =>
         return `Code generation had validation errors:\n\n${errorMessages}\n\nPlease try again or specify corrections.`
       }
 
+      // Step 3: Detect and install missing dependencies
+      writer.write({
+        id: toolCallId,
+        type: 'data-generating-files',
+        data: { paths: uploaded.map((f) => f.path), status: 'analyzing', message: 'Checking for missing dependencies...' },
+      })
+
+      // Get package.json to check what's installed
+      let packageJsonContent = ''
+      try {
+        const packageJsonFile = uploaded.find((f) => f.path === 'package.json')
+        if (packageJsonFile) {
+          packageJsonContent = packageJsonFile.content
+        } else {
+          // Try to read from sandbox if not generated
+          const pkgResult = await sandbox?.readFile({ path: 'package.json' })
+          if (pkgResult) {
+            packageJsonContent = await pkgResult.text()
+          }
+        }
+      } catch (error) {
+        console.error('Failed to read package.json:', error)
+      }
+
+      // Detect missing dependencies
+      const dependencyReport = detectMissingDependencies(
+        uploaded.map((f) => ({ path: f.path, content: f.content })),
+        packageJsonContent
+      )
+
+      if (dependencyReport.missingPackages.length > 0) {
+        writer.write({
+          id: toolCallId,
+          type: 'data-generating-files',
+          data: {
+            paths: uploaded.map((f) => f.path),
+            status: 'analyzing',
+            message: `Installing ${dependencyReport.missingPackages.length} missing package(s): ${dependencyReport.missingPackages.join(', ')}...`,
+          },
+        })
+
+        try {
+          // Attempt to install missing packages
+          const installCommand = generateInstallCommand(dependencyReport.missingPackages, 'npm')
+          console.log(`Installing missing dependencies: ${installCommand}`)
+
+          if (sandbox) {
+            const cmdResult = await sandbox.runCommand({
+              cmd: 'npm',
+              args: ['install', ...dependencyReport.missingPackages],
+              detached: false,
+            })
+
+            if (cmdResult.exitCode === 0) {
+              writer.write({
+                id: toolCallId,
+                type: 'data-generating-files',
+                data: {
+                  paths: uploaded.map((f) => f.path),
+                  status: 'analyzing',
+                  message: `✅ Successfully installed ${dependencyReport.missingPackages.length} package(s)`,
+                },
+              })
+            } else {
+              const stderr = await cmdResult.stderr()
+              writer.write({
+                id: toolCallId,
+                type: 'data-generating-files',
+                data: {
+                  paths: uploaded.map((f) => f.path),
+                  status: 'analyzing',
+                  message: `⚠️  Could not auto-install all dependencies. Please run: ${installCommand}`,
+                },
+              })
+              console.error('npm install failed:', stderr)
+            }
+          }
+        } catch (error) {
+          const installCommand = generateInstallCommand(dependencyReport.missingPackages, 'npm')
+          writer.write({
+            id: toolCallId,
+            type: 'data-generating-files',
+            data: {
+              paths: uploaded.map((f) => f.path),
+              status: 'analyzing',
+              message: `⚠️  Could not auto-install dependencies. Please run: ${installCommand}`,
+            },
+          })
+          console.error('Dependency installation error:', error)
+        }
+      }
+
       writer.write({
         id: toolCallId,
         type: 'data-generating-files',
@@ -157,6 +249,10 @@ export const generateFiles = ({ writer, modelId, userId, projectId }: Params) =>
       })
 
       const pathList = uploaded.map((file) => `- ${file.path}`).join('\n')
-      return `Successfully generated and validated ${uploaded.length} files.\n\nPaths:\n${pathList}`
+      const depsInfo =
+        dependencyReport.missingPackages.length > 0
+          ? `\n\n📦 Dependencies: ${dependencyReport.summary}`
+          : ''
+      return `Successfully generated and validated ${uploaded.length} files.\n\nPaths:\n${pathList}${depsInfo}`
     },
   })
