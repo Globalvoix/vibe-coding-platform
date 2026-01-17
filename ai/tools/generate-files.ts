@@ -10,6 +10,8 @@ import z from 'zod/v3'
 import { upsertProjectFiles } from '@/lib/project-files-db'
 import { buildGenerationBlueprint } from '@/lib/generation-blueprint'
 import { validateGeneratedFiles } from '@/lib/code-semantic-validator'
+import { detectMissingDependencies, generateInstallCommand } from '@/lib/missing-dependencies-detector'
+import { autoInstallMissingPackages } from './auto-install-missing-packages'
 
 interface Params {
   modelId: string
