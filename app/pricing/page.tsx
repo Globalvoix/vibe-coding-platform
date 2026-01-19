@@ -149,17 +149,7 @@ export default function PricingPage() {
   }, [isSignedIn])
 
   const handleGetStarted = (planId: string) => {
-    // Free plan doesn't need checkout
-    if (planId === 'free') {
-      if (!isSignedIn) {
-        router.push('/sign-in')
-        return
-      }
-      router.push('/home')
-      return
-    }
-
-    // For paid plans, redirect to sign in if not signed in
+    // Redirect to sign in if not signed in
     if (!isSignedIn) {
       router.push('/sign-in')
       return
