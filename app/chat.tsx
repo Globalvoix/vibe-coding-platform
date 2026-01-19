@@ -388,34 +388,6 @@ export function Chat({ className, initialPrompt, initialMessages, projectId, pro
         ) : (
           <>
             <Conversation className="relative w-full flex-1 min-h-0 bg-background">
-              {isBackgroundGenerating && (
-                <div className="sticky top-0 z-10 w-full bg-[#D2E3FC]/80 backdrop-blur-sm border-b border-[#1A73E8]/20 px-4 py-2 flex items-center justify-between animate-in fade-in slide-in-from-top-2 duration-300">
-                  <div className="flex items-center gap-2">
-                    <div className="relative w-4 h-4 flex items-center justify-center">
-                      <div className="absolute w-full h-full rounded-full bg-[#1A73E8]/10 animate-ping"></div>
-                      <Square className="w-2.5 h-2.5 fill-[#1A73E8] text-[#1A73E8]" />
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-[12px] font-semibold text-[#1A73E8]">
-                        Generation in progress...
-                      </span>
-                      {generationProgress?.message && (
-                        <span className="text-[11px] text-[#1A73E8]/70 truncate max-w-[200px]">
-                          {generationProgress.message}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleStopGeneration}
-                    className="h-7 px-3 text-[11px] font-bold text-[#1A73E8] hover:bg-[#1A73E8]/10 rounded-full border border-[#1A73E8]/30"
-                  >
-                    STOP
-                  </Button>
-                </div>
-              )}
               <ConversationContent className="space-y-4">
                 {allMessages.map((message, index) => (
                   <Message
