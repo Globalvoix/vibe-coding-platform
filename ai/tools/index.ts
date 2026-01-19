@@ -19,7 +19,7 @@ interface Params {
 export function tools({ modelId, writer, userId, projectId }: Params) {
   return {
     createSandbox: createSandbox({ writer }),
-    generateFiles: generateFiles({ writer, modelId, userId, projectId }),
+    generateFiles: generateFiles({ writer, modelId }),
     getSandboxURL: getSandboxURL({ writer }),
     runCommand: runCommand({ writer }),
     requestSupabaseConnection: requestSupabaseConnection({ writer, projectId }),
