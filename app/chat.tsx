@@ -65,6 +65,8 @@ export function Chat({ className, initialPrompt, initialMessages, projectId, pro
   })
   const [showHistoryPanel, setShowHistoryPanel] = useState(false)
   const [selectedVersionId, setSelectedVersionId] = useState<string | null>(null)
+  const [hasSubscription, setHasSubscription] = useState<boolean | null>(null)
+  const [showSubscriptionRequired, setShowSubscriptionRequired] = useState(false)
 
   // Persist and restore chat messages across page refreshes and across devices (seeded from project DB)
   const seedChatMessages = useMemo(() => {
