@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { createProject, listProjects, countProjectsCreatedSince } from '@/lib/projects-db'
-import { getUserSubscription, initializeFreeSubscription, getPlanLimits } from '@/lib/subscription'
+import { getUserSubscription, getPlanLimits } from '@/lib/subscription'
 
 export async function GET() {
   const { userId } = await auth()
