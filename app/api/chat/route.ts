@@ -277,6 +277,18 @@ export async function POST(req: Request) {
 
     const requiredCredits = calculatePromptCost(userPromptText)
     const credits = await getUserCredits(userId)
+    const subscription = await getUserSubscription(userId)
+
+    // Check if user has a paid subscription
+    if (!subscription || subscription.plan_id === 'free' || subscription.status !== 'active') {
+      return NextResponse.json(
+        {
+          error: 'A paid subscription is required to use ThinkSoft. We are in beta and paid-only due to high demand.',
+          code: 'SUBSCRIPTION_REQUIRED',
+        },
+        { status: 403 }
+      )
+    }
 
     if (credits.balance < requiredCredits) {
       return NextResponse.json(
