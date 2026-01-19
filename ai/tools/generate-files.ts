@@ -7,21 +7,13 @@ import { getWriteFiles } from './generate-files/get-write-files'
 import { tool } from 'ai'
 import description from './generate-files.md'
 import z from 'zod/v3'
-import { upsertProjectFiles } from '@/lib/project-files-db'
-import { buildGenerationBlueprint } from '@/lib/generation-blueprint'
-import { validateGeneratedFiles } from '@/lib/code-semantic-validator'
-import { detectMissingDependencies, generateInstallCommand } from '@/lib/missing-dependencies-detector'
-import { sandboxFileOps } from './sandbox-file-operations'
-import { GenerationSessionTracker } from '@/lib/generation-session-tracker'
 
 interface Params {
   modelId: string
   writer: UIMessageStreamWriter<UIMessage<never, DataPart>>
-  userId: string
-  projectId?: string
 }
 
-export const generateFiles = ({ writer, modelId, userId, projectId }: Params) =>
+export const generateFiles = ({ writer, modelId }: Params) =>
   tool({
     description,
     inputSchema: z.object({
@@ -29,347 +21,87 @@ export const generateFiles = ({ writer, modelId, userId, projectId }: Params) =>
       paths: z.array(z.string()),
     }),
     execute: async ({ sandboxId, paths }, { toolCallId, messages }) => {
-      const sessionTracker = new GenerationSessionTracker(toolCallId, projectId || '', userId)
+      writer.write({
+        id: toolCallId,
+        type: 'data-generating-files',
+        data: { paths: [], status: 'generating' },
+      })
 
-      // Safe writer that doesn't throw if the stream is closed
-      const safeWrite = (part: any) => {
-        try {
-          writer.write(part)
-        } catch (error) {
-          // Ignore stream closure errors
-          console.warn('Stream write failed (possibly closed):', error)
-        }
-      }
+      let sandbox: Sandbox | null = null
 
       try {
-        // Initialize session tracking
-        if (projectId) {
-          await sessionTracker.initialize(sandboxId)
-        }
+        sandbox = await Sandbox.get({ sandboxId })
+      } catch (error) {
+        const richError = getRichError({
+          action: 'get sandbox by id',
+          args: { sandboxId },
+          error,
+        })
 
-        safeWrite({
+        writer.write({
           id: toolCallId,
           type: 'data-generating-files',
-          data: { paths: [], status: 'generating' },
+          data: { error: richError.error, paths: [], status: 'error' },
         })
 
-        // Step 1: Build generation blueprint for context
-        safeWrite({
-          id: toolCallId,
-          type: 'data-generating-files',
-          data: { paths: [], status: 'analyzing', message: 'Analyzing generation requirements...' },
-        })
+        return richError.message
+      }
 
-        if (projectId) {
-          await sessionTracker.updateProgress({
-            stage: 'analyzing',
-            message: 'Analyzing generation requirements...',
-          })
-        }
+      const writeFiles = getWriteFiles({ sandbox, toolCallId, writer })
+      const iterator = getContents({ messages, modelId, paths })
+      const uploaded: File[] = []
 
-        const blueprint = buildGenerationBlueprint({
-          paths,
-          userRequest: messages[messages.length - 1]?.content?.toString() ?? '',
-        })
-
-        let sandbox: Sandbox | null = null
-
-        try {
-          sandbox = await Sandbox.get({ sandboxId })
-        } catch (error) {
-          const richError = getRichError({
-            action: 'get sandbox by id',
-            args: { sandboxId },
-            error,
-          })
-
-          writer.write({
-            id: toolCallId,
-            type: 'data-generating-files',
-            data: { error: richError.error, paths: [], status: 'error' },
-          })
-
-          if (projectId) {
-            await sessionTracker.complete('error')
-          }
-          return richError.message
-        }
-
-        const writeFiles = getWriteFiles({ sandbox, toolCallId, writer: { write: safeWrite } as any })
-        const iterator = getContents({ messages, modelId, paths, blueprint })
-        const uploaded: File[] = []
-        const allGeneratedFiles: File[] = []
-
-        const persistFiles = async (files: File[]) => {
-          if (!projectId) return
-          if (files.length === 0) return
-
-          try {
-            await upsertProjectFiles({
-              userId,
-              projectId,
-              files: files.map((file) => ({ path: file.path, content: file.content })),
-            })
-          } catch {
-            // best-effort persistence
-          }
-        }
-
-        try {
-          for await (const chunk of iterator) {
-            // Check if generation was cancelled
-            if (projectId) {
-              const isCancelled = await GenerationSessionTracker.isCancelled(toolCallId)
-              if (isCancelled) {
-                if (projectId) {
-                  await sessionTracker.complete('cancelled')
-                }
-
-                safeWrite({
-                  id: toolCallId,
-                  type: 'data-generating-files',
-                  data: {
-                    paths,
-                    status: 'error',
-                    error: { message: 'Generation was cancelled by user' },
-                  },
-                })
-                return 'Generation was cancelled by user.'
-              }
-            }
-
-            if (chunk.files.length > 0) {
-              // Collect for later validation
-              allGeneratedFiles.push(...chunk.files)
-
-              const error = await writeFiles(chunk)
-              if (error) {
-                if (projectId) {
-                  await sessionTracker.complete('error')
-                }
-                return error
-              }
-
-              uploaded.push(...chunk.files)
-              await persistFiles(chunk.files)
+      try {
+        for await (const chunk of iterator) {
+          if (chunk.files.length > 0) {
+            const error = await writeFiles(chunk)
+            if (error) {
+              return error
             } else {
-              safeWrite({
-                id: toolCallId,
-                type: 'data-generating-files',
-                data: {
-                  status: 'generating',
-                  paths: chunk.paths,
-                },
-              })
+              uploaded.push(...chunk.files)
             }
-          }
-        } catch (error) {
-          const richError = getRichError({
-            action: 'generate file contents',
-            args: { modelId, paths },
-            error,
-          })
-
-          safeWrite({
-            id: toolCallId,
-            type: 'data-generating-files',
-            data: {
-              error: richError.error,
-              status: 'error',
-              paths,
-            },
-          })
-
-          if (projectId) {
-            await sessionTracker.complete('error')
-          }
-          return richError.message
-        }
-
-        // Step 2: Validate generated files
-        safeWrite({
-          id: toolCallId,
-          type: 'data-generating-files',
-          data: { paths: uploaded.map((f) => f.path), status: 'validating', message: 'Validating generated code...' },
-        })
-
-        if (projectId) {
-          await sessionTracker.updateProgress({
-            stage: 'validating',
-            message: 'Validating generated code...',
-            filesCount: uploaded.length,
-          })
-        }
-
-        const validationResult = validateGeneratedFiles(
-          uploaded.map((file) => ({
-            path: file.path,
-            content: file.content,
-          })),
-          blueprint.componentStructure.routes
-        )
-
-        if (!validationResult.isValid) {
-          const errorMessages = validationResult.errors.map((e) => `${e.file}: ${e.message}`).join('\n')
-          if (projectId) {
-            await sessionTracker.complete('error')
-          }
-          return `Code generation had validation errors:\n\n${errorMessages}\n\nPlease try again or specify corrections.`
-        }
-
-        // Step 3: Detect and install missing dependencies
-        safeWrite({
-          id: toolCallId,
-          type: 'data-generating-files',
-          data: { paths: uploaded.map((f) => f.path), status: 'analyzing', message: 'Checking for missing dependencies...' },
-        })
-
-        // Get package.json to check what's installed
-        let packageJsonContent = ''
-        let packageJsonFile = uploaded.find((f) => f.path === 'package.json')
-        let wasPackageJsonGenerated = false
-
-        try {
-          if (packageJsonFile) {
-            packageJsonContent = packageJsonFile.content
-            wasPackageJsonGenerated = true
           } else {
-            // Try to read from sandbox if not generated
-            if (sandbox) {
-              const pkgText = await sandboxFileOps.readFileText(sandbox, 'package.json')
-              if (typeof pkgText === 'string') {
-                packageJsonContent = pkgText
-              }
-            }
-          }
-        } catch (error) {
-          console.error('Failed to read package.json:', error)
-        }
-
-        // If we couldn't read package.json, skip dependency detection to avoid false positives
-        if (!packageJsonContent || packageJsonContent.trim().length === 0) {
-          safeWrite({
-            id: toolCallId,
-            type: 'data-generating-files',
-            data: {
-              paths: uploaded.map((f) => f.path),
-              status: 'analyzing',
-              message: 'Skipping dependency check (package.json could not be read from sandbox).',
-            },
-          })
-
-          safeWrite({
-            id: toolCallId,
-            type: 'data-generating-files',
-            data: { paths: uploaded.map((file) => file.path), status: 'done' },
-          })
-
-          if (projectId) {
-            await sessionTracker.complete('completed')
-          }
-
-          const pathList = uploaded.map((file) => `- ${file.path}`).join('\n')
-          return `Successfully generated and validated ${uploaded.length} files.\n\nPaths:\n${pathList}`
-        }
-
-        // Detect missing dependencies
-        const dependencyReport = detectMissingDependencies(
-          uploaded.map((f) => ({ path: f.path, content: f.content })),
-          packageJsonContent
-        )
-
-        if (dependencyReport.missingPackages.length > 0) {
-          safeWrite({
-            id: toolCallId,
-            type: 'data-generating-files',
-            data: {
-              paths: uploaded.map((f) => f.path),
-              status: 'analyzing',
-              message: `Installing ${dependencyReport.missingPackages.length} missing package(s): ${dependencyReport.missingPackages.join(', ')}...`,
-            },
-          })
-
-          if (projectId) {
-            await sessionTracker.updateProgress({
-              stage: 'installing-deps',
-              message: `Installing ${dependencyReport.missingPackages.length} missing package(s)`,
-              filesCount: uploaded.length,
-            })
-          }
-
-          try {
-            // Attempt to install missing packages
-            const installCommand = generateInstallCommand(dependencyReport.missingPackages, 'npm')
-            console.log(`Installing missing dependencies: ${installCommand}`)
-
-            if (sandbox) {
-              const cmdResult = await sandbox.runCommand({
-                cmd: 'npm',
-                args: ['install', ...dependencyReport.missingPackages],
-                detached: false,
-              })
-
-              if (cmdResult.exitCode === 0) {
-                safeWrite({
-                  id: toolCallId,
-                  type: 'data-generating-files',
-                  data: {
-                    paths: uploaded.map((f) => f.path),
-                    status: 'analyzing',
-                    message: `✅ Successfully installed ${dependencyReport.missingPackages.length} package(s)`,
-                  },
-                })
-              } else {
-                const stderr = await cmdResult.stderr()
-                safeWrite({
-                  id: toolCallId,
-                  type: 'data-generating-files',
-                  data: {
-                    paths: uploaded.map((f) => f.path),
-                    status: 'analyzing',
-                    message: `⚠️  Could not auto-install all dependencies. Please run: ${installCommand}`,
-                  },
-                })
-                console.error('npm install failed:', stderr)
-              }
-            }
-          } catch (error) {
-            const installCommand = generateInstallCommand(dependencyReport.missingPackages, 'npm')
-            safeWrite({
+            writer.write({
               id: toolCallId,
               type: 'data-generating-files',
               data: {
-                paths: uploaded.map((f) => f.path),
-                status: 'analyzing',
-                message: `⚠️  Could not auto-install dependencies. Please run: ${installCommand}`,
+                status: 'generating',
+                paths: chunk.paths,
               },
             })
-            console.error('Dependency installation error:', error)
           }
         }
-
-        safeWrite({
-          id: toolCallId,
-          type: 'data-generating-files',
-          data: { paths: uploaded.map((file) => file.path), status: 'done' },
+      } catch (error) {
+        const richError = getRichError({
+          action: 'generate file contents',
+          args: { modelId, paths },
+          error,
         })
 
-        if (projectId) {
-          await sessionTracker.complete('completed')
-        }
+        writer.write({
+          id: toolCallId,
+          type: 'data-generating-files',
+          data: {
+            error: richError.error,
+            status: 'error',
+            paths,
+          },
+        })
 
-        const pathList = uploaded.map((file) => `- ${file.path}`).join('\n')
-        const depsInfo =
-          dependencyReport.missingPackages.length > 0
-            ? `\n\n📦 Dependencies: ${dependencyReport.summary}`
-            : ''
-        return `Successfully generated and validated ${uploaded.length} files.\n\nPaths:\n${pathList}${depsInfo}`
-      } catch (error) {
-        console.error('Generation session error:', error)
-        if (projectId) {
-          await sessionTracker.complete('error')
-        }
-        throw error
+        return richError.message
       }
+
+      writer.write({
+        id: toolCallId,
+        type: 'data-generating-files',
+        data: { paths: uploaded.map((file) => file.path), status: 'done' },
+      })
+
+      return `Successfully generated and uploaded ${
+        uploaded.length
+      } files. Their paths and contents are as follows:
+        ${uploaded
+          .map((file) => `Path: ${file.path}\nContent: ${file.content}\n`)
+          .join('\n')}`
     },
   })
