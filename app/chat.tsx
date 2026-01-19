@@ -65,13 +65,6 @@ export function Chat({ className, initialPrompt, initialMessages, projectId, pro
   })
   const [showHistoryPanel, setShowHistoryPanel] = useState(false)
   const [selectedVersionId, setSelectedVersionId] = useState<string | null>(null)
-  const [isBackgroundGenerating, setIsBackgroundGenerating] = useState(false)
-  const [activeGenerationId, setActiveGenerationId] = useState<string | null>(null)
-  const [generationProgress, setGenerationProgress] = useState<{
-    stage: string
-    message?: string
-    filesCount?: number
-  } | null>(null)
 
   // Persist and restore chat messages across page refreshes and across devices (seeded from project DB)
   const seedChatMessages = useMemo(() => {
