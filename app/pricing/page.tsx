@@ -215,11 +215,14 @@ export default function PricingPage() {
 
         <section className="relative z-10 w-full max-w-6xl">
           <div className="text-center mb-10">
+            <Badge className="mb-4 bg-amber-500/20 text-amber-600 border-amber-500/40 hover:bg-amber-500/20">
+              Beta - Paid Only
+            </Badge>
             <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight text-white mb-3">
               Pricing
             </h1>
             <p className="text-base sm:text-lg text-white/90">
-              Start for free. Upgrade as you go.
+              We're in beta and offering paid plans only due to high demand.
             </p>
           </div>
 
