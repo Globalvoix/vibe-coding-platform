@@ -189,8 +189,8 @@ export async function getUserSubscription(
     const subscription = result.rows[0]
 
     if (!subscription) {
-      const created = await initializeFreeSubscription(userId)
-      return created ? normalizeSubscription(created) : null
+      // Don't auto-create free subscriptions - require paid plans only
+      return null
     }
 
     return normalizeSubscription(subscription)
