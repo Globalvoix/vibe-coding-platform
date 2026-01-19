@@ -140,6 +140,33 @@ export function Chat({ className, initialPrompt, initialMessages, projectId, pro
 
 
   useEffect(() => {
+    if (!isSignedIn) {
+      setHasSubscription(null)
+      return
+    }
+
+    const checkSubscriptionStatus = async () => {
+      try {
+        const response = await fetch('/api/subscription')
+        if (response.ok) {
+          const data = await response.json()
+          const subscription = data.subscription
+          // Only allow paid plans (not free)
+          const isPaid = subscription && subscription.plan_id !== 'free' && subscription.status === 'active'
+          setHasSubscription(isPaid)
+        } else {
+          setHasSubscription(false)
+        }
+      } catch (error) {
+        console.error('Failed to check subscription status:', error)
+        setHasSubscription(false)
+      }
+    }
+
+    checkSubscriptionStatus()
+  }, [isSignedIn])
+
+  useEffect(() => {
     if (!projectId) return
 
     const checkSupabaseStatus = async () => {
