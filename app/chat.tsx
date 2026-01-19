@@ -220,6 +220,18 @@ export function Chat({ className, initialPrompt, initialMessages, projectId, pro
         return
       }
 
+      // Check if user has a paid subscription
+      if (hasSubscription === false) {
+        setShowSubscriptionRequired(true)
+        return
+      }
+
+      // If subscription status is still loading, don't submit
+      if (hasSubscription === null) {
+        toast.loading('Checking subscription status...')
+        return
+      }
+
       const messageText = text.trim()
 
       if (messageText) {
@@ -238,7 +250,7 @@ export function Chat({ className, initialPrompt, initialMessages, projectId, pro
         }
       }
     },
-    [isSignedIn, openSignIn, sendMessage, setInput, projectId, supabaseConnected]
+    [isSignedIn, openSignIn, sendMessage, setInput, projectId, supabaseConnected, hasSubscription]
   )
 
   const previousChatStatusRef = useRef(status)
