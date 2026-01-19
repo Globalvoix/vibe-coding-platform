@@ -13,36 +13,32 @@ import { cn } from "@/lib/utils";
 
 const faqs = [
   {
-    question: "Can I try Thinksoft for free?",
-    answer: "Yes. Our Starter plan lets you start building with generous limits- no payment details needed. Upgrade only when you're ready to scale."
+    question: "Why is Thinksoft paid-only?",
+    answer: "We're currently in beta and offering paid plans only due to high demand. This helps us maintain quality service and provide the best experience for our users."
   },
   {
     question: "Which plan is best for me?",
-    answer: "If you're exploring or testing, start with the Starter plan for free. For solo creators or startups shipping live apps, the Personal plan is ideal. Thinksoft and Booster plans are for higher and frequent usage."
+    answer: "For solo creators or startups shipping live apps, the Pro plan is ideal. The Business plan is for teams running multiple products and environments. The Enterprise plan is for organizations that need custom limits and enterprise guarantees."
   },
   {
-    question: "What if my tokens are exhausted in any paid plans? Can I buy more tokens?",
-    answer: "You'll get notified before hitting limits. If you run out of tokens, you can purchase additional tokens anytime- no need to change your plan. And if you need consistently more tokens, upgrading to a higher plan which gives you better value."
+    question: "What if my credits are exhausted? Can I buy more credits?",
+    answer: "You'll get notified before hitting limits. If you run out of credits, you can upgrade to a higher plan which gives you more credits per month. Or you can contact us for custom solutions."
   },
   {
-    question: "If I have not used my token limits in any particular month, does credit roll over?",
-    answer: "No unused tokens don't roll-over. They are lost."
+    question: "If I have not used my credit limits in any particular month, does credit roll over?",
+    answer: "No, unused credits don't roll-over. They are reset at the beginning of each billing period."
   },
   {
     question: "Do I need any long-term commitment?",
     answer: "No, you can subscribe on a monthly basis and cancel at any time."
   },
   {
-    question: "Do I need to provide credit card details to start?",
-    answer: "Nope. You can sign up and build for free with our Starter plan without a card."
-  },
-  {
     question: "What payment methods do you accept?",
-    answer: "We accept all major credit and debit cards and payment via Paypal."
+    answer: "We accept all major credit and debit cards and payment via PayPal."
   },
   {
     question: "Can I switch or cancel my subscription anytime?",
-    answer: "Yes. You can upgrade, downgrade, or cancel anytime- your projects and data remain yours. But you dont get a refund."
+    answer: "Yes. You can upgrade, downgrade, or cancel anytime- your projects and data remain yours. But you don't get a refund."
   },
   {
     question: "How do refunds work?",
