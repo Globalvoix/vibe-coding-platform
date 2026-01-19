@@ -524,6 +524,10 @@ export function Chat({ className, initialPrompt, initialMessages, projectId, pro
         title={comingSoonModal.title}
         description={comingSoonModal.description}
       />
+      <SubscriptionRequiredModal
+        isOpen={showSubscriptionRequired}
+        onClose={() => setShowSubscriptionRequired(false)}
+      />
     </>
   )
 }
