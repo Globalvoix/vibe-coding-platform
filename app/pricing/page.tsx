@@ -75,22 +75,6 @@ export default function PricingPage() {
 
   const plans = [
     {
-      id: 'free',
-      tierName: "Starter",
-      name: "Free",
-      credits: "20 credits/mo",
-      price: "$0",
-      priceSub: "/mo",
-      description: "Get started with AI-generated frontends and a single workspace.",
-      features: [
-        "20 credits per month",
-        "Up to 5 apps/workspaces",
-        "Unlimited database creations",
-        "Basic frontend generation",
-      ],
-      highlight: false,
-    },
-    {
       id: 'pro',
       tierName: "Pro",
       name: "$15",
