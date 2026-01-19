@@ -276,31 +276,11 @@ export function Chat({ className, initialPrompt, initialMessages, projectId, pro
     !forceEnableInput && (status === 'streaming' || status === 'submitted')
   const isInputDisabled = !forceEnableInput && status !== 'ready'
 
-  const handleStopGeneration = useCallback(async () => {
-    // Optimistically update UI
-    setIsBackgroundGenerating(false)
-    setActiveGenerationId(null)
-    setGenerationProgress(null)
-
+  const handleStopGeneration = useCallback(() => {
     // Stop the current client-side stream using the useChat hook
     stop()
-
-    if (projectId) {
-      try {
-        const response = await fetch(`/api/projects/${projectId}/generation-stop`, {
-          method: 'POST',
-        })
-        if (response.ok) {
-          toast.success('Generation stopped')
-        } else {
-          // If failed, we might want to revert the optimistic update or just log
-          console.error('Failed to send stop signal')
-        }
-      } catch (error) {
-        console.error('Error stopping generation:', error)
-      }
-    }
-  }, [stop, projectId])
+    toast.success('Generation stopped')
+  }, [stop])
 
   const handleVersionSelect = (version: ProjectVersion) => {
     setSelectedVersionId(version.id)
