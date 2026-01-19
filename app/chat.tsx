@@ -272,39 +272,9 @@ export function Chat({ className, initialPrompt, initialMessages, projectId, pro
     }
   }, [allMessages.length, hasRestored, initialPrompt, input, projectId, status])
 
-  useEffect(() => {
-    if (!projectId) return
-
-    const checkGenerationStatus = async () => {
-      try {
-        const response = await fetch(`/api/projects/${projectId}/generation-status`)
-        if (response.ok) {
-          const data = await response.json()
-          if (data.isActive) {
-            setIsBackgroundGenerating(true)
-            setActiveGenerationId(data.session?.id)
-            if (data.session?.progress) {
-              setGenerationProgress(data.session.progress)
-            }
-          } else {
-            setIsBackgroundGenerating(false)
-            setActiveGenerationId(null)
-            setGenerationProgress(null)
-          }
-        }
-      } catch (error) {
-        console.error('Failed to check generation status:', error)
-      }
-    }
-
-    checkGenerationStatus()
-    const interval = setInterval(checkGenerationStatus, 3000)
-    return () => clearInterval(interval)
-  }, [projectId])
-
   const isLoading =
-    !forceEnableInput && (status === 'streaming' || status === 'submitted' || isBackgroundGenerating)
-  const isInputDisabled = !forceEnableInput && (status !== 'ready' || isBackgroundGenerating)
+    !forceEnableInput && (status === 'streaming' || status === 'submitted')
+  const isInputDisabled = !forceEnableInput && status !== 'ready'
 
   const handleStopGeneration = useCallback(async () => {
     // Optimistically update UI
