@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { getUserCredits } from '@/lib/credits'
+import { getPlanLimits } from '@/lib/subscription'
 
 export async function GET(request: NextRequest) {
   try {
@@ -11,10 +12,12 @@ export async function GET(request: NextRequest) {
     }
 
     const credits = await getUserCredits(userId)
+    const limits = await getPlanLimits(credits.planId || 'free')
 
     return NextResponse.json({
       credits: credits.balance,
       planId: credits.planId,
+      limit: limits.credits,
     })
   } catch (error) {
     console.error('Error fetching user credits:', error)
