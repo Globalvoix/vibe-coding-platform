@@ -396,20 +396,22 @@ export async function POST(req: Request) {
               projectId,
               sessionTracker: generationSessionTracker,
             }),
-            onError: async (error) => {
+            onError: (error) => {
               console.error('Error communicating with AI')
               console.error(JSON.stringify(error, null, 2))
 
               if (!generationSessionTracker) return
 
-              try {
-                const isCancelled = await GenerationSessionTracker.isCancelled(
-                  generationSessionTracker.id
-                )
-                await generationSessionTracker.complete(isCancelled ? 'cancelled' : 'error')
-              } catch (trackerError) {
-                console.warn('Failed to update generation session status on error', trackerError)
-              }
+              void (async () => {
+                try {
+                  const isCancelled = await GenerationSessionTracker.isCancelled(
+                    generationSessionTracker.id
+                  )
+                  await generationSessionTracker.complete(isCancelled ? 'cancelled' : 'error')
+                } catch (trackerError) {
+                  console.warn('Failed to update generation session status on error', trackerError)
+                }
+              })()
             },
             onFinish: async ({ usage }) => {
               if (generationSessionTracker) {
