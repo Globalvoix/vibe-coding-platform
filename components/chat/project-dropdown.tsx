@@ -45,6 +45,7 @@ export function ProjectDropdown({ projectName, projectId }: ProjectDropdownProps
   const [open, setOpen] = React.useState(false)
   const [renameModalOpen, setRenameModalOpen] = React.useState(false)
   const [creditBalance, setCreditBalance] = React.useState<number | null>(null)
+  const [creditLimit, setCreditLimit] = React.useState<number>(100)
   const [isCreditsLoading, setIsCreditsLoading] = React.useState(false)
   const router = useRouter()
   const { isSignedIn } = useAuth()
@@ -59,6 +60,9 @@ export function ProjectDropdown({ projectName, projectId }: ProjectDropdownProps
       if (response.ok) {
         const data = await response.json()
         setCreditBalance(typeof data.credits === 'number' ? data.credits : null)
+        if (typeof data.limit === 'number') {
+          setCreditLimit(data.limit)
+        }
       }
     } catch (error) {
       console.error('Failed to load credits', error)
@@ -73,8 +77,7 @@ export function ProjectDropdown({ projectName, projectId }: ProjectDropdownProps
     return () => window.removeEventListener(CREDITS_UPDATED_EVENT, loadCredits)
   }, [loadCredits])
 
-  const maxCredits = 100 // Assuming 100 is max for progress bar display
-  const creditPercentage = creditBalance !== null ? Math.min((creditBalance / maxCredits) * 100, 100) : 0
+  const creditPercentage = creditBalance !== null && creditLimit > 0 ? Math.min((creditBalance / creditLimit) * 100, 100) : 0
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
