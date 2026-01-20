@@ -37,7 +37,7 @@ export function SubscriptionRequiredModal({
             <div className="flex-1">
               <DialogTitle>Subscription Required</DialogTitle>
               <DialogDescription className="mt-2 space-y-2">
-                <p>We're currently in <span className="font-semibold">beta</span> and offering paid plans only due to high demand.</p>
+                <p>We&apos;re currently in <span className="font-semibold">beta</span> and offering paid plans only due to high demand.</p>
                 <p>To use ThinkSoft AI, please select a subscription plan that works for you.</p>
               </DialogDescription>
             </div>
