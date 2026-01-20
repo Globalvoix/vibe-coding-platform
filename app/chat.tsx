@@ -43,6 +43,26 @@ interface Props {
   projectName?: string
 }
 
+type GenerationProgress = {
+  stage: 'analyzing' | 'generating' | 'validating' | 'installing-deps' | 'done'
+  message?: string
+  paths?: string[]
+  filesCount?: number
+  error?: string
+  completionPercentage?: number
+}
+
+type GenerationStatusResponse = {
+  isActive: boolean
+  session: null | {
+    id: string
+    status: 'active' | 'completed' | 'error' | 'cancelled'
+    progress: GenerationProgress | null
+    createdAt: string
+    updatedAt: string
+  }
+}
+
 export function Chat({ className, initialPrompt, initialMessages, projectId, projectName }: Props) {
   const { chat } = useSharedChatContext()
   const { messages, sendMessage, status, stop } = useChat<ChatUIMessage>({ chat })
@@ -68,6 +88,8 @@ export function Chat({ className, initialPrompt, initialMessages, projectId, pro
   const [selectedVersionId, setSelectedVersionId] = useState<string | null>(null)
   const [hasSubscription, setHasSubscription] = useState<boolean | null>(null)
   const [showSubscriptionRequired, setShowSubscriptionRequired] = useState(false)
+  const [activeGenerationSession, setActiveGenerationSession] = useState<GenerationStatusResponse['session']>(null)
+  const generationPollIntervalRef = useRef<number | null>(null)
 
   // Persist and restore chat messages across page refreshes and across devices (seeded from project DB)
   const seedChatMessages = useMemo(() => {
@@ -318,11 +340,89 @@ export function Chat({ className, initialPrompt, initialMessages, projectId, pro
     !forceEnableInput && (status === 'streaming' || status === 'submitted')
   const isInputDisabled = !forceEnableInput && status !== 'ready'
 
-  const handleStopGeneration = useCallback(() => {
+  useEffect(() => {
+    if (!projectId) {
+      setActiveGenerationSession(null)
+      return
+    }
+
+    let cancelled = false
+
+    async function checkGenerationStatus() {
+      try {
+        const response = await fetch(`/api/projects/${projectId}/generation-status`, {
+          cache: 'no-store',
+        })
+
+        if (!response.ok) return
+
+        const data = (await response.json()) as GenerationStatusResponse
+        if (cancelled) return
+
+        setActiveGenerationSession(data.session)
+
+        if (generationPollIntervalRef.current !== null) {
+          window.clearInterval(generationPollIntervalRef.current)
+          generationPollIntervalRef.current = null
+        }
+
+        if (data.isActive) {
+          generationPollIntervalRef.current = window.setInterval(async () => {
+            try {
+              const progressRes = await fetch(
+                `/api/projects/${projectId}/generation-progress`,
+                { cache: 'no-store' }
+              )
+              if (!progressRes.ok) return
+
+              const progressData = (await progressRes.json()) as GenerationStatusResponse
+              if (cancelled) return
+
+              setActiveGenerationSession(progressData.session)
+
+              if (!progressData.isActive && generationPollIntervalRef.current !== null) {
+                window.clearInterval(generationPollIntervalRef.current)
+                generationPollIntervalRef.current = null
+              }
+            } catch (error) {
+              console.warn('Failed to poll generation progress', error)
+            }
+          }, 2000)
+        }
+      } catch (error) {
+        console.warn('Failed to check generation status', error)
+      }
+    }
+
+    checkGenerationStatus()
+
+    return () => {
+      cancelled = true
+      if (generationPollIntervalRef.current !== null) {
+        window.clearInterval(generationPollIntervalRef.current)
+        generationPollIntervalRef.current = null
+      }
+    }
+  }, [projectId])
+
+  const isBackgroundGenerating =
+    !!projectId && !!activeGenerationSession && activeGenerationSession.status === 'active' && !isLoading
+
+  const handleStopGeneration = useCallback(async () => {
     // Stop the current client-side stream using the useChat hook
     stop()
+
+    if (projectId) {
+      try {
+        await fetch(`/api/projects/${projectId}/generation-stop`, { method: 'POST' })
+      } catch (error) {
+        console.warn('Failed to stop generation session', error)
+      }
+    }
+
+    setActiveGenerationSession(null)
     toast.success('Generation stopped')
-  }, [stop])
+  }, [projectId, stop])
 
   const handleVersionSelect = (version: ProjectVersion) => {
     setSelectedVersionId(version.id)
@@ -446,12 +546,36 @@ export function Chat({ className, initialPrompt, initialMessages, projectId, pro
               <ConversationScrollButton />
             </Conversation>
 
+            {isBackgroundGenerating && (
+              <div className="px-4 py-2 text-xs text-muted-foreground border-t border-border/60 bg-background">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="font-medium text-foreground/80">
+                      Generation in progress
+                    </div>
+                    {activeGenerationSession?.progress?.message && (
+                      <div className="truncate">{activeGenerationSession.progress.message}</div>
+                    )}
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => void handleStopGeneration()}
+                    className="h-7"
+                  >
+                    Stop
+                  </Button>
+                </div>
+              </div>
+            )}
+
             <form
               className="bg-background p-2"
               onSubmit={async (event) => {
                 event.preventDefault()
                 if (isLoading) {
-                  handleStopGeneration()
+                  await handleStopGeneration()
                 } else {
                   validateAndSubmitMessage(input)
                 }
@@ -463,7 +587,7 @@ export function Chat({ className, initialPrompt, initialMessages, projectId, pro
                 isLoading={isLoading}
                 onSubmit={() => {
                   if (isLoading) {
-                    handleStopGeneration()
+                    void handleStopGeneration()
                   } else {
                     validateAndSubmitMessage(input)
                   }
