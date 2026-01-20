@@ -204,7 +204,7 @@ export default function PricingPage() {
               Pricing
             </h1>
             <p className="text-base sm:text-lg text-white/90">
-              We're in beta and offering paid plans only due to high demand.
+              We&apos;re in beta and offering paid plans only due to high demand.
             </p>
           </div>
 
