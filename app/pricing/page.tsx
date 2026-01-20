@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 const faqs = [
   {
     question: "Why is Thinksoft paid-only?",
-    answer: "We're currently in beta and offering paid plans only due to high demand. This helps us maintain quality service and provide the best experience for our users."
+    answer: "We\'re currently in beta and offering paid plans only due to high demand. This helps us maintain quality service and provide the best experience for our users."
   },
   {
     question: "Which plan is best for me?",
@@ -22,11 +22,11 @@ const faqs = [
   },
   {
     question: "What if my credits are exhausted? Can I buy more credits?",
-    answer: "You'll get notified before hitting limits. If you run out of credits, you can upgrade to a higher plan which gives you more credits per month. Or you can contact us for custom solutions."
+    answer: "You\'ll get notified before hitting limits. If you run out of credits, you can upgrade to a higher plan which gives you more credits per month. Or you can contact us for custom solutions."
   },
   {
     question: "If I have not used my credit limits in any particular month, does credit roll over?",
-    answer: "No, unused credits don't roll-over. They are reset at the beginning of each billing period."
+    answer: "No, unused credits don\'t roll-over. They are reset at the beginning of each billing period."
   },
   {
     question: "Do I need any long-term commitment?",
@@ -38,7 +38,7 @@ const faqs = [
   },
   {
     question: "Can I switch or cancel my subscription anytime?",
-    answer: "Yes. You can upgrade, downgrade, or cancel anytime- your projects and data remain yours. But you don't get a refund."
+    answer: "Yes. You can upgrade, downgrade, or cancel anytime- your projects and data remain yours. But you don\'t get a refund."
   },
   {
     question: "How do refunds work?",
