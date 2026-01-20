@@ -226,9 +226,9 @@ export function Preview({
               <div className="h-10 w-10 rounded-full border-2 border-dashed border-border animate-spin" />
               <p className="text-center max-w-[220px]">
                 {restoreError === 'missing_files'
-                  ? 'Preview can’t be restored yet for this project. Generate the app again to start a new preview.'
+                  ? 'Preview can\'t be restored yet for this project. Generate the app again to start a new preview.'
                   : restoreError === 'unknown'
-                    ? 'Preview couldn’t be restored. Please try again.'
+                    ? 'Preview couldn\'t be restored. Please try again.'
                     : isRestoringEnvironment
                       ? 'Restoring your environment...'
                       : 'Preview will appear here once your app is generated or the sandbox is running.'}
