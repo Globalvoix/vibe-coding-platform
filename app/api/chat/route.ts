@@ -388,7 +388,7 @@ export async function POST(req: Request) {
             ...getModelOptions(chatModelId, { reasoningEffort: effectiveReasoningEffort }),
             system: systemPrompt,
             messages: convertToModelMessages(processedMessages),
-            stopWhen: stepCountIs(60),
+            stopWhen: stepCountIs(200),
             tools: tools({
               modelId: toolModelId,
               writer: safeWriter,
