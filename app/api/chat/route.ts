@@ -17,6 +17,8 @@ import { getUserSubscription } from '@/lib/subscription'
 import { createOrUpdateEnvVar, listEnvVars } from '@/lib/env-vars-db'
 import { getProject } from '@/lib/projects-db'
 import { CONNECTOR_DEFINITIONS, detectConnectorFromPhrase, type ConnectorId } from '@/lib/connector-mapping'
+import { GenerationSessionTracker } from '@/lib/generation-session-tracker'
+import { randomUUID } from 'crypto'
 import prompt from './prompt.md'
 
 interface BodyData {
@@ -306,6 +308,24 @@ export async function POST(req: Request) {
     const connectorContext =
       projectId && project ? await buildConnectorContext({ projectId, userPromptText }) : ''
 
+    const generationSessionTracker =
+      projectId && project
+        ? new GenerationSessionTracker(randomUUID(), projectId, userId)
+        : null
+
+    if (generationSessionTracker) {
+      try {
+        await generationSessionTracker.initialize(null)
+        await generationSessionTracker.updateProgress({
+          stage: 'analyzing',
+          message: 'Starting generation',
+          completionPercentage: 5,
+        })
+      } catch (error) {
+        console.warn('Failed to initialize generation session tracking:', error)
+      }
+    }
+
     const repoContext =
       project && typeof project.repo_context === 'string' && project.repo_context.trim()
         ? project.repo_context.trim()
@@ -343,22 +363,66 @@ export async function POST(req: Request) {
             return message
           })
 
+          let streamWriterClosed = false
+
+          const safeWriter = {
+            write: (value: unknown) => {
+              if (streamWriterClosed) return
+              try {
+                writer.write(value as never)
+              } catch {
+                streamWriterClosed = true
+              }
+            },
+            merge: (value: unknown) => {
+              if (streamWriterClosed) return
+              try {
+                writer.merge(value as never)
+              } catch {
+                streamWriterClosed = true
+              }
+            },
+          } as typeof writer
+
           const result = streamText({
             ...getModelOptions(chatModelId, { reasoningEffort: effectiveReasoningEffort }),
             system: systemPrompt,
             messages: convertToModelMessages(processedMessages),
-            stopWhen: stepCountIs(20),
+            stopWhen: stepCountIs(60),
             tools: tools({
               modelId: toolModelId,
-              writer,
+              writer: safeWriter,
               userId,
               projectId,
+              sessionTracker: generationSessionTracker,
             }),
-            onError: (error) => {
+            onError: async (error) => {
               console.error('Error communicating with AI')
               console.error(JSON.stringify(error, null, 2))
+
+              if (!generationSessionTracker) return
+
+              try {
+                const isCancelled = await GenerationSessionTracker.isCancelled(
+                  generationSessionTracker.id
+                )
+                await generationSessionTracker.complete(isCancelled ? 'cancelled' : 'error')
+              } catch (trackerError) {
+                console.warn('Failed to update generation session status on error', trackerError)
+              }
             },
             onFinish: async ({ usage }) => {
+              if (generationSessionTracker) {
+                try {
+                  const isCancelled = await GenerationSessionTracker.isCancelled(
+                    generationSessionTracker.id
+                  )
+                  await generationSessionTracker.complete(isCancelled ? 'cancelled' : 'completed')
+                } catch (error) {
+                  console.warn('Failed to finalize generation session status', error)
+                }
+              }
+
               try {
                 await recordUsageAndDeductCredits({
                   userId,
@@ -372,8 +436,21 @@ export async function POST(req: Request) {
               }
             },
           })
-          result.consumeStream()
-          writer.merge(
+
+          void result.consumeStream().catch(async (error) => {
+            if (!generationSessionTracker) return
+            console.warn('Stream consumption ended unexpectedly', error)
+            try {
+              const isCancelled = await GenerationSessionTracker.isCancelled(
+                generationSessionTracker.id
+              )
+              await generationSessionTracker.complete(isCancelled ? 'cancelled' : 'error')
+            } catch (trackerError) {
+              console.warn('Failed to mark generation session after stream consumption error', trackerError)
+            }
+          })
+
+          safeWriter.merge(
             result.toUIMessageStream({
               sendReasoning: true,
               sendStart: false,

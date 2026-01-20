@@ -5,12 +5,14 @@ import { getRichError } from './get-rich-error'
 import { tool } from 'ai'
 import description from './run-command.md'
 import z from 'zod/v3'
+import { GenerationSessionTracker } from '@/lib/generation-session-tracker'
 
 interface Params {
   writer: UIMessageStreamWriter<UIMessage<never, DataPart>>
+  sessionTracker?: GenerationSessionTracker | null
 }
 
-export const runCommand = ({ writer }: Params) =>
+export const runCommand = ({ writer, sessionTracker }: Params) =>
   tool({
     description,
     inputSchema: z.object({
@@ -34,6 +36,22 @@ export const runCommand = ({ writer }: Params) =>
         ),
     }),
     execute: async ({ sandboxId, command, sudo, wait, args = [] }, { toolCallId }) => {
+      if (sessionTracker) {
+        const isCancelled = await GenerationSessionTracker.isCancelled(sessionTracker.id)
+        if (isCancelled) {
+          throw new Error('Generation cancelled')
+        }
+
+        const isInstallCommand =
+          ['npm', 'pnpm', 'yarn', 'bun'].includes(command) && args[0] === 'install'
+
+        await sessionTracker.updateProgress({
+          stage: isInstallCommand ? 'installing-deps' : 'validating',
+          message: `Running ${command} ${args.join(' ')}`.trim(),
+          completionPercentage: isInstallCommand ? 96 : 94,
+        })
+      }
+
       writer.write({
         id: toolCallId,
         type: 'data-run-command',
@@ -132,6 +150,14 @@ export const runCommand = ({ writer }: Params) =>
               status: 'done',
             },
           })
+
+          if (sessionTracker) {
+            await sessionTracker.updateProgress({
+              stage: 'done',
+              message: 'Generation complete',
+              completionPercentage: 100,
+            })
+          }
 
           return (
             `The command \`${command} ${args.join(' ')}\` has finished with exit code ${done.exitCode}.` +

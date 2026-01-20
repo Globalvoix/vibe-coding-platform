@@ -27,6 +27,10 @@ export class GenerationSessionTracker {
     this.userId = userId
   }
 
+  get id() {
+    return this.sessionId
+  }
+
   async initialize(sandboxId: string | null = null): Promise<GenerationSessionRecord> {
     return createGenerationSession(this.sessionId, this.projectId, this.userId, sandboxId)
   }
