@@ -47,6 +47,13 @@ export const dataPartSchema = z.object({
     reason: z.string().optional(),
   }),
 
+  // ── File content streamed to Monaco editor ───────────────────────────────
+  'file-content': z.object({
+    sandboxId: z.string(),
+    path: z.string(),
+    content: z.string(),
+  }),
+
   // ── Multi-agent pipeline data parts ──────────────────────────────────────
   'agent-status': z.object({
     agentName: z.enum(['architect', 'craftsman', 'adversary', 'historian', 'synthesizer', 'executor']),

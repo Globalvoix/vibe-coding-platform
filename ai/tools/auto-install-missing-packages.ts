@@ -1,5 +1,7 @@
-import { Sandbox } from '@vercel/sandbox'
+import { Sandbox } from 'e2b'
 import { generationLogger } from './generation-logger'
+
+const E2B_API_KEY = process.env.E2B_API_KEY
 
 interface PackageInstallResult {
   packageName: string
@@ -81,11 +83,7 @@ async function installPackage(
 
     generationLogger.progress('auto_install', `Attempting to install ${packageName} using ${pm}`)
 
-    const result = await sandbox.runCommand({
-      cmd: pm,
-      args: ['add', packageName],
-      detached: false,
-    })
+    const result = await sandbox.commands.run(`${pm} add ${packageName}`, { timeoutMs: 120_000 })
 
     if (result.exitCode === 0) {
       generationLogger.success('auto_install', `Successfully installed ${packageName}`)
@@ -95,8 +93,9 @@ async function installPackage(
         pm,
       }
     } else {
-      const stderr = await result.stderr()
-      const reason = stderr ? `Exit code ${result.exitCode}: ${stderr.slice(0, 100)}` : `Exit code ${result.exitCode}`
+      const reason = result.stderr
+        ? `Exit code ${result.exitCode}: ${result.stderr.slice(0, 100)}`
+        : `Exit code ${result.exitCode}`
       return {
         packageName,
         installed: false,

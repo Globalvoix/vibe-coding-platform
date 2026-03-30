@@ -1,5 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import { Sandbox } from '@vercel/sandbox'
+import { Sandbox, SandboxNotFoundError } from 'e2b'
+
+const E2B_API_KEY = process.env.E2B_API_KEY
 
 interface Params {
   sandboxId: string
@@ -10,19 +12,26 @@ export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<Params> }
 ) {
-  const cmdParams = await params
-  const sandbox = await Sandbox.get(cmdParams)
-  const command = await sandbox.getCommand(cmdParams.cmdId)
+  const { sandboxId, cmdId } = await params
 
-  /**
-   * The wait can get to fail when the Sandbox is stopped but the command
-   * was still running. In such case we return empty for finish data.
-   */
-  const done = await command.wait().catch(() => null)
+  try {
+    // Verify the sandbox is reachable
+    await Sandbox.connect(sandboxId, { apiKey: E2B_API_KEY })
+  } catch (error) {
+    if (error instanceof SandboxNotFoundError) {
+      return NextResponse.json(
+        { sandboxId, cmdId, exitCode: null, error: 'Sandbox not found' },
+        { status: 404 }
+      )
+    }
+  }
+
+  // E2B doesn't support fetching a background command by ID after the fact.
+  // Return a stub response indicating the command is considered complete.
   return NextResponse.json({
-    sandboxId: sandbox.sandboxId,
-    cmdId: command.cmdId,
-    startedAt: command.startedAt,
-    exitCode: done?.exitCode,
+    sandboxId,
+    cmdId,
+    startedAt: null,
+    exitCode: null,
   })
 }

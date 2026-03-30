@@ -1,4 +1,4 @@
-import { Sandbox } from '@vercel/sandbox'
+import { Sandbox } from 'e2b'
 import { getSupabaseProject } from '@/lib/supabase-projects-db'
 import { generateSupabaseEnvFile } from '@/lib/supabase-db'
 
@@ -25,12 +25,7 @@ export async function syncProjectEnvToSandbox({
       anonKey: connection.anon_key || undefined,
     })
 
-    await sandbox.writeFiles([
-      {
-        path: '.env.local',
-        content: Buffer.from(envContent, 'utf8'),
-      },
-    ])
+    await sandbox.files.write('.env.local', envContent)
   } catch (error) {
     console.error('Failed to sync project env to sandbox:', error)
     throw error

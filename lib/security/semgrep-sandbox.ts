@@ -1,4 +1,6 @@
-import { Sandbox } from '@vercel/sandbox'
+import { Sandbox } from 'e2b'
+
+const E2B_API_KEY = process.env.E2B_API_KEY
 
 export type SemgrepFinding = {
   checkId: string
@@ -60,7 +62,7 @@ export async function runSemgrepInSandbox(params: {
   stderr: string
   parsedOk: boolean
 }> {
-  const sandbox = await Sandbox.get({ sandboxId: params.sandboxId })
+  const sandbox = await Sandbox.connect(params.sandboxId, { apiKey: E2B_API_KEY })
   const timeoutSeconds =
     typeof params.timeoutSeconds === 'number' && params.timeoutSeconds > 0
       ? Math.min(300, Math.max(10, params.timeoutSeconds))
@@ -103,18 +105,18 @@ export async function runSemgrepInSandbox(params: {
     ].join(' '),
   ].join('\n')
 
-  const cmd = await sandbox.runCommand({
-    cmd: 'bash',
-    args: ['-lc', `${installAndRun}\n`],
-  })
+  const result = await sandbox.commands.run(
+    `bash -lc ${JSON.stringify(installAndRun + '\n')}`,
+    { timeoutMs: (timeoutSeconds + 60) * 1000 }
+  ).catch((err: unknown) => ({
+    exitCode: 1,
+    stdout: '',
+    stderr: String(err),
+  }))
 
-  const done = await cmd.wait().catch(() => null)
-  const rawExitCode = done?.exitCode ?? null
-
-  const [stdout, stderr] = await Promise.all([
-    done?.stdout().catch(() => '') ?? Promise.resolve(''),
-    done?.stderr().catch(() => '') ?? Promise.resolve(''),
-  ])
+  const rawExitCode = result.exitCode
+  const stdout = result.stdout
+  const stderr = result.stderr
 
   const parsed = sanitizeStdoutToJson(stdout)
   const json = parsed && typeof parsed === 'object' ? (parsed as SemgrepJson) : null

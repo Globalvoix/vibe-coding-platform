@@ -1,4 +1,4 @@
-import { Sandbox } from '@vercel/sandbox'
+import { Sandbox } from 'e2b'
 import { generationLogger } from './generation-logger'
 
 export interface HealthCheckMetadata {
@@ -120,7 +120,7 @@ export class SandboxHealthChecker {
    */
   private async checkConnectivity(sandbox: Sandbox): Promise<boolean> {
     try {
-      await sandbox.runCommand({ cmd: 'echo', args: ['status'] })
+      await sandbox.commands.run('echo status', { timeoutMs: 10000 })
       return true
     } catch {
       return false
@@ -135,12 +135,8 @@ export class SandboxHealthChecker {
     metadata: HealthCheckMetadata
   ): Promise<boolean> {
     try {
-      const result = await sandbox.runCommand({
-        cmd: 'df',
-        args: ['-h', '/'],
-      })
-
-      const output = await result.stdout()
+      const result = await sandbox.commands.run('df -h /', { timeoutMs: 10000 })
+      const output = result.stdout
       const lines = output.split('\n')
       if (lines.length > 1) {
         const parts = lines[1].split(/\s+/)
@@ -165,12 +161,8 @@ export class SandboxHealthChecker {
     metadata: HealthCheckMetadata
   ): Promise<boolean> {
     try {
-      const result = await sandbox.runCommand({
-        cmd: 'free',
-        args: ['-m'],
-      })
-
-      const output = await result.stdout()
+      const result = await sandbox.commands.run('free -m', { timeoutMs: 10000 })
+      const output = result.stdout
       const lines = output.split('\n')
       if (lines.length >= 2) {
         const parts = lines[1].split(/\s+/)
@@ -195,12 +187,8 @@ export class SandboxHealthChecker {
     metadata: HealthCheckMetadata
   ): Promise<boolean> {
     try {
-      const result = await sandbox.runCommand({
-        cmd: 'ps',
-        args: ['aux'],
-      })
-
-      const output = await result.stdout()
+      const result = await sandbox.commands.run('ps aux', { timeoutMs: 10000 })
+      const output = result.stdout
       const processCount = output.split('\n').length - 2 // Exclude header and last empty line
       metadata.runningProcesses = processCount
       return processCount < 500 // Warn if more than 500 processes
@@ -214,23 +202,13 @@ export class SandboxHealthChecker {
    */
   private async checkPortAvailable(sandbox: Sandbox, port: number): Promise<boolean> {
     try {
-      const result = await sandbox.runCommand({
-        cmd: 'lsof',
-        args: ['-i', `:${port}`],
-      })
-
-      const output = await result.stdout()
-      return output.length === 0 // Port is free if no output
+      const result = await sandbox.commands.run(`lsof -i :${port}`, { timeoutMs: 10000 })
+      return result.stdout.length === 0 // Port is free if no output
     } catch {
       // lsof might not be available, try netstat
       try {
-        const result = await sandbox.runCommand({
-          cmd: 'netstat',
-          args: ['-tulpn'],
-        })
-
-        const output = await result.stdout()
-        return !output.includes(`:${port} `)
+        const result = await sandbox.commands.run('netstat -tulpn', { timeoutMs: 10000 })
+        return !result.stdout.includes(`:${port} `)
       } catch {
         return true // Assume OK if check fails
       }

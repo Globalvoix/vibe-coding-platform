@@ -1,6 +1,6 @@
 import type { UIMessageStreamWriter, UIMessage } from 'ai'
 import type { DataPart } from '../messages/data-parts'
-import { Sandbox } from '@vercel/sandbox'
+import { Sandbox } from 'e2b'
 import { getRichError } from './get-rich-error'
 import { tool } from 'ai'
 import description from './create-sandbox.md'
@@ -22,17 +22,17 @@ export const createSandbox = ({ writer, sessionTracker }: Params) =>
         .max(2700000)
         .optional()
         .describe(
-          'Maximum time in milliseconds the Vercel Sandbox will remain active before automatically shutting down. Minimum 600000ms (10 minutes), maximum 2700000ms (45 minutes). Defaults to 600000ms (10 minutes). The sandbox will terminate all running processes when this timeout is reached.'
+          'Maximum time in milliseconds the sandbox will remain active before automatically shutting down. Minimum 600000ms (10 minutes), maximum 2700000ms (45 minutes). Defaults to 600000ms (10 minutes).'
         ),
       ports: z
         .array(z.number())
         .max(2)
         .optional()
         .describe(
-          'Array of network ports to expose and make accessible from outside the Vercel Sandbox. These ports allow web servers, APIs, or other services running inside the Vercel Sandbox to be reached externally. Common ports include 3000 (Next.js), 8000 (Python servers), 5000 (Flask), etc.'
+          'Array of network ports to expose. Common ports: 3000 (Next.js), 8000 (Python), 5000 (Flask). Ports are automatically available in E2B sandboxes.'
         ),
     }),
-    execute: async ({ timeout, ports }, { toolCallId }) => {
+    execute: async ({ timeout }, { toolCallId }) => {
       if (sessionTracker) {
         const isCancelled = await GenerationSessionTracker.isCancelled(sessionTracker.id)
         if (isCancelled) {
@@ -53,8 +53,8 @@ export const createSandbox = ({ writer, sessionTracker }: Params) =>
 
       try {
         const sandbox = await Sandbox.create({
-          timeout: timeout ?? 600000,
-          ports,
+          timeoutMs: timeout ?? 600000,
+          apiKey: process.env.E2B_API_KEY,
         })
 
         if (sessionTracker) {

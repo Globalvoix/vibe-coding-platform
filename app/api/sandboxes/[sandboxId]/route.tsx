@@ -1,31 +1,23 @@
-import { APIError } from '@vercel/sandbox/dist/api-client/api-error'
 import { NextRequest, NextResponse } from 'next/server'
-import { Sandbox } from '@vercel/sandbox'
+import { Sandbox, SandboxNotFoundError } from 'e2b'
 
-/**
- * We must change the SDK to add data to the instance and then
- * use it to retrieve the status of the Sandbox.
- */
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ sandboxId: string }> }
 ) {
   const { sandboxId } = await params
   try {
-    const sandbox = await Sandbox.get({ sandboxId })
-    await sandbox.runCommand({
-      cmd: 'echo',
-      args: ['Sandbox status check'],
-    })
+    const sandbox = await Sandbox.connect(sandboxId, { apiKey: process.env.E2B_API_KEY })
+    await sandbox.commands.run('echo "health check"', { timeoutMs: 5000 })
     return NextResponse.json({ status: 'running' })
   } catch (error) {
-    if (
-      error instanceof APIError &&
-      error.json.error.code === 'sandbox_stopped'
-    ) {
+    if (error instanceof SandboxNotFoundError) {
       return NextResponse.json({ status: 'stopped' })
-    } else {
-      throw error
     }
+    const msg = error instanceof Error ? error.message : String(error)
+    if (msg.includes('not found') || msg.includes('does not exist')) {
+      return NextResponse.json({ status: 'stopped' })
+    }
+    throw error
   }
 }

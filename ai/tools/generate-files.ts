@@ -1,6 +1,6 @@
 import type { UIMessageStreamWriter, UIMessage } from 'ai'
 import type { DataPart } from '../messages/data-parts'
-import { Sandbox } from '@vercel/sandbox'
+import { Sandbox } from 'e2b'
 import { getContents, type File } from './generate-files/get-contents'
 import { getRichError } from './get-rich-error'
 import { getWriteFiles } from './generate-files/get-write-files'
@@ -46,10 +46,10 @@ export const generateFiles = ({ writer, modelId, sessionTracker }: Params) =>
       let sandbox: Sandbox | null = null
 
       try {
-        sandbox = await Sandbox.get({ sandboxId })
+        sandbox = await Sandbox.connect(sandboxId, { apiKey: process.env.E2B_API_KEY })
       } catch (error) {
         const richError = getRichError({
-          action: 'get sandbox by id',
+          action: 'connect to sandbox by id',
           args: { sandboxId },
           error,
         })
@@ -63,7 +63,7 @@ export const generateFiles = ({ writer, modelId, sessionTracker }: Params) =>
         return richError.message
       }
 
-      const writeFiles = getWriteFiles({ sandbox, toolCallId, writer })
+      const writeFiles = getWriteFiles({ sandbox, sandboxId, toolCallId, writer })
       const iterator = getContents({ messages, modelId, paths })
       const uploaded: File[] = []
 

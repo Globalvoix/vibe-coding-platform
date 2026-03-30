@@ -87,18 +87,14 @@ async function generateSecurityFixes(params: {
 }
 
 async function applyFixesToSandbox(params: { sandboxId: string; fixes: Map<string, string> }) {
-  const { Sandbox } = await import('@vercel/sandbox')
-  const sandbox = await Sandbox.get({ sandboxId: params.sandboxId })
+  const { Sandbox } = await import('e2b')
+  const sandbox = await Sandbox.connect(params.sandboxId, { apiKey: process.env.E2B_API_KEY })
 
-  const filesToWrite: Array<{ path: string; content: Buffer }> = []
-
-  for (const [filePath, content] of params.fixes) {
-    filesToWrite.push({ path: filePath, content: Buffer.from(content, 'utf-8') })
-  }
-
-  if (filesToWrite.length > 0) {
-    await sandbox.writeFiles(filesToWrite)
-  }
+  await Promise.all(
+    Array.from(params.fixes.entries()).map(([filePath, content]) =>
+      sandbox.files.write(filePath, content)
+    )
+  )
 }
 
 const DEFAULT_SANDBOX_SCAN_PATHS = [

@@ -1,6 +1,6 @@
 import type { DataPart } from '../../messages/data-parts'
 import type { File } from './get-contents'
-import type { Sandbox } from '@vercel/sandbox'
+import type { Sandbox } from 'e2b'
 import type { UIMessageStreamWriter, UIMessage } from 'ai'
 import { getRichError } from '../get-rich-error'
 import { generationLogger } from '../generation-logger'
@@ -8,11 +8,12 @@ import { validateGeneratedFiles } from '@/lib/code-semantic-validator'
 
 interface Params {
   sandbox: Sandbox
+  sandboxId: string
   toolCallId: string
   writer: UIMessageStreamWriter<UIMessage<never, DataPart>>
 }
 
-export function getWriteFiles({ sandbox, toolCallId, writer }: Params) {
+export function getWriteFiles({ sandbox, sandboxId, toolCallId, writer }: Params) {
   return async function writeFiles(params: {
     written: string[]
     files: File[]
@@ -26,7 +27,6 @@ export function getWriteFiles({ sandbox, toolCallId, writer }: Params) {
     })
 
     try {
-      // Pre-write validation
       generationLogger.progress('file_write', `Validating ${params.files.length} files before upload`)
 
       const validationResult = validateGeneratedFiles(
@@ -43,7 +43,6 @@ export function getWriteFiles({ sandbox, toolCallId, writer }: Params) {
           .join('\n')
 
         const message = `Pre-write validation failed:\n${errorSummary}`
-
         generationLogger.error('file_write', message, 'VALIDATION_ERROR', message)
 
         writer.write({
@@ -61,21 +60,24 @@ export function getWriteFiles({ sandbox, toolCallId, writer }: Params) {
 
       generationLogger.progress('file_write', `Writing ${params.files.length} validated files to sandbox`)
 
-      // Write files to sandbox with proper encoding
-      const filesToWrite = params.files.map((file) => {
-        // Ensure content is string and properly encoded
-        let content = file.content
-        if (typeof content !== 'string') {
-          content = String(content)
-        }
+      // Write files to E2B sandbox in parallel + stream content to Monaco
+      await Promise.all(
+        params.files.map(async (file) => {
+          let content = file.content
+          if (typeof content !== 'string') {
+            content = String(content)
+          }
 
-        return {
-          content: Buffer.from(content, 'utf8'),
-          path: file.path,
-        }
-      })
+          await sandbox.files.write(file.path, content)
 
-      await sandbox.writeFiles(filesToWrite)
+          // Stream file content to the frontend so Monaco can display it immediately
+          writer.write({
+            id: toolCallId,
+            type: 'data-file-content',
+            data: { sandboxId, path: file.path, content },
+          })
+        })
+      )
 
       generationLogger.success('file_write', `Successfully wrote ${params.files.length} files to sandbox`)
     } catch (error) {

@@ -1,4 +1,4 @@
-import { Sandbox } from '@vercel/sandbox'
+import { Sandbox } from 'e2b'
 import { sandboxHealthChecker } from './sandbox-health-check'
 import { generationLogger } from './generation-logger'
 
@@ -65,7 +65,6 @@ export class PreGenerationValidator {
         result.valid = false
       }
 
-      const status = result.valid ? 'success' : 'error'
       generationLogger.progress(
         'validation',
         `Validation complete: ${result.valid ? 'PASS' : 'FAIL'} (${result.errors.length} errors, ${result.warnings.length} warnings)`
@@ -87,17 +86,12 @@ export class PreGenerationValidator {
     result: PreGenerationValidationResult
   ): Promise<void> {
     try {
-      const nodeResult = await sandbox.runCommand({
-        cmd: 'node',
-        args: ['--version'],
-      })
-
-      const versionOutput = (await nodeResult.stdout()).trim()
+      const nodeResult = await sandbox.commands.run('node --version', { timeoutMs: 10000 })
+      const versionOutput = nodeResult.stdout.trim()
       const match = versionOutput.match(/v(\d+)\.(\d+)\.(\d+)/)
 
       if (match) {
         const major = parseInt(match[1], 10)
-        const minor = parseInt(match[2], 10)
 
         // Node 18+ is required
         if (major < 18) {
@@ -124,10 +118,7 @@ export class PreGenerationValidator {
 
     for (const pm of managers) {
       try {
-        await sandbox.runCommand({
-          cmd: pm,
-          args: ['--version'],
-        })
+        await sandbox.commands.run(`${pm} --version`, { timeoutMs: 10000 })
         available.push(pm)
       } catch {
         // PM not available
@@ -150,12 +141,8 @@ export class PreGenerationValidator {
     result: PreGenerationValidationResult
   ): Promise<void> {
     try {
-      const psResult = await sandbox.runCommand({
-        cmd: 'ps',
-        args: ['aux'],
-      })
-
-      const output = (await psResult.stdout()).toLowerCase()
+      const psResult = await sandbox.commands.run('ps aux', { timeoutMs: 10000 })
+      const output = psResult.stdout.toLowerCase()
 
       // Check for common dev server processes
       const conflicts = [
@@ -173,7 +160,7 @@ export class PreGenerationValidator {
           }
         }
       }
-    } catch (error) {
+    } catch {
       generationLogger.progress('validation', 'Could not check for conflicting processes')
     }
   }

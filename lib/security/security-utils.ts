@@ -1,4 +1,6 @@
-import { Sandbox } from '@vercel/sandbox'
+import { Sandbox } from 'e2b'
+
+const E2B_API_KEY = process.env.E2B_API_KEY
 
 export interface SecurityIssue {
   id: string
@@ -9,19 +11,11 @@ export interface SecurityIssue {
 }
 
 export async function readFileFromSandbox(
-  sandbox: Awaited<ReturnType<typeof Sandbox.get>>,
+  sandbox: Sandbox,
   filePath: string
 ): Promise<string | null> {
   try {
-    const stream = await sandbox.readFile({ path: filePath })
-    if (!stream) return null
-
-    const chunks: Buffer[] = []
-    for await (const chunk of stream) {
-      chunks.push(chunk as Buffer)
-    }
-
-    return Buffer.concat(chunks).toString('utf-8')
+    return await sandbox.files.read(filePath)
   } catch {
     return null
   }
@@ -31,7 +25,7 @@ export async function getSandboxFiles(
   sandboxId: string,
   filePaths: string[]
 ): Promise<Array<{ path: string; content: string }>> {
-  const sandbox = await Sandbox.get({ sandboxId })
+  const sandbox = await Sandbox.connect(sandboxId, { apiKey: E2B_API_KEY })
   const files: Array<{ path: string; content: string }> = []
 
   for (const filePath of filePaths) {

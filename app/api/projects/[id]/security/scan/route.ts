@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
-import { Sandbox } from '@vercel/sandbox'
+import { Sandbox } from 'e2b'
 import { z } from 'zod'
 import { generateObject } from 'ai'
 import { getModelOptions } from '@/ai/gateway'
@@ -14,6 +14,8 @@ import {
 } from '@/lib/security/security-utils'
 import { runSemgrepInSandbox } from '@/lib/security/semgrep-sandbox'
 
+const E2B_API_KEY = process.env.E2B_API_KEY
+
 function issueSortKey(issue: SecurityIssue) {
   return `${issue.level}:${issue.title}:${issue.filePath ?? ''}`
 }
@@ -25,23 +27,21 @@ type SandboxCmdResult = {
 }
 
 async function runSandboxBash(
-  sandbox: Awaited<ReturnType<typeof Sandbox.get>>,
+  sandbox: Sandbox,
   script: string
 ): Promise<SandboxCmdResult> {
-  const cmd = await sandbox.runCommand({
-    cmd: 'bash',
-    args: ['-lc', script],
-  })
-
-  const done = await cmd.wait().catch(() => null)
-  const exitCode = done?.exitCode ?? null
-
-  const [stdout, stderr] = await Promise.all([
-    done?.stdout().catch(() => '') ?? Promise.resolve(''),
-    done?.stderr().catch(() => '') ?? Promise.resolve(''),
-  ])
-
-  return { exitCode, stdout, stderr }
+  try {
+    const result = await sandbox.commands.run(`bash -lc ${JSON.stringify(script)}`, {
+      timeoutMs: 300_000,
+    })
+    return {
+      exitCode: result.exitCode,
+      stdout: result.stdout,
+      stderr: result.stderr,
+    }
+  } catch {
+    return { exitCode: 1, stdout: '', stderr: 'Command failed' }
+  }
 }
 
 function isLikelyTextFile(path: string) {
@@ -66,7 +66,7 @@ function rankPathForSecurity(path: string) {
 }
 
 async function listSandboxFilePaths(params: {
-  sandbox: Awaited<ReturnType<typeof Sandbox.get>>
+  sandbox: Sandbox
   maxPaths?: number
 }): Promise<string[]> {
   const maxPaths =
@@ -98,20 +98,12 @@ async function listSandboxFilePaths(params: {
 }
 
 async function readSandboxTextFile(params: {
-  sandbox: Awaited<ReturnType<typeof Sandbox.get>>
+  sandbox: Sandbox
   path: string
   maxChars?: number
 }): Promise<string | null> {
   try {
-    const stream = await params.sandbox.readFile({ path: params.path })
-    if (!stream) return null
-
-    const chunks: Buffer[] = []
-    for await (const chunk of stream) {
-      chunks.push(chunk as Buffer)
-    }
-
-    const raw = Buffer.concat(chunks).toString('utf-8')
+    const raw = await params.sandbox.files.read(params.path)
     if (!raw) return ''
     if (raw.includes('\u0000')) return null
 
@@ -204,7 +196,8 @@ export async function POST(req: NextRequest, context: { params: Promise<{ id: st
       return NextResponse.json({ error: 'Missing sandboxId' }, { status: 400 })
     }
 
-    const sandbox = await Sandbox.get({ sandboxId })
+    const sandbox = await Sandbox.connect(sandboxId, { apiKey: E2B_API_KEY })
+
 
     const allPaths = await listSandboxFilePaths({ sandbox })
     const codePaths = allPaths.filter(isLikelyTextFile)

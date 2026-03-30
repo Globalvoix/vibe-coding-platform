@@ -51,6 +51,9 @@ interface SandboxStore {
   setIsRestoringEnvironment: (restoring: boolean) => void
   restoreError: 'missing_files' | 'unknown' | null
   setRestoreError: (error: 'missing_files' | 'unknown' | null) => void
+  // Monaco file content: path → content (populated by data-file-content stream events)
+  fileContents: Record<string, string>
+  setFileContent: (path: string, content: string) => void
 }
 
 function getBackgroundCommandErrorLines(commands: Command[]) {
@@ -130,6 +133,9 @@ export const useSandboxStore = create<SandboxStore>()((set) => ({
   setCurrentProjectId: (id) => set(() => ({ currentProjectId: id })),
   setViewingVersion: (version) => set(() => ({ viewingVersion: version })),
   setRevertInChatVersionId: (versionId) => set(() => ({ revertInChatVersionId: versionId })),
+  fileContents: {},
+  setFileContent: (path, content) =>
+    set((state) => ({ fileContents: { ...state.fileContents, [path]: content } })),
   reset: () =>
     set(() => ({
       sandboxId: undefined,
@@ -146,6 +152,7 @@ export const useSandboxStore = create<SandboxStore>()((set) => ({
       activeTab: 'preview',
       isRestoringEnvironment: false,
       restoreError: null,
+      fileContents: {},
     })),
   setChatStatus: (status) =>
     set((state) =>
@@ -195,7 +202,7 @@ export const useFileExplorerStore = create<FileExplorerStore>()((set) => ({
 }))
 
 export function useDataStateMapper() {
-  const { addPaths, setSandboxId, setUrl, upsertCommand, addGeneratedFiles } =
+  const { addPaths, setSandboxId, setUrl, upsertCommand, addGeneratedFiles, setFileContent } =
     useSandboxStore()
   const { errors } = useCommandErrorsLogs()
   const { setCursor } = useMonitorState()
@@ -232,6 +239,9 @@ export function useDataStateMapper() {
         if (data.data.url) {
           setUrl(data.data.url)
         }
+        break
+      case 'data-file-content':
+        setFileContent(data.data.path, data.data.content)
         break
       // Multi-agent pipeline events — silently handled, UI picks these up via chat data parts
       case 'data-agent-status':

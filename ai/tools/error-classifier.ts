@@ -1,5 +1,3 @@
-import { APIError } from '@vercel/sandbox/dist/api-client/api-error'
-
 export type ErrorCategory = 'transient' | 'permanent' | 'recoverable' | 'critical'
 export type Severity = 'low' | 'medium' | 'high' | 'critical'
 
@@ -292,38 +290,32 @@ export class ErrorClassifier {
       return error.message
     }
     if (typeof error === 'object' && error !== null) {
-      if ('message' in error && typeof (error as any).message === 'string') {
-        return (error as any).message
+      if ('message' in error && typeof (error as Record<string, unknown>).message === 'string') {
+        return (error as Record<string, unknown>).message as string
       }
-      if ('error' in error && typeof (error as any).error === 'string') {
-        return (error as any).error
+      if ('error' in error && typeof (error as Record<string, unknown>).error === 'string') {
+        return (error as Record<string, unknown>).error as string
       }
     }
     return String(error)
   }
 
   private extractCode(error: unknown): string | undefined {
-    if (error instanceof APIError) {
-      return error.json?.error?.code
-    }
     if (typeof error === 'object' && error !== null) {
-      if ('code' in error && typeof (error as any).code === 'string') {
-        return (error as any).code
+      if ('code' in error && typeof (error as Record<string, unknown>).code === 'string') {
+        return (error as Record<string, unknown>).code as string
       }
     }
     return undefined
   }
 
   private extractText(error: unknown): string {
-    if (error instanceof APIError) {
-      return error.text || ''
-    }
     if (typeof error === 'object' && error !== null) {
-      if ('text' in error && typeof (error as any).text === 'string') {
-        return (error as any).text
+      if ('text' in error && typeof (error as Record<string, unknown>).text === 'string') {
+        return (error as Record<string, unknown>).text as string
       }
-      if ('stderr' in error && typeof (error as any).stderr === 'string') {
-        return (error as any).stderr
+      if ('stderr' in error && typeof (error as Record<string, unknown>).stderr === 'string') {
+        return (error as Record<string, unknown>).stderr as string
       }
     }
     return ''

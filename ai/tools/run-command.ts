@@ -1,6 +1,6 @@
 import type { UIMessageStreamWriter, UIMessage } from 'ai'
 import type { DataPart } from '../messages/data-parts'
-import { Sandbox } from '@vercel/sandbox'
+import { Sandbox } from 'e2b'
 import { getRichError } from './get-rich-error'
 import { tool } from 'ai'
 import description from './run-command.md'
@@ -16,7 +16,7 @@ export const runCommand = ({ writer, sessionTracker }: Params) =>
   tool({
     description,
     inputSchema: z.object({
-      sandboxId: z.string().describe('The ID of the Vercel Sandbox to run the command in'),
+      sandboxId: z.string().describe('The ID of the sandbox to run the command in'),
       command: z
         .string()
         .describe(
@@ -28,14 +28,14 @@ export const runCommand = ({ writer, sessionTracker }: Params) =>
         .describe(
           "Array of arguments for the command. Each argument should be a separate string (e.g., ['install', '--verbose'] for npm install --verbose, or ['src/index.js'] to run a file, or ['-la', './src'] to list files). IMPORTANT: Use relative paths (e.g., 'src/file.js') or absolute paths instead of trying to change directories with 'cd' first, since each command runs in a fresh shell session."
         ),
-      sudo: z.boolean().optional().describe('Whether to run the command with sudo'),
+      sudo: z.boolean().optional().describe('Whether to run the command with elevated privileges'),
       wait: z
         .boolean()
         .describe(
           'Whether to wait for the command to finish before returning. If true, the command will block until it completes, and you will receive its output.'
         ),
     }),
-    execute: async ({ sandboxId, command, sudo, wait, args = [] }, { toolCallId }) => {
+    execute: async ({ sandboxId, command, sudo: _sudo, wait, args = [] }, { toolCallId }) => {
       if (sessionTracker) {
         const isCancelled = await GenerationSessionTracker.isCancelled(sessionTracker.id)
         if (isCancelled) {
@@ -61,10 +61,10 @@ export const runCommand = ({ writer, sessionTracker }: Params) =>
       let sandbox: Sandbox
 
       try {
-        sandbox = await Sandbox.get({ sandboxId })
+        sandbox = await Sandbox.connect(sandboxId, { apiKey: process.env.E2B_API_KEY })
       } catch (error) {
         const richError = getRichError({
-          action: 'get sandbox by id',
+          action: 'connect to sandbox by id',
           args: { sandboxId },
           error,
         })
@@ -84,69 +84,54 @@ export const runCommand = ({ writer, sessionTracker }: Params) =>
         return richError.message
       }
 
+      const fullCmd = [command, ...args].join(' ')
+
       if (!wait) {
-        const cmd = await sandbox.runCommand({
-          detached: true,
-          cmd: command,
-          args,
-          sudo,
-        })
+        const handle = await sandbox.commands.run(fullCmd, { background: true })
+        const cmdId = String(handle.pid)
 
         writer.write({
           id: toolCallId,
           type: 'data-run-command',
           data: {
             sandboxId,
-            commandId: cmd.cmdId,
+            commandId: cmdId,
             command,
             args,
             status: 'running',
           },
         })
 
-        return `The command \`${command} ${args.join(
-          ' '
-        )}\` has been started in the background in the sandbox with ID \`${sandboxId}\` with the commandId ${
-          cmd.cmdId
-        }.`
+        return `The command \`${fullCmd}\` has been started in the background in sandbox \`${sandboxId}\` with commandId ${cmdId}.`
       }
 
-      // For waiting commands, add retry logic for transient failures
+      // Blocking commands with retry logic for transient failures
       let lastError: unknown = null
       const maxRetries = 2
 
       for (let attempt = 0; attempt <= maxRetries; attempt++) {
         try {
-          const cmd = await sandbox.runCommand({
-            cmd: command,
-            args,
-            sudo,
-          })
-
           writer.write({
             id: toolCallId,
             type: 'data-run-command',
             data: {
               sandboxId,
-              commandId: cmd.cmdId,
               command,
               args,
               status: 'waiting',
             },
           })
 
-          const done = await cmd.wait()
-          const [stdout, stderr] = await Promise.all([done.stdout(), done.stderr()])
+          const result = await sandbox.commands.run(fullCmd, { timeoutMs: 120_000 })
 
           writer.write({
             id: toolCallId,
             type: 'data-run-command',
             data: {
               sandboxId,
-              commandId: cmd.cmdId,
               command,
               args,
-              exitCode: done.exitCode,
+              exitCode: result.exitCode,
               status: 'done',
             },
           })
@@ -160,9 +145,9 @@ export const runCommand = ({ writer, sessionTracker }: Params) =>
           }
 
           return (
-            `The command \`${command} ${args.join(' ')}\` has finished with exit code ${done.exitCode}.` +
-            `\n\nStdout:\n\`\`\`\n${stdout}\n\`\`\`` +
-            `\n\nStderr:\n\`\`\`\n${stderr}\n\`\`\``
+            `The command \`${fullCmd}\` has finished with exit code ${result.exitCode}.` +
+            `\n\nStdout:\n\`\`\`\n${result.stdout}\n\`\`\`` +
+            `\n\nStderr:\n\`\`\`\n${result.stderr}\n\`\`\``
           )
         } catch (error) {
           lastError = error
@@ -175,16 +160,14 @@ export const runCommand = ({ writer, sessionTracker }: Params) =>
             errorStr.includes('temporarily')
 
           if (!isTransient || attempt === maxRetries) {
-            break // Don't retry for non-transient errors or if max retries reached
+            break
           }
 
-          // Wait before retrying (exponential backoff: 1s, 2s)
           const delayMs = Math.pow(2, attempt) * 1000
           await new Promise((resolve) => setTimeout(resolve, delayMs))
         }
       }
 
-      // All retries exhausted, return error
       const richError = getRichError({
         action: 'run command in sandbox',
         args: { sandboxId, command, args },

@@ -1,4 +1,3 @@
-import { APIError } from '@vercel/sandbox/dist/api-client/api-error'
 import { errorClassifier, type ClassifiedError } from './error-classifier'
 
 interface Params {
@@ -124,16 +123,19 @@ function getErrorFields(error: unknown) {
       message: String(error),
       json: error,
     }
-  } else if (error instanceof APIError) {
+  }
+
+  const e = error as Error & { json?: unknown; text?: string }
+  if (e.json !== undefined || e.text !== undefined) {
     return {
-      message: error.message,
-      json: error.json,
-      text: error.text,
+      message: e.message,
+      json: e.json,
+      text: e.text,
     }
-  } else {
-    return {
-      message: error.message,
-      json: error,
-    }
+  }
+
+  return {
+    message: error.message,
+    json: error,
   }
 }

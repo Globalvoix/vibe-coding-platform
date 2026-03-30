@@ -1,6 +1,6 @@
 import type { UIMessageStreamWriter, UIMessage } from 'ai'
 import type { DataPart } from '../messages/data-parts'
-import { Sandbox } from '@vercel/sandbox'
+import { Sandbox } from 'e2b'
 import { tool } from 'ai'
 import description from './get-sandbox-url.md'
 import z from 'zod/v3'
@@ -18,12 +18,12 @@ export const getSandboxURL = ({ writer, sessionTracker }: Params) =>
       sandboxId: z
         .string()
         .describe(
-          "The unique identifier of the Vercel Sandbox (e.g., 'sbx_abc123xyz'). This ID is returned when creating a Vercel Sandbox and is used to reference the specific sandbox instance."
+          'The unique identifier of the sandbox. This ID is returned when creating a sandbox and is used to reference the specific sandbox instance.'
         ),
       port: z
         .number()
         .describe(
-          'The port number where a service is running inside the Vercel Sandbox (e.g., 3000 for Next.js dev server, 8000 for Python apps, 5000 for Flask). The port must have been exposed when the sandbox was created or when running commands.'
+          'The port number where a service is running inside the sandbox (e.g., 3000 for Next.js dev server, 8000 for Python apps, 5000 for Flask).'
         ),
     }),
     execute: async ({ sandboxId, port }, { toolCallId }) => {
@@ -40,8 +40,9 @@ export const getSandboxURL = ({ writer, sessionTracker }: Params) =>
         data: { status: 'loading' },
       })
 
-      const sandbox = await Sandbox.get({ sandboxId })
-      const url = sandbox.domain(port)
+      const sandbox = await Sandbox.connect(sandboxId, { apiKey: process.env.E2B_API_KEY })
+      const host = sandbox.getHost(port)
+      const url = `https://${host}`
 
       writer.write({
         id: toolCallId,

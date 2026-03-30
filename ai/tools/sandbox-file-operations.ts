@@ -1,4 +1,4 @@
-import { Sandbox } from '@vercel/sandbox'
+import { Sandbox } from 'e2b'
 import { createHash } from 'crypto'
 import { generationLogger } from './generation-logger'
 
@@ -55,20 +55,17 @@ export class SandboxFileOperations {
   async writeFileWithVerification(sandbox: Sandbox, file: FileOperation): Promise<WriteFileResult> {
     const content = typeof file.content === 'string' ? Buffer.from(file.content) : file.content
     const originalChecksum = this.calculateChecksum(content)
+    const contentStr = content.toString('utf8')
 
     try {
       generationLogger.progress('file_write', `Writing file: ${file.path}`)
 
-      // Write file to sandbox
-      await sandbox.writeFiles([
-        {
-          path: file.path,
-          content,
-        },
-      ])
+      // Write file to sandbox using E2B API
+      await sandbox.files.write(file.path, contentStr)
 
       // Read file back to verify
-      const readBackBuffer = await this.readFileToBuffer(sandbox, file.path)
+      const readBack = await sandbox.files.read(file.path)
+      const readBackBuffer = Buffer.from(readBack, 'utf8')
       const readBackChecksum = this.calculateChecksum(readBackBuffer)
 
       const verified = originalChecksum === readBackChecksum
@@ -108,8 +105,7 @@ export class SandboxFileOperations {
    */
   async readPackageJson(sandbox: Sandbox): Promise<Record<string, unknown> | null> {
     try {
-      const buffer = await this.readFileToBuffer(sandbox, 'package.json')
-      const text = buffer.toString('utf8')
+      const text = await sandbox.files.read('package.json')
       return JSON.parse(text) as Record<string, unknown>
     } catch (error) {
       generationLogger.error(
@@ -200,32 +196,12 @@ export class SandboxFileOperations {
     return createHash('sha256').update(content).digest('hex')
   }
 
-  private async streamToBuffer(stream: NodeJS.ReadableStream): Promise<Buffer> {
-    const chunks: Buffer[] = []
-
-    for await (const chunk of stream) {
-      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
-    }
-
-    return Buffer.concat(chunks)
-  }
-
-  private async readFileToBuffer(sandbox: Sandbox, path: string): Promise<Buffer> {
-    const stream = await sandbox.readFile({ path })
-    if (!stream) {
-      throw new Error(`File not found: ${path}`)
-    }
-
-    return this.streamToBuffer(stream)
-  }
-
   /**
    * Read a file from sandbox and return its text content
    */
-  async readFileText(sandbox: Sandbox, path: string, encoding: BufferEncoding = 'utf-8'): Promise<string | null> {
+  async readFileText(sandbox: Sandbox, path: string): Promise<string | null> {
     try {
-      const buffer = await this.readFileToBuffer(sandbox, path)
-      return buffer.toString(encoding)
+      return await sandbox.files.read(path)
     } catch {
       return null
     }
@@ -236,7 +212,7 @@ export class SandboxFileOperations {
    */
   async fileExists(sandbox: Sandbox, path: string): Promise<boolean> {
     try {
-      await sandbox.readFile({ path })
+      await sandbox.files.read(path)
       return true
     } catch {
       return false
@@ -248,8 +224,8 @@ export class SandboxFileOperations {
    */
   async getFileSize(sandbox: Sandbox, path: string): Promise<number> {
     try {
-      const buffer = await this.readFileToBuffer(sandbox, path)
-      return buffer.length
+      const content = await sandbox.files.read(path)
+      return Buffer.byteLength(content, 'utf8')
     } catch {
       return 0
     }
@@ -260,16 +236,9 @@ export class SandboxFileOperations {
    */
   async createBackup(sandbox: Sandbox, path: string): Promise<boolean> {
     try {
-      const content = await this.readFileToBuffer(sandbox, path)
+      const content = await sandbox.files.read(path)
       const backupPath = `${path}.backup`
-
-      await sandbox.writeFiles([
-        {
-          path: backupPath,
-          content,
-        },
-      ])
-
+      await sandbox.files.write(backupPath, content)
       return true
     } catch (error) {
       generationLogger.error('file_write', `Failed to create backup of ${path}`, 'BACKUP_ERROR', String(error))
