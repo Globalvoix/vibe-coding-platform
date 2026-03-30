@@ -11,7 +11,7 @@ import {
   Coins,
   ChevronRight
 } from 'lucide-react'
-import { useAuth, UserButton } from '@clerk/nextjs'
+import { UserButton } from '@clerk/nextjs'
 import { CREDITS_UPDATED_EVENT } from '@/lib/credits-events'
 import { useUIStore } from '@/lib/ui-store'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -19,7 +19,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 export function MiniSidebar() {
   const router = useRouter()
   const pathname = usePathname()
-  const { isSignedIn } = useAuth()
+  // TEST MODE: bypass auth
+  const isSignedIn = true
   const { sidebarOpen, toggleSidebar } = useUIStore()
   const [creditBalance, setCreditBalance] = useState<number | null>(null)
 

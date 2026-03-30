@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 import { Menu } from 'lucide-react';
 import { ThinksoftLogo } from '@/components/icons/thinksoft';
 import Link from 'next/link';
-import { useAuth, useClerk } from '@clerk/nextjs';
+import { useClerk } from '@clerk/nextjs';
 import { SignInButton, SignUpButton } from '@clerk/nextjs';
 import { UserButtonWrapper } from './user-button-wrapper';
 import { usePathname, useRouter } from 'next/navigation';
@@ -39,7 +39,8 @@ export function Navbar({ variant = 'default', theme = 'dark' }: { variant?: Navb
   const [headerShapeClass, setHeaderShapeClass] = useState('rounded-full');
   const shapeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { toggleSidebar } = useUIStore();
-  const { isSignedIn } = useAuth();
+  // TEST MODE: bypass auth
+  const isSignedIn = true;
   const { openSignIn } = useClerk();
   const router = useRouter();
   const pathname = usePathname();
