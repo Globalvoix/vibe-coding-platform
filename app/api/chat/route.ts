@@ -12,8 +12,7 @@ import { auth } from '@clerk/nextjs/server'
 import { getAvailableModels, getModelOptions } from '@/ai/gateway'
 import { checkBotId } from 'botid/server'
 import { tools } from '@/ai/tools'
-import { recordUsageAndDeductCredits, getUserCredits } from '@/lib/credits'
-import { getUserSubscription } from '@/lib/subscription'
+import { recordUsageAndDeductCredits } from '@/lib/credits'
 import { createOrUpdateEnvVar, listEnvVars } from '@/lib/env-vars-db'
 import { getProject } from '@/lib/projects-db'
 import { CONNECTOR_DEFINITIONS, detectConnectorFromPhrase, type ConnectorId } from '@/lib/connector-mapping'
@@ -204,31 +203,7 @@ export async function POST(req: Request) {
     }
 
     const requiredCredits = calculatePromptCost(userPromptText)
-    const credits = await getUserCredits(userId)
-    const subscription = await getUserSubscription(userId)
-
-    if (!subscription || subscription.plan_id === 'free' || subscription.status !== 'active') {
-      return NextResponse.json(
-        {
-          error: 'A paid subscription is required to use ThinkSoft. We are in beta and paid-only due to high demand.',
-          code: 'SUBSCRIPTION_REQUIRED',
-        },
-        { status: 403 }
-      )
-    }
-
-    if (credits.balance < requiredCredits) {
-      return NextResponse.json(
-        {
-          error: `Insufficient credits. This prompt requires ${requiredCredits} credits. Please upgrade your plan or wait for your monthly credits to refresh.`,
-          code: 'INSUFFICIENT_CREDITS',
-          currentBalance: credits.balance,
-          requiredCredits,
-          planId: credits.planId,
-        },
-        { status: 402 }
-      )
-    }
+    // DEV MODE: subscription and credit checks bypassed for local testing
 
     const connectorContext =
       projectId && project ? await buildConnectorContext({ projectId, userPromptText }) : ''
