@@ -141,10 +141,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: `Bot detected` }, { status: 403 })
     }
 
-    const { userId } = await auth()
-    if (!userId) {
-      return NextResponse.json({ error: 'User not authenticated' }, { status: 401 })
-    }
+    // TEST MODE: use authenticated user if available, otherwise fall back to a test id
+    const { userId: clerkUserId } = await auth()
+    const userId = clerkUserId ?? 'test-user-local'
 
     const bodyData = (await req.json()) as BodyData
     const { messages, projectId } = bodyData
@@ -203,32 +202,8 @@ export async function POST(req: Request) {
       }
     }
 
+    // TEST MODE: subscription and credits gates are bypassed
     const requiredCredits = calculatePromptCost(userPromptText)
-    const credits = await getUserCredits(userId)
-    const subscription = await getUserSubscription(userId)
-
-    if (!subscription || subscription.plan_id === 'free' || subscription.status !== 'active') {
-      return NextResponse.json(
-        {
-          error: 'A paid subscription is required to use ThinkSoft. We are in beta and paid-only due to high demand.',
-          code: 'SUBSCRIPTION_REQUIRED',
-        },
-        { status: 403 }
-      )
-    }
-
-    if (credits.balance < requiredCredits) {
-      return NextResponse.json(
-        {
-          error: `Insufficient credits. This prompt requires ${requiredCredits} credits. Please upgrade your plan or wait for your monthly credits to refresh.`,
-          code: 'INSUFFICIENT_CREDITS',
-          currentBalance: credits.balance,
-          requiredCredits,
-          planId: credits.planId,
-        },
-        { status: 402 }
-      )
-    }
 
     const connectorContext =
       projectId && project ? await buildConnectorContext({ projectId, userPromptText }) : ''

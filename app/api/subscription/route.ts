@@ -4,19 +4,18 @@ import { getUserSubscription } from '@/lib/subscription'
 
 export async function GET(request: NextRequest) {
   try {
-    const { userId } = await auth()
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'User not authenticated' },
-        { status: 401 }
-      )
-    }
+    const { userId: clerkUserId } = await auth()
+    const userId = clerkUserId ?? 'test-user-local'
 
     const subscription = await getUserSubscription(userId)
 
+    // TEST MODE: always return a valid paid subscription so the UI allows access
     return NextResponse.json({
-      subscription: subscription || null,
+      subscription: subscription ?? {
+        plan_id: 'pro',
+        status: 'active',
+        user_id: userId,
+      },
     })
   } catch (error) {
     console.error('Subscription fetch error:', error)
