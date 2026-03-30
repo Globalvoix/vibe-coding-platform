@@ -47,18 +47,19 @@ export const dataPartSchema = z.object({
     reason: z.string().optional(),
   }),
 
-  // ── File content streamed to Monaco editor ───────────────────────────────
+  // ── File content streamed to Monaco editor ──────────────────────────────
   'file-content': z.object({
     sandboxId: z.string(),
     path: z.string(),
     content: z.string(),
   }),
 
-  // ── Multi-agent pipeline data parts ──────────────────────────────────────
+  // ── Multi-agent pipeline data parts ────────────────────────────────────
   'agent-status': z.object({
     agentName: z.enum(['architect', 'craftsman', 'adversary', 'historian', 'synthesizer', 'executor']),
     status: z.enum(['starting', 'running', 'done', 'error']),
     message: z.string().optional(),
+    durationMs: z.number().optional(),
   }),
   'adversary-findings': z.object({
     problems: z.array(z.object({
@@ -77,10 +78,43 @@ export const dataPartSchema = z.object({
     filesPlanned: z.number(),
     executionDirectiveReady: z.boolean(),
   }),
+
+  // ── Diff preview — shown to user before code is applied ─────────────────
+  'pending-diff': z.object({
+    pendingId: z.string(),
+    sandboxId: z.string(),
+    sessionId: z.string(),
+    projectId: z.string(),
+    diffs: z.array(z.object({
+      path: z.string(),
+      action: z.enum(['create', 'modify', 'delete']),
+      content: z.string(),
+      description: z.string(),
+    })),
+    totalFiles: z.number(),
+    summary: z.string(),
+  }),
+  'diff-decision': z.object({
+    pendingId: z.string(),
+    decision: z.enum(['approved', 'rejected']),
+    appliedFiles: z.number().optional(),
+  }),
+
+  // ── Parallel subtask thread ─────────────────────────────────────────────
+  'subtask-thread': z.object({
+    threadId: z.string(),
+    groupId: z.string(),
+    description: z.string(),
+    status: z.enum(['starting', 'running', 'done', 'error']),
+    filesHandled: z.array(z.string()),
+  }),
+
+  // ── Execution retry ─────────────────────────────────────────────────────
   'execution-retry': z.object({
     attempt: z.number(),
     maxAttempts: z.number(),
     reason: z.string(),
+    fixApplied: z.string().optional(),
   }),
 })
 

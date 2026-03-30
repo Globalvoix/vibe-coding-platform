@@ -39,6 +39,11 @@ export type EventType =
   | 'execution_result'
   | 'execution_retry'
   | 'execution_error'
+  | 'execution_success'
+  | 'execution_failed'
+  | 'auto_fix_applied'
+  | 'diff_rejected'
+  | 'diff_applied'
   | 'session_complete'
   | 'session_cancelled'
 

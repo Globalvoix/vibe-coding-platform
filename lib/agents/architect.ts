@@ -1,6 +1,6 @@
 import { generateObject } from 'ai'
 import { getModelOptions } from '@/ai/gateway'
-import { DEFAULT_MODEL } from '@/ai/constants'
+import { getAgentPlanningModelId } from '@/ai/model-routing'
 import { executionPlanSchema, type AgentRunContext, type ExecutionPlan, type HistorianContext } from './types'
 import { randomUUID } from 'crypto'
 
@@ -22,13 +22,15 @@ Rules:
 - For large apps, always define multi-page architecture with proper routing
 - Never include placeholders — every decision must be concrete
 - If the request involves auth, always include proper server/client separation
-- Estimate complexity honestly: low = single component, medium = multi-file feature, high = full app`
+- Estimate complexity honestly: low = single component, medium = multi-file feature, high = full app
+- When a request has independent subsystems (e.g. "auth AND dashboard"), assign them to separate parallel task groups`
 
 export async function runArchitectAgent(
   ctx: AgentRunContext,
   historianContext: HistorianContext
 ): Promise<ExecutionPlan> {
-  const modelOptions = getModelOptions(DEFAULT_MODEL)
+  // Architect uses Claude Sonnet 4.5 — best structural reasoning model
+  const modelOptions = getModelOptions(getAgentPlanningModelId())
 
   const historianInsights =
     historianContext.reusablePatterns.length > 0 || historianContext.commonPitfalls.length > 0
@@ -58,7 +60,7 @@ ${ctx.conversationHistory}
 Current user request:
 "${ctx.userPrompt}"
 
-Produce a complete, concrete execution plan. Be specific about files and structure.`,
+Produce a complete, concrete execution plan. Be specific about files and structure. When two or more subsystems are independent, assign them to separate task groups with canRunInParallelWithOtherGroups: true.`,
       },
     ],
   })

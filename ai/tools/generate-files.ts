@@ -1,21 +1,23 @@
 import type { UIMessageStreamWriter, UIMessage } from 'ai'
 import type { DataPart } from '../messages/data-parts'
-import { Sandbox } from 'e2b'
 import { getContents, type File } from './generate-files/get-contents'
 import { getRichError } from './get-rich-error'
-import { getWriteFiles } from './generate-files/get-write-files'
 import { tool } from 'ai'
 import description from './generate-files.md'
 import z from 'zod/v3'
 import { GenerationSessionTracker } from '@/lib/generation-session-tracker'
+import { storePendingDiffs, buildDiffSummary, type PendingDiffFile } from '@/lib/diff'
+import { randomUUID } from 'crypto'
 
 interface Params {
   modelId: string
   writer: UIMessageStreamWriter<UIMessage<never, DataPart>>
   sessionTracker?: GenerationSessionTracker | null
+  projectId?: string | null
+  sessionId?: string
 }
 
-export const generateFiles = ({ writer, modelId, sessionTracker }: Params) =>
+export const generateFiles = ({ writer, modelId, sessionTracker, projectId, sessionId }: Params) =>
   tool({
     description,
     inputSchema: z.object({
@@ -43,30 +45,10 @@ export const generateFiles = ({ writer, modelId, sessionTracker }: Params) =>
         data: { paths: [], status: 'generating' },
       })
 
-      let sandbox: Sandbox | null = null
-
-      try {
-        sandbox = await Sandbox.connect(sandboxId, { apiKey: process.env.E2B_API_KEY })
-      } catch (error) {
-        const richError = getRichError({
-          action: 'connect to sandbox by id',
-          args: { sandboxId },
-          error,
-        })
-
-        writer.write({
-          id: toolCallId,
-          type: 'data-generating-files',
-          data: { error: richError.error, paths: [], status: 'error' },
-        })
-
-        return richError.message
-      }
-
-      const writeFiles = getWriteFiles({ sandbox, sandboxId, toolCallId, writer })
       const iterator = getContents({ messages, modelId, paths })
-      const uploaded: File[] = []
+      const allFiles: File[] = []
 
+      // Collect all generated files
       try {
         for await (const chunk of iterator) {
           if (sessionTracker) {
@@ -82,20 +64,15 @@ export const generateFiles = ({ writer, modelId, sessionTracker }: Params) =>
           }
 
           if (chunk.files.length > 0) {
-            const error = await writeFiles(chunk)
-            if (error) {
-              return error
-            } else {
-              uploaded.push(...chunk.files)
-              if (sessionTracker) {
-                await sessionTracker.updateProgress({
-                  stage: 'generating',
-                  message: 'Writing files',
-                  paths: uploaded.map((file) => file.path),
-                  filesCount: uploaded.length,
-                  completionPercentage: 30 + Math.min(60, uploaded.length),
-                })
-              }
+            allFiles.push(...chunk.files)
+            if (sessionTracker) {
+              await sessionTracker.updateProgress({
+                stage: 'generating',
+                message: 'Preparing files for review',
+                paths: allFiles.map((f) => f.path),
+                filesCount: allFiles.length,
+                completionPercentage: 30 + Math.min(50, allFiles.length * 5),
+              })
             }
           } else {
             if (sessionTracker) {
@@ -103,7 +80,7 @@ export const generateFiles = ({ writer, modelId, sessionTracker }: Params) =>
                 stage: 'generating',
                 message: 'Preparing file contents',
                 paths: chunk.paths,
-                filesCount: uploaded.length,
+                filesCount: allFiles.length,
                 completionPercentage: 30,
               })
             }
@@ -111,10 +88,7 @@ export const generateFiles = ({ writer, modelId, sessionTracker }: Params) =>
             writer.write({
               id: toolCallId,
               type: 'data-generating-files',
-              data: {
-                status: 'generating',
-                paths: chunk.paths,
-              },
+              data: { status: 'generating', paths: chunk.paths },
             })
           }
         }
@@ -128,37 +102,120 @@ export const generateFiles = ({ writer, modelId, sessionTracker }: Params) =>
         writer.write({
           id: toolCallId,
           type: 'data-generating-files',
-          data: {
-            error: richError.error,
-            status: 'error',
-            paths,
-          },
+          data: { error: richError.error, status: 'error', paths },
         })
 
         return richError.message
       }
 
+      if (allFiles.length === 0) {
+        writer.write({
+          id: toolCallId,
+          type: 'data-generating-files',
+          data: { paths: [], status: 'done' },
+        })
+        return 'No files were generated.'
+      }
+
+      // ── Stage files as pending diffs (diff preview before writing to E2B) ──
       writer.write({
         id: toolCallId,
         type: 'data-generating-files',
-        data: { paths: uploaded.map((file) => file.path), status: 'done' },
+        data: { paths: allFiles.map((f) => f.path), status: 'validating' },
+      })
+
+      const pendingDiffs: PendingDiffFile[] = allFiles.map((file) => ({
+        path: file.path,
+        action: 'create' as const,
+        content: file.content,
+        description: `Generated by AI`,
+      }))
+
+      const summary = buildDiffSummary(pendingDiffs)
+      const effectiveProjectId = projectId ?? 'unknown'
+      const effectiveSessionId = sessionId ?? randomUUID()
+
+      let pendingId: string | null = null
+      try {
+        pendingId = await storePendingDiffs({
+          sessionId: effectiveSessionId,
+          projectId: effectiveProjectId,
+          sandboxId,
+          diffs: pendingDiffs,
+          summary,
+        })
+      } catch (err) {
+        console.warn('[generate-files] Failed to store pending diffs — falling back to direct write:', err)
+      }
+
+      // Stream file contents to Monaco editor so user can preview immediately
+      for (const file of allFiles) {
+        writer.write({
+          id: toolCallId,
+          type: 'data-file-content',
+          data: { sandboxId, path: file.path, content: file.content },
+        })
+      }
+
+      if (pendingId) {
+        // Emit pending-diff event: user must approve before files are written to E2B
+        writer.write({
+          type: 'data-pending-diff',
+          data: {
+            pendingId,
+            sandboxId,
+            sessionId: effectiveSessionId,
+            projectId: effectiveProjectId,
+            diffs: pendingDiffs,
+            totalFiles: pendingDiffs.length,
+            summary,
+          },
+        } as never)
+
+        if (sessionTracker) {
+          await sessionTracker.updateProgress({
+            stage: 'validating',
+            message: 'Waiting for user to review changes',
+            paths: allFiles.map((f) => f.path),
+            filesCount: allFiles.length,
+            completionPercentage: 85,
+          })
+        }
+
+        return `Generated ${allFiles.length} files. They have been staged for review (pendingId: ${pendingId}). The user will review and approve the changes before they are written to the sandbox. Do NOT call runCommand or getSandboxUrl — wait for the user to approve.`
+      }
+
+      // Fallback: pending diff storage failed, write directly
+      const { Sandbox } = await import('e2b')
+      let sandbox
+      try {
+        sandbox = await Sandbox.connect(sandboxId, { apiKey: process.env.E2B_API_KEY })
+      } catch (error) {
+        const richError = getRichError({ action: 'connect to sandbox by id', args: { sandboxId }, error })
+        writer.write({ id: toolCallId, type: 'data-generating-files', data: { error: richError.error, paths: [], status: 'error' } })
+        return richError.message
+      }
+
+      for (const file of allFiles) {
+        await sandbox.files.write(file.path, file.content)
+      }
+
+      writer.write({
+        id: toolCallId,
+        type: 'data-generating-files',
+        data: { paths: allFiles.map((f) => f.path), status: 'done' },
       })
 
       if (sessionTracker) {
         await sessionTracker.updateProgress({
           stage: 'validating',
           message: 'Files generated. Validating project...',
-          paths: uploaded.map((file) => file.path),
-          filesCount: uploaded.length,
+          paths: allFiles.map((f) => f.path),
+          filesCount: allFiles.length,
           completionPercentage: 92,
         })
       }
 
-      return `Successfully generated and uploaded ${
-        uploaded.length
-      } files. Their paths and contents are as follows:
-        ${uploaded
-          .map((file) => `Path: ${file.path}\nContent: ${file.content}\n`)
-          .join('\n')}`
+      return `Successfully generated and uploaded ${allFiles.length} files: ${allFiles.map((f) => f.path).join(', ')}`
     },
   })

@@ -354,6 +354,7 @@ export async function POST(req: Request) {
               writer: safeWriter,
               userId,
               projectId,
+              sessionId,
               sessionTracker: generationSessionTracker,
             }),
             onError: (error) => {

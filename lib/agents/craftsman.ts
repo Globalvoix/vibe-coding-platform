@@ -1,6 +1,6 @@
 import { generateObject } from 'ai'
 import { getModelOptions } from '@/ai/gateway'
-import { DEFAULT_MODEL } from '@/ai/constants'
+import { getCraftsmanModelId } from '@/ai/model-routing'
 import { z } from 'zod'
 import { fileDiffSchema, type AgentRunContext, type ExecutionPlan, type FileDiff } from './types'
 
@@ -40,9 +40,19 @@ export type CraftsmanOutput = z.infer<typeof craftsmanOutputSchema>
 
 export async function runCraftsmanAgent(
   ctx: AgentRunContext,
-  plan: ExecutionPlan
+  plan: ExecutionPlan,
+  taskGroupFileHints?: string[]
 ): Promise<FileDiff[]> {
-  const modelOptions = getModelOptions(DEFAULT_MODEL)
+  const filePaths = taskGroupFileHints ?? plan.requiredFiles.map((f) => f.path)
+
+  // Choose model based on what files this Craftsman instance handles:
+  // UI files → Gemini Flash; backend/lib files → Claude Sonnet 4.5
+  const modelId = getCraftsmanModelId(filePaths)
+  const modelOptions = getModelOptions(modelId)
+
+  const relevantFiles = taskGroupFileHints
+    ? plan.requiredFiles.filter((f) => taskGroupFileHints.includes(f.path))
+    : plan.requiredFiles
 
   const planSummary = `
 Intent: ${plan.intent}
@@ -50,8 +60,8 @@ App Type: ${plan.appType ?? 'unknown'}
 Framework: ${plan.framework}
 Complexity: ${plan.estimatedComplexity}
 
-Files to create/modify:
-${plan.requiredFiles.map((f) => `- ${f.path} (${f.isNew ? 'new' : 'modify'}): ${f.purpose}`).join('\n')}
+Files to create/modify (this thread):
+${relevantFiles.map((f) => `- ${f.path} (${f.isNew ? 'new' : 'modify'}): ${f.purpose}`).join('\n')}
 
 Required packages: ${plan.requiredPackages.join(', ') || 'none'}
 

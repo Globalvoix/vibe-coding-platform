@@ -1,7 +1,7 @@
 import { generateObject } from 'ai'
 import { getModelOptions } from '@/ai/gateway'
-import { DEFAULT_MODEL } from '@/ai/constants'
-import { synthesisResultSchema, type AgentRunContext, type ExecutionPlan, type FileDiff, type HistorianContext, type Problem, type SynthesisResult } from './types'
+import { getAgentPlanningModelId } from '@/ai/model-routing'
+import { synthesisResultSchema, type AgentRunContext, type ExecutionPlan, type FileDiff, type HistorianContext, type SynthesisResult } from './types'
 import type { AdversaryOutput } from './adversary'
 
 const SYNTHESIZER_SYSTEM_PROMPT = `You are the Synthesizer agent in a multi-agent AI system.
@@ -38,7 +38,8 @@ export async function runSynthesizerAgent(
   adversaryOutput: AdversaryOutput,
   historianContext: HistorianContext
 ): Promise<SynthesisResult> {
-  const modelOptions = getModelOptions(DEFAULT_MODEL)
+  // Synthesizer uses Claude Sonnet 4.5 — needs strongest reasoning to reconcile all agent outputs
+  const modelOptions = getModelOptions(getAgentPlanningModelId())
 
   const problemsText =
     adversaryOutput.problems.length > 0

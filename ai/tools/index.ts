@@ -14,20 +14,21 @@ interface Params {
   modelId: string
   writer: UIMessageStreamWriter<UIMessage<never, DataPart>>
   userId: string
-  projectId?: string
+  projectId?: string | null
+  sessionId?: string
   sessionTracker?: GenerationSessionTracker | null
 }
 
-export function tools({ modelId, writer, userId, projectId, sessionTracker }: Params) {
+export function tools({ modelId, writer, userId, projectId, sessionId, sessionTracker }: Params) {
   return {
     createSandbox: createSandbox({ writer, sessionTracker }),
-    generateFiles: generateFiles({ writer, modelId, sessionTracker }),
+    generateFiles: generateFiles({ writer, modelId, sessionTracker, projectId: projectId ?? undefined, sessionId }),
     getSandboxURL: getSandboxURL({ writer, sessionTracker }),
     runCommand: runCommand({ writer, sessionTracker }),
-    requestSupabaseConnection: requestSupabaseConnection({ writer, projectId }),
-    requestEnvVars: requestEnvVars({ writer, projectId }),
-    webSearch: webSearch({ projectId }),
-    webScrape: webScrape({ projectId }),
+    requestSupabaseConnection: requestSupabaseConnection({ writer, projectId: projectId ?? undefined }),
+    requestEnvVars: requestEnvVars({ writer, projectId: projectId ?? undefined }),
+    webSearch: webSearch({ projectId: projectId ?? undefined }),
+    webScrape: webScrape({ projectId: projectId ?? undefined }),
   }
 }
 

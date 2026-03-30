@@ -17,6 +17,49 @@ interface ViewingVersion {
 
 export type SandboxTabId = 'preview' | 'code' | 'console' | 'cloud' | 'security'
 
+// ── Agent pipeline state ──────────────────────────────────────────────────
+
+export type AgentName = 'historian' | 'architect' | 'craftsman' | 'adversary' | 'synthesizer' | 'executor'
+export type AgentStatus = 'idle' | 'starting' | 'running' | 'done' | 'error'
+
+export interface AgentState {
+  name: AgentName
+  status: AgentStatus
+  message?: string
+  startedAt?: number
+  finishedAt?: number
+  durationMs?: number
+}
+
+export interface SubtaskThread {
+  threadId: string
+  groupId: string
+  description: string
+  status: 'starting' | 'running' | 'done' | 'error'
+  filesHandled: string[]
+}
+
+// ── Pending diff types ────────────────────────────────────────────────────
+
+export interface PendingDiffFile {
+  path: string
+  action: 'create' | 'modify' | 'delete'
+  content: string
+  description: string
+}
+
+export interface PendingDiff {
+  pendingId: string
+  sandboxId: string
+  sessionId: string
+  projectId: string
+  diffs: PendingDiffFile[]
+  totalFiles: number
+  summary: string
+}
+
+// ── Main store ────────────────────────────────────────────────────────────
+
 interface SandboxStore {
   addGeneratedFiles: (files: string[]) => void
   addLog: (data: { sandboxId: string; cmdId: string; log: CommandLog }) => void
@@ -51,9 +94,29 @@ interface SandboxStore {
   setIsRestoringEnvironment: (restoring: boolean) => void
   restoreError: 'missing_files' | 'unknown' | null
   setRestoreError: (error: 'missing_files' | 'unknown' | null) => void
-  // Monaco file content: path → content (populated by data-file-content stream events)
+  // Monaco file content: path → content
   fileContents: Record<string, string>
   setFileContent: (path: string, content: string) => void
+  // ── Agent pipeline state ──────────────────────────────────────────────
+  agents: Record<AgentName, AgentState>
+  setAgentStatus: (name: AgentName, status: AgentStatus, message?: string, durationMs?: number) => void
+  subtaskThreads: SubtaskThread[]
+  upsertSubtaskThread: (thread: SubtaskThread) => void
+  clearAgentPipeline: () => void
+  // ── Pending diff state ────────────────────────────────────────────────
+  pendingDiff: PendingDiff | null
+  setPendingDiff: (diff: PendingDiff | null) => void
+  pendingDiffResolved: boolean
+  setPendingDiffResolved: (resolved: boolean) => void
+}
+
+const DEFAULT_AGENTS: Record<AgentName, AgentState> = {
+  historian: { name: 'historian', status: 'idle' },
+  architect: { name: 'architect', status: 'idle' },
+  craftsman: { name: 'craftsman', status: 'idle' },
+  adversary: { name: 'adversary', status: 'idle' },
+  synthesizer: { name: 'synthesizer', status: 'idle' },
+  executor: { name: 'executor', status: 'idle' },
 }
 
 function getBackgroundCommandErrorLines(commands: Command[]) {
@@ -98,15 +161,10 @@ export const useSandboxStore = create<SandboxStore>()((set) => ({
     set((state) => ({ paths: [...new Set([...state.paths, ...paths])] })),
   applySandboxState: (sandboxState) =>
     set((state) => {
-      if (!sandboxState) {
-        return state
-      }
-
+      if (!sandboxState) return state
       const nextPaths = Array.isArray(sandboxState.paths) ? sandboxState.paths : []
       const nextUrl = typeof sandboxState.url === 'string' ? sandboxState.url : undefined
-
       const nextSandboxId = sandboxState.sandboxId ?? state.sandboxId
-
       return {
         sandboxId: nextSandboxId,
         status: nextSandboxId ? 'running' : state.status,
@@ -136,6 +194,42 @@ export const useSandboxStore = create<SandboxStore>()((set) => ({
   fileContents: {},
   setFileContent: (path, content) =>
     set((state) => ({ fileContents: { ...state.fileContents, [path]: content } })),
+  // ── Agent pipeline ──────────────────────────────────────────────────────
+  agents: { ...DEFAULT_AGENTS },
+  setAgentStatus: (name, status, message, durationMs) =>
+    set((state) => ({
+      agents: {
+        ...state.agents,
+        [name]: {
+          ...state.agents[name],
+          name,
+          status,
+          message,
+          durationMs,
+          startedAt: status === 'starting' ? Date.now() : state.agents[name]?.startedAt,
+          finishedAt: (status === 'done' || status === 'error') ? Date.now() : state.agents[name]?.finishedAt,
+        },
+      },
+    })),
+  subtaskThreads: [],
+  upsertSubtaskThread: (thread) =>
+    set((state) => {
+      const idx = state.subtaskThreads.findIndex((t) => t.threadId === thread.threadId)
+      if (idx === -1) return { subtaskThreads: [...state.subtaskThreads, thread] }
+      const updated = [...state.subtaskThreads]
+      updated[idx] = thread
+      return { subtaskThreads: updated }
+    }),
+  clearAgentPipeline: () =>
+    set(() => ({
+      agents: { ...DEFAULT_AGENTS },
+      subtaskThreads: [],
+    })),
+  // ── Pending diffs ────────────────────────────────────────────────────────
+  pendingDiff: null,
+  setPendingDiff: (diff) => set(() => ({ pendingDiff: diff, pendingDiffResolved: false })),
+  pendingDiffResolved: false,
+  setPendingDiffResolved: (resolved) => set(() => ({ pendingDiffResolved: resolved })),
   reset: () =>
     set(() => ({
       sandboxId: undefined,
@@ -153,6 +247,10 @@ export const useSandboxStore = create<SandboxStore>()((set) => ({
       isRestoringEnvironment: false,
       restoreError: null,
       fileContents: {},
+      agents: { ...DEFAULT_AGENTS },
+      subtaskThreads: [],
+      pendingDiff: null,
+      pendingDiffResolved: false,
     })),
   setChatStatus: (status) =>
     set((state) =>
@@ -166,6 +264,10 @@ export const useSandboxStore = create<SandboxStore>()((set) => ({
       paths: [],
       url: undefined,
       generatedFiles: new Set<string>(),
+      agents: { ...DEFAULT_AGENTS },
+      subtaskThreads: [],
+      pendingDiff: null,
+      pendingDiffResolved: false,
     })),
   setStatus: (status) => set(() => ({ status })),
   setUrl: (url) => set(() => ({ url })),
@@ -181,6 +283,8 @@ export const useSandboxStore = create<SandboxStore>()((set) => ({
     })
   },
 }))
+
+// ── File explorer store ──────────────────────────────────────────────────
 
 interface FileExplorerStore {
   paths: string[]
@@ -201,9 +305,21 @@ export const useFileExplorerStore = create<FileExplorerStore>()((set) => ({
   reset: () => set(() => ({ paths: [] })),
 }))
 
+// ── Data state mapper hook ────────────────────────────────────────────────
+
 export function useDataStateMapper() {
-  const { addPaths, setSandboxId, setUrl, upsertCommand, addGeneratedFiles, setFileContent } =
-    useSandboxStore()
+  const {
+    addPaths,
+    setSandboxId,
+    setUrl,
+    upsertCommand,
+    addGeneratedFiles,
+    setFileContent,
+    setAgentStatus,
+    upsertSubtaskThread,
+    setPendingDiff,
+    setPendingDiffResolved,
+  } = useSandboxStore()
   const { errors } = useCommandErrorsLogs()
   const { setCursor } = useMonitorState()
 
@@ -243,8 +359,41 @@ export function useDataStateMapper() {
       case 'data-file-content':
         setFileContent(data.data.path, data.data.content)
         break
-      // Multi-agent pipeline events — silently handled, UI picks these up via chat data parts
+      // ── Agent pipeline events ─────────────────────────────────────────
       case 'data-agent-status':
+        setAgentStatus(
+          data.data.agentName as Parameters<typeof setAgentStatus>[0],
+          data.data.status as Parameters<typeof setAgentStatus>[1],
+          data.data.message,
+          data.data.durationMs
+        )
+        break
+      case 'data-subtask-thread':
+        upsertSubtaskThread({
+          threadId: data.data.threadId,
+          groupId: data.data.groupId,
+          description: data.data.description,
+          status: data.data.status,
+          filesHandled: data.data.filesHandled,
+        })
+        break
+      // ── Diff preview events ────────────────────────────────────────────
+      case 'data-pending-diff':
+        setPendingDiff({
+          pendingId: data.data.pendingId,
+          sandboxId: data.data.sandboxId,
+          sessionId: data.data.sessionId,
+          projectId: data.data.projectId,
+          diffs: data.data.diffs,
+          totalFiles: data.data.totalFiles,
+          summary: data.data.summary,
+        })
+        break
+      case 'data-diff-decision':
+        if (data.data.decision === 'approved' || data.data.decision === 'rejected') {
+          setPendingDiffResolved(true)
+        }
+        break
       case 'data-adversary-findings':
       case 'data-synthesis-ready':
       case 'data-execution-retry':

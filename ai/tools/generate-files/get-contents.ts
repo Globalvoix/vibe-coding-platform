@@ -1,5 +1,6 @@
 import { streamObject, type ModelMessage } from 'ai'
 import { getModelOptions } from '@/ai/gateway'
+import { chooseFileGenerationModelId } from '@/ai/model-routing'
 import { Deferred } from '@/lib/deferred'
 import type { GenerationBlueprint } from '@/lib/generation-blueprint'
 import z from 'zod/v3'
@@ -40,8 +41,15 @@ export async function* getContents(
 
   const systemPrompt = buildEnhancedSystemPrompt(params.paths, params.blueprint)
 
+  // Per-file-type model routing: UI → Gemini Flash, backend → Claude Sonnet 4.5
+  const selectedModelId = chooseFileGenerationModelId({
+    paths: params.paths,
+    messages: params.messages,
+    fallbackModelId: params.modelId,
+  })
+
   const result = streamObject({
-    ...getModelOptions(params.modelId, { reasoningEffort: 'medium' }),
+    ...getModelOptions(selectedModelId, { reasoningEffort: 'medium' }),
     maxOutputTokens: 64000,
     system: systemPrompt,
     messages: [

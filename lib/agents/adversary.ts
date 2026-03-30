@@ -1,6 +1,6 @@
 import { generateObject } from 'ai'
 import { getModelOptions } from '@/ai/gateway'
-import { DEFAULT_MODEL } from '@/ai/constants'
+import { getAgentPlanningModelId } from '@/ai/model-routing'
 import { z } from 'zod'
 import { problemSchema, type AgentRunContext, type ExecutionPlan, type FileDiff, type Problem } from './types'
 
@@ -44,7 +44,8 @@ export async function runAdversaryAgent(
   plan: ExecutionPlan,
   diffs: FileDiff[]
 ): Promise<AdversaryOutput> {
-  const modelOptions = getModelOptions(DEFAULT_MODEL)
+  // Adversary uses Claude Sonnet 4.5 — deep reasoning for security & correctness review
+  const modelOptions = getModelOptions(getAgentPlanningModelId())
 
   const planText = `
 Intent: ${plan.intent}
@@ -53,15 +54,17 @@ Files: ${plan.requiredFiles.map((f) => f.path).join(', ')}
 Packages: ${plan.requiredPackages.join(', ') || 'none'}
 `
 
-  const diffsText = diffs
-    .map(
-      (d) =>
-        `${d.action.toUpperCase()} ${d.path}:
+  const diffsText = diffs.length > 0
+    ? diffs
+        .map(
+          (d) =>
+            `${d.action.toUpperCase()} ${d.path}:
   ${d.description}
   Imports: ${d.importDependencies.join(', ') || 'none'}
   ${d.codeSnippet ? `Key code:\n${d.codeSnippet}` : ''}`
-    )
-    .join('\n\n')
+        )
+        .join('\n\n')
+    : 'No Craftsman diffs available yet — attack the plan directly.'
 
   const result = await generateObject({
     ...modelOptions,

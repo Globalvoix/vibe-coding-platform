@@ -1,6 +1,6 @@
 import { generateObject } from 'ai'
 import { getModelOptions } from '@/ai/gateway'
-import { DEFAULT_MODEL } from '@/ai/constants'
+import { getHistorianModelId } from '@/ai/model-routing'
 import { getPastPlanEvents, getPastSessionSummaries } from '../orchestrator/event-log'
 import { historianContextSchema, type AgentRunContext, type HistorianContext } from './types'
 
@@ -48,7 +48,8 @@ export async function runHistorianAgent(
     .join('\n\n')
 
   try {
-    const modelOptions = getModelOptions(DEFAULT_MODEL)
+    // Historian uses Gemini Flash — fast retrieval, no deep reasoning needed
+    const modelOptions = getModelOptions(getHistorianModelId())
     const result = await generateObject({
       ...modelOptions,
       schema: historianContextSchema,

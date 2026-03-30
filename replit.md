@@ -17,15 +17,33 @@ A Next.js 15 AI-powered coding agent application that allows users to generate w
 
 ## Architecture
 
-### Multi-Agent Pipeline
-Every user request passes through a 4-agent pipeline before code generation begins:
+### Multi-Agent Pipeline (True Parallel)
+Every user request passes through a 5-agent pipeline orchestrated in `lib/orchestrator/index.ts`:
 
-1. **Historian** (`lib/agents/historian.ts`) — Queries past sessions from Postgres `agent_events` table for relevant patterns and pitfalls
-2. **Architect** (`lib/agents/architect.ts`) — Reads user intent + historian context, produces a structured `ExecutionPlan` JSON (files, tasks, packages, decisions)
-3. **Craftsman + Adversary** (`lib/agents/craftsman.ts` + `lib/agents/adversary.ts`) — Run in **parallel**: Craftsman produces `FileDiff[]` describing what to build; Adversary simultaneously attacks the plan looking for critical errors, type mismatches, and security issues
-4. **Synthesizer** (`lib/agents/synthesizer.ts`) — Reconciles diffs + problems → patches critical issues → produces an `executionDirective` that becomes the enhanced system prompt
+1. **Historian** + **Architect** — Fire **simultaneously** via `Promise.allSettled`; Historian queries past sessions; Architect produces a structured `ExecutionPlan` JSON
+2. **Craftsman** — Spawns N **parallel subtask threads** (one per `parallelTaskGroups` entry) each writing `FileDiff[]`; runs alongside Adversary concurrently
+3. **Adversary** (`lib/agents/adversary.ts`) — Simultaneously attacks the plan for critical errors, type mismatches, security issues
+4. **Synthesizer** (`lib/agents/synthesizer.ts`) — Reconciles all parallel outputs → patches critical issues → produces `executionDirective` system prompt
 
-The enhanced system prompt is then fed into the existing `streamText` + tools execution loop, which writes files into the E2B sandbox and streams file contents to the Monaco editor.
+### Model Routing
+- **Gemini Flash 3** (`google/gemini-2.5-flash`) — Historian, UI file generation
+- **Claude Sonnet 4.5** (`anthropic/claude-sonnet-4.5`) — Architect, Adversary, Synthesizer, backend file generation
+- **GPT-5.1 Codex Max** (`openai/gpt-5.1-codex-max`) — Auto-retry debugger in `lib/orchestrator/executor-retry.ts`
+
+Per-file model routing is applied in `ai/tools/generate-files/get-contents.ts` via `chooseFileGenerationModelId`.
+
+### Diff Preview System
+Generated files are **not written directly to E2B**. Instead, `ai/tools/generate-files.ts` stages them as `pending_diffs` in Postgres. The chat stream emits a `data-pending-diff` part that renders a Monaco DiffEditor card (`components/diff/pending-diff-card.tsx`). The user approves or discards; approved files are written to E2B via `POST /api/projects/[id]/diffs/apply`.
+
+### Auto-Retry Executor
+`lib/orchestrator/executor-retry.ts` runs commands in E2B with up to 3 retry attempts. On failure it calls GPT to analyze stdout/stderr and generate a fix command, then re-runs. All outcomes are logged to `agent_events`.
+
+### Agent Pipeline UI
+- `components/chat/message-part/agent-pipeline.tsx` — Inline `AgentPipeline` (per-agent status row) + `AgentPipelinePanel` (full pipeline overview with parallel thread list)
+- `app/state.ts` — Zustand store with `agents`, `subtaskThreads`, `pendingDiff`, `pendingDiffResolved`, `useDataStateMapper` handles all `data-agent-status`, `data-subtask-thread`, `data-pending-diff`, `data-diff-decision` events
+
+### Event Log (Time-Travel Replay)
+`lib/orchestrator/event-log.ts` appends every pipeline event to `agent_events` Postgres table. `getSessionEvents` / `getProjectHistory` enable full session replay.
 
 ### Orchestrator (`lib/orchestrator/`)
 - `index.ts` — Main pipeline coordinator, streams agent status events to the UI
