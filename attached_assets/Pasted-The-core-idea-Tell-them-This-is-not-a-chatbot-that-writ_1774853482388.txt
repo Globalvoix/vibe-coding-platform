@@ -1,0 +1,24 @@
+The core idea
+Tell them: "This is not a chatbot that writes code. This is a multi-agent system where several AI agents run in parallel, each with a specific job, and their outputs get merged before anything touches the user's screen."
+
+The agents — describe each one by its job
+"There are four agents running simultaneously the moment a user sends a message:
+The first is the Architect agent. Its only job is to read the user's intent and produce a structured plan — a JSON object describing what files need to be created or modified, in what order, and why. It never writes actual code.
+The second is the Craftsman agent. It receives the Architect's plan and writes the actual code. It has access to the user's entire file tree as context. It outputs file diffs, not full files.
+The third is the Adversary agent. It runs at the same time as the Craftsman. It receives the same plan and tries to find what could go wrong — edge cases, missing error handling, broken imports, type mismatches. It outputs a list of problems, not fixes.
+The fourth is the Historian agent. It queries the user's past sessions and finds similar things they've built before. It feeds that context back into the other agents before they finish."
+
+The synthesis step — describe what happens after
+"Before any code reaches the user, a synthesis step runs. It takes the Craftsman's diffs and the Adversary's problem list and reconciles them. If the Adversary flagged something critical, the Craftsman's output gets patched. If it's minor, it gets surfaced as a warning to the user. The user always sees a diff preview — never a blind file overwrite."
+
+The execution loop — describe how code actually runs
+"After the user approves the diff, the code runs inside an E2B sandbox — a completely isolated cloud environment. The agent watches the sandbox output. If there's an error, it reads the stack trace and automatically attempts a fix, up to three times, without asking the user. Only if it fails all three times does it surface the error to the user with a clear explanation."
+
+The memory system — describe what persists
+"Every session is saved as an event log, not a transcript. Every agent action, every tool call, every diff, every execution result is an immutable event appended to a log in Supabase. This means the system can replay any session, resume from any point, and time-travel back to any working state via snapshots."
+
+The task graph — describe how work is parallelized
+"When a user request can be broken into independent subtasks — say, 'build the auth system and the dashboard' — the orchestrator spawns two separate agent threads that run in parallel using BullMQ job queues. They write to separate parts of the file tree and merge at the end. The user sees both streams of output arriving simultaneously."
+
+What to tell Replit to NOT do
+"Do not build a single API route that calls Claude once and returns a response. Do not use a simple chat loop. The architecture must have a queue between the user's message and the LLM calls, so agent tasks can be tracked, retried, and parallelized. Each agent is a separate function with its own system prompt, its own context window, and its own output schema."

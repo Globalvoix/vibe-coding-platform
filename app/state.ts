@@ -233,6 +233,12 @@ export function useDataStateMapper() {
           setUrl(data.data.url)
         }
         break
+      // Multi-agent pipeline events — silently handled, UI picks these up via chat data parts
+      case 'data-agent-status':
+      case 'data-adversary-findings':
+      case 'data-synthesis-ready':
+      case 'data-execution-retry':
+        break
       default:
         break
     }

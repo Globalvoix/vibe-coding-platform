@@ -18,6 +18,8 @@ import { createOrUpdateEnvVar, listEnvVars } from '@/lib/env-vars-db'
 import { getProject } from '@/lib/projects-db'
 import { CONNECTOR_DEFINITIONS, detectConnectorFromPhrase, type ConnectorId } from '@/lib/connector-mapping'
 import { GenerationSessionTracker } from '@/lib/generation-session-tracker'
+import { runOrchestrator } from '@/lib/orchestrator'
+import { appendEvent } from '@/lib/orchestrator/event-log'
 import { randomUUID } from 'crypto'
 import prompt from './prompt.md'
 
@@ -28,7 +30,6 @@ interface BodyData {
 
 function calculatePromptCost(text: string): number {
   const words = text.trim().split(/\s+/).filter((word) => word.length > 0).length
-
   if (words > 50) return 15
   if (words > 20) return 12
   return 10
@@ -36,99 +37,43 @@ function calculatePromptCost(text: string): number {
 
 function extractEnvVarsFromText(text: string) {
   const found: Array<{ key: string; value: string }> = []
-
   const lines = text.split(/\r?\n/)
   for (const line of lines) {
     const trimmed = line.trim()
     if (!trimmed || trimmed.startsWith('#')) continue
-
     const match = trimmed.match(/^([A-Z][A-Z0-9_]{1,63})\s*=\s*(.+)$/)
     if (!match) continue
-
     const key = match[1] ?? ''
     let rawValue = (match[2] ?? '').trim()
-
     if (rawValue.startsWith('"') && rawValue.endsWith('"') && rawValue.length >= 2) {
-      rawValue = rawValue
-        .slice(1, -1)
-        .replace(/\\n/g, '\n')
-        .replace(/\\"/g, '"')
-        .replace(/\\\\/g, '\\')
+      rawValue = rawValue.slice(1, -1).replace(/\\n/g, '\n').replace(/\\"/g, '"').replace(/\\\\/g, '\\')
     } else if (rawValue.startsWith("'") && rawValue.endsWith("'") && rawValue.length >= 2) {
       rawValue = rawValue.slice(1, -1)
     }
-
     if (!rawValue) continue
-
     found.push({ key, value: rawValue })
   }
-
   const present = new Set(found.map((v) => v.key))
   const add = (key: string, value: string | undefined) => {
-    if (!value) return
-    if (present.has(key)) return
+    if (!value || present.has(key)) return
     found.push({ key, value })
     present.add(key)
   }
-
   const extractToken = (re: RegExp) => text.match(re)?.[0]
-
-  // Google Gemini
-  if (!present.has('GOOGLE_GENERATIVE_AI_API_KEY')) {
-    const isGeminiMentioned = /\bgemini\b/i.test(text) || /google\s+generative/i.test(text)
-    if (isGeminiMentioned) {
-      add('GOOGLE_GENERATIVE_AI_API_KEY', extractToken(/AIza[0-9A-Za-z_-]{20,}/))
-    }
-  }
-
-  // OpenAI
-  if (!present.has('OPENAI_API_KEY')) {
-    const isOpenAIMentioned = /\bopenai\b/i.test(text) || /\bgpt\b/i.test(text) || /chatgpt/i.test(text)
-    if (isOpenAIMentioned) {
-      add('OPENAI_API_KEY', extractToken(/sk-(?:proj-)?[0-9A-Za-z_-]{20,}/))
-    }
-  }
-
-  // Together AI
-  if (!present.has('TOGETHER_API_KEY')) {
-    const isTogetherMentioned = /\btogether\b/i.test(text)
-    if (isTogetherMentioned) {
-      add('TOGETHER_API_KEY', extractToken(/tgp_v1__?[0-9A-Za-z_-]{20,}/))
-    }
-  }
-
-  // Deepseek (shares sk- prefix, so require explicit mention)
-  if (!present.has('DEEPSEEK_API_KEY')) {
-    const isDeepseekMentioned = /\bdeepseek\b/i.test(text)
-    if (isDeepseekMentioned) {
-      add('DEEPSEEK_API_KEY', extractToken(/sk-[0-9A-Za-z_-]{20,}/))
-    }
-  }
-
-  // Perplexity
-  if (!present.has('PERPLEXITY_API_KEY')) {
-    const isPerplexityMentioned = /\bperplexity\b/i.test(text)
-    if (isPerplexityMentioned) {
-      add('PERPLEXITY_API_KEY', extractToken(/pplx-[0-9A-Za-z_-]{10,}/))
-    }
-  }
-
-  // Firecrawl
-  if (!present.has('FIRECRAWL_API_KEY')) {
-    const isFirecrawlMentioned = /\bfirecrawl\b/i.test(text)
-    if (isFirecrawlMentioned) {
-      add('FIRECRAWL_API_KEY', extractToken(/fc[-_][0-9A-Za-z]{10,}/))
-    }
-  }
-
-  // ElevenLabs
-  if (!present.has('ELEVEN_LABS_API_KEY')) {
-    const isElevenMentioned = /\beleven\b/i.test(text) || /11\s?labs/i.test(text)
-    if (isElevenMentioned) {
-      add('ELEVEN_LABS_API_KEY', extractToken(/sk_[0-9A-Za-z_-]{10,}/))
-    }
-  }
-
+  if (!present.has('GOOGLE_GENERATIVE_AI_API_KEY') && (/\bgemini\b/i.test(text) || /google\s+generative/i.test(text)))
+    add('GOOGLE_GENERATIVE_AI_API_KEY', extractToken(/AIza[0-9A-Za-z_-]{20,}/))
+  if (!present.has('OPENAI_API_KEY') && (/\bopenai\b/i.test(text) || /\bgpt\b/i.test(text) || /chatgpt/i.test(text)))
+    add('OPENAI_API_KEY', extractToken(/sk-(?:proj-)?[0-9A-Za-z_-]{20,}/))
+  if (!present.has('TOGETHER_API_KEY') && /\btogether\b/i.test(text))
+    add('TOGETHER_API_KEY', extractToken(/tgp_v1__?[0-9A-Za-z_-]{20,}/))
+  if (!present.has('DEEPSEEK_API_KEY') && /\bdeepseek\b/i.test(text))
+    add('DEEPSEEK_API_KEY', extractToken(/sk-[0-9A-Za-z_-]{20,}/))
+  if (!present.has('PERPLEXITY_API_KEY') && /\bperplexity\b/i.test(text))
+    add('PERPLEXITY_API_KEY', extractToken(/pplx-[0-9A-Za-z_-]{10,}/))
+  if (!present.has('FIRECRAWL_API_KEY') && /\bfirecrawl\b/i.test(text))
+    add('FIRECRAWL_API_KEY', extractToken(/fc[-_][0-9A-Za-z]{10,}/))
+  if (!present.has('ELEVEN_LABS_API_KEY') && (/\beleven\b/i.test(text) || /11\s?labs/i.test(text)))
+    add('ELEVEN_LABS_API_KEY', extractToken(/sk_[0-9A-Za-z_-]{10,}/))
   return found
 }
 
@@ -152,7 +97,6 @@ async function buildConnectorContext({
   const configuredKeys = new Set(
     envVars.filter((v) => (v.value ?? '').length > 0).map((v) => v.key)
   )
-
   const configuredConnectors = Object.values(CONNECTOR_DEFINITIONS)
     .filter(
       (c) =>
@@ -160,18 +104,12 @@ async function buildConnectorContext({
         (c.envVarAliases ?? []).some((alias) => configuredKeys.has(alias))
     )
     .sort((a, b) => b.priority - a.priority)
-
   const detected = detectConnectorFromPhrase(userPromptText)
     .slice(0, 5)
     .map((m) => ({ id: m.connector.id as ConnectorId, displayName: m.connector.displayName }))
-
-  const detectedUnique = Array.from(
-    new Map(detected.map((d) => [d.id, d])).values()
-  )
-
+  const detectedUnique = Array.from(new Map(detected.map((d) => [d.id, d])).values())
   const configuredNames = configuredConnectors.map((c) => c.displayName)
   const detectedNames = detectedUnique.map((d) => d.displayName)
-
   const lines: string[] = []
   lines.push('# PROJECT CONNECTOR CONTEXT')
   lines.push('')
@@ -181,7 +119,6 @@ async function buildConnectorContext({
   } else {
     for (const name of configuredNames) lines.push(`- ${name}`)
   }
-
   lines.push('')
   lines.push('## Detected needs from the latest user message')
   if (detectedNames.length === 0) {
@@ -189,13 +126,11 @@ async function buildConnectorContext({
   } else {
     for (const name of detectedNames) lines.push(`- ${name}`)
   }
-
   lines.push('')
   lines.push('## Rules')
   lines.push('- If a detected connector is already configured, use it immediately and generate code that reads its env var (do not ask for the key).')
   lines.push('- If a detected connector is not configured, instruct the user to configure it in Settings → Connectors, then proceed.')
   lines.push('- Never include any secret env var values in messages or code.')
-
   return lines.join('\n')
 }
 
@@ -207,12 +142,8 @@ export async function POST(req: Request) {
     }
 
     const { userId } = await auth()
-
     if (!userId) {
-      return NextResponse.json(
-        { error: 'User not authenticated' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'User not authenticated' }, { status: 401 })
     }
 
     const bodyData = (await req.json()) as BodyData
@@ -222,7 +153,6 @@ export async function POST(req: Request) {
     const chatModelId = Models.OpenAIGPT5Mini
 
     const project = projectId ? await getProject(userId, projectId).catch(() => null) : null
-
     const models = await getAvailableModels()
 
     const extractedEnvVars: Array<{ key: string; value: string }> = []
@@ -242,7 +172,6 @@ export async function POST(req: Request) {
             }
           }
         }
-
         for (const { key, value } of extractedEnvVars) {
           await createOrUpdateEnvVar(projectId, userId, key, value, true)
         }
@@ -250,19 +179,16 @@ export async function POST(req: Request) {
         console.warn('Failed to capture env vars from chat:', error)
       }
     }
+
     const effectiveReasoningEffort = 'medium' as const
 
     const toolModel = models.find((model) => model.id === toolModelId)
     if (!toolModel) {
-      return NextResponse.json(
-        { error: `Model ${toolModelId} not found.` },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: `Model ${toolModelId} not found.` }, { status: 400 })
     }
 
     const chatModel = models.find((model) => model.id === chatModelId) ?? toolModel
 
-    // Extract user's latest message text to calculate cost
     let userPromptText = ''
     for (let i = messages.length - 1; i >= 0; i--) {
       const message = messages[i]
@@ -281,7 +207,6 @@ export async function POST(req: Request) {
     const credits = await getUserCredits(userId)
     const subscription = await getUserSubscription(userId)
 
-    // Check if user has a paid subscription
     if (!subscription || subscription.plan_id === 'free' || subscription.status !== 'active') {
       return NextResponse.json(
         {
@@ -318,7 +243,7 @@ export async function POST(req: Request) {
         await generationSessionTracker.initialize(null)
         await generationSessionTracker.updateProgress({
           stage: 'analyzing',
-          message: 'Starting generation',
+          message: 'Starting multi-agent pipeline',
           completionPercentage: 5,
         })
       } catch (error) {
@@ -331,12 +256,38 @@ export async function POST(req: Request) {
         ? project.repo_context.trim()
         : ''
 
-    const systemPrompt = [prompt, connectorContext, repoContext].filter(Boolean).join('\n\n')
+    const conversationHistory = messages
+      .slice(-6)
+      .filter((m) => m.role === 'user' || m.role === 'assistant')
+      .map((m) => {
+        const textPart = m.parts?.find((p) => p.type === 'text')
+        const text = textPart && 'text' in textPart ? String(textPart.text ?? '') : ''
+        return `${m.role.toUpperCase()}: ${text.slice(0, 300)}`
+      })
+      .join('\n')
+
+    const projectContext = [
+      repoContext,
+      project ? `Project ID: ${project.id}` : '',
+    ]
+      .filter(Boolean)
+      .join('\n')
+
+    const sessionId = randomUUID()
+
+    const agentCtx = {
+      sessionId,
+      projectId: projectId ?? '',
+      userId,
+      userPrompt: userPromptText,
+      conversationHistory,
+      projectContext,
+    }
 
     return createUIMessageStreamResponse({
       stream: createUIMessageStream({
         originalMessages: messages,
-        execute: ({ writer }) => {
+        execute: async ({ writer }) => {
           const processedMessages = messages.map((message) => {
             message.parts = message.parts.map((part) => {
               if (message.role === 'user' && part.type === 'text' && secretsToRedact.length > 0) {
@@ -352,8 +303,7 @@ export async function POST(req: Request) {
                     `There are errors in the generated code. This is the summary of the errors we have:\n` +
                     `\`\`\`${part.data.summary}\`\`\`\n` +
                     (part.data.paths?.length
-                      ? `The following files may contain errors:\n` +
-                        `\`\`\`${part.data.paths?.join('\n')}\`\`\`\n`
+                      ? `The following files may contain errors:\n\`\`\`${part.data.paths?.join('\n')}\`\`\`\n`
                       : '') +
                     `Fix the errors reported.`,
                 }
@@ -384,6 +334,41 @@ export async function POST(req: Request) {
             },
           } as typeof writer
 
+          // Run the multi-agent orchestrator BEFORE generation.
+          // Only for new user requests (not tool-call follow-ups).
+          const isNewRequest = userPromptText.length > 0 && (
+            messages.length <= 2 ||
+            messages[messages.length - 1]?.role === 'user'
+          )
+
+          let orchestratorResult = null
+          if (isNewRequest) {
+            try {
+              orchestratorResult = await runOrchestrator({
+                ctx: agentCtx,
+                baseSystemPrompt: prompt,
+                connectorContext,
+                writer: safeWriter,
+              })
+            } catch (err) {
+              console.warn('[chat] Orchestrator failed — falling back to base prompt:', err)
+            }
+          }
+
+          const systemPrompt = orchestratorResult
+            ? orchestratorResult.enhancedSystemPrompt
+            : [prompt, connectorContext, repoContext].filter(Boolean).join('\n\n')
+
+          if (generationSessionTracker) {
+            await generationSessionTracker.updateProgress({
+              stage: 'generating',
+              message: orchestratorResult
+                ? `Executing ${orchestratorResult.plan.requiredFiles.length}-file plan`
+                : 'Generating',
+              completionPercentage: orchestratorResult ? 30 : 20,
+            }).catch(() => {})
+          }
+
           const result = streamText({
             ...getModelOptions(chatModelId, { reasoningEffort: effectiveReasoningEffort }),
             system: systemPrompt,
@@ -399,14 +384,10 @@ export async function POST(req: Request) {
             onError: (error) => {
               console.error('Error communicating with AI')
               console.error(JSON.stringify(error, null, 2))
-
               if (!generationSessionTracker) return
-
               void (async () => {
                 try {
-                  const isCancelled = await GenerationSessionTracker.isCancelled(
-                    generationSessionTracker.id
-                  )
+                  const isCancelled = await GenerationSessionTracker.isCancelled(generationSessionTracker.id)
                   await generationSessionTracker.complete(isCancelled ? 'cancelled' : 'error')
                 } catch (trackerError) {
                   console.warn('Failed to update generation session status on error', trackerError)
@@ -416,26 +397,34 @@ export async function POST(req: Request) {
             onFinish: async ({ usage }) => {
               if (generationSessionTracker) {
                 try {
-                  const isCancelled = await GenerationSessionTracker.isCancelled(
-                    generationSessionTracker.id
-                  )
+                  const isCancelled = await GenerationSessionTracker.isCancelled(generationSessionTracker.id)
                   await generationSessionTracker.complete(isCancelled ? 'cancelled' : 'completed')
                 } catch (error) {
                   console.warn('Failed to finalize generation session status', error)
                 }
               }
-
               try {
                 await recordUsageAndDeductCredits({
                   userId,
                   modelId: chatModelId,
                   usage,
                   creditsRequired: requiredCredits,
-                  metadata: { source: 'chat' },
+                  metadata: { source: 'chat', sessionId },
                 })
               } catch (error) {
                 console.error('Failed to record credit usage for chat', error)
               }
+              await appendEvent({
+                sessionId,
+                projectId: projectId ?? '',
+                userId,
+                eventType: 'session_complete',
+                data: {
+                  userPrompt: userPromptText,
+                  filesPlanned: orchestratorResult?.plan.requiredFiles.length ?? 0,
+                  tokensUsed: usage,
+                },
+              }).catch(() => {})
             },
           })
 
@@ -443,9 +432,7 @@ export async function POST(req: Request) {
             if (!generationSessionTracker) return
             console.warn('Stream consumption ended unexpectedly', error)
             try {
-              const isCancelled = await GenerationSessionTracker.isCancelled(
-                generationSessionTracker.id
-              )
+              const isCancelled = await GenerationSessionTracker.isCancelled(generationSessionTracker.id)
               await generationSessionTracker.complete(isCancelled ? 'cancelled' : 'error')
             } catch (trackerError) {
               console.warn('Failed to mark generation session after stream consumption error', trackerError)

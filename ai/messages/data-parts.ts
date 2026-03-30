@@ -46,6 +46,35 @@ export const dataPartSchema = z.object({
     })).optional(),
     reason: z.string().optional(),
   }),
+
+  // ── Multi-agent pipeline data parts ──────────────────────────────────────
+  'agent-status': z.object({
+    agentName: z.enum(['architect', 'craftsman', 'adversary', 'historian', 'synthesizer', 'executor']),
+    status: z.enum(['starting', 'running', 'done', 'error']),
+    message: z.string().optional(),
+  }),
+  'adversary-findings': z.object({
+    problems: z.array(z.object({
+      severity: z.enum(['critical', 'major', 'warning', 'info']),
+      category: z.string(),
+      description: z.string(),
+      affectedFiles: z.array(z.string()),
+      suggestion: z.string(),
+    })),
+    overallRisk: z.enum(['low', 'medium', 'high', 'critical']),
+    riskSummary: z.string(),
+  }),
+  'synthesis-ready': z.object({
+    criticalProblemsPatched: z.number(),
+    warningsCount: z.number(),
+    filesPlanned: z.number(),
+    executionDirectiveReady: z.boolean(),
+  }),
+  'execution-retry': z.object({
+    attempt: z.number(),
+    maxAttempts: z.number(),
+    reason: z.string(),
+  }),
 })
 
 export type DataPart = z.infer<typeof dataPartSchema>
