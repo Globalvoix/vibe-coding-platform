@@ -20,7 +20,6 @@ import { Message } from '@/components/chat/message'
 import { Panel, PanelHeader } from '@/components/panels/panels'
 import { Settings } from '@/components/settings/settings'
 import { ComingSoonModal } from '@/components/modals/coming-soon-modal'
-import { SubscriptionRequiredModal } from '@/components/modals/subscription-required-modal'
 import { HistoryPanel } from '@/components/history-panel/history-panel'
 import { useChat } from '@ai-sdk/react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -86,8 +85,6 @@ export function Chat({ className, initialPrompt, initialMessages, projectId, pro
   })
   const [showHistoryPanel, setShowHistoryPanel] = useState(false)
   const [selectedVersionId, setSelectedVersionId] = useState<string | null>(null)
-  const [hasSubscription, setHasSubscription] = useState<boolean | null>(null)
-  const [showSubscriptionRequired, setShowSubscriptionRequired] = useState(false)
   const [activeGenerationSession, setActiveGenerationSession] = useState<GenerationStatusResponse['session']>(null)
   const generationPollIntervalRef = useRef<number | null>(null)
 
@@ -162,32 +159,6 @@ export function Chat({ className, initialPrompt, initialMessages, projectId, pro
   }
 
 
-  useEffect(() => {
-    if (!isSignedIn) {
-      setHasSubscription(null)
-      return
-    }
-
-    const checkSubscriptionStatus = async () => {
-      try {
-        const response = await fetch('/api/subscription')
-        if (response.ok) {
-          const data = await response.json()
-          const subscription = data.subscription
-          // Only allow paid plans (not free)
-          const isPaid = subscription && subscription.plan_id !== 'free' && subscription.status === 'active'
-          setHasSubscription(isPaid)
-        } else {
-          setHasSubscription(false)
-        }
-      } catch (error) {
-        console.error('Failed to check subscription status:', error)
-        setHasSubscription(false)
-      }
-    }
-
-    checkSubscriptionStatus()
-  }, [isSignedIn])
 
   useEffect(() => {
     if (!projectId) return
@@ -243,18 +214,6 @@ export function Chat({ className, initialPrompt, initialMessages, projectId, pro
         return
       }
 
-      // Check if user has a paid subscription
-      if (hasSubscription === false) {
-        setShowSubscriptionRequired(true)
-        return
-      }
-
-      // If subscription status is still loading, don't submit
-      if (hasSubscription === null) {
-        toast.loading('Checking subscription status...')
-        return
-      }
-
       const messageText = text.trim()
 
       if (messageText) {
@@ -273,7 +232,7 @@ export function Chat({ className, initialPrompt, initialMessages, projectId, pro
         }
       }
     },
-    [isSignedIn, openSignIn, sendMessage, setInput, projectId, supabaseConnected, hasSubscription]
+    [isSignedIn, openSignIn, sendMessage, setInput, projectId, supabaseConnected]
   )
 
   const previousChatStatusRef = useRef(status)
@@ -647,10 +606,6 @@ export function Chat({ className, initialPrompt, initialMessages, projectId, pro
         }
         title={comingSoonModal.title}
         description={comingSoonModal.description}
-      />
-      <SubscriptionRequiredModal
-        isOpen={showSubscriptionRequired}
-        onClose={() => setShowSubscriptionRequired(false)}
       />
     </>
   )

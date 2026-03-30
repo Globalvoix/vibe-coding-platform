@@ -32,11 +32,6 @@ export default function HomePage() {
     if (!response.ok) {
       try {
         const data = await response.json();
-        if (data?.code === 'APP_LIMIT_REACHED') {
-          router.push('/pricing');
-          return null;
-        }
-
         if (typeof data?.error === 'string' && data.error.trim()) {
           toast.error(data.error);
           return null;
