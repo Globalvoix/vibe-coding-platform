@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@clerk/nextjs'
+import { useAuth, useClerk } from '@clerk/nextjs'
 import { MiniSidebar } from '@/components/sidebar/mini-sidebar'
 import { Navbar } from '@/components/ui/mini-navbar'
 import { useUIStore } from '@/lib/ui-store'
@@ -56,12 +56,20 @@ export default function ProjectsPage() {
   const [selectedCreator, setSelectedCreator] = useState<string | null>(null)
   
   const router = useRouter()
-  // TEST MODE: bypass auth
-  const { userId } = useAuth()
+  const { isSignedIn, userId } = useAuth()
+  const { openSignIn } = useClerk()
   const { sidebarOpen } = useUIStore()
 
   useEffect(() => {
     let cancelled = false
+
+    if (!isSignedIn) {
+      openSignIn()
+      setIsLoading(false)
+      return () => {
+        cancelled = true
+      }
+    }
 
     async function load() {
       try {
@@ -90,7 +98,7 @@ export default function ProjectsPage() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [isSignedIn, openSignIn])
 
   const handleOpen = (id: string) => {
     router.push(`/workspace?projectId=${id}`)

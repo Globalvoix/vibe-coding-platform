@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Navbar } from "@/components/ui/mini-navbar";
 import Image from "next/image";
 import { Spinner } from "@/components/ui/spinner";
-import { useClerk } from "@clerk/nextjs";
+import { useAuth, useClerk } from "@clerk/nextjs";
 import { motion } from "framer-motion";
 import { ChevronRight } from "lucide-react";
 import { PromptBox } from "./prompt-box";
@@ -30,8 +30,7 @@ export function HeroWave({
 }: HeroWaveProps) {
   const [isLoading, setIsLoading] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  // TEST MODE: bypass auth
-  const isSignedIn = true;
+  const { isSignedIn } = useAuth();
   const { openSignIn } = useClerk();
 
   const baseSubtitlePrefix = "The AI Fullstack Engineer. Create beautiful, production-ready";

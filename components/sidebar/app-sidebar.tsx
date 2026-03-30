@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useClerk } from '@clerk/nextjs'
+import { useAuth, useClerk } from '@clerk/nextjs'
 import { useUIStore } from '@/lib/ui-store'
 import { CREDITS_UPDATED_EVENT } from '@/lib/credits-events'
 import { cn } from '@/lib/utils'
@@ -18,8 +18,7 @@ export function AppSidebar() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { sidebarOpen, setSidebarOpen, setSettingsModalOpen, setSettingsTab } = useUIStore()
-  // TEST MODE: bypass auth
-  const isSignedIn = true
+  const { isSignedIn } = useAuth()
   const { openSignIn } = useClerk()
 
   const handleOpenSettings = (tab: string = 'settings') => {

@@ -17,6 +17,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
+import { useAuth } from '@clerk/nextjs'
 import { CREDITS_UPDATED_EVENT } from '@/lib/credits-events'
 
 import { RenameProjectModal } from './rename-project-modal'
@@ -47,8 +48,7 @@ export function ProjectDropdown({ projectName, projectId }: ProjectDropdownProps
   const [creditLimit, setCreditLimit] = React.useState<number>(100)
   const [isCreditsLoading, setIsCreditsLoading] = React.useState(false)
   const router = useRouter()
-  // TEST MODE: bypass auth
-  const isSignedIn = true
+  const { isSignedIn } = useAuth()
 
   const { setSettingsModalOpen, setSettingsTab } = useUIStore()
 

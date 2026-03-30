@@ -1,19 +1,23 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
-import { createProject, listProjects } from '@/lib/projects-db'
+import { createProject, listProjects, countProjectsCreatedSince } from '@/lib/projects-db'
+import { getUserSubscription, getPlanLimits } from '@/lib/subscription'
 
 export async function GET() {
-  const { userId: clerkUserId } = await auth()
-  const userId = clerkUserId ?? 'test-user-local'
+  const { userId } = await auth()
+  if (!userId) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
 
   const projects = await listProjects(userId)
   return NextResponse.json({ projects })
 }
 
 export async function POST(req: Request) {
-  // TEST MODE: use authenticated user if available, otherwise fall back to a test id
-  const { userId: clerkUserId } = await auth()
-  const userId = clerkUserId ?? 'test-user-local'
+  const { userId } = await auth()
+  if (!userId) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
 
   const body = await req.json().catch(() => ({})) as { prompt?: string }
   const prompt = typeof body.prompt === 'string' ? body.prompt : ''
@@ -22,7 +26,43 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Prompt is required' }, { status: 400 })
   }
 
-  // TEST MODE: subscription and limits gates are bypassed
+  const subscription = await getUserSubscription(userId)
+
+  // Require a paid subscription to create projects
+  if (!subscription || subscription.plan_id === 'free' || subscription.status !== 'active') {
+    return NextResponse.json(
+      {
+        error: 'A paid subscription is required to create projects. We are in beta and paid-only due to high demand.',
+        code: 'SUBSCRIPTION_REQUIRED',
+      },
+      { status: 403 }
+    )
+  }
+
+  const planId = subscription.plan_id
+  const limits = await getPlanLimits(planId)
+
+  if (Number.isFinite(limits.apps)) {
+    const now = new Date()
+    const periodStart = subscription?.current_period_start
+      ? new Date(subscription.current_period_start)
+      : new Date(now.getFullYear(), now.getMonth(), 1)
+
+    const appsThisPeriod = await countProjectsCreatedSince(userId, periodStart)
+
+    if (appsThisPeriod >= limits.apps) {
+      return NextResponse.json(
+        {
+          error: 'App limit reached for your current plan.',
+          code: 'APP_LIMIT_REACHED',
+          planId,
+          limit: limits.apps,
+        },
+        { status: 403 }
+      )
+    }
+  }
+
   const project = await createProject(userId, prompt)
   return NextResponse.json(project, { status: 201 })
 }

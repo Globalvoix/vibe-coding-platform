@@ -26,7 +26,7 @@ import { useChat } from '@ai-sdk/react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSharedChatContext } from '@/lib/chat-context'
 import { useSandboxStore } from './state'
-import { useClerk } from '@clerk/nextjs'
+import { useAuth, useClerk } from '@clerk/nextjs'
 import type { ChatUIMessage } from '@/components/chat/types'
 import { emitCreditsUpdated } from '@/lib/credits-events'
 import { useChatPersistence } from '@/lib/use-chat-persistence'
@@ -73,8 +73,7 @@ export function Chat({ className, initialPrompt, initialMessages, projectId, pro
   const hasSubmittedInitialPromptRef = useRef(false)
   const [forceEnableInput, setForceEnableInput] = useState(false)
   const recoveryTimeoutRef = useRef<number | null>(null)
-  // TEST MODE: bypass auth — treat every visitor as signed in
-  const isSignedIn = true
+  const { isSignedIn } = useAuth()
   const { openSignIn } = useClerk()
   const [comingSoonModal, setComingSoonModal] = useState<{
     isOpen: boolean
@@ -163,10 +162,32 @@ export function Chat({ className, initialPrompt, initialMessages, projectId, pro
   }
 
 
-  // TEST MODE: skip subscription check, always allow
   useEffect(() => {
-    setHasSubscription(true)
-  }, [])
+    if (!isSignedIn) {
+      setHasSubscription(null)
+      return
+    }
+
+    const checkSubscriptionStatus = async () => {
+      try {
+        const response = await fetch('/api/subscription')
+        if (response.ok) {
+          const data = await response.json()
+          const subscription = data.subscription
+          // Only allow paid plans (not free)
+          const isPaid = subscription && subscription.plan_id !== 'free' && subscription.status === 'active'
+          setHasSubscription(isPaid)
+        } else {
+          setHasSubscription(false)
+        }
+      } catch (error) {
+        console.error('Failed to check subscription status:', error)
+        setHasSubscription(false)
+      }
+    }
+
+    checkSubscriptionStatus()
+  }, [isSignedIn])
 
   useEffect(() => {
     if (!projectId) return
@@ -217,7 +238,10 @@ export function Chat({ className, initialPrompt, initialMessages, projectId, pro
 
   const validateAndSubmitMessage = useCallback(
     (text: string) => {
-      // TEST MODE: sign-in and subscription checks are bypassed
+      if (!isSignedIn) {
+        openSignIn()
+        return
+      }
 
       // Check if user has a paid subscription
       if (hasSubscription === false) {
