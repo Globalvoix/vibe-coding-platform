@@ -12,7 +12,8 @@ A Next.js 15 AI-powered coding agent application that allows users to generate w
 - **AI Providers**: OpenAI, Anthropic, Google (via AI SDK)
 - **Payments**: Lemon Squeezy
 - **UI**: Tailwind CSS v4, Radix UI, Framer Motion
-- **Code Execution**: `@vercel/sandbox`
+- **Code Execution**: `e2b` (E2B sandbox)
+- **Code Editor**: `@monaco-editor/react` (Monaco, lazy-loaded)
 
 ## Architecture
 
@@ -24,7 +25,7 @@ Every user request passes through a 4-agent pipeline before code generation begi
 3. **Craftsman + Adversary** (`lib/agents/craftsman.ts` + `lib/agents/adversary.ts`) — Run in **parallel**: Craftsman produces `FileDiff[]` describing what to build; Adversary simultaneously attacks the plan looking for critical errors, type mismatches, and security issues
 4. **Synthesizer** (`lib/agents/synthesizer.ts`) — Reconciles diffs + problems → patches critical issues → produces an `executionDirective` that becomes the enhanced system prompt
 
-The enhanced system prompt is then fed into the existing `streamText` + tools execution loop, which writes files into the Vercel sandbox.
+The enhanced system prompt is then fed into the existing `streamText` + tools execution loop, which writes files into the E2B sandbox and streams file contents to the Monaco editor.
 
 ### Orchestrator (`lib/orchestrator/`)
 - `index.ts` — Main pipeline coordinator, streams agent status events to the UI
@@ -70,6 +71,9 @@ The following secrets need to be set for the app to fully function:
 - `SUPABASE_OAUTH_REDIRECT_URL`
 - `SUPABASE_OAUTH_SCOPES`
 - `SUPABASE_PLATFORM_URL`
+
+### Code Execution (E2B)
+- `E2B_API_KEY` — E2B sandbox API key (https://e2b.dev/dashboard)
 
 ### AI Providers
 - `OPENAI_API_KEY`
