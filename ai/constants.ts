@@ -3,6 +3,9 @@ export enum Models {
   AnthropicClaude4Sonnet = 'anthropic/claude-4-sonnet',
   AnthropicClaude45Sonnet = 'anthropic/claude-sonnet-4.5',
 
+  // OpenCode Zen models
+  OpenCodeBigPickle = 'opencode/big-pickle',
+
   // Default UI & general coding model (via Vercel AI Gateway)
   GoogleGeminiFlash3 = 'google/gemini-2.5-flash',
 
@@ -21,9 +24,10 @@ export enum Models {
 }
 
 // Default for UI creation
-export const DEFAULT_MODEL = Models.GoogleGeminiFlash3
+export const DEFAULT_MODEL = Models.OpenCodeBigPickle
 
 export const SUPPORTED_MODELS = [
+  Models.OpenCodeBigPickle,
   Models.GoogleGeminiFlash3,
   Models.OpenAIGPT5Mini,
   Models.OpenAIGPT5,

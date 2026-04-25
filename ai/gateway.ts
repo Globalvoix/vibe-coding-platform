@@ -1,15 +1,16 @@
 import { createGatewayProvider } from '@ai-sdk/gateway'
 import { createOpenAI } from '@ai-sdk/openai'
 import { createAnthropic } from '@ai-sdk/anthropic'
-import { Models } from './constants'
+import { Models } from '@/ai/constants'
 import type { JSONValue } from 'ai'
 import type { OpenAIResponsesProviderOptions } from '@ai-sdk/openai'
 import type { LanguageModelV2 } from '@ai-sdk/provider'
 
 const DEFAULT_GATEWAY_BASE_URL = 'https://ai-gateway.vercel.sh/v1/ai'
+const OPENCODE_BASE_URL = 'https://opencode.ai/zen/v1'
 
 export async function getAvailableModels() {
-  const models: Array<{ id: string; name: string }> = []
+  const models: Array<{ id: string; name: string; enabled?: boolean; requiresPaid?: boolean }> = []
 
   try {
     const gateway = gatewayInstance()
@@ -19,29 +20,28 @@ export async function getAvailableModels() {
     // best-effort; we'll fall back to a curated list below
   }
 
-  const ensure = (id: string, name: string, enabled: boolean) => {
+  const ensure = (id: string, name: string, enabled = true, requiresPaid = false) => {
     if (!enabled) return
     if (models.some((m) => m.id === id)) return
-    models.push({ id, name })
+    models.push({ id, name, enabled, requiresPaid })
   }
 
   const hasOpenAI = Boolean(process.env.OPENAI_API_KEY)
   const hasAnthropic = Boolean(process.env.ANTHROPIC_API_KEY)
   const hasGateway = Boolean(process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_AI_GATEWAY_API_KEY)
+  const hasOpenCode = Boolean(process.env.OPENCODE_API_KEY)
 
+  ensure(Models.OpenCodeBigPickle, 'Big Pickle (Free)', hasOpenCode || hasGateway, false)
   ensure(Models.OpenAIGPT5, 'OpenAI GPT-5', hasOpenAI)
   ensure(Models.OpenAIGPT5Mini, 'OpenAI GPT-5 Mini', hasOpenAI)
 
-  // Gateway-routed models
   ensure(Models.GoogleGeminiFlash3, 'Google Gemini Flash 3', hasGateway)
   ensure(Models.OpenAIGPT51CodexMax, 'OpenAI GPT-5.1 Codex Max', hasGateway)
   ensure(Models.Minimax21, 'Minimax 2.1', hasGateway)
   ensure(Models.AnthropicClaude45Sonnet, 'Anthropic Claude Sonnet 4.5', hasGateway)
 
-  // Direct provider models
   ensure(Models.AnthropicClaude4Sonnet, 'Anthropic Claude 4 Sonnet', hasAnthropic)
 
-  // Keep the list stable for UI
   return models
 }
 
@@ -55,6 +55,18 @@ export function getModelOptions(
   modelId: string,
   options?: { reasoningEffort?: 'minimal' | 'low' | 'medium' }
 ): ModelOptions {
+  if (modelId === Models.OpenCodeBigPickle) {
+    const opencode = opencodeInstance()
+    return {
+      model: opencode(modelId),
+      providerOptions: {
+        opencode: {
+          reasoningEffort: options?.reasoningEffort ?? 'medium',
+        },
+      },
+    }
+  }
+
   if (modelId === Models.OpenAIGPT5 || modelId === Models.OpenAIGPT5Mini) {
     const openai = openaiInstance()
     return {
@@ -109,6 +121,13 @@ function openaiInstance() {
 function anthropicInstance() {
   return createAnthropic({
     apiKey: process.env.ANTHROPIC_API_KEY,
+  })
+}
+
+function opencodeInstance() {
+  return createGatewayProvider({
+    baseURL: process.env.OPENCODE_BASE_URL || OPENCODE_BASE_URL,
+    apiKey: process.env.OPENCODE_API_KEY,
   })
 }
 

@@ -11,7 +11,6 @@ import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { getAvailableModels, getModelOptions } from '@/ai/gateway'
 import { checkBotId } from 'botid/server'
-import { tools } from '@/ai/tools'
 import { recordUsageAndDeductCredits, getUserCredits } from '@/lib/credits'
 import { getUserSubscription } from '@/lib/subscription'
 import { createOrUpdateEnvVar, listEnvVars } from '@/lib/env-vars-db'
@@ -20,6 +19,7 @@ import { CONNECTOR_DEFINITIONS, detectConnectorFromPhrase, type ConnectorId } fr
 import { GenerationSessionTracker } from '@/lib/generation-session-tracker'
 import { randomUUID } from 'crypto'
 import prompt from './prompt.md'
+import { runtimeTools, getDefaultModel } from '@/lib/agent/runtime-bridge'
 
 interface BodyData {
   messages: ChatUIMessage[]
@@ -218,8 +218,8 @@ export async function POST(req: Request) {
     const bodyData = (await req.json()) as BodyData
     const { messages, projectId } = bodyData
 
-    const toolModelId = DEFAULT_MODEL
-    const chatModelId = Models.OpenAIGPT5Mini
+    const toolModelId = getDefaultModel()
+    const chatModelId = getDefaultModel()
 
     const project = projectId ? await getProject(userId, projectId).catch(() => null) : null
 
@@ -389,13 +389,7 @@ export async function POST(req: Request) {
             system: systemPrompt,
             messages: convertToModelMessages(processedMessages),
             stopWhen: stepCountIs(200),
-            tools: tools({
-              modelId: toolModelId,
-              writer: safeWriter,
-              userId,
-              projectId,
-              sessionTracker: generationSessionTracker,
-            }),
+            tools: runtimeTools,
             onError: (error) => {
               console.error('Error communicating with AI')
               console.error(JSON.stringify(error, null, 2))
