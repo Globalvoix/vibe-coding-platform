@@ -7,7 +7,7 @@ Use this tool to retrieve a publicly accessible URL for a specific port that was
 Use Get Sandbox URL when:
 
 1. A service or web server is running on a port that was exposed during sandbox creation
-2. You need to share a live preview link with the user
+2. You need to enable the UI to present a live preview link/card
 3. You want to access a running server inside the sandbox via HTTP
 4. You need to programmatically test or call an internal endpoint running in the sandbox
 
@@ -44,7 +44,7 @@ Assistant:
 3. Run Command: `npm run dev`
 4. (Optional) Wait Command
 5. Get Sandbox URL: port 3000
-→ Returns: a public URL the user can open in a browser
+→ Returns: a public URL for internal use and the UI preview card (do not paste it into chat text)
 </example>
 
 ## Summary

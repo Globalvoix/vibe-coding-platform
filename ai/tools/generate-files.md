@@ -27,6 +27,11 @@ Use Generate Files when:
 - File contents must reflect the user’s intent and the overall session context
 - File paths must be well-structured and use consistent naming conventions
 - Generated files should assume compatibility with other existing files in the sandbox
+- When generating frontend code (React/Next.js/Tailwind), aim for a premium product experience: rich layouts (cards, grids, panels), micro-interactions (hover/press/focus states), high-quality imagery (e.g. Unsplash via next/image), and polished empty/loading/error states.
+- **AUTOMATICALLY extract design inspiration** from premium sources (magicui.design, shadcn/ui, shots.so, Awwwards.com, 3dicons.co) using EXA and Firecrawl APIs for every frontend generation.
+- **Adapt and remix** extracted designs—combine multiple sources, change colors/typography/layout, and ensure each output is unique and user-intent-driven.
+- **Integrate advanced patterns**: 3D animations (@react-three/fiber), smooth scroll (Lenis), animated icons (Lottie), shader effects, glassmorphism, and gradient compositions.
+- Vary your approach—never generate the same design structure or component composition twice.
 
 ## Best Practices
 

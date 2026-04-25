@@ -4,12 +4,14 @@ import { Sandbox } from '@vercel/sandbox'
 import { tool } from 'ai'
 import description from './get-sandbox-url.md'
 import z from 'zod/v3'
+import { GenerationSessionTracker } from '@/lib/generation-session-tracker'
 
 interface Params {
   writer: UIMessageStreamWriter<UIMessage<never, DataPart>>
+  sessionTracker?: GenerationSessionTracker | null
 }
 
-export const getSandboxURL = ({ writer }: Params) =>
+export const getSandboxURL = ({ writer, sessionTracker }: Params) =>
   tool({
     description,
     inputSchema: z.object({
@@ -25,6 +27,13 @@ export const getSandboxURL = ({ writer }: Params) =>
         ),
     }),
     execute: async ({ sandboxId, port }, { toolCallId }) => {
+      if (sessionTracker) {
+        const isCancelled = await GenerationSessionTracker.isCancelled(sessionTracker.id)
+        if (isCancelled) {
+          throw new Error('Generation cancelled')
+        }
+      }
+
       writer.write({
         id: toolCallId,
         type: 'data-get-sandbox-url',
@@ -39,6 +48,14 @@ export const getSandboxURL = ({ writer }: Params) =>
         type: 'data-get-sandbox-url',
         data: { url, status: 'done' },
       })
+
+      if (sessionTracker) {
+        await sessionTracker.updateProgress({
+          stage: 'done',
+          message: 'Preview ready',
+          completionPercentage: 100,
+        })
+      }
 
       return { url }
     },

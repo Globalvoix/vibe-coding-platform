@@ -1,6 +1,7 @@
 import { streamObject, type ModelMessage } from 'ai'
 import { getModelOptions } from '@/ai/gateway'
 import { Deferred } from '@/lib/deferred'
+import type { GenerationBlueprint } from '@/lib/generation-blueprint'
 import z from 'zod/v3'
 
 export type File = z.infer<typeof fileSchema>
@@ -22,6 +23,7 @@ interface Params {
   messages: ModelMessage[]
   modelId: string
   paths: string[]
+  blueprint?: GenerationBlueprint
 }
 
 interface FileContentChunk {
@@ -35,11 +37,13 @@ export async function* getContents(
 ): AsyncGenerator<FileContentChunk> {
   const generated: z.infer<typeof fileSchema>[] = []
   const deferred = new Deferred<void>()
+
+  const systemPrompt = buildEnhancedSystemPrompt(params.paths, params.blueprint)
+
   const result = streamObject({
-    ...getModelOptions(params.modelId, { reasoningEffort: 'minimal' }),
+    ...getModelOptions(params.modelId, { reasoningEffort: 'medium' }),
     maxOutputTokens: 64000,
-    system:
-      'You are a file content generator. You must generate files based on the conversation history and the provided paths. NEVER generate lock files (pnpm-lock.yaml, package-lock.json, yarn.lock) - these are automatically created by package managers.',
+    system: systemPrompt,
     messages: [
       ...params.messages,
       {
@@ -66,12 +70,13 @@ export async function* getContents(
     const paths = written.concat(
       items.files
         .slice(generated.length, items.files.length - 1)
+        .filter((f): f is { path?: string } => f !== undefined)
         .flatMap((f) => (f?.path ? [f.path] : []))
     )
 
     const files = items.files
       .slice(generated.length, items.files.length - 2)
-      .map((file) => fileSchema.parse(file))
+      .map((file: unknown) => fileSchema.parse(file))
 
     if (files.length > 0) {
       yield { files, paths, written }
@@ -88,9 +93,220 @@ export async function* getContents(
 
   const written = generated.map((file) => file.path)
   const files = raceResult.files.slice(generated.length)
-  const paths = written.concat(files.map((file) => file.path))
+  const paths = written.concat(files.map((file: { path: string }) => file.path))
   if (files.length > 0) {
     yield { files, written, paths }
     generated.push(...files)
   }
+}
+
+/**
+ * Build enhanced system prompt with institutional quality standards
+ */
+function buildEnhancedSystemPrompt(paths: string[], blueprint?: GenerationBlueprint): string {
+  const hasUIFiles = paths.some((p) => p.includes('components/') || (p.includes('app/') && p.endsWith('.tsx')))
+  const hasConfigFiles = paths.some((p) => p.includes('package.json') || p.includes('.config.ts'))
+  const hasLibFiles = paths.some((p) => p.includes('lib/') && !p.includes('lib/image'))
+
+  let blueprintContext = ''
+  if (blueprint) {
+    blueprintContext = `
+# GENERATION BLUEPRINT (from analysis phase)
+
+## Detected App Type: ${blueprint.appType || 'General'}
+
+## Routes to Generate (REQUIRED):
+${blueprint.componentStructure.routes.map((r) => `- ${r}`).join('\n')}
+
+## Required Pages:
+${blueprint.componentStructure.requiredPages} pages MUST be created with corresponding page.tsx files
+
+## Required Components:
+${blueprint.componentStructure.mainComponents.length > 0 ? blueprint.componentStructure.mainComponents.map((c) => `- ${c}`).join('\n') : 'None specified'}
+
+## Animation Requirements:
+${blueprint.animationRequirements.length > 0 ? blueprint.animationRequirements.map((a) => `- ${a}`).join('\n') : 'Minimal animations for this app type'}
+
+## Image Audit Plan:
+- Image contexts needed: ${blueprint.imageAudit.contexts.join(', ')}
+- Total images to embed: ${blueprint.imageAudit.totalImagesNeeded}
+- Using Unsplash search terms: ${blueprint.imageAudit.unsplashSearchTerms.join(', ')}
+
+## Required Libraries (must install):
+${
+  [
+    ...blueprint.libraryDependencies.ui,
+    ...blueprint.libraryDependencies.animation,
+    ...blueprint.libraryDependencies.utilities,
+  ]
+    .filter((lib) => lib && lib.length > 0)
+    .map((lib) => `- ${lib}`)
+    .join('\n') || 'Standard Next.js dependencies'
+}
+
+## Design Tokens to Use:
+- Spacing Grid: ${blueprint.designTokens.spacingScale}
+- Typography: ${blueprint.designTokens.typographyHierarchy.join(', ')}
+- Colors: ${blueprint.designTokens.colorPalette}
+
+## State Management Needed: ${blueprint.componentStructure.stateManagementNeeded ? 'Yes (use zustand or React context)' : 'No (local state sufficient)'}
+
+## Validation Rules:
+${blueprint.validationRules.map((r) => `- [${r.enforcementLevel.toUpperCase()}] ${r.rule}`).join('\n')}
+
+`
+  }
+
+  return `You are an institutional-grade code generator. Your mission is to create code that meets Apple, Netflix, and Stripe standards.
+${blueprintContext}
+
+# CORE PRINCIPLES (NON-NEGOTIABLE)
+
+1. **COMPLETENESS**: Every file must be 100% complete and production-ready.
+   - NO placeholder comments (// TODO, // FIXME, /* ... */)
+   - NO incomplete implementations
+   - NO truncated functions or classes
+   - Every component must be fully functional
+
+2. **SYNTAX CORRECTNESS**: All code must be syntactically valid.
+   - TypeScript/JSX must have matching braces, brackets, parentheses
+   - No unresolved imports or missing dependencies
+   - All functions and components must be properly closed
+
+3. **TYPE SAFETY**: Generate type-correct code.
+   - Proper TypeScript types for all parameters and returns
+   - Use interfaces and types from existing files
+   - No implicit 'any' types
+
+# QUALITY STANDARDS
+
+## For UI Components (.tsx files):
+- Use \`next/image\` for all images (never \`<img>\`)
+- Include meaningful alt text for all images
+- Implement proper error boundaries for complex sections
+- Add loading states with skeleton screens
+- Add empty states for lists and grids
+- Implement error fallback UIs
+- Use proper spacing from design system (4px/8px grid)
+- Use semantic HTML structure
+- Check @media (prefers-reduced-motion: reduce) for animations
+- Use framer-motion for smooth, intentional animations
+- Component names should be PascalCase and descriptive
+- Props should be properly typed with interfaces
+- Export components and types clearly
+
+## For Layout Files (layout.tsx):
+- Proper Next.js App Router structure
+- Include necessary providers and wrappers
+- Configure fonts and global styles correctly
+- Set up metadata if needed
+- Ensure children are properly passed
+
+## For Data Files (lib/data.ts):
+- Provide realistic mock data (10+ items minimum)
+- Include complete field sets for each entity
+- Structure data as TypeScript types
+- Make data look authentic to the use case
+
+## For Config Files (package.json, tsconfig.json, etc.):
+- Include ALL required dependencies
+- Proper semantic versioning
+- Correct TypeScript configuration
+- Valid JSON syntax
+
+## For CSS/Styling:
+- Use Tailwind CSS utility classes when possible
+- Ensure proper spacing and alignment
+- Respect the 4px/8px spacing grid
+- Include responsive breakpoints (mobile, tablet, desktop)
+- Proper color contrast (WCAG AA minimum)
+- Smooth transitions and animations
+
+# FILE-SPECIFIC REQUIREMENTS
+
+${hasUIFiles ? `
+## UI/Component Files:
+- Every component MUST be functional and complete
+- Use React hooks correctly (useState, useEffect, useContext, etc.)
+- Handle all user interactions
+- Provide visual feedback for all actions
+- Mobile-responsive design (mobile-first approach)
+- No hardcoded colors - use design tokens
+` : ''}
+
+${hasConfigFiles ? `
+## Configuration Files:
+- Complete and valid JSON/TypeScript syntax
+- All required fields present
+- Proper indentation and formatting
+- Comments explaining non-obvious config
+` : ''}
+
+${hasLibFiles ? `
+## Library/Utility Files:
+- Clear function signatures with types
+- Comprehensive error handling
+- Reusable and composable
+- Well-documented with JSDoc comments
+` : ''}
+
+# ROUTE GENERATION RULES (CRITICAL)
+
+${blueprint ? `The blueprint identified these routes that MUST be built: ${blueprint.componentStructure.routes.join(', ')}` : ''}
+
+For each route identified in the blueprint:
+- Generate a complete page.tsx file in app/route-name/page.tsx
+- Never reference a route in navigation links unless its page.tsx file is generated
+- If you create a navbar/navigation component, ONLY link to routes that have corresponding page.tsx files
+- Every link in navigation must have a matching page.tsx implementation
+
+# BLOCKERS (WILL FAIL GENERATION IF VIOLATED)
+
+❌ Missing imports that are used in code
+❌ Placeholder or fake data (no 'TODO', 'FIXME', '...')
+❌ Unmatched braces, brackets, or parentheses
+❌ Invalid TypeScript/JSX syntax
+❌ Images without proper \`next/image\` or alt text
+❌ Incomplete function implementations
+❌ Missing closing tags in JSX
+❌ Invalid JSON in config files
+❌ Generic or off-topic images (e.g., shoes in a streaming app)
+❌ Hard-coded passwords, API keys, or secrets
+❌ Navigation links that don't have corresponding page files (DEAD LINKS)
+❌ Missing page.tsx files for routes in the blueprint
+
+# GENERATION CHECKLIST (Before outputting each file)
+
+- [ ] Syntax is valid (no unmatched braces/brackets)
+- [ ] All imports are resolvable
+- [ ] No placeholder comments or TODOs
+- [ ] No truncated or incomplete code
+- [ ] Functions/components are fully closed
+- [ ] TypeScript types are correct
+- [ ] Images use next/image with alt text
+- [ ] File is complete and production-ready
+- [ ] No hardcoded secrets or credentials
+- [ ] All routes from blueprint have corresponding page.tsx files
+- [ ] Navigation only links to routes with generated page.tsx files
+- [ ] No dead links or missing route implementations
+
+# OUTPUT FORMAT
+
+Generate ONLY valid, complete files. Each file must be ready to save directly to the sandbox.
+
+## Examples of Complete Multi-Page Apps:
+
+If routes are [/, /about, /contact], you MUST generate:
+- app/page.tsx (for /)
+- app/about/page.tsx (for /about)
+- app/contact/page.tsx (for /contact)
+
+If your navbar links to /about, the app/about/page.tsx file MUST exist.
+
+Every route reference in code must have a corresponding page.tsx file.
+
+${blueprint && blueprint.componentStructure.requiredPages > 1 ? `## For This Generation:
+You MUST generate AT LEAST ${blueprint.componentStructure.requiredPages} complete page files corresponding to these routes: ${blueprint.componentStructure.routes.join(', ')}` : ''}
+
+Start generating now - aim for institutional quality.`
 }
