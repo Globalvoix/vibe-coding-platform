@@ -1,16 +1,6 @@
 import { createGatewayProvider } from '@ai-sdk/gateway'
-import { Models } from '@/ai/constants'
 import { tool, type ToolSet } from 'ai'
-import { todoWriteTool } from '@/packages/runtime/packages/agent/tools/todo'
-import { readFileTool } from '@/packages/runtime/packages/agent/tools/read'
-import { writeFileTool, editFileTool } from '@/packages/runtime/packages/agent/tools/write'
-import { grepTool } from '@/packages/runtime/packages/agent/tools/grep'
-import { globTool } from '@/packages/runtime/packages/agent/tools/glob'
-import { bashTool } from '@/packages/runtime/packages/agent/tools/bash'
-import { taskTool } from '@/packages/runtime/packages/agent/tools/task'
-import { askUserQuestionTool } from '@/packages/runtime/packages/agent/tools/ask-user-question'
-import { skillTool } from '@/packages/runtime/packages/agent/tools/skill'
-import { webFetchTool } from '@/packages/runtime/packages/agent/tools/fetch'
+import { z } from 'zod'
 
 const OPENCODE_BASE_URL = 'https://opencode.ai/zen/v1'
 
@@ -39,20 +29,80 @@ export function createRuntimeProvider() {
 }
 
 export const runtimeTools: ToolSet = {
-  todo_write: todoWriteTool,
-  read: readFileTool(),
-  write: writeFileTool(),
-  edit: editFileTool(),
-  grep: grepTool(),
-  glob: globTool(),
-  bash: bashTool,
-  task: taskTool,
-  ask_user_question: askUserQuestionTool,
-  skill: skillTool,
-  web_fetch: webFetchTool,
-}
+  todo_write: tool({
+    description: `Create and manage a structured task list for the current session.
 
-export { runtimeConfig as config }
+WHEN TO USE:
+- Complex multi-step tasks requiring 3 or more distinct steps
+- When the user provides multiple requirements or a checklist
+- After receiving new instructions - immediately capture them as todos
+
+USAGE:
+- This tool REPLACES the entire todo list - always send the full, updated list of todos
+- Use it frequently to keep the task list in sync with actual progress
+- Update statuses as you start and finish work`,
+    inputSchema: z.object({
+      todos: z.array(z.object({
+        id: z.string(),
+        content: z.string(),
+        status: z.enum(['pending', 'in_progress', 'completed']),
+      })),
+    }),
+    execute: async () => ({ success: true }),
+  }),
+
+  read_file: tool({
+    description: 'Read the contents of a file from the filesystem',
+    inputSchema: z.object({
+      path: z.string(),
+    }),
+    execute: async ({ path }) => {
+      try {
+        const content = await Bun.file(path).text()
+        return { path, content, success: true }
+      } catch {
+        return { path, error: 'Failed to read file', success: false }
+      }
+    },
+  }),
+
+  write_file: tool({
+    description: 'Write content to a file, creating it if it does not exist',
+    inputSchema: z.object({
+      path: z.string(),
+      content: z.string(),
+    }),
+    execute: async ({ path, content }) => {
+      try {
+        await Bun.write(path, content)
+        return { path, success: true }
+      } catch {
+        return { path, error: 'Failed to write file', success: false }
+      }
+    },
+  }),
+
+  bash: tool({
+    description: 'Execute a shell command and return the output',
+    inputSchema: z.object({
+      command: z.string(),
+      timeout: z.number().optional(),
+    }),
+    execute: async ({ command }) => {
+      try {
+        const result = Bun.spawnSync(command, { shell: true })
+        return {
+          stdout: result.stdout?.toString() || '',
+          stderr: result.stderr?.toString() || '',
+          exitCode: result.exitCode,
+          success: true,
+        }
+      } catch {
+        return { error: 'Command execution failed', success: false }
+      }
+    },
+  }),
+}
 
 export function getDefaultModel() {
   return runtimeConfig.defaultModel
