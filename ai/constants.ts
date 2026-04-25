@@ -1,18 +1,48 @@
 export enum Models {
-  AnthropicClaude4Sonnet = 'claude-4-sonnet',
-  AnthropicClaude45Sonnet = 'claude-sonnet-4.5',
-  GoogleGeminiFlash = 'gemini-2.5-flash',
-  OpenAIGPT4o = 'gpt-4o',
+  AmazonNovaPro = 'amazon/nova-pro',
+  AnthropicClaude4Sonnet = 'anthropic/claude-4-sonnet',
+  AnthropicClaude45Sonnet = 'anthropic/claude-sonnet-4.5',
+
+  // OpenCode Zen models
+  OpenCodeBigPickle = 'opencode/big-pickle',
+
+  // Default UI & general coding model (via Vercel AI Gateway)
+  GoogleGeminiFlash3 = 'google/gemini-2.5-flash',
+
+  // Chat/content model
+  OpenAIGPT5 = 'gpt-5',
+  OpenAIGPT5Mini = 'gpt-5-mini',
+
+  // Advanced/complex coding
+  OpenAIGPT51CodexMax = 'openai/gpt-5.1-codex-max',
+
+  // Security fix model (via Vercel AI Gateway)
+  Minimax21 = 'minimax/minimax-2.1',
+
+  MoonshotKimiK2 = 'moonshotai/kimi-k2',
+  XaiGrok3Fast = 'xai/grok-3-fast',
 }
 
-export const DEFAULT_MODEL = Models.AnthropicClaude45Sonnet
+// Default for UI creation
+export const DEFAULT_MODEL = Models.OpenCodeBigPickle
 
-export const SUPPORTED_MODELS: string[] = [
-  Models.AnthropicClaude4Sonnet,
+export const SUPPORTED_MODELS = [
+  Models.OpenCodeBigPickle,
+  Models.GoogleGeminiFlash3,
+  Models.OpenAIGPT5Mini,
+  Models.OpenAIGPT5,
+  Models.OpenAIGPT51CodexMax,
+  Models.Minimax21,
   Models.AnthropicClaude45Sonnet,
-  Models.GoogleGeminiFlash,
-  Models.OpenAIGPT4o,
-]
+] as const
+
+export type SupportedModelId = (typeof SUPPORTED_MODELS)[number]
+
+const SUPPORTED_MODEL_ID_SET = new Set<string>(SUPPORTED_MODELS)
+
+export function isSupportedModelId(id: string): id is SupportedModelId {
+  return SUPPORTED_MODEL_ID_SET.has(id)
+}
 
 export const TEST_PROMPTS = [
   'Generate a Next.js app that allows to list and search Pokemons',

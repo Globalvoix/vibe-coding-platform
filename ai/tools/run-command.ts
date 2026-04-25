@@ -1,22 +1,22 @@
 import type { UIMessageStreamWriter, UIMessage } from 'ai'
 import type { DataPart } from '../messages/data-parts'
-import { Command, Sandbox } from '@vercel/sandbox'
+import { Sandbox } from '@vercel/sandbox'
 import { getRichError } from './get-rich-error'
 import { tool } from 'ai'
 import description from './run-command.md'
 import z from 'zod/v3'
+import { GenerationSessionTracker } from '@/lib/generation-session-tracker'
 
 interface Params {
   writer: UIMessageStreamWriter<UIMessage<never, DataPart>>
+  sessionTracker?: GenerationSessionTracker | null
 }
 
-export const runCommand = ({ writer }: Params) =>
+export const runCommand = ({ writer, sessionTracker }: Params) =>
   tool({
     description,
     inputSchema: z.object({
-      sandboxId: z
-        .string()
-        .describe('The ID of the Vercel Sandbox to run the command in'),
+      sandboxId: z.string().describe('The ID of the Vercel Sandbox to run the command in'),
       command: z
         .string()
         .describe(
@@ -28,27 +28,37 @@ export const runCommand = ({ writer }: Params) =>
         .describe(
           "Array of arguments for the command. Each argument should be a separate string (e.g., ['install', '--verbose'] for npm install --verbose, or ['src/index.js'] to run a file, or ['-la', './src'] to list files). IMPORTANT: Use relative paths (e.g., 'src/file.js') or absolute paths instead of trying to change directories with 'cd' first, since each command runs in a fresh shell session."
         ),
-      sudo: z
-        .boolean()
-        .optional()
-        .describe('Whether to run the command with sudo'),
+      sudo: z.boolean().optional().describe('Whether to run the command with sudo'),
       wait: z
         .boolean()
         .describe(
           'Whether to wait for the command to finish before returning. If true, the command will block until it completes, and you will receive its output.'
         ),
     }),
-    execute: async (
-      { sandboxId, command, sudo, wait, args = [] },
-      { toolCallId }
-    ) => {
+    execute: async ({ sandboxId, command, sudo, wait, args = [] }, { toolCallId }) => {
+      if (sessionTracker) {
+        const isCancelled = await GenerationSessionTracker.isCancelled(sessionTracker.id)
+        if (isCancelled) {
+          throw new Error('Generation cancelled')
+        }
+
+        const isInstallCommand =
+          ['npm', 'pnpm', 'yarn', 'bun'].includes(command) && args[0] === 'install'
+
+        await sessionTracker.updateProgress({
+          stage: isInstallCommand ? 'installing-deps' : 'validating',
+          message: `Running ${command} ${args.join(' ')}`.trim(),
+          completionPercentage: isInstallCommand ? 96 : 94,
+        })
+      }
+
       writer.write({
         id: toolCallId,
         type: 'data-run-command',
         data: { sandboxId, command, args, status: 'executing' },
       })
 
-      let sandbox: Sandbox | null = null
+      let sandbox: Sandbox
 
       try {
         sandbox = await Sandbox.get({ sandboxId })
@@ -71,53 +81,17 @@ export const runCommand = ({ writer }: Params) =>
           },
         })
 
-        return
+        return richError.message
       }
 
-      let cmd: Command | null = null
-
-      try {
-        cmd = await sandbox.runCommand({
+      if (!wait) {
+        const cmd = await sandbox.runCommand({
           detached: true,
           cmd: command,
           args,
           sudo,
         })
-      } catch (error) {
-        const richError = getRichError({
-          action: 'run command in sandbox',
-          args: { sandboxId },
-          error,
-        })
 
-        writer.write({
-          id: toolCallId,
-          type: 'data-run-command',
-          data: {
-            sandboxId,
-            command,
-            args,
-            error: richError.error,
-            status: 'error',
-          },
-        })
-
-        return
-      }
-
-      writer.write({
-        id: toolCallId,
-        type: 'data-run-command',
-        data: {
-          sandboxId,
-          commandId: cmd.cmdId,
-          command,
-          args,
-          status: 'executing',
-        },
-      })
-
-      if (!wait) {
         writer.write({
           id: toolCallId,
           type: 'data-run-command',
@@ -137,68 +111,98 @@ export const runCommand = ({ writer }: Params) =>
         }.`
       }
 
+      // For waiting commands, add retry logic for transient failures
+      let lastError: unknown = null
+      const maxRetries = 2
+
+      for (let attempt = 0; attempt <= maxRetries; attempt++) {
+        try {
+          const cmd = await sandbox.runCommand({
+            cmd: command,
+            args,
+            sudo,
+          })
+
+          writer.write({
+            id: toolCallId,
+            type: 'data-run-command',
+            data: {
+              sandboxId,
+              commandId: cmd.cmdId,
+              command,
+              args,
+              status: 'waiting',
+            },
+          })
+
+          const done = await cmd.wait()
+          const [stdout, stderr] = await Promise.all([done.stdout(), done.stderr()])
+
+          writer.write({
+            id: toolCallId,
+            type: 'data-run-command',
+            data: {
+              sandboxId,
+              commandId: cmd.cmdId,
+              command,
+              args,
+              exitCode: done.exitCode,
+              status: 'done',
+            },
+          })
+
+          if (sessionTracker) {
+            await sessionTracker.updateProgress({
+              stage: 'done',
+              message: 'Generation complete',
+              completionPercentage: 100,
+            })
+          }
+
+          return (
+            `The command \`${command} ${args.join(' ')}\` has finished with exit code ${done.exitCode}.` +
+            `\n\nStdout:\n\`\`\`\n${stdout}\n\`\`\`` +
+            `\n\nStderr:\n\`\`\`\n${stderr}\n\`\`\``
+          )
+        } catch (error) {
+          lastError = error
+
+          const errorStr = String(error)
+          const isTransient =
+            errorStr.includes('timeout') ||
+            errorStr.includes('ETIMEDOUT') ||
+            errorStr.includes('ECONNREFUSED') ||
+            errorStr.includes('temporarily')
+
+          if (!isTransient || attempt === maxRetries) {
+            break // Don't retry for non-transient errors or if max retries reached
+          }
+
+          // Wait before retrying (exponential backoff: 1s, 2s)
+          const delayMs = Math.pow(2, attempt) * 1000
+          await new Promise((resolve) => setTimeout(resolve, delayMs))
+        }
+      }
+
+      // All retries exhausted, return error
+      const richError = getRichError({
+        action: 'run command in sandbox',
+        args: { sandboxId, command, args },
+        error: lastError,
+      })
+
       writer.write({
         id: toolCallId,
         type: 'data-run-command',
         data: {
           sandboxId,
-          commandId: cmd.cmdId,
           command,
           args,
-          status: 'waiting',
+          error: richError.error,
+          status: 'error',
         },
       })
 
-      const done = await cmd.wait()
-      try {
-        const [stdout, stderr] = await Promise.all([
-          done.stdout(),
-          done.stderr(),
-        ])
-
-        writer.write({
-          id: toolCallId,
-          type: 'data-run-command',
-          data: {
-            sandboxId,
-            commandId: cmd.cmdId,
-            command,
-            args,
-            exitCode: done.exitCode,
-            status: 'done',
-          },
-        })
-
-        return (
-          `The command \`${command} ${args.join(
-            ' '
-          )}\` has finished with exit code ${done.exitCode}.` +
-          `Stdout of the command was: \n` +
-          `\`\`\`\n${stdout}\n\`\`\`\n` +
-          `Stderr of the command was: \n` +
-          `\`\`\`\n${stderr}\n\`\`\``
-        )
-      } catch (error) {
-        const richError = getRichError({
-          action: 'wait for command to finish',
-          args: { sandboxId, commandId: cmd.cmdId },
-          error,
-        })
-
-        writer.write({
-          id: toolCallId,
-          type: 'data-run-command',
-          data: {
-            sandboxId,
-            commandId: cmd.cmdId,
-            command,
-            args,
-            error: richError.error,
-            status: 'error',
-          },
-        })
-
-        return
-      }
+      return richError.message
     },
   })

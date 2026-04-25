@@ -1,28 +1,48 @@
-import { anthropic } from '@ai-sdk/anthropic'
-import { google } from '@ai-sdk/google'
-import { openai } from '@ai-sdk/openai'
-import { Models, SUPPORTED_MODELS } from './constants'
+import { createGatewayProvider } from '@ai-sdk/gateway'
+import { createOpenAI } from '@ai-sdk/openai'
+import { createAnthropic } from '@ai-sdk/anthropic'
+import { Models } from '@/ai/constants'
 import type { JSONValue } from 'ai'
+import type { OpenAIResponsesProviderOptions } from '@ai-sdk/openai'
 import type { LanguageModelV2 } from '@ai-sdk/provider'
 
-const modelRegistry: Record<string, () => LanguageModelV2> = {
-  [Models.AnthropicClaude4Sonnet]: () =>
-    anthropic('claude-opus-4-1-20250805'),
-  [Models.AnthropicClaude45Sonnet]: () => anthropic('claude-3-5-sonnet-20241022'),
-  [Models.GoogleGeminiFlash]: () => google('gemini-2.0-flash-exp'),
-  [Models.OpenAIGPT4o]: () => openai('gpt-4o-2024-11-20'),
-}
+const DEFAULT_GATEWAY_BASE_URL = 'https://ai-gateway.vercel.sh/v1/ai'
+const OPENCODE_BASE_URL = 'https://opencode.ai/zen/v1'
 
 export async function getAvailableModels() {
-  return SUPPORTED_MODELS.map((modelId) => {
-    const labels: Record<string, string> = {
-      [Models.AnthropicClaude4Sonnet]: 'Claude 3 Opus',
-      [Models.AnthropicClaude45Sonnet]: 'Claude 3.5 Sonnet',
-      [Models.GoogleGeminiFlash]: 'Gemini 2.0 Flash',
-      [Models.OpenAIGPT4o]: 'GPT-4o',
-    }
-    return { id: modelId, name: labels[modelId] || modelId }
-  })
+  const models: Array<{ id: string; name: string; enabled?: boolean; requiresPaid?: boolean }> = []
+
+  try {
+    const gateway = gatewayInstance()
+    const response = await gateway.getAvailableModels()
+    models.push(...response.models.map((model) => ({ id: model.id, name: model.name })))
+  } catch {
+    // best-effort; we'll fall back to a curated list below
+  }
+
+  const ensure = (id: string, name: string, enabled = true, requiresPaid = false) => {
+    if (!enabled) return
+    if (models.some((m) => m.id === id)) return
+    models.push({ id, name, enabled, requiresPaid })
+  }
+
+  const hasOpenAI = Boolean(process.env.OPENAI_API_KEY)
+  const hasAnthropic = Boolean(process.env.ANTHROPIC_API_KEY)
+  const hasGateway = Boolean(process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_AI_GATEWAY_API_KEY)
+  const hasOpenCode = Boolean(process.env.OPENCODE_API_KEY)
+
+  ensure(Models.OpenCodeBigPickle, 'Big Pickle (Free)', hasOpenCode || hasGateway, false)
+  ensure(Models.OpenAIGPT5, 'OpenAI GPT-5', hasOpenAI)
+  ensure(Models.OpenAIGPT5Mini, 'OpenAI GPT-5 Mini', hasOpenAI)
+
+  ensure(Models.GoogleGeminiFlash3, 'Google Gemini Flash 3', hasGateway)
+  ensure(Models.OpenAIGPT51CodexMax, 'OpenAI GPT-5.1 Codex Max', hasGateway)
+  ensure(Models.Minimax21, 'Minimax 2.1', hasGateway)
+  ensure(Models.AnthropicClaude45Sonnet, 'Anthropic Claude Sonnet 4.5', hasGateway)
+
+  ensure(Models.AnthropicClaude4Sonnet, 'Anthropic Claude 4 Sonnet', hasAnthropic)
+
+  return models
 }
 
 export interface ModelOptions {
@@ -35,17 +55,48 @@ export function getModelOptions(
   modelId: string,
   options?: { reasoningEffort?: 'minimal' | 'low' | 'medium' }
 ): ModelOptions {
-  const getModel = modelRegistry[modelId]
-  if (!getModel) {
-    throw new Error(`Unsupported model: ${modelId}`)
+  if (modelId === Models.OpenCodeBigPickle) {
+    const opencode = opencodeInstance()
+    return {
+      model: opencode(modelId),
+      providerOptions: {
+        opencode: {
+          reasoningEffort: options?.reasoningEffort ?? 'medium',
+        },
+      },
+    }
   }
 
-  const model = getModel()
-
-  if (modelId === Models.AnthropicClaude4Sonnet ||
-    modelId === Models.AnthropicClaude45Sonnet) {
+  if (modelId === Models.OpenAIGPT5 || modelId === Models.OpenAIGPT5Mini) {
+    const openai = openaiInstance()
     return {
-      model,
+      model: openai(modelId),
+      providerOptions: {
+        openai: {
+          reasoningEffort: options?.reasoningEffort ?? 'low',
+          serviceTier: 'priority',
+        } satisfies OpenAIResponsesProviderOptions,
+      },
+    }
+  }
+
+  if (modelId === Models.AnthropicClaude4Sonnet) {
+    const anthropic = anthropicInstance()
+    return {
+      model: anthropic(modelId),
+      providerOptions: {
+        anthropic: {
+          cacheControl: { type: 'ephemeral' },
+        },
+      },
+    }
+  }
+
+  const gateway = gatewayInstance()
+
+  if (modelId === Models.AnthropicClaude45Sonnet) {
+    return {
+      model: gateway(modelId),
       headers: { 'anthropic-beta': 'fine-grained-tool-streaming-2025-05-14' },
       providerOptions: {
         anthropic: {
@@ -55,5 +106,34 @@ export function getModelOptions(
     }
   }
 
-  return { model }
+  return {
+    model: gateway(modelId),
+  }
+}
+
+function openaiInstance() {
+  return createOpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+    organization: process.env.OPENAI_ORG_ID,
+  })
+}
+
+function anthropicInstance() {
+  return createAnthropic({
+    apiKey: process.env.ANTHROPIC_API_KEY,
+  })
+}
+
+function opencodeInstance() {
+  return createGatewayProvider({
+    baseURL: process.env.OPENCODE_BASE_URL || OPENCODE_BASE_URL,
+    apiKey: process.env.OPENCODE_API_KEY,
+  })
+}
+
+function gatewayInstance() {
+  return createGatewayProvider({
+    baseURL: process.env.AI_GATEWAY_BASE_URL || DEFAULT_GATEWAY_BASE_URL,
+    apiKey: process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_AI_GATEWAY_API_KEY,
+  })
 }

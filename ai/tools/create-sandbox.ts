@@ -5,12 +5,14 @@ import { getRichError } from './get-rich-error'
 import { tool } from 'ai'
 import description from './create-sandbox.md'
 import z from 'zod/v3'
+import { GenerationSessionTracker } from '@/lib/generation-session-tracker'
 
 interface Params {
   writer: UIMessageStreamWriter<UIMessage<never, DataPart>>
+  sessionTracker?: GenerationSessionTracker | null
 }
 
-export const createSandbox = ({ writer }: Params) =>
+export const createSandbox = ({ writer, sessionTracker }: Params) =>
   tool({
     description,
     inputSchema: z.object({
@@ -31,6 +33,18 @@ export const createSandbox = ({ writer }: Params) =>
         ),
     }),
     execute: async ({ timeout, ports }, { toolCallId }) => {
+      if (sessionTracker) {
+        const isCancelled = await GenerationSessionTracker.isCancelled(sessionTracker.id)
+        if (isCancelled) {
+          throw new Error('Generation cancelled')
+        }
+        await sessionTracker.updateProgress({
+          stage: 'analyzing',
+          message: 'Creating sandbox',
+          completionPercentage: 10,
+        })
+      }
+
       writer.write({
         id: toolCallId,
         type: 'data-create-sandbox',
@@ -42,6 +56,14 @@ export const createSandbox = ({ writer }: Params) =>
           timeout: timeout ?? 600000,
           ports,
         })
+
+        if (sessionTracker) {
+          await sessionTracker.updateProgress({
+            stage: 'generating',
+            message: 'Sandbox ready, preparing files',
+            completionPercentage: 20,
+          })
+        }
 
         writer.write({
           id: toolCallId,
