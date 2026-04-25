@@ -16,7 +16,16 @@ export function Horizontal({ defaultLayout, left, right }: HProps) {
   return (
     <PanelGroup direction="horizontal" onLayout={onLayout}>
       <Panel defaultSize={defaultLayout[0]}>{left}</Panel>
-      <PanelResizeHandle className="w-2" />
+      <PanelResizeHandle className="group relative w-2 -mx-1 flex items-center justify-center cursor-col-resize select-none z-50 transition-all duration-300">
+        <div className="h-full w-[1px] bg-border/30 group-hover:bg-blue-500/40 group-active:bg-blue-500/60 transition-colors" />
+        <div className="absolute top-1/2 -translate-y-1/2 rounded-full border border-border/40 bg-background shadow-md px-1 py-3 opacity-0 group-hover:opacity-100 transition-all scale-75 group-hover:scale-100 group-active:scale-95 flex items-center justify-center pointer-events-none">
+          <div className="flex flex-col gap-0.5">
+            <div className="h-0.5 w-2 rounded-full bg-foreground/10" />
+            <div className="h-0.5 w-2 rounded-full bg-foreground/10" />
+            <div className="h-0.5 w-2 rounded-full bg-foreground/10" />
+          </div>
+        </div>
+      </PanelResizeHandle>
       <Panel defaultSize={defaultLayout[1]}>{right}</Panel>
     </PanelGroup>
   )
@@ -36,9 +45,13 @@ export function Vertical({ defaultLayout, top, middle, bottom }: VProps) {
   return (
     <PanelGroup direction="vertical" onLayout={onLayout}>
       <Panel defaultSize={defaultLayout[0]}>{top}</Panel>
-      <PanelResizeHandle className="h-2" />
+      <PanelResizeHandle className="group relative h-3 -my-1 flex items-center justify-center cursor-row-resize select-none">
+        <div className="w-full h-px bg-border/60 group-hover:bg-border transition-colors" />
+      </PanelResizeHandle>
       <Panel defaultSize={defaultLayout[1]}>{middle}</Panel>
-      <PanelResizeHandle className="h-2" />
+      <PanelResizeHandle className="group relative h-3 -my-1 flex items-center justify-center cursor-row-resize select-none">
+        <div className="w-full h-px bg-border/60 group-hover:bg-border transition-colors" />
+      </PanelResizeHandle>
       <Panel defaultSize={defaultLayout[2]}>{bottom}</Panel>
     </PanelGroup>
   )

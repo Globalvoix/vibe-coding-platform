@@ -3,7 +3,7 @@ import { MarkdownRenderer } from '@/components/markdown-renderer/markdown-render
 
 export function Text({ part }: { part: TextUIPart }) {
   return (
-    <div className="text-sm px-3.5 py-3 border bg-secondary/90 text-secondary-foreground border-gray-300 rounded-md font-mono">
+    <div className="text-[14px] leading-[1.65] text-foreground/80 font-sans">
       <MarkdownRenderer content={part.text} />
     </div>
   )

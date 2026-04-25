@@ -2,19 +2,19 @@
 @import 'tw-animate-css';
 
 :root {
-  --background: rgb(255, 255, 255);
+  --background: rgb(254, 254, 254);
   --foreground: rgb(10, 10, 10);
-  --card: rgb(255, 255, 255);
+  --card: rgb(254, 254, 254);
   --card-foreground: rgb(10, 10, 10);
-  --popover: rgb(255, 255, 255);
+  --popover: rgb(254, 254, 254);
   --popover-foreground: rgb(10, 10, 10);
   --primary: rgb(41, 41, 41);
   --primary-foreground: rgb(250, 250, 250);
-  --secondary: rgb(250, 250, 250);
+  --secondary: rgb(254, 254, 254);
   --secondary-foreground: rgb(90, 90, 90);
-  --muted: rgb(240, 240, 240);
+  --muted: rgb(254, 254, 254);
   --muted-foreground: rgb(113, 113, 113);
-  --accent: rgb(245, 245, 245);
+  --accent: rgb(254, 254, 254);
   --accent-foreground: oklch(57.61% 0.2508 258.23);
   --destructive: rgb(231, 0, 11);
   --destructive-foreground: rgb(245, 245, 245);
@@ -26,7 +26,7 @@
   --chart-3: rgb(115, 115, 115);
   --chart-4: rgb(115, 115, 115);
   --chart-5: rgb(115, 115, 115);
-  --sidebar: rgb(250, 250, 250);
+  --sidebar: rgb(254, 254, 254);
   --sidebar-foreground: rgb(10, 10, 10);
   --sidebar-primary: rgb(23, 23, 23);
   --sidebar-primary-foreground: rgb(250, 250, 250);
@@ -34,9 +34,9 @@
   --sidebar-accent-foreground: rgb(23, 23, 23);
   --sidebar-border: rgb(229, 229, 229);
   --sidebar-ring: rgb(161, 161, 161);
-  --font-sans: Geist, sans-serif;
-  --font-serif: Geist Mono, monospace;
-  --font-mono: Geist Mono, monospace;
+  --font-sans: Inter, system-ui, sans-serif;
+  --font-serif: Inter, system-ui, sans-serif;
+  --font-mono: Inter, system-ui, sans-serif;
   --radius: 0.75rem;
   --shadow-2xs: 0px 1px 0px 0px hsl(0 0% 0% / 0);
   --shadow-xs: 0px 1px 0px 0px hsl(0 0% 0% / 0);
@@ -91,9 +91,9 @@
   --sidebar-accent-foreground: rgb(250, 250, 250);
   --sidebar-border: rgb(255, 255, 255);
   --sidebar-ring: rgb(82, 82, 82);
-  --font-sans: Geist, sans-serif;
-  --font-serif: Geist Mono, monospace;
-  --font-mono: Geist Mono, monospace;
+  --font-sans: Inter, system-ui, sans-serif;
+  --font-serif: Inter, system-ui, sans-serif;
+  --font-mono: Inter, system-ui, sans-serif;
   --radius: 0.75rem;
   --shadow-2xs: 0px 1px 0px 0px hsl(0 0% 0% / 0);
   --shadow-xs: 0px 1px 0px 0px hsl(0 0% 0% / 0);
@@ -107,6 +107,15 @@
   --shadow-xl: 0px 1px 0px 0px hsl(0 0% 0% / 0),
     0px 8px 10px -1px hsl(0 0% 0% / 0);
   --shadow-2xl: 0px 1px 0px 0px hsl(0 0% 0% / 0);
+}
+
+body {
+  font-family: var(--font-sans);
+}
+
+.chat-toolbar-action-button,
+.chat-toolbar-settings-group {
+  background-color: #F7F4ED;
 }
 
 @theme inline {
@@ -160,4 +169,45 @@
   --shadow-lg: var(--shadow-lg);
   --shadow-xl: var(--shadow-xl);
   --shadow-2xl: var(--shadow-2xl);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #d5d3ce;
+  border-radius: 3px;
+}
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #4b5563;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #c9c5be;
+}
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+/* Chat scrollbar styling */
+.conversation-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+.conversation-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.conversation-scroll::-webkit-scrollbar-thumb {
+  background: #d5d3ce;
+  border-radius: 2.5px;
+}
+.dark .conversation-scroll::-webkit-scrollbar-thumb {
+  background: #4b5563;
+}
+.conversation-scroll::-webkit-scrollbar-thumb:hover {
+  background: #bfbbb2;
+}
+.dark .conversation-scroll::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
 }

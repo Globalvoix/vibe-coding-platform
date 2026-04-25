@@ -9,6 +9,8 @@ import { RunCommand } from './run-command'
 import { ReportErrors } from './report-errors'
 import { Reasoning } from './reasoning'
 import { Text } from './text'
+import { ConnectSupabase } from './connect-supabase'
+import { RequestEnvVars } from './request-env-vars'
 import { memo } from 'react'
 
 interface Props {
@@ -23,15 +25,19 @@ export const MessagePart = memo(function MessagePart({
   if (part.type === 'data-generating-files') {
     return <GenerateFiles message={part.data} />
   } else if (part.type === 'data-create-sandbox') {
-    return <CreateSandbox message={part.data} />
+    return null
   } else if (part.type === 'data-get-sandbox-url') {
     return <GetSandboxURL message={part.data} />
   } else if (part.type === 'data-run-command') {
-    return <RunCommand message={part.data} />
+    return null
   } else if (part.type === 'reasoning') {
     return <Reasoning part={part} partIndex={partIndex} />
   } else if (part.type === 'data-report-errors') {
     return <ReportErrors message={part.data} />
+  } else if (part.type === 'data-connect-supabase') {
+    return <ConnectSupabase message={part.data} />
+  } else if (part.type === 'data-request-env-vars') {
+    return <RequestEnvVars message={part.data} />
   } else if (part.type === 'text') {
     return <Text part={part} />
   }

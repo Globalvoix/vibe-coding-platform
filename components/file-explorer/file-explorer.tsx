@@ -74,28 +74,44 @@ export const FileExplorer = memo(function FileExplorer({
   )
 
   return (
-    <Panel className={className}>
-      <PanelHeader>
-        <FileIcon className="w-4 mr-2" />
-        <span className="font-mono uppercase font-semibold">
+    <Panel className={cn('border border-border/60 rounded-lg shadow-sm', className)}>
+      <PanelHeader className="gap-2 border-b border-border/60 bg-muted/40">
+        <FileIcon className="w-4 h-4 text-muted-foreground" />
+        <span className="text-xs font-semibold uppercase tracking-wide">
           Sandbox Remote Filesystem
         </span>
         {selected && !disabled && (
-          <span className="ml-auto text-gray-500">{selected.path}</span>
+          <span className="ml-auto text-[11px] text-muted-foreground truncate max-w-xs">
+            {selected.path}
+          </span>
         )}
       </PanelHeader>
 
-      <div className="flex text-sm h-[calc(100%-2rem-1px)]">
-        <ScrollArea className="w-1/4 border-r border-primary/18 flex-shrink-0">
-          <div>{renderFileTree(fs)}</div>
+      <div className="flex text-xs h-[calc(100%-2rem-1px)]">
+        <ScrollArea className="w-1/4 border-r border-border/60 flex-shrink-0 bg-muted/30">
+          <div className="py-1">
+            {renderFileTree(fs)}
+          </div>
         </ScrollArea>
         {selected && sandboxId && !disabled && (
-          <ScrollArea className="w-3/4 flex-shrink-0">
-            <FileContent
-              sandboxId={sandboxId}
-              path={selected.path.substring(1)}
-            />
-            <ScrollBar orientation="horizontal" />
+          <ScrollArea className="w-3/4 flex-shrink-0 bg-background">
+            <div className="flex h-full flex-col border-l border-border/60 bg-background/95">
+              <div className="flex items-center justify-between border-b border-border/60 px-3 py-1.5 text-[11px] text-muted-foreground bg-muted/40">
+                <span className="truncate">
+                  {selected.path.substring(1)}
+                </span>
+                <span className="ml-2 rounded-full border border-border/60 bg-secondary/60 px-2 py-0.5 text-[10px] uppercase tracking-wide">
+                  {selected.name.split('.').pop()}
+                </span>
+              </div>
+              <div className="flex-1 overflow-auto px-3 py-2 text-sm bg-muted/40">
+                <FileContent
+                  sandboxId={sandboxId}
+                  path={selected.path.substring(1)}
+                />
+                <ScrollBar orientation="horizontal" />
+              </div>
+            </div>
           </ScrollArea>
         )}
       </div>
@@ -103,7 +119,6 @@ export const FileExplorer = memo(function FileExplorer({
   )
 })
 
-// Memoized file tree node component
 const FileTreeNode = memo(function FileTreeNode({
   node,
   depth,
@@ -131,8 +146,11 @@ const FileTreeNode = memo(function FileTreeNode({
     <div>
       <div
         className={cn(
-          `flex items-center py-0.5 px-1 hover:bg-gray-100 cursor-pointer`,
-          { 'bg-gray-200/80': selected?.path === node.path }
+          'flex items-center py-0.5 px-2 hover:bg-muted cursor-pointer text-[11px]',
+          {
+            'bg-muted/70 font-medium text-foreground':
+              selected?.path === node.path,
+          }
         )}
         style={{ paddingLeft: `${depth * 16 + 8}px` }}
         onClick={handleClick}
@@ -140,19 +158,19 @@ const FileTreeNode = memo(function FileTreeNode({
         {node.type === 'folder' ? (
           <>
             {node.expanded ? (
-              <ChevronDownIcon className="w-4 mr-1" />
+              <ChevronDownIcon className="w-3 h-3 mr-1 text-muted-foreground" />
             ) : (
-              <ChevronRightIcon className="w-4 mr-1" />
+              <ChevronRightIcon className="w-3 h-3 mr-1 text-muted-foreground" />
             )}
-            <FolderIcon className="w-4 mr-2" />
+            <FolderIcon className="w-3 h-3 mr-2 text-muted-foreground" />
           </>
         ) : (
           <>
-            <div className="w-4 mr-1" />
-            <FileIcon className="w-4 mr-2 " />
+            <div className="w-3 h-3 mr-1" />
+            <FileIcon className="w-3 h-3 mr-2 text-muted-foreground" />
           </>
         )}
-        <span className="">{node.name}</span>
+        <span className="truncate">{node.name}</span>
       </div>
 
       {node.type === 'folder' && node.expanded && node.children && (

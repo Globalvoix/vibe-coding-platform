@@ -1,8 +1,11 @@
+import { isSupportedModelId, type SupportedModelId } from '@/ai/constants'
 import { useState, useEffect, useCallback } from 'react'
 
 interface DisplayModel {
-  id: string
+  id: SupportedModelId
   label: string
+  enabled: boolean
+  requiresPaid: boolean
 }
 
 const MAX_RETRIES = 3
@@ -27,12 +30,20 @@ export function useAvailableModels() {
           throw new Error('Failed to fetch models')
         }
         const data = await response.json()
-        const newModels = data.models.map(
-          (model: { id: string; name: string }) => ({
-            id: model.id,
-            label: model.name,
+
+        const newModels: DisplayModel[] = []
+        for (const rawModel of Array.isArray(data?.models) ? data.models : []) {
+          const id = String(rawModel?.id ?? '')
+          if (!isSupportedModelId(id)) continue
+
+          newModels.push({
+            id,
+            label: String(rawModel?.name ?? id),
+            enabled: rawModel?.enabled ?? true,
+            requiresPaid: rawModel?.requiresPaid ?? false,
           })
-        )
+        }
+
         setModels(newModels)
         setError(null)
         setRetryCount(0)

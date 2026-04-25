@@ -48,33 +48,31 @@ export function Welcome(props: {
         >
           <div className="p-6 space-y-4 ">
             <h1 className="text-2xl sans-serif font-semibold tracking-tight mb-7">
-              OSS Vibe Coding Platform
+              Thinksoft
             </h1>
             <p className="text-base text-primary">
-              This is a <strong>demo</strong> of an end-to-end coding platform
-              where the user can enter text prompts, and the agent will create a
-              full stack application.
+              <strong>Thinksoft</strong> is an AI-powered full-stack development platform
+              that brings your ideas to life. Simply enter what you want to build,
+              and our advanced AI agent creates complete, production-ready applications.
             </p>
             <p className="text-base text-secondary-foreground">
-              It uses Vercel&apos;s AI Cloud services like{' '}
-              <ExternalLink href="https://vercel.com/docs/vercel-sandbox">
-                Sandbox
+              Powered by advanced AI models (GPT-5, Claude, and more), integrated with modern development tools like{' '}
+              <ExternalLink href="https://supabase.com/">
+                Supabase
               </ExternalLink>{' '}
-              for secure code execution,{' '}
-              <ExternalLink href="https://vercel.com/docs/ai-gateway">
-                AI Gateway
+              for databases,{' '}
+              <ExternalLink href="https://neon.tech/">
+                Neon
               </ExternalLink>{' '}
-              for GPT-5 and other models support,{' '}
-              <ExternalLink href="https://vercel.com/fluid">
-                Fluid Compute
+              for serverless Postgres,{' '}
+              <ExternalLink href="https://nextjs.org/">
+                Next.js
               </ExternalLink>{' '}
-              for efficient rendering and streaming, and it&apos;s built with{' '}
-              <ExternalLink href="https://nextjs.org/">Next.js</ExternalLink>{' '}
-              and the{' '}
-              <ExternalLink href="https://ai-sdk.dev/docs/introduction">
-                AI SDK
-              </ExternalLink>
-              .
+              for frontend frameworks, and{' '}
+              <ExternalLink href="https://netlify.com/">
+                Netlify
+              </ExternalLink>{' '}
+              for deployment. Build faster, ship smarter.
             </p>
           </div>
           <footer className="bg-secondary flex justify-end p-4 border-t border-border">

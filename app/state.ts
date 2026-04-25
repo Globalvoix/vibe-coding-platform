@@ -5,24 +5,52 @@ import { useMonitorState } from '@/components/error-monitor/state'
 import { useMemo } from 'react'
 import { create } from 'zustand'
 
+interface ViewingVersion {
+  id: string
+  name: string
+  sandboxState: {
+    sandboxId?: string
+    paths?: string[]
+    url?: string
+  } | null
+}
+
+export type SandboxTabId = 'preview' | 'code' | 'console' | 'cloud' | 'security'
+
 interface SandboxStore {
   addGeneratedFiles: (files: string[]) => void
   addLog: (data: { sandboxId: string; cmdId: string; log: CommandLog }) => void
   addPaths: (paths: string[]) => void
+  applySandboxState: (sandboxState: ViewingVersion['sandboxState']) => void
   chatStatus: ChatStatus
   clearGeneratedFiles: () => void
   commands: Command[]
   generatedFiles: Set<string>
   paths: string[]
+  reset: () => void
   sandboxId?: string
+  currentProjectId?: string | null
+  setCurrentProjectId: (id: string | null) => void
   setChatStatus: (status: ChatStatus) => void
+  setRevertInChatVersionId: (versionId: string | null) => void
   setSandboxId: (id: string) => void
   setStatus: (status: 'running' | 'stopped') => void
-  setUrl: (url: string, uuid: string) => void
+  setUrl: (url: string) => void
+  clearUrl: () => void
+  setViewingVersion: (version: ViewingVersion | null) => void
   status?: 'running' | 'stopped'
   upsertCommand: (command: Omit<Command, 'startedAt'>) => void
   url?: string
-  urlUUID?: string
+  viewingVersion: ViewingVersion | null
+  revertInChatVersionId: string | null
+  device: 'desktop' | 'tablet' | 'mobile'
+  setDevice: (device: 'desktop' | 'tablet' | 'mobile') => void
+  activeTab: SandboxTabId
+  setActiveTab: (tab: SandboxTabId) => void
+  isRestoringEnvironment: boolean
+  setIsRestoringEnvironment: (restoring: boolean) => void
+  restoreError: 'missing_files' | 'unknown' | null
+  setRestoreError: (error: 'missing_files' | 'unknown' | null) => void
 }
 
 function getBackgroundCommandErrorLines(commands: Command[]) {
@@ -65,11 +93,60 @@ export const useSandboxStore = create<SandboxStore>()((set) => ({
   },
   addPaths: (paths) =>
     set((state) => ({ paths: [...new Set([...state.paths, ...paths])] })),
+  applySandboxState: (sandboxState) =>
+    set((state) => {
+      if (!sandboxState) {
+        return state
+      }
+
+      const nextPaths = Array.isArray(sandboxState.paths) ? sandboxState.paths : []
+      const nextUrl = typeof sandboxState.url === 'string' ? sandboxState.url : undefined
+
+      const nextSandboxId = sandboxState.sandboxId ?? state.sandboxId
+
+      return {
+        sandboxId: nextSandboxId,
+        status: nextSandboxId ? 'running' : state.status,
+        paths: nextPaths.length > 0 ? nextPaths : state.paths,
+        url: nextUrl,
+      }
+    }),
   chatStatus: 'ready',
+  viewingVersion: null,
+  revertInChatVersionId: null,
+  device: 'desktop',
+  setDevice: (device) => set(() => ({ device })),
+  activeTab: 'preview',
+  setActiveTab: (tab) => set(() => ({ activeTab: tab })),
+  isRestoringEnvironment: false,
+  setIsRestoringEnvironment: (restoring) => set(() => ({ isRestoringEnvironment: restoring })),
+  restoreError: null,
+  setRestoreError: (error) => set(() => ({ restoreError: error })),
   clearGeneratedFiles: () => set(() => ({ generatedFiles: new Set<string>() })),
   commands: [],
   generatedFiles: new Set<string>(),
   paths: [],
+  currentProjectId: null,
+  setCurrentProjectId: (id) => set(() => ({ currentProjectId: id })),
+  setViewingVersion: (version) => set(() => ({ viewingVersion: version })),
+  setRevertInChatVersionId: (versionId) => set(() => ({ revertInChatVersionId: versionId })),
+  reset: () =>
+    set(() => ({
+      sandboxId: undefined,
+      currentProjectId: null,
+      commands: [],
+      paths: [],
+      url: undefined,
+      generatedFiles: new Set<string>(),
+      status: undefined,
+      chatStatus: 'ready',
+      viewingVersion: null,
+      revertInChatVersionId: null,
+      device: 'desktop',
+      activeTab: 'preview',
+      isRestoringEnvironment: false,
+      restoreError: null,
+    })),
   setChatStatus: (status) =>
     set((state) =>
       state.chatStatus === status ? state : { chatStatus: status }
@@ -84,7 +161,8 @@ export const useSandboxStore = create<SandboxStore>()((set) => ({
       generatedFiles: new Set<string>(),
     })),
   setStatus: (status) => set(() => ({ status })),
-  setUrl: (url, urlUUID) => set(() => ({ url, urlUUID })),
+  setUrl: (url) => set(() => ({ url })),
+  clearUrl: () => set(() => ({ url: undefined })),
   upsertCommand: (cmd) => {
     set((state) => {
       const existingIdx = state.commands.findIndex((c) => c.cmdId === cmd.cmdId)
@@ -100,6 +178,7 @@ export const useSandboxStore = create<SandboxStore>()((set) => ({
 interface FileExplorerStore {
   paths: string[]
   addPath: (path: string) => void
+  reset: () => void
 }
 
 export const useFileExplorerStore = create<FileExplorerStore>()((set) => ({
@@ -112,6 +191,7 @@ export const useFileExplorerStore = create<FileExplorerStore>()((set) => ({
       return state
     })
   },
+  reset: () => set(() => ({ paths: [] })),
 }))
 
 export function useDataStateMapper() {
@@ -150,7 +230,7 @@ export function useDataStateMapper() {
         break
       case 'data-get-sandbox-url':
         if (data.data.url) {
-          setUrl(data.data.url, crypto.randomUUID())
+          setUrl(data.data.url)
         }
         break
       default:

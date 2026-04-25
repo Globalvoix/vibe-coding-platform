@@ -1,5 +1,7 @@
+import { ClerkProvider as ClerkRootProvider } from '@clerk/nextjs'
 import { NuqsAdapter } from 'nuqs/adapters/next/app'
-import { ChatProvider } from '@/lib/chat-context'
+import { ChatScopeProvider } from '@/components/providers/chat-scope-provider'
+import { ThemeProvider } from '@/components/providers/theme-provider'
 import { CommandLogsStream } from '@/components/commands-logs/commands-logs-stream'
 import { ErrorMonitor } from '@/components/error-monitor/error-monitor'
 import { SandboxState } from '@/components/modals/sandbox-state'
@@ -7,14 +9,24 @@ import { Toaster } from '@/components/ui/sonner'
 import type { ReactNode } from 'react'
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
+import { Inter } from 'next/font/google'
 import './globals.css'
 
-const title = 'OSS Vibe Coding Platform'
-const description = `This is a demo of an end-to-end coding platform where the user can enter text prompts, and the agent will create a full stack application. It uses Vercel's AI Cloud services like Sandbox for secure code execution, AI Gateway for GPT-5 and other models support, Fluid Compute for efficient rendering and streaming, and it's built with Next.js and the AI SDK.`
+const title = 'Thinksoft - Full-Stack Vibe Coding Platform'
+const description = `Thinksoft is a full-stack vibe coding platform that transforms your ideas into reality. Get beautiful, production-ready frontends with enterprise-grade backends powered by advanced AI. Build complete web apps, SaaS platforms, e-commerce stores, and more with zero boilerplate.`
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-sans',
+})
 
 export const metadata: Metadata = {
   title,
   description,
+  icons: {
+    icon: '/favicon.svg',
+    apple: '/favicon.svg',
+  },
   openGraph: {
     images: [
       {
@@ -36,19 +48,28 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: ReactNode }>) {
   return (
-    <html lang="en">
-      <body className="antialiased">
-        <Suspense fallback={null}>
-          <NuqsAdapter>
-            <ChatProvider>
-              <ErrorMonitor>{children}</ErrorMonitor>
-            </ChatProvider>
-          </NuqsAdapter>
-        </Suspense>
-        <Toaster />
-        <CommandLogsStream />
-        <SandboxState />
-      </body>
-    </html>
+    <ClerkRootProvider>
+      <html lang="en" suppressHydrationWarning>
+        <body className={`${inter.variable} antialiased`}>
+          <Suspense fallback={null}>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <NuqsAdapter>
+                <ChatScopeProvider>
+                  <ErrorMonitor>{children}</ErrorMonitor>
+                </ChatScopeProvider>
+              </NuqsAdapter>
+            </ThemeProvider>
+          </Suspense>
+          <Toaster />
+          <CommandLogsStream />
+          <SandboxState />
+        </body>
+      </html>
+    </ClerkRootProvider>
   )
 }
