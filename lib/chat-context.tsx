@@ -1,14 +1,14 @@
 'use client'
 
 import { type ChatUIMessage } from '@/components/chat/types'
-import { type ReactNode } from 'react'
+import { type ReactNode, createContext, useContext, useMemo, useRef } from 'react'
 import { Chat } from '@ai-sdk/react'
 import { DataPart } from '@/ai/messages/data-parts'
 import { DataUIPart } from 'ai'
-import { createContext, useContext, useMemo, useRef } from 'react'
-import { useDataStateMapper } from '@/app/state'
+import { useDataStateMapper, useSandboxStore } from '@/app/state'
 import { mutate } from 'swr'
 import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
 
 interface ChatContextValue {
   chat: Chat<ChatUIMessage>
@@ -16,27 +16,44 @@ interface ChatContextValue {
 
 const ChatContext = createContext<ChatContextValue | undefined>(undefined)
 
-export function ChatProvider({ children }: { children: ReactNode }) {
+export function ChatProvider({
+  children,
+  scopeKey,
+}: {
+  children: ReactNode
+  scopeKey?: string
+}) {
   const mapDataToState = useDataStateMapper()
   const mapDataToStateRef = useRef(mapDataToState)
   mapDataToStateRef.current = mapDataToState
 
-  const chat = useMemo(
-    () =>
-      new Chat<ChatUIMessage>({
-        onToolCall: () => mutate('/api/auth/info'),
-        onData: (data: DataUIPart<DataPart>) => mapDataToStateRef.current(data),
-        onError: (error) => {
-          toast.error(`Communication error with the AI: ${error.message}`)
-          console.error('Error sending message:', error)
-        },
-      }),
-    []
-  )
+  const { setChatStatus } = useSandboxStore()
+  const router = useRouter()
 
-  return (
-    <ChatContext.Provider value={{ chat }}>{children}</ChatContext.Provider>
-  )
+  const chat = useMemo(() => {
+    return new Chat<ChatUIMessage>({
+      onToolCall: () => mutate('/api/auth/info'),
+      onData: (data: DataUIPart<DataPart>) => mapDataToStateRef.current(data),
+      onError: (error) => {
+        const errorMessage = error.message || ''
+
+        // Handle insufficient credits error
+        if (errorMessage.includes('INSUFFICIENT_CREDITS') || errorMessage.includes('insufficient credits')) {
+          toast.error('You don\'t have enough credits for this prompt. Please upgrade your plan.')
+          setTimeout(() => {
+            router.push('/pricing')
+          }, 1500)
+        } else {
+          toast.error(`Communication error with the AI: ${errorMessage}`)
+        }
+
+        console.error('Error sending message:', error)
+        setChatStatus('ready')
+      },
+    })
+  }, [setChatStatus, router, scopeKey])
+
+  return <ChatContext.Provider value={{ chat }}>{children}</ChatContext.Provider>
 }
 
 export function useSharedChatContext() {

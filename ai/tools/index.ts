@@ -4,18 +4,30 @@ import { createSandbox } from './create-sandbox'
 import { generateFiles } from './generate-files'
 import { getSandboxURL } from './get-sandbox-url'
 import { runCommand } from './run-command'
+import { requestSupabaseConnection } from './request-supabase-connection'
+import { requestEnvVars } from './request-env-vars'
+import { webSearch } from './web-search'
+import { webScrape } from './web-scrape'
+import type { GenerationSessionTracker } from '@/lib/generation-session-tracker'
 
 interface Params {
   modelId: string
   writer: UIMessageStreamWriter<UIMessage<never, DataPart>>
+  userId: string
+  projectId?: string
+  sessionTracker?: GenerationSessionTracker | null
 }
 
-export function tools({ modelId, writer }: Params) {
+export function tools({ modelId, writer, userId, projectId, sessionTracker }: Params) {
   return {
-    createSandbox: createSandbox({ writer }),
-    generateFiles: generateFiles({ writer, modelId }),
-    getSandboxURL: getSandboxURL({ writer }),
-    runCommand: runCommand({ writer }),
+    createSandbox: createSandbox({ writer, sessionTracker }),
+    generateFiles: generateFiles({ writer, modelId, sessionTracker }),
+    getSandboxURL: getSandboxURL({ writer, sessionTracker }),
+    runCommand: runCommand({ writer, sessionTracker }),
+    requestSupabaseConnection: requestSupabaseConnection({ writer, projectId }),
+    requestEnvVars: requestEnvVars({ writer, projectId }),
+    webSearch: webSearch({ projectId }),
+    webScrape: webScrape({ projectId }),
   }
 }
 
