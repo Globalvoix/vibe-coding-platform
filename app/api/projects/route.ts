@@ -26,20 +26,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Prompt is required' }, { status: 400 })
   }
 
+  // Free to use - no subscription required
   const subscription = await getUserSubscription(userId)
-
-  // Require a paid subscription to create projects
-  if (!subscription || subscription.plan_id === 'free' || subscription.status !== 'active') {
-    return NextResponse.json(
-      {
-        error: 'A paid subscription is required to create projects. We are in beta and paid-only due to high demand.',
-        code: 'SUBSCRIPTION_REQUIRED',
-      },
-      { status: 403 }
-    )
-  }
-
-  const planId = subscription.plan_id
+  const planId = subscription?.plan_id ?? 'free'
   const limits = await getPlanLimits(planId)
 
   if (Number.isFinite(limits.apps)) {

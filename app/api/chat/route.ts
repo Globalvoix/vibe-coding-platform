@@ -281,29 +281,7 @@ export async function POST(req: Request) {
     const credits = await getUserCredits(userId)
     const subscription = await getUserSubscription(userId)
 
-    // Check if user has a paid subscription
-    if (!subscription || subscription.plan_id === 'free' || subscription.status !== 'active') {
-      return NextResponse.json(
-        {
-          error: 'A paid subscription is required to use ThinkSoft. We are in beta and paid-only due to high demand.',
-          code: 'SUBSCRIPTION_REQUIRED',
-        },
-        { status: 403 }
-      )
-    }
-
-    if (credits.balance < requiredCredits) {
-      return NextResponse.json(
-        {
-          error: `Insufficient credits. This prompt requires ${requiredCredits} credits. Please upgrade your plan or wait for your monthly credits to refresh.`,
-          code: 'INSUFFICIENT_CREDITS',
-          currentBalance: credits.balance,
-          requiredCredits,
-          planId: credits.planId,
-        },
-        { status: 402 }
-      )
-    }
+    // Free to use - no subscription required
 
     const connectorContext =
       projectId && project ? await buildConnectorContext({ projectId, userPromptText }) : ''
